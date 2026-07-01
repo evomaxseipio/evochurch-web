@@ -37,6 +37,7 @@ export async function fetchMembersPage(
   });
 
   if (error) throw error;
+  assertRpcSuccess(data, "No se pudieron cargar los miembros.");
   return parseMembersPageResponse(data);
 }
 

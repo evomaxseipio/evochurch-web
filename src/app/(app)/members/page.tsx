@@ -26,7 +26,20 @@ export default async function MembersPage({
   searchParams: Promise<{ page?: string; filter?: string; q?: string; size?: string }>;
 }) {
   const session = await getAppSession();
-  if (!session) return null;
+  if (!session) {
+    return (
+      <p
+        className="rounded-xl px-4 py-3 text-sm"
+        style={{
+          background: "var(--danger-bg)",
+          color: "var(--danger)",
+        }}
+      >
+        No se pudo cargar la sesión de la iglesia. Recarga la página o vuelve a
+        iniciar sesión.
+      </p>
+    );
+  }
 
   const { page: pageRaw, filter: filterRaw, q, size: sizeRaw } = await searchParams;
   const page = Math.max(1, Number.parseInt(pageRaw ?? "1", 10) || 1);
