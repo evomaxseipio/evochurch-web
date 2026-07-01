@@ -1,0 +1,17 @@
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { getSupabaseEnv, supabaseClientOptions } from "./config";
+
+/** Cliente con service role — solo servidor, nunca importar en componentes cliente. */
+export function createAdminClient() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) return null;
+
+  const { url } = getSupabaseEnv();
+  return createSupabaseClient(url, serviceRoleKey, {
+    ...supabaseClientOptions,
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}

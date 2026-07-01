@@ -1,0 +1,724 @@
+"use client";
+
+import { AddMemberModal } from "@/components/members/add-member-modal";
+import {
+  MemberAvatar,
+  RoleChip,
+  StatusChip,
+} from "@/components/members/member-ui";
+import { Icons } from "@/components/icons";
+import { DataTable } from "@/components/ui/data-table";
+import { FilterToolbar } from "@/components/ui/filter-toolbar";
+import {
+  buildMembersListUrl,
+  DEFAULT_MEMBERS_PAGE_SIZE,
+  MEMBERS_PAGE_SIZE_OPTIONS,
+  type MembersPageSize,
+} from "@/lib/members/pagination";
+import { memberFullName } from "@/lib/members/parse";
+import type {
+  Member,
+  MemberFilterKey,
+  MembersListStats,
+  MembersPagination,
+} from "@/lib/members/types";
+import { toast } from "@/lib/toast";
+import { useIsDesktop } from "@/hooks/use-is-desktop";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const FILTERS: { key: MemberFilterKey; label: string }[] = [
+  { key: "all", label: "Todos" },
+  { key: "members", label: "Miembros" },
+  { key: "visits", label: "Visitas" },
+  { key: "active", label: "Activos" },
+  { key: "inactive", label: "Inactivos" },
+];
+
+const MINI_STATS: {
+  key: MemberFilterKey;
+  label: string;
+  delta: string;
+  dir: "up" | "dn";
+  color: string;
+  icon: keyof typeof Icons;
+}[] = [
+  { key: "members", label: "Miembros", delta: "+12.4%", dir: "up", color: "var(--success)", icon: "users" },
+  { key: "visits", label: "Total de visitas", delta: "+8.2%", dir: "up", color: "var(--info)", icon: "pin" },
+  { key: "inactive", label: "Inactivos", delta: "-3.1%", dir: "dn", color: "var(--muted)", icon: "arrowDn" },
+  { key: "active", label: "Activos", delta: "+2", dir: "up", color: "var(--accent-600)", icon: "users" },
+];
+
+export function MembersListView({
+  members,
+  roles,
+  stats,
+  pagination,
+  filter,
+  query: queryFromServer,
+}: {
+  members: Member[];
+  roles: string[];
+  stats: MembersListStats;
+  pagination: MembersPagination;
+  filter: MemberFilterKey;
+  query: string;
+}) {
+  const router = useRouter();
+  const [searchInput, setSearchInput] = useState(queryFromServer);
+  const [addOpen, setAddOpen] = useState(false);
+  const [menuId, setMenuId] = useState<string | null>(null);
+  const isDesktop = useIsDesktop();
+
+  const page = pagination.page;
+  const pageSize: MembersPageSize = MEMBERS_PAGE_SIZE_OPTIONS.includes(
+    pagination.pageSize as MembersPageSize,
+  )
+    ? (pagination.pageSize as MembersPageSize)
+    : DEFAULT_MEMBERS_PAGE_SIZE;
+  const totalPages = Math.max(1, pagination.totalPages);
+  const total = pagination.total;
+  const pageStart = total === 0 ? 0 : (page - 1) * pageSize;
+  const pageEnd = Math.min(pageStart + members.length, total);
+
+  useEffect(() => {
+    if (searchInput === queryFromServer) return;
+    const timer = window.setTimeout(() => {
+      router.push(
+        buildMembersListUrl({
+          filter,
+          query: searchInput,
+          page: 1,
+          pageSize,
+        }),
+      );
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [searchInput, queryFromServer, filter, pageSize, router]);
+
+  function listUrl(next: {
+    filter?: MemberFilterKey;
+    query?: string;
+    page?: number;
+    pageSize?: number;
+  }) {
+    return buildMembersListUrl({
+      filter: next.filter ?? filter,
+      query: next.query ?? searchInput,
+      page: next.page ?? page,
+      pageSize: next.pageSize ?? pageSize,
+    });
+  }
+
+  function onFilterChange(key: MemberFilterKey) {
+    router.push(listUrl({ filter: key, page: 1 }));
+  }
+
+  function onPage(next: number) {
+    router.push(listUrl({ page: next }));
+  }
+
+  function onPageSize(next: MembersPageSize) {
+    router.push(listUrl({ pageSize: next, page: 1 }));
+  }
+
+  function statCount(key: MemberFilterKey): number {
+    if (key === "all") return stats.total;
+    if (key === "members") return stats.members;
+    if (key === "visits") return stats.visits;
+    if (key === "active") return stats.active;
+    return stats.inactive;
+  }
+
+  return (
+    <div onClick={() => setMenuId(null)}>
+      <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
+        <div>
+          <div className="eyebrow">Comunidad</div>
+          <h1 className="display" style={{ fontSize: 40, margin: "4px 0 6px", letterSpacing: "-0.025em" }}>
+            Miembros <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>de la familia</span>
+          </h1>
+          <p className="muted" style={{ margin: 0 }}>
+            {stats.total.toLocaleString("es-DO")} hermanos registrados ·{" "}
+            {total.toLocaleString("es-DO")} en la vista actual
+          </p>
+        </div>
+        <div className="row">
+          <button
+            type="button"
+            className="btn outline"
+            onClick={() => toast.success("Reporte generado", "Miembros exportados (próximamente)")}
+          >
+            <Icons.download size={16} /> PDF
+          </button>
+          <button
+            type="button"
+            className="btn outline"
+            onClick={() => toast.success("Reporte generado", "Miembros exportados (próximamente)")}
+          >
+            <Icons.download size={16} /> Excel
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: isDesktop ? "2fr 1fr 1fr 1fr 1fr" : "1fr",
+          gap: 14,
+          marginTop: 22,
+        }}
+      >
+        <div className="card" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+          <div className="row between" style={{ alignItems: "center" }}>
+            <div className="eyebrow">Total de miembros</div>
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: "var(--accent-soft)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <Icons.users size={18} stroke="var(--accent)" />
+            </div>
+          </div>
+          <div className="row" style={{ alignItems: "center", gap: 14 }}>
+            <div className="display" style={{ fontSize: 48, lineHeight: 1, letterSpacing: "-0.03em", color: "var(--primary)" }}>
+              {stats.total}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: "var(--success)" }}>▲ activos {stats.active}</span>
+              <span className="tiny muted">en la iglesia</span>
+            </div>
+          </div>
+        </div>
+
+        {isDesktop
+          ? MINI_STATS.map((s) => {
+              const Icon = Icons[s.icon];
+              const v = statCount(s.key);
+              return (
+                <div key={s.key} className="card" style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div className="row between" style={{ alignItems: "center" }}>
+                    <div className="eyebrow">{s.label}</div>
+                    <div
+                      style={{
+                        width: 34,
+                        height: 34,
+                        borderRadius: 10,
+                        background: `color-mix(in oklab, ${s.color} 16%, transparent)`,
+                        display: "grid",
+                        placeItems: "center",
+                        color: s.color,
+                      }}
+                    >
+                      <Icon size={16} />
+                    </div>
+                  </div>
+                  <div className="row" style={{ alignItems: "center", gap: 12 }}>
+                    <div className="display" style={{ fontSize: 36, lineHeight: 1, letterSpacing: "-0.02em", color: s.color }}>
+                      {v}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: s.dir === "up" ? "var(--success)" : "var(--danger)" }}>
+                        {s.dir === "up" ? "▲" : "▼"} {s.delta}
+                      </span>
+                      <span className="tiny muted">vs anterior</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          : null}
+      </div>
+
+      {!isDesktop ? (
+        <div className="row" style={{ gap: 8, marginTop: 14, flexWrap: "wrap" }}>
+          {FILTERS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              className={`btn sm${filter === key ? " primary" : ""}`}
+              onClick={() => onFilterChange(key)}
+            >
+              {label} ({statCount(key)})
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <FilterToolbar
+        style={{ marginTop: 18 }}
+        query={searchInput}
+        onQueryChange={setSearchInput}
+        queryPlaceholder="Buscar por nombre, rol o sector…"
+        maxSearchWidth={9999}
+        filters={isDesktop ? FILTERS : undefined}
+        activeFilter={filter}
+        onFilterChange={onFilterChange}
+        trailing={
+          <button type="button" className="btn primary" onClick={() => setAddOpen(true)}>
+            <Icons.plus size={14} /> Nuevo miembro
+          </button>
+        }
+      />
+
+      {isDesktop ? (
+        <DataTable
+          style={{ marginTop: 18, position: "relative" }}
+          columns={[
+            {
+              key: "member",
+              label: "Miembro",
+              render: (m) => (
+                <div className="row" style={{ gap: 12 }}>
+                  <MemberAvatar member={m} size="md" square />
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{memberFullName(m)}</div>
+                    <div className="tiny muted">
+                      {m.contact.phone || m.contact.mobilePhone || "—"}
+                    </div>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              key: "role",
+              label: "Rol",
+              className: "muted",
+              render: (m) => m.membershipRole || "—",
+            },
+            {
+              key: "ministry",
+              label: "Ministerio",
+              className: "muted",
+              render: () => "—",
+            },
+            {
+              key: "sector",
+              label: "Sector",
+              className: "muted",
+              render: (m) =>
+                m.address.stateProvince || m.address.cityState || "—",
+            },
+            {
+              key: "nationality",
+              label: "Nacionalidad",
+              className: "muted",
+              render: (m) => m.nationality || "—",
+            },
+            {
+              key: "status",
+              label: "Estado",
+              render: (m) => <StatusChip member={m} />,
+            },
+          ]}
+          rows={members}
+          rowKey={(m) => m.memberId}
+          onRowClick={(m) => router.push(`/members/profile?id=${m.memberId}`)}
+          actions={(m) => (
+            <RowMenu
+              open={menuId === m.memberId}
+              onToggle={() =>
+                setMenuId((current) =>
+                  current === m.memberId ? null : m.memberId,
+                )
+              }
+              onClose={() => setMenuId(null)}
+              member={m}
+            />
+          )}
+          empty={
+            <>
+              <div className="display" style={{ fontSize: 22 }}>
+                Sin resultados
+              </div>
+              <div className="tiny muted">
+                Intenta con otra búsqueda o agrega un miembro
+              </div>
+            </>
+          }
+        />
+      ) : (
+        <div className="col" style={{ gap: 10, marginTop: 18 }}>
+          {members.length === 0 ? (
+            <div className="card" style={{ padding: 40, textAlign: "center" }}>
+              <div className="display" style={{ fontSize: 22 }}>Sin resultados</div>
+              <div className="tiny muted">Intenta con otra búsqueda</div>
+            </div>
+          ) : (
+            members.map((m) => (
+              <div key={m.memberId} className="card" style={{ padding: 14, position: "relative" }}>
+                <div style={{ position: "absolute", top: 12, right: 12 }}>
+                  <RowMenu
+                    open={menuId === m.memberId}
+                    onToggle={() =>
+                      setMenuId((current) =>
+                        current === m.memberId ? null : m.memberId,
+                      )
+                    }
+                    onClose={() => setMenuId(null)}
+                    member={m}
+                  />
+                </div>
+                <Link href={`/members/profile?id=${m.memberId}`} className="row" style={{ gap: 12, textDecoration: "none", color: "inherit" }}>
+                  <MemberAvatar member={m} size="md" square />
+                  <div style={{ flex: 1, minWidth: 0, paddingRight: 36 }}>
+                    <div style={{ fontWeight: 600 }}>{memberFullName(m)}</div>
+                    <div className="tiny muted">{m.contact.email || m.contact.phone}</div>
+                    <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                      <RoleChip role={m.membershipRole} />
+                      <StatusChip member={m} />
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {total > 0 ? (
+        <Pagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={totalPages}
+          total={total}
+          pageStart={pageStart}
+          pageEnd={pageEnd}
+          onPage={onPage}
+          onPageSize={onPageSize}
+        />
+      ) : null}
+
+      <AddMemberModal open={addOpen} onClose={() => setAddOpen(false)} roles={roles} />
+    </div>
+  );
+}
+
+function RowMenu({
+  open,
+  onToggle,
+  onClose,
+  member,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  member: Member;
+}) {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const profileHref = `/members/profile?id=${member.memberId}`;
+  const name = memberFullName(member);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  const menu = [
+    {
+      id: "edit",
+      label: "Editar perfil",
+      icon: <Icons.edit size={15} />,
+      on: () => {},
+      href: profileHref,
+    },
+    {
+      id: "tithe",
+      label: "Registrar diezmo",
+      icon: <Icons.wallet size={15} />,
+      on: () => toast.info("Nuevo diezmo", `Registrando diezmo para ${name} (próximamente)`),
+    },
+    {
+      id: "offer",
+      label: "Registrar ofrenda",
+      icon: <Icons.wallet size={15} />,
+      on: () => toast.info("Nueva ofrenda", `Registrando ofrenda para ${name} (próximamente)`),
+    },
+    {
+      id: "msg",
+      label: "Mensajes",
+      icon: <Icons.chat size={15} />,
+      on: () => toast.info("Mensajes", `Chat con ${name} (próximamente)`),
+      disabled: true,
+    },
+    {
+      id: "userapp",
+      label: "Configurar usuario",
+      icon: <Icons.users size={15} />,
+      on: () => toast.success("Invitación enviada", `${name} recibirá un correo (próximamente)`),
+    },
+    {
+      id: "del",
+      label: "Eliminar",
+      icon: <Icons.trash size={15} />,
+      danger: true,
+      on: () => toast.error("Confirmar eliminación", `Confirma desde el panel del miembro`),
+    },
+  ] as const;
+
+  return (
+    <div style={{ position: "relative", display: "inline-block" }} ref={menuRef}>
+      <button
+        type="button"
+        className="btn ghost icon-only sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        title="Acciones"
+        aria-label="Acciones"
+        aria-expanded={open}
+      >
+        <Icons.menu size={16} />
+      </button>
+      {open ? (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            left: 0,
+            zIndex: 30,
+            minWidth: 200,
+            background: "var(--bg-1)",
+            border: "1px solid var(--line)",
+            borderRadius: 10,
+            boxShadow: "var(--shadow-3)",
+            padding: 6,
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
+          {menu.map((item, index) => (
+            <div key={item.id}>
+              {index === menu.length - 1 ? (
+                <div style={{ height: 1, background: "var(--line)", margin: "4px 4px" }} />
+              ) : null}
+              {"href" in item && item.href ? (
+                <Link
+                  href={item.href}
+                  onClick={onClose}
+                  className="action-menu-item"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "8px 10px",
+                    borderRadius: 7,
+                    color: "var(--fg)",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    textDecoration: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 16,
+                      display: "inline-grid",
+                      placeItems: "center",
+                      color: "var(--muted)",
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled={"disabled" in item && item.disabled}
+                  onClick={() => {
+                    if ("disabled" in item && item.disabled) return;
+                    item.on();
+                    onClose();
+                  }}
+                  className="action-menu-item"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    width: "100%",
+                    padding: "8px 10px",
+                    borderRadius: 7,
+                    background: "transparent",
+                    border: 0,
+                    color:
+                      "danger" in item && item.danger
+                        ? "var(--danger)"
+                        : "disabled" in item && item.disabled
+                          ? "var(--muted)"
+                          : "var(--fg)",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    fontFamily: "inherit",
+                    cursor:
+                      "disabled" in item && item.disabled ? "not-allowed" : "pointer",
+                    textAlign: "left",
+                    opacity: "disabled" in item && item.disabled ? 0.5 : 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 16,
+                      display: "inline-grid",
+                      placeItems: "center",
+                      color:
+                        "danger" in item && item.danger
+                          ? "var(--danger)"
+                          : "var(--muted)",
+                    }}
+                  >
+                    {item.icon}
+                  </span>
+                  {item.label}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function Pagination({
+  page,
+  pageSize,
+  totalPages,
+  total,
+  pageStart,
+  pageEnd,
+  onPage,
+  onPageSize,
+}: {
+  page: number;
+  pageSize: MembersPageSize;
+  totalPages: number;
+  total: number;
+  pageStart: number;
+  pageEnd: number;
+  onPage: (p: number) => void;
+  onPageSize: (size: MembersPageSize) => void;
+}) {
+  const pageButtons = useMemo(() => {
+    const set = new Set([1, totalPages, page, page - 1, page + 1]);
+    const list = [...set].filter((n) => n >= 1 && n <= totalPages).sort((a, b) => a - b);
+    const out: (number | "…")[] = [];
+    for (let i = 0; i < list.length; i++) {
+      if (i > 0 && list[i] - list[i - 1] > 1) out.push("…");
+      out.push(list[i]);
+    }
+    return out;
+  }, [page, totalPages]);
+
+  return (
+    <div
+      className="card flat"
+      style={{
+        marginTop: 14,
+        padding: "10px 14px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        flexWrap: "wrap",
+      }}
+    >
+      <div className="row" style={{ gap: 12, alignItems: "center" }}>
+        <span className="tiny muted">
+          Mostrando{" "}
+          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>{pageStart + 1}</b>
+          {" – "}
+          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>{pageEnd}</b>
+          {" de "}
+          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
+            {total.toLocaleString("es-DO")}
+          </b>{" "}
+          miembros
+        </span>
+        <span style={{ width: 1, height: 18, background: "var(--line)" }} />
+        <label className="row" style={{ gap: 6, fontSize: 12, color: "var(--muted)" }}>
+          Filas
+          <select
+            className="select"
+            style={{ padding: "4px 8px", width: "auto", fontSize: 12 }}
+            value={pageSize}
+            onChange={(e) => onPageSize(Number(e.target.value) as MembersPageSize)}
+            aria-label="Registros por página"
+          >
+            {MEMBERS_PAGE_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="row" style={{ gap: 4 }}>
+        <button
+          type="button"
+          className="btn outline sm"
+          disabled={page <= 1}
+          onClick={() => onPage(page - 1)}
+        >
+          <span style={{ display: "inline-block", transform: "rotate(90deg)" }}>
+            <Icons.arrowDn size={12} />
+          </span>
+          Anterior
+        </button>
+        {pageButtons.map((b, i) =>
+          b === "…" ? (
+            <span
+              key={`ellipsis-${i}`}
+              style={{ padding: "0 6px", color: "var(--dim)", fontFamily: "var(--font-mono)" }}
+            >
+              …
+            </span>
+          ) : (
+            <button
+              key={b}
+              type="button"
+              onClick={() => onPage(b)}
+              className={`btn sm ${b === page ? "primary" : "outline"}`}
+              style={{ minWidth: 32, padding: "5px 0", fontFamily: "var(--font-mono)" }}
+            >
+              {b}
+            </button>
+          ),
+        )}
+        <button
+          type="button"
+          className="btn outline sm"
+          disabled={page >= totalPages}
+          onClick={() => onPage(page + 1)}
+        >
+          Siguiente
+          <span style={{ display: "inline-block", transform: "rotate(-90deg)" }}>
+            <Icons.arrowDn size={12} />
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+}

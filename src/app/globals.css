@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "../styles/design.css";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Next.js: map design tokens to Tailwind utilities */
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-surface: var(--bg-1);
+  --color-muted: var(--muted);
+  --color-border: var(--line);
+  --color-primary: var(--accent);
+  --color-primary-dark: var(--accent-strong);
+  --color-primary-darker: var(--accent-strong);
+  --color-primary-light: var(--lila);
+  --color-sidebar: #0b0d12;
+  --color-sidebar-foreground: var(--fg);
+  --color-sidebar-muted: var(--muted);
+  --font-sans: var(--font-ui);
+  --font-serif: var(--font-display), ui-serif, Georgia, serif;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* App shell: scroll inside .content only */
+body:has(.app-shell) {
+  overflow: hidden;
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Ring spinner used in login button */
+.ring {
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.tiny {
+  font-size: 12px;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.row.between {
+  justify-content: space-between;
+}

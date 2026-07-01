@@ -1,0 +1,68 @@
+import { parseFundsResponse } from "@/lib/funds/parse";
+import type { Fund, FundInput } from "@/lib/funds/types";
+import { assertRpcSuccess } from "@/lib/supabase/rpc-result";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+export async function fetchFunds(
+  supabase: SupabaseClient,
+  churchId: number,
+): Promise<Fund[]> {
+  const { data, error } = await supabase.rpc("spgetfunds", {
+    p_church_id: churchId,
+  });
+
+  if (error) throw error;
+  return parseFundsResponse(data);
+}
+
+export async function saveFund(
+  supabase: SupabaseClient,
+  churchId: number,
+  input: FundInput,
+): Promise<string> {
+  const { data, error } = await supabase.rpc("sp_maintance_funds", {
+    p_fund_id: input.fundId ?? null,
+    p_church_id: churchId,
+    p_fund_name: input.name,
+    p_description: input.description || null,
+    p_target_amount: input.targetAmount,
+    p_start_date: input.startDate,
+    p_end_date: input.endDate || null,
+    p_is_active: input.isActive,
+    p_is_primary: input.isPrimary,
+    p_total_contributions: input.totalContributions,
+  });
+
+  if (error) throw error;
+  const row = (data as Record<string, unknown>) ?? {};
+  assertRpcSuccess(row, "No se pudo guardar el fondo.");
+  return String(row.fund_id ?? input.fundId ?? "");
+}
+
+export async function deleteFund(
+  supabase: SupabaseClient,
+  churchId: number,
+  fundId: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_delete_fund", {
+    p_fund_id: fundId,
+    p_church_id: churchId,
+  });
+
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo eliminar el fondo.");
+}
+
+export async function setPrimaryFund(
+  supabase: SupabaseClient,
+  churchId: number,
+  fundId: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_change_primary_fund", {
+    p_fund_id: fundId,
+    p_church_id: churchId,
+  });
+
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo marcar el fondo como primario.");
+}

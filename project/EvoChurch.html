@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es-DO">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
+<meta name="theme-color" content="#0F1E3D" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#060D1A" media="(prefers-color-scheme: dark)"/>
+<title>EvoChurch · Renacer</title>
+
+<!-- PWA manifest (inline) -->
+<link rel="manifest" href='data:application/manifest+json;charset=utf-8,{"name":"EvoChurch · Renacer","short_name":"EvoChurch","start_url":".","display":"standalone","background_color":"%23FAFAF7","theme_color":"%230F1E3D","description":"Gestión administrativa para iglesias cristianas","lang":"es-DO","orientation":"portrait-primary","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 192 192\"><rect width=\"192\" height=\"192\" rx=\"48\" fill=\"%231E3A8A\"/><path d=\"M96 32 v128 M64 80 h64\" stroke=\"%23FDE68A\" stroke-width=\"12\" stroke-linecap=\"round\"/></svg>","sizes":"192x192","type":"image/svg+xml"}]}'/>
+<link rel="apple-touch-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="48" fill="%231E3A8A"/><path d="M96 32 v128 M64 80 h64" stroke="%23FDE68A" stroke-width="12" stroke-linecap="round"/></svg>'/>
+<link rel="icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="%231E3A8A"/><path d="M32 12 v40 M20 26 h24" stroke="%23FDE68A" stroke-width="5" stroke-linecap="round"/></svg>'/>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+
+<link rel="stylesheet" href="app.css?v=2000003"/>
+
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#5B21B6"/>
+  <path d="M96 50 v92 M64 80 h64" stroke="#e9d5ff" stroke-width="10" stroke-linecap="round"/>
+</svg>
+</template>
+
+<script>
+  // Minimal SW for PWA install eligibility
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('activate', e => self.clients.claim());
+      self.addEventListener('fetch', e => {});
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).catch(()=>{});
+  }
+</script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <!-- Data + components + screens -->
+  <script src="data.js?v=2000003"></script>
+  <script type="text/babel" src="tweaks-panel.jsx?v=1782244"></script>
+  <script type="text/babel" src="components.jsx?v=2000003"></script>
+  <script type="text/babel" src="crud.jsx?v=1782244"></script>
+  <script type="text/babel" src="transacciones.jsx?v=2000008"></script>
+  <script type="text/babel" src="contribuciones.jsx?v=1782244"></script>
+  <script type="text/babel" src="fondos.jsx?v=2000002"></script>
+  <script type="text/babel" src="ministerios.jsx?v=1"></script>
+  <script type="text/babel" src="screens-1.jsx?v=1782244"></script>
+  <script type="text/babel" src="screens-2.jsx?v=1782244"></script>
+  <script type="text/babel" src="screens-3.jsx?v=2000002"></script>
+  <script type="text/babel" src="screens-4.jsx?v=1782244"></script>
+  <script type="text/babel" src="screens-config.jsx?v=2000003"></script>
+  <script type="text/babel" src="app.jsx?v=2000003"></script>
+</body>
+</html>

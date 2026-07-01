@@ -1,0 +1,146 @@
+export type MemberAddress = {
+  streetAddress: string;
+  stateProvince: string;
+  cityState: string;
+  country: string;
+};
+
+export type MemberContact = {
+  phone: string;
+  mobilePhone: string;
+  email: string;
+};
+
+export type Member = {
+  memberId: string;
+  churchId: number | null;
+  firstName: string;
+  lastName: string;
+  nickName: string;
+  dateOfBirth: string;
+  gender: string;
+  maritalStatus: string;
+  nationality: string;
+  idType: string;
+  idNumber: string;
+  isActive: boolean;
+  isMember: boolean;
+  bio: string;
+  membershipRole: string;
+  address: MemberAddress;
+  contact: MemberContact;
+};
+
+export type MembershipRecord = {
+  profileId: string;
+  baptismDate: string;
+  baptismChurch: string;
+  baptismPastor: string;
+  membershipRole: string;
+  baptismChurchCity: string;
+  baptismChurchCountry: string;
+  hasCredential: boolean;
+  isBaptizedInSpirit: boolean;
+  membershipHistory: MembershipHistoryEntry[];
+};
+
+export type MembershipHistoryEntry = {
+  dateStart: string;
+  dateReturned: string | null;
+  observations: string;
+};
+
+export type MemberFinanceSummary = {
+  tithesAmount: number;
+  offeringAmount: number;
+  donationAmount: number;
+  totalContributions: number;
+};
+
+export type MemberFinanceChartPoint = {
+  label: string;
+  tithe: number;
+  offer: number;
+  donation: number;
+};
+
+export type MemberFinanceData = {
+  statusCode: number;
+  message: string;
+  summary: MemberFinanceSummary;
+  chartData: MemberFinanceChartPoint[];
+  collections: MemberCollectionRow[];
+};
+
+export type MemberCollectionRow = {
+  collectionId: string;
+  collectionType: number;
+  collectionTypeName: string;
+  collectionDate: string;
+  collectionAmount: number;
+  paymentMethod: string;
+  comments: string;
+};
+
+export type MemberFilterKey =
+  | "all"
+  | "members"
+  | "visits"
+  | "active"
+  | "inactive";
+
+export type MembersListStats = {
+  total: number;
+  members: number;
+  visits: number;
+  active: number;
+  inactive: number;
+};
+
+export type MembersPagination = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
+
+export type MembersPageResult = {
+  members: Member[];
+  stats: MembersListStats;
+  pagination: MembersPagination;
+};
+
+export type MemberProfileInput = {
+  firstName: string;
+  lastName: string;
+  nickName: string;
+  dateOfBirth: string;
+  gender: string;
+  maritalStatus: string;
+  nationality: string;
+  idType: string;
+  idNumber: string;
+  isActive: boolean;
+  isMember: boolean;
+  bio: string;
+  membershipRole: string;
+  streetAddress: string;
+  stateProvince: string;
+  cityState: string;
+  country: string;
+  phone: string;
+  mobilePhone: string;
+  email: string;
+};
+
+export type MembershipInput = {
+  profileId: string;
+  baptismDate: string;
+  baptismChurch: string;
+  baptismPastor: string;
+  membershipRole: string;
+  baptismChurchCity: string;
+  baptismChurchCountry: string;
+  hasCredential: boolean;
+  isBaptizedInSpirit: boolean;
+};
