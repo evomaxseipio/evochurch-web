@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUser } from "@/lib/supabase/session";
+import { sessionRequiresPasswordChange } from "@/lib/auth/temp-password-flow";
 import { cache } from "react";
 
 export type AppSession = {
@@ -124,6 +125,9 @@ export async function requireAppSession(): Promise<AppSession> {
 /** Supabase + sesión de negocio para server actions (multitenant). */
 export async function getActionSession() {
   const session = await requireAppSession();
+  if (sessionRequiresPasswordChange(session)) {
+    throw new Error("Debes cambiar tu contraseña temporal antes de continuar.");
+  }
   const supabase = await createClient();
   return { supabase, session };
 }

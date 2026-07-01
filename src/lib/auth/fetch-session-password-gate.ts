@@ -14,7 +14,10 @@ async function fetchSessionRequiresPasswordChange(
   supabase: SupabaseClient,
 ): Promise<boolean> {
   const { data, error } = await supabase.rpc("sp_get_session_context");
-  if (error) return false;
+  if (error) {
+    console.error("sp_get_session_context (password gate):", error.message);
+    return true;
+  }
   return sessionRequiresPasswordChange(parseAppSession(data));
 }
 

@@ -1,6 +1,7 @@
 "use server";
 
 import { getAppSession } from "@/lib/auth/app-session";
+import { syncAuthAppMetadata } from "@/lib/auth/sync-app-metadata";
 import {
   sessionRequiresPasswordChange,
   validateNewPassword,
@@ -63,6 +64,7 @@ export async function changeTempPasswordAction(
     };
   }
 
+  await syncAuthAppMetadata(session, supabase);
   await supabase.auth.refreshSession();
   redirect("/dashboard");
 }
