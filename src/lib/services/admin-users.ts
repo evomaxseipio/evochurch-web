@@ -70,3 +70,68 @@ export async function updateChurchAuthUser(
   if (error) throw error;
   assertRpcSuccess(data, "No se pudo actualizar el usuario.");
 }
+
+export async function setAuthUserTempPassword(
+  supabase: SupabaseClient,
+  churchId: number,
+  authUserId: string,
+  tempPassword: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_set_auth_user_temp_password", {
+    p_church_id: churchId,
+    p_auth_user_id: authUserId,
+    p_temp_password: tempPassword,
+  });
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo registrar la contraseña temporal.");
+}
+
+export async function getAuthUserTempPassword(
+  supabase: SupabaseClient,
+  churchId: number,
+  authUserId: string,
+): Promise<{ isTempPassword: boolean; tempPassword: string | null }> {
+  const { data, error } = await supabase.rpc("sp_get_auth_user_temp_password", {
+    p_church_id: churchId,
+    p_auth_user_id: authUserId,
+  });
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo leer la contraseña temporal.");
+  const row =
+    data && typeof data === "object" && !Array.isArray(data)
+      ? (data as Record<string, unknown>)
+      : null;
+  return {
+    isTempPassword: row?.is_temp_password === true,
+    tempPassword:
+      typeof row?.temp_password === "string" ? row.temp_password : null,
+  };
+}
+
+export async function clearAuthUserTempPassword(
+  supabase: SupabaseClient,
+  churchId: number,
+  authUserId: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_clear_auth_user_temp_password", {
+    p_church_id: churchId,
+    p_auth_user_id: authUserId,
+  });
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo limpiar la contraseña temporal.");
+}
+
+export async function resetChurchAuthUserPassword(
+  supabase: SupabaseClient,
+  churchId: number,
+  authUserId: string,
+  newPassword: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_reset_church_auth_user_password", {
+    p_church_id: churchId,
+    p_auth_user_id: authUserId,
+    p_new_password: newPassword,
+  });
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo restablecer la contraseña de acceso.");
+}

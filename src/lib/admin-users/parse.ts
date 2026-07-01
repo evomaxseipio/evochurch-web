@@ -27,6 +27,7 @@ type UserRow = {
   membership_role?: string | null;
   is_active?: boolean;
   is_verified?: boolean;
+  is_temp_password?: boolean;
   last_login_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -69,14 +70,15 @@ export function parseChurchAuthUser(row: unknown): ChurchAuthUser | null {
   if (!row || typeof row !== "object") return null;
   const r = row as UserRow;
   const authUserId = str(r.auth_user_id);
-  const profileId = str(r.profile_id);
   const email = str(r.email);
-  if (!authUserId || !profileId || !email) return null;
+  if (!authUserId || !email) return null;
+
+  const profileId = str(r.profile_id);
 
   return {
     authUserId,
     email,
-    profileId,
+    profileId: profileId || "",
     firstName: str(r.first_name),
     lastName: str(r.last_name),
     appRoleId: parseRoleId(r.app_role_id),
@@ -84,6 +86,7 @@ export function parseChurchAuthUser(row: unknown): ChurchAuthUser | null {
     membershipRole: str(r.membership_role),
     isActive: r.is_active === true,
     isVerified: r.is_verified === true,
+    isTempPassword: r.is_temp_password === true,
     lastLoginAt: str(r.last_login_at),
     createdAt: str(r.created_at),
     updatedAt: str(r.updated_at),
@@ -115,38 +118,58 @@ export function churchAuthUserInitials(user: ChurchAuthUser): string {
   return user.email.slice(0, 2).toUpperCase();
 }
 
+const MONTHS_SHORT_ES = [
+  "ene",
+  "feb",
+  "mar",
+  "abr",
+  "may",
+  "jun",
+  "jul",
+  "ago",
+  "sep",
+  "oct",
+  "nov",
+  "dic",
+] as const;
+
+/** Hora 12h fija — evita diferencias Node vs navegador (espacios Unicode en es-DO). */
+function formatClockEsDO(date: Date): string {
+  const h24 = date.getHours();
+  const minutes = date.getMinutes();
+  const suffix = h24 >= 12 ? "p. m." : "a. m.";
+  let h12 = h24 % 12;
+  if (h12 === 0) h12 = 12;
+  return `${h12}:${String(minutes).padStart(2, "0")} ${suffix}`;
+}
+
+function startOfLocalDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 export function formatLastLogin(iso: string | null): string {
   if (!iso) return "Nunca";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "Nunca";
 
   const now = new Date();
-  const startOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-  );
+  const startOfToday = startOfLocalDay(now);
   const startOfYesterday = new Date(startOfToday);
   startOfYesterday.setDate(startOfYesterday.getDate() - 1);
 
-  const time = date.toLocaleTimeString("es-DO", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const time = formatClockEsDO(date);
 
   if (date >= startOfToday) return `Hoy · ${time}`;
   if (date >= startOfYesterday) return `Ayer · ${time}`;
 
   const diffDays = Math.floor(
-    (startOfToday.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+    (startOfToday.getTime() - startOfLocalDay(date).getTime()) /
+      (1000 * 60 * 60 * 24),
   );
   if (diffDays < 7) return `Hace ${diffDays} días`;
 
-  return date.toLocaleDateString("es-DO", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  const month = MONTHS_SHORT_ES[date.getMonth()] ?? "";
+  return `${date.getDate()} ${month} ${date.getFullYear()}`;
 }
 
 export function toAdminUserRow(user: ChurchAuthUser): AdminUserRow {
@@ -160,6 +183,7 @@ export function toAdminUserRow(user: ChurchAuthUser): AdminUserRow {
     role: displayUserRoleLabel(user),
     lastLogin: formatLastLogin(user.lastLoginAt),
     active: user.isActive,
+    isTempPassword: user.isTempPassword,
   };
 }
 

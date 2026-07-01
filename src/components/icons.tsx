@@ -144,6 +144,12 @@ export const Icons = {
       <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5" />
     </svg>
   ),
+  globe: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a14 14 0 0 1 4 9 14 14 0 0 1-4 9 14 14 0 0 1-4-9 14 14 0 0 1 4-9z" />
+    </svg>
+  ),
   pin: (p: IconProps) => (
     <svg viewBox="0 0 24 24" {...base(p)}>
       <path d="M12 22s7-7.5 7-13a7 7 0 0 0-14 0c0 5.5 7 13 7 13z" />

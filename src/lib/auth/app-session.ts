@@ -15,6 +15,7 @@ export type AppSession = {
   canAuthorizeFinances: boolean;
   isActive: boolean;
   isVerified: boolean;
+  isTempPassword: boolean;
 };
 
 type SessionContextRow = {
@@ -30,6 +31,7 @@ type SessionContextRow = {
   can_authorize_finances?: boolean;
   is_active?: boolean;
   is_verified?: boolean;
+  is_temp_password?: boolean;
 };
 
 function parseChurchId(raw: unknown): number | null {
@@ -83,6 +85,7 @@ export function parseAppSession(data: unknown): AppSession | null {
     canAuthorizeFinances: row.can_authorize_finances === true,
     isActive: row.is_active === true,
     isVerified: row.is_verified === true,
+    isTempPassword: row.is_temp_password === true,
   };
 }
 

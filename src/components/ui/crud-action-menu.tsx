@@ -56,9 +56,13 @@ function CrudMenuItem({
 export function CrudActionMenu({
   onEdit,
   onDelete,
+  onResetAccess,
+  resetAccessPending = false,
 }: {
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
+  onResetAccess?: () => void;
+  resetAccessPending?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{
@@ -81,7 +85,8 @@ export function CrudActionMenu({
   const handleToggle = () => {
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      const menuH = 44 * 2 + 20;
+      const menuItems = onResetAccess ? 3 : 2;
+      const menuH = 44 * menuItems + 20;
       const menuW = 180;
       const below = window.innerHeight - r.bottom;
       const toLeft = window.innerWidth - r.left;
@@ -142,22 +147,37 @@ export function CrudActionMenu({
                 onEdit();
               }}
             />
-            <div
-              style={{
-                height: 1,
-                background: "var(--line)",
-                margin: "4px 6px",
-              }}
-            />
-            <CrudMenuItem
-              icon={<Icons.trash width={15} />}
-              label="Eliminar"
-              danger
-              onClick={() => {
-                close();
-                onDelete();
-              }}
-            />
+            {onResetAccess ? (
+              <CrudMenuItem
+                icon={<Icons.settings width={15} />}
+                label="Restablecer acceso"
+                onClick={() => {
+                  if (resetAccessPending) return;
+                  close();
+                  onResetAccess();
+                }}
+              />
+            ) : null}
+            {onDelete ? (
+              <>
+                <div
+                  style={{
+                    height: 1,
+                    background: "var(--line)",
+                    margin: "4px 6px",
+                  }}
+                />
+                <CrudMenuItem
+                  icon={<Icons.trash width={15} />}
+                  label="Eliminar"
+                  danger
+                  onClick={() => {
+                    close();
+                    onDelete();
+                  }}
+                />
+              </>
+            ) : null}
           </div>
         </>
       ) : null}

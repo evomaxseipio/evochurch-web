@@ -2,6 +2,10 @@
 
 import { parseAppSession } from "@/lib/auth/app-session";
 import { syncAuthAppMetadata } from "@/lib/auth/sync-app-metadata";
+import {
+  sessionRequiresPasswordChange,
+  UPDATE_PASSWORD_PATH,
+} from "@/lib/auth/temp-password-flow";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -41,6 +45,10 @@ export async function login(
 
   await syncAuthAppMetadata(session, supabase);
   await supabase.auth.refreshSession();
+
+  if (sessionRequiresPasswordChange(session)) {
+    redirect(UPDATE_PASSWORD_PATH);
+  }
 
   redirect(next.startsWith("/") ? next : "/dashboard");
 }

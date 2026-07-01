@@ -1,7 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/icons";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export type FilterChip<T extends string = string> = {
   key: T;
@@ -61,6 +61,7 @@ export function FilterToolbar<T extends string = string>({
   trailing,
   maxSearchWidth = 320,
   compactSearch = false,
+  searchWidthPercent,
   style,
 }: {
   query: string;
@@ -75,6 +76,8 @@ export function FilterToolbar<T extends string = string>({
   maxSearchWidth?: number;
   /** Búsqueda de ancho fijo; deja espacio para controles intermedios. */
   compactSearch?: boolean;
+  /** Ancho del campo de búsqueda respecto al toolbar (p. ej. 50 = mitad). */
+  searchWidthPercent?: number;
   style?: React.CSSProperties;
 }) {
   const filterChips =
@@ -86,7 +89,19 @@ export function FilterToolbar<T extends string = string>({
       />
     ) : null;
 
-  const useExtendedLayout = compactSearch || middle != null;
+  const useExtendedLayout = compactSearch || middle != null || searchWidthPercent != null;
+
+  const searchStyle: CSSProperties =
+    searchWidthPercent != null
+      ? {
+          width: `${searchWidthPercent}%`,
+          maxWidth: `${searchWidthPercent}%`,
+          minWidth: 160,
+          flexShrink: 0,
+        }
+      : useExtendedLayout
+        ? { width: maxSearchWidth, minWidth: 280, flexShrink: 0 }
+        : { flex: 1, minWidth: 220, maxWidth: maxSearchWidth };
 
   return (
     <div
@@ -101,20 +116,32 @@ export function FilterToolbar<T extends string = string>({
         ...style,
       }}
     >
-      <div
-        className="search"
-        style={
-          useExtendedLayout
-            ? { width: maxSearchWidth, minWidth: 280, flexShrink: 0 }
-            : { flex: 1, minWidth: 220, maxWidth: maxSearchWidth }
-        }
-      >
+      <div className="search" style={searchStyle}>
         <Icons.search size={16} stroke="var(--ink-3)" />
         <input
           placeholder={queryPlaceholder}
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
         />
+        {query.trim() ? (
+          <button
+            type="button"
+            className="btn ghost icon-only sm"
+            onClick={() => onQueryChange("")}
+            aria-label="Limpiar búsqueda"
+            title="Limpiar búsqueda"
+            style={{
+              width: 24,
+              height: 24,
+              minWidth: 24,
+              padding: 0,
+              flexShrink: 0,
+              color: "var(--muted)",
+            }}
+          >
+            <Icons.x size={14} />
+          </button>
+        ) : null}
       </div>
 
       {middle}

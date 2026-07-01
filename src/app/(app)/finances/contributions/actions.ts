@@ -89,6 +89,7 @@ export async function saveContributionAction(
 
     revalidatePath("/finances/contributions");
     revalidatePath("/finances/funds");
+    revalidatePath("/members");
     return { ok: true };
   } catch (e) {
     return {

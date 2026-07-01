@@ -2,6 +2,7 @@
 
 import {
   deactivateAdminUserAction,
+  resetAuthUserAccessPasswordAction,
   type AdminUserActionResult,
 } from "@/app/(app)/settings/users/actions";
 import { AdminUserFormDrawer } from "@/components/admin-users/admin-user-form-drawer";
@@ -12,6 +13,7 @@ import {
 } from "@/components/admin-users/admin-user-ui";
 import { Icons } from "@/components/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { CopyPasswordDialog } from "@/components/ui/copy-password-dialog";
 import { CrudActionMenu } from "@/components/ui/crud-action-menu";
 import { CrudPagination } from "@/components/ui/crud-pagination";
 import { useActionToast } from "@/hooks/use-action-toast";
@@ -19,7 +21,10 @@ import {
   computeChurchAuthUsersStats,
   toAdminUserRow,
 } from "@/lib/admin-users/parse";
-import type { AdminUserRow, ChurchAuthUser } from "@/lib/admin-users/types";
+import type {
+  AdminUserRow,
+  ChurchAuthUsersStats,
+} from "@/lib/admin-users/types";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 import {
@@ -68,10 +73,14 @@ function exportLabel() {
   return `Usuarios_${months[now.getMonth()]}${now.getFullYear()}`;
 }
 
-export function AdminUsersListView({ users }: { users: ChurchAuthUser[] }) {
+export function AdminUsersListView({
+  rows,
+  stats,
+}: {
+  rows: AdminUserRow[];
+  stats: ChurchAuthUsersStats;
+}) {
   const router = useRouter();
-  const rows = useMemo(() => users.map(toAdminUserRow), [users]);
-  const stats = computeChurchAuthUsersStats(users);
 
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "true" | "false">(
@@ -84,6 +93,13 @@ export function AdminUsersListView({ users }: { users: ChurchAuthUser[] }) {
     user: AdminUserRow | null;
   } | null>(null);
   const [confirm, setConfirm] = useState<AdminUserRow | null>(null);
+  const [passwordDialog, setPasswordDialog] = useState<{
+    title: string;
+    message: string;
+    email: string;
+    password: string;
+  } | null>(null);
+  const [resetAccessPending, setResetAccessPending] = useState(false);
 
   const [deactivateState, deactivateAction, deactivatePending] = useActionState(
     deactivateAdminUserAction,
@@ -127,6 +143,28 @@ export function AdminUsersListView({ users }: { users: ChurchAuthUser[] }) {
       router.refresh();
     },
   });
+
+  async function handleResetAccess(user: AdminUserRow) {
+    setResetAccessPending(true);
+    try {
+      const result = await resetAuthUserAccessPasswordAction(user.authUserId);
+      if (!result.ok) {
+        toast.error("No se pudo restablecer", result.error);
+        return;
+      }
+
+      setPasswordDialog({
+        title: "Acceso restablecido",
+        message:
+          "Se generó una nueva contraseña temporal. Compártela con el usuario; deberá cambiarla al iniciar sesión.",
+        email: result.email,
+        password: result.tempPassword,
+      });
+      router.refresh();
+    } finally {
+      setResetAccessPending(false);
+    }
+  }
 
   return (
     <div>
@@ -310,6 +348,8 @@ export function AdminUsersListView({ users }: { users: ChurchAuthUser[] }) {
                     <td className="col-actions">
                       <CrudActionMenu
                         onEdit={() => setDrawer({ mode: "edit", user: it })}
+                        onResetAccess={() => handleResetAccess(it)}
+                        resetAccessPending={resetAccessPending}
                         onDelete={() => setConfirm(it)}
                       />
                     </td>
@@ -373,6 +413,24 @@ export function AdminUsersListView({ users }: { users: ChurchAuthUser[] }) {
         user={drawer?.user ?? null}
         onClose={() => setDrawer(null)}
         onSaved={() => router.refresh()}
+        onPasswordIssued={({ email, tempPassword }) =>
+          setPasswordDialog({
+            title: "Acceso al sistema",
+            message:
+              "Usuario guardado con contraseña temporal. Compártela con el hermano; deberá cambiarla al iniciar sesión.",
+            email,
+            password: tempPassword,
+          })
+        }
+      />
+
+      <CopyPasswordDialog
+        open={passwordDialog !== null}
+        title={passwordDialog?.title ?? ""}
+        message={passwordDialog?.message ?? ""}
+        email={passwordDialog?.email ?? ""}
+        password={passwordDialog?.password ?? ""}
+        onClose={() => setPasswordDialog(null)}
       />
 
       {confirm ? (

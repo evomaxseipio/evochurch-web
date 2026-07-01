@@ -1,6 +1,8 @@
 "use client";
 
 import { SectionCard } from "@/components/members/member-ui";
+import { FundsKpi } from "@/components/funds/funds-kpi";
+import { Icons } from "@/components/icons";
 import { fmtRD } from "@/lib/format-currency";
 import { emptyMemberFinanceData } from "@/lib/services/member-finances";
 import type {
@@ -18,17 +20,17 @@ const TYPE_STYLES: Record<
 > = {
   1: {
     label: "Diezmo",
-    color: "#5b21b6",
+    color: "var(--d-tithe)",
     gradient: "from-blue-600 to-indigo-700",
   },
   2: {
     label: "Ofrenda",
-    color: "#059669",
+    color: "var(--d-offering)",
     gradient: "from-emerald-600 to-teal-700",
   },
   3: {
     label: "Donación",
-    color: "#ea580c",
+    color: "var(--d-donation)",
     gradient: "from-orange-500 to-orange-700",
   },
 };
@@ -76,7 +78,7 @@ export function MemberFinancesTab({ memberId }: { memberId: string }) {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="h-[110px] animate-pulse rounded-2xl bg-surface"
+              className="h-[84px] animate-pulse rounded-2xl bg-surface"
             />
           ))}
         </div>
@@ -96,30 +98,34 @@ function MemberFinancesContent({ finances }: { finances: MemberFinanceData }) {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <FinanceKpi
+        <FundsKpi
+          kind="elevated"
           label="Diezmos"
-          value={summary.tithesAmount}
-          gradient="from-blue-600 to-indigo-700"
-          icon={<WalletIcon />}
+          value={fmtRD(summary.tithesAmount)}
+          icon={<Icons.wallet size={16} />}
+          tone="d-funds"
         />
-        <FinanceKpi
+        <FundsKpi
+          kind="elevated"
           label="Ofrendas"
-          value={summary.offeringAmount}
-          gradient="from-emerald-600 to-teal-700"
-          icon={<CheckIcon />}
+          value={fmtRD(summary.offeringAmount)}
+          icon={<Icons.check size={16} />}
+          tone="d-income"
         />
-        <FinanceKpi
+        <FundsKpi
+          kind="elevated"
           label="Donaciones"
-          value={summary.donationAmount}
-          gradient="from-orange-500 to-orange-700"
-          icon={<HeartIcon />}
+          value={fmtRD(summary.donationAmount)}
+          icon={<Icons.star size={16} />}
+          tone="d-donation"
         />
-        <FinanceKpi
+        <FundsKpi
+          kind="elevated"
           label="Total"
-          value={summary.totalContributions}
-          gradient="from-primary-darker to-primary"
-          icon={<CoinsIcon />}
-          feature
+          value={fmtRD(summary.totalContributions)}
+          icon={<Icons.trendUp size={16} />}
+          tone="d-system"
+          totalSummary
         />
       </div>
 
@@ -136,9 +142,9 @@ function MemberFinancesContent({ finances }: { finances: MemberFinanceData }) {
           <>
             <MonthlyGroupedChart data={chartData} />
             <div className="mt-3 flex flex-wrap gap-4">
-              <LegendDot color="#5b21b6" label="Diezmos" />
-              <LegendDot color="#059669" label="Ofrendas" />
-              <LegendDot color="#ea580c" label="Donaciones" />
+              <LegendDot color="var(--d-tithe)" label="Diezmos" />
+              <LegendDot color="var(--d-offering)" label="Ofrendas" />
+              <LegendDot color="var(--d-donation)" label="Donaciones" />
               <LegendLine label="Total mensual" />
             </div>
           </>
@@ -150,40 +156,6 @@ function MemberFinancesContent({ finances }: { finances: MemberFinanceData }) {
         emptyMessage={message}
         isEmpty={isEmpty}
       />
-    </div>
-  );
-}
-
-function FinanceKpi({
-  label,
-  value,
-  gradient,
-  icon,
-  feature,
-}: {
-  label: string;
-  value: number;
-  gradient: string;
-  icon: React.ReactNode;
-  feature?: boolean;
-}) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border bg-gradient-to-br p-4 text-white shadow-md ${gradient} ${
-        feature
-          ? "border-primary/30 shadow-primary/20"
-          : "border-white/10"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15">
-          {icon}
-        </span>
-      </div>
-      <p className="mt-4 text-[11px] font-bold uppercase tracking-wider text-white/70">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-bold tabular-nums">{fmtRD(value)}</p>
     </div>
   );
 }
@@ -588,59 +560,6 @@ function WalletIcon({ className = "h-4 w-4" }: { className?: string }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-      />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg
-      className="h-4 w-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-    </svg>
-  );
-}
-
-function HeartIcon() {
-  return (
-    <svg
-      className="h-4 w-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-      />
-    </svg>
-  );
-}
-
-function CoinsIcon() {
-  return (
-    <svg
-      className="h-4 w-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     </svg>
   );

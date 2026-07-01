@@ -1,6 +1,10 @@
 import { AdminUsersListView } from "@/components/admin-users/admin-users-list-view";
 import { getAppSession } from "@/lib/auth/app-session";
 import { getAdminSessionOrNull } from "@/lib/auth/require-admin-session";
+import {
+  computeChurchAuthUsersStats,
+  toAdminUserRow,
+} from "@/lib/admin-users/parse";
 import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -48,5 +52,10 @@ export default async function UsersSettingsPage() {
     );
   }
 
-  return <AdminUsersListView users={users} />;
+  return (
+    <AdminUsersListView
+      rows={users.map(toAdminUserRow)}
+      stats={computeChurchAuthUsersStats(users)}
+    />
+  );
 }

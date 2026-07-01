@@ -45,10 +45,11 @@ function NavGroupItem({
   return (
     <div className="nav-group">
       <div
-        className={`nav-item nav-parent ${containsActive ? "within" : ""}`}
+        className={`nav-item nav-parent ${containsActive ? "within" : ""} ${open ? "open" : ""}`}
         onClick={() => setOpen((o) => !o)}
         role="button"
         tabIndex={0}
+        aria-expanded={open}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -134,10 +135,7 @@ export function Sidebar({
   const pathname = usePathname();
 
   return (
-    <aside
-      className={`sidebar ${className}`}
-      style={{ backgroundColor: "rgb(16, 19, 26)" }}
-    >
+    <aside className={`sidebar${collapsed ? " is-collapsed" : ""} ${className}`.trim()}>
       <div className="sidebar-logo">
         <div className="mark">
           <Icons.cross size={20} stroke="#fff" />
@@ -181,8 +179,7 @@ export function Sidebar({
         <form action={signOut}>
           <button
             type="submit"
-            className="user-chip"
-            style={{ width: "100%", border: 0, background: "transparent", textAlign: "left" }}
+            className="user-chip user-chip-btn"
             title="Cerrar sesión"
           >
             <div className="avatar">{initials(userLabel)}</div>
@@ -190,9 +187,13 @@ export function Sidebar({
               <>
                 <div className="meta">
                   <div className="nm">{userLabel}</div>
-                  <div className="rl">{userRole ?? "Admin"} · {churchShort ?? "Renacer"}</div>
+                  <div className="rl">
+                    {userRole ?? "Admin"} · {churchShort ?? "Renacer"}
+                  </div>
                 </div>
-                <Icons.more size={16} stroke="rgba(255,255,255,0.5)" />
+                <span className="user-chip-more">
+                  <Icons.more size={16} />
+                </span>
               </>
             ) : null}
           </button>

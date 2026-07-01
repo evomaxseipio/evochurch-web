@@ -3,6 +3,10 @@ import {
   getAppSession,
   getSessionDisplayRole,
 } from "@/lib/auth/app-session";
+import {
+  sessionRequiresPasswordChange,
+  UPDATE_PASSWORD_PATH,
+} from "@/lib/auth/temp-password-flow";
 import { getVerifiedUser } from "@/lib/supabase/session";
 import { redirect } from "next/navigation";
 
@@ -18,6 +22,10 @@ export default async function AppLayout({
   }
 
   const session = await getAppSession();
+  if (sessionRequiresPasswordChange(session)) {
+    redirect(UPDATE_PASSWORD_PATH);
+  }
+
   const userLabel =
     session?.fullName ??
     (user.user_metadata?.full_name as string | undefined) ??

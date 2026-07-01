@@ -1,6 +1,6 @@
-import type { dashboardMock } from "@/lib/mock/dashboard-data";
+"use client";
 
-type HeroData = (typeof dashboardMock)["hero"];
+import type { DashboardHeroData } from "@/lib/dashboard/types";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -16,14 +16,21 @@ export function DashboardHero({
 }: {
   pastor: string;
   churchName?: string;
-  hero: HeroData;
+  hero: DashboardHeroData;
 }) {
   const greeting = getGreeting();
 
   return (
     <div className="hero">
       <div className="hero-main">
-        <div style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--muted)" }}>
+        <div
+          style={{
+            fontSize: 11,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: "var(--muted)",
+          }}
+        >
           {hero.dateLabel}
           {churchName ? (
             <span style={{ marginLeft: 10, opacity: 0.85 }}>· {churchName}</span>
@@ -38,13 +45,20 @@ export function DashboardHero({
         </h2>
         <div className="meta-row">
           <div className="m">
-            Asistencia este domingo<b>{hero.attendance}</b>
+            Asistencia este domingo
+            <b>{hero.attendance}</b>
+            <span
+              className="tiny muted"
+              style={{ display: "block", marginTop: 4, fontWeight: 500 }}
+            >
+              {hero.attendanceDisclaimer}
+            </span>
           </div>
           <div className="m">
             Ofrenda del día<b>{hero.offering}</b>
           </div>
           <div className="m">
-            Bautismos pendientes<b>{hero.baptisms}</b>
+            Catecúmenos<b>{hero.catechumens}</b>
           </div>
         </div>
       </div>

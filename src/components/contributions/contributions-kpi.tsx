@@ -12,11 +12,11 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          feature
           label="Total ingresos"
           value={fmtRDshort(stats.total)}
-          icon={<Icons.wallet size={16} />}
-          accent="var(--accent)"
+          icon={<Icons.trendUp size={16} />}
+          tone="d-system"
+          totalSummary
           delta="+12.4%"
           deltaDir="up"
         />
@@ -27,7 +27,7 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
           label="Diezmos"
           value={fmtRDshort(stats.tithes)}
           icon={<Icons.wallet size={16} />}
-          accent="var(--d-funds)"
+          tone="d-funds"
         />
       </div>
       <div className="span-3">
@@ -36,7 +36,7 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
           label="Ofrendas"
           value={fmtRDshort(stats.offerings)}
           icon={<Icons.check size={16} />}
-          accent="var(--success)"
+          tone="d-income"
         />
       </div>
       <div className="span-3">
@@ -45,7 +45,7 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
           label="Donaciones"
           value={fmtRDshort(stats.donations)}
           icon={<Icons.star size={16} />}
-          accent="var(--warm)"
+          tone="d-donation"
         />
       </div>
     </div>

@@ -1,8 +1,14 @@
 import { MembersListView } from "@/components/members/members-list-view";
 import { parseMembersPageSize } from "@/lib/members/pagination";
 import { fetchMemberRoles, fetchMembersPage } from "@/lib/services/members";
+import {
+  fetchIncomeTypes,
+} from "@/lib/services/contributions";
+import { fetchFunds } from "@/lib/services/funds";
+import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
 import type { MemberFilterKey } from "@/lib/members/types";
 import { getAppSession } from "@/lib/auth/app-session";
+import { getAdminSessionOrNull } from "@/lib/auth/require-admin-session";
 import { createClient } from "@/lib/supabase/server";
 
 const FILTERS: MemberFilterKey[] = [
@@ -48,14 +54,18 @@ export default async function MembersPage({
   const pageSize = parseMembersPageSize(sizeRaw);
 
   const supabase = await createClient();
+  const canManageUsers = (await getAdminSessionOrNull()) != null;
 
   let error: string | null = null;
   let listData: Awaited<ReturnType<typeof fetchMembersPage>> | null = null;
   let roles: string[] = [];
+  let funds: Awaited<ReturnType<typeof fetchFunds>> = [];
+  let incomeTypes: Awaited<ReturnType<typeof fetchIncomeTypes>> = [];
+  let systemAccessProfileIds: string[] = [];
 
   try {
     const churchId = session.churchId;
-    [listData, roles] = await Promise.all([
+    [listData, roles, funds, incomeTypes] = await Promise.all([
       fetchMembersPage(supabase, {
         churchId,
         page,
@@ -64,7 +74,16 @@ export default async function MembersPage({
         search: query || null,
       }),
       fetchMemberRoles(supabase).catch(() => [] as string[]),
+      fetchFunds(supabase, churchId),
+      fetchIncomeTypes(supabase, churchId),
     ]);
+
+    if (canManageUsers) {
+      const authUsers = await fetchChurchAuthUsers(supabase, churchId);
+      systemAccessProfileIds = authUsers
+        .map((u) => u.profileId)
+        .filter((id): id is string => Boolean(id));
+    }
   } catch (e) {
     error =
       e instanceof Error ? e.message : "No se pudieron cargar los miembros.";
@@ -91,6 +110,10 @@ export default async function MembersPage({
           pagination={listData.pagination}
           filter={filter}
           query={query}
+          funds={funds}
+          incomeTypes={incomeTypes}
+          canManageUsers={canManageUsers}
+          systemAccessProfileIds={systemAccessProfileIds}
         />
       ) : null}
     </>

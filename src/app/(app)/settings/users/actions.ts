@@ -1,17 +1,25 @@
 "use server";
 
+import { evaluateSystemAccessEligibility } from "@/lib/admin-users/eligibility";
+import { toAdminUserRow } from "@/lib/admin-users/parse";
 import {
   isPastorRole,
   projectRoleToAppRoleId,
 } from "@/lib/admin-users/roles";
-import type { AdminUserInput } from "@/lib/admin-users/types";
+import { generateTempPassword } from "@/lib/admin-users/temp-password";
+import type { AdminUserInput, AdminUserRow } from "@/lib/admin-users/types";
 import { requireAdminSession } from "@/lib/auth/require-admin-session";
 import {
+  fetchChurchAuthUsers,
+  getAuthUserTempPassword,
   registerChurchAuthUser,
+  resetChurchAuthUserPassword,
+  setAuthUserTempPassword,
   updateChurchAuthUser,
 } from "@/lib/services/admin-users";
 import {
   fetchMemberById,
+  fetchMembership,
   fetchMembersPage,
   saveMembership,
   updateMember,
@@ -19,10 +27,21 @@ import {
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { randomBytes } from "node:crypto";
 
 export type AdminUserActionResult =
-  | { ok: true; tempPassword?: string }
+  | { ok: true; tempPassword?: string; email?: string }
+  | { ok: false; error: string };
+
+export type MemberSystemAccessContextResult =
+  | {
+      ok: true;
+      existingUser: AdminUserRow | null;
+      tempPassword: string | null;
+    }
+  | { ok: false; error: string };
+
+export type ResetMemberAccessResult =
+  | { ok: true; email: string; tempPassword: string }
   | { ok: false; error: string };
 
 async function adminSessionContext() {
@@ -46,8 +65,22 @@ function parseAdminUserInput(formData: FormData): AdminUserInput {
   };
 }
 
-function generateTempPassword(): string {
-  return randomBytes(9).toString("base64url");
+async function issueAccessPasswordReset(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  churchId: number,
+  authUserId: string,
+  email: string,
+): Promise<ResetMemberAccessResult> {
+  const tempPassword = generateTempPassword();
+  await resetChurchAuthUserPassword(
+    supabase,
+    churchId,
+    authUserId,
+    tempPassword,
+  );
+  revalidatePath("/settings/users");
+  revalidatePath("/members");
+  return { ok: true, email, tempPassword };
 }
 
 async function resolveProfileId(
@@ -76,6 +109,138 @@ async function resolveProfileId(
       m.contact.email?.trim().toLowerCase() === email,
   );
   return byName?.memberId ?? null;
+}
+
+async function assertEligibleForSystemAccess(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  churchId: number,
+  profileId: string,
+  email?: string | null,
+): Promise<string | null> {
+  const member = await fetchMemberById(supabase, churchId, profileId);
+  if (!member) return "Miembro no encontrado.";
+
+  const membership = await fetchMembership(supabase, churchId, profileId).catch(
+    () => null,
+  );
+
+  const eligibility = evaluateSystemAccessEligibility({
+    isMember: member.isMember,
+    email: email ?? member.contact.email,
+    membership,
+  });
+
+  return eligibility.ok ? null : eligibility.message;
+}
+
+export async function getMemberSystemAccessContextAction(
+  profileId: string,
+): Promise<MemberSystemAccessContextResult> {
+  try {
+    const { supabase, session } = await adminSessionContext();
+
+    const eligibilityError = await assertEligibleForSystemAccess(
+      supabase,
+      session.churchId,
+      profileId,
+    );
+    if (eligibilityError) {
+      return { ok: false, error: eligibilityError };
+    }
+
+    const users = await fetchChurchAuthUsers(supabase, session.churchId);
+    const existing = users.find((u) => u.profileId === profileId) ?? null;
+    let tempPassword: string | null = null;
+
+    if (existing?.isTempPassword) {
+      const temp = await getAuthUserTempPassword(
+        supabase,
+        session.churchId,
+        existing.authUserId,
+      );
+      tempPassword = temp.tempPassword;
+    }
+
+    return {
+      ok: true,
+      existingUser: existing ? toAdminUserRow(existing) : null,
+      tempPassword,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "No se pudo verificar el acceso del miembro.",
+    };
+  }
+}
+
+export async function resetMemberAccessPasswordAction(
+  profileId: string,
+): Promise<ResetMemberAccessResult> {
+  try {
+    const { supabase, session } = await adminSessionContext();
+
+    const eligibilityError = await assertEligibleForSystemAccess(
+      supabase,
+      session.churchId,
+      profileId,
+    );
+    if (eligibilityError) {
+      return { ok: false, error: eligibilityError };
+    }
+
+    const users = await fetchChurchAuthUsers(supabase, session.churchId);
+    const existing = users.find((u) => u.profileId === profileId);
+    if (!existing) {
+      return {
+        ok: false,
+        error: "Este miembro aún no tiene acceso al sistema. Use Configurar usuario.",
+      };
+    }
+
+    return await issueAccessPasswordReset(
+      supabase,
+      session.churchId,
+      existing.authUserId,
+      existing.email,
+    );
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error ? e.message : "No se pudo restablecer el acceso.",
+    };
+  }
+}
+
+export async function resetAuthUserAccessPasswordAction(
+  authUserId: string,
+): Promise<ResetMemberAccessResult> {
+  try {
+    const { supabase, session } = await adminSessionContext();
+
+    const users = await fetchChurchAuthUsers(supabase, session.churchId);
+    const existing = users.find((u) => u.authUserId === authUserId);
+    if (!existing) {
+      return { ok: false, error: "Usuario no encontrado en esta iglesia." };
+    }
+
+    return await issueAccessPasswordReset(
+      supabase,
+      session.churchId,
+      existing.authUserId,
+      existing.email,
+    );
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error ? e.message : "No se pudo restablecer el acceso.",
+    };
+  }
 }
 
 async function syncProfileAndMembership(
@@ -161,6 +326,16 @@ export async function saveAdminUserAction(
     }
     input.profileId = profileId;
 
+    const eligibilityError = await assertEligibleForSystemAccess(
+      supabase,
+      session.churchId,
+      profileId,
+      input.email,
+    );
+    if (eligibilityError) {
+      return { ok: false, error: eligibilityError };
+    }
+
     if (mode === "create") {
       if (!admin) {
         return {
@@ -199,10 +374,18 @@ export async function saveAdminUserAction(
         isActive: input.isActive,
       });
 
+      await setAuthUserTempPassword(
+        supabase,
+        session.churchId,
+        created.user.id,
+        password,
+      );
+
       await syncProfileAndMembership(supabase, session.churchId, profileId, input);
 
       revalidatePath("/settings/users");
-      return input.password ? { ok: true } : { ok: true, tempPassword: password };
+      revalidatePath("/members");
+      return { ok: true, tempPassword: password, email: input.email };
     }
 
     if (!input.authUserId) {
@@ -227,7 +410,6 @@ export async function saveAdminUserAction(
     if (admin) {
       const authUpdates: {
         email?: string;
-        password?: string;
         app_metadata?: {
           church_id: number;
           profile_id: string;
@@ -242,7 +424,17 @@ export async function saveAdminUserAction(
         },
       };
 
-      if (input.password) authUpdates.password = input.password;
+      let returnedTempPassword: string | undefined;
+
+      if (input.password) {
+        await resetChurchAuthUserPassword(
+          supabase,
+          session.churchId,
+          input.authUserId,
+          input.password,
+        );
+        returnedTempPassword = input.password;
+      }
 
       const { error: authError } = await admin.auth.admin.updateUserById(
         input.authUserId,
@@ -255,9 +447,32 @@ export async function saveAdminUserAction(
           error: authError.message ?? "No se pudo actualizar la cuenta Auth.",
         };
       }
+
+      revalidatePath("/settings/users");
+      revalidatePath("/members");
+      return returnedTempPassword
+        ? { ok: true, tempPassword: returnedTempPassword, email: input.email }
+        : { ok: true };
+    }
+
+    if (input.password) {
+      await resetChurchAuthUserPassword(
+        supabase,
+        session.churchId,
+        input.authUserId,
+        input.password,
+      );
+      revalidatePath("/settings/users");
+      revalidatePath("/members");
+      return {
+        ok: true,
+        tempPassword: input.password,
+        email: input.email,
+      };
     }
 
     revalidatePath("/settings/users");
+    revalidatePath("/members");
     return { ok: true };
   } catch (e) {
     return {
