@@ -123,7 +123,7 @@ export async function requireAppSession(): Promise<AppSession> {
 
 /** Supabase + sesión de negocio para server actions (multitenant). */
 export async function getActionSession() {
-  const supabase = await createClient();
   const session = await requireAppSession();
+  const supabase = await createClient();
   return { supabase, session };
 }

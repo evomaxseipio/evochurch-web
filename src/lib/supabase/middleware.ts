@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { fetchSessionRequiresPasswordChange } from "@/lib/auth/fetch-session-password-gate";
+import { resolveSessionRequiresPasswordChange } from "@/lib/auth/fetch-session-password-gate";
 import { UPDATE_PASSWORD_PATH } from "@/lib/auth/temp-password-flow";
 import { getSupabaseEnv, supabaseClientOptions } from "./config";
 
@@ -67,8 +67,10 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && (isProtected || isUpdatePasswordRoute || isAuthRoute)) {
-    const mustChangePassword =
-      await fetchSessionRequiresPasswordChange(supabase);
+    const mustChangePassword = await resolveSessionRequiresPasswordChange(
+      supabase,
+      user,
+    );
 
     if (mustChangePassword && (isProtected || (isAuthRoute && !isUpdatePasswordRoute))) {
       const url = request.nextUrl.clone();

@@ -7,6 +7,7 @@ export type AuthAppMetadata = {
   profile_id: string;
   app_role_id?: number | null;
   church_name?: string | null;
+  is_temp_password?: boolean;
 };
 
 export function sessionToAppMetadata(session: AppSession): AuthAppMetadata {
@@ -15,6 +16,7 @@ export function sessionToAppMetadata(session: AppSession): AuthAppMetadata {
     profile_id: session.profileId,
     app_role_id: session.appRoleId,
     church_name: session.churchName,
+    is_temp_password: session.isTempPassword,
   };
 }
 
