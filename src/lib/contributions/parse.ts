@@ -172,6 +172,39 @@ export function parseIncomeEntriesResponse(data: unknown): Contribution[] {
     .filter((c) => c.incomeId.length > 0);
 }
 
+export function parseIncomeEntriesPageResponse(data: unknown): {
+  entries: Contribution[];
+  totalCount: number;
+  periodStats: ContributionsStats;
+} {
+  const root = asRecord(data);
+  if (!root) {
+    return {
+      entries: [],
+      totalCount: 0,
+      periodStats: { total: 0, tithes: 0, offerings: 0, donations: 0 },
+    };
+  }
+
+  if (root.success === false) {
+    throw new Error(
+      asString(root.message) || "No se pudieron cargar las contribuciones.",
+    );
+  }
+
+  const statsRaw = asRecord(root.period_stats);
+  return {
+    entries: parseIncomeEntriesResponse(root.entries),
+    totalCount: asNumber(root.total_count),
+    periodStats: {
+      total: asNumber(statsRaw?.total),
+      tithes: asNumber(statsRaw?.tithes),
+      offerings: asNumber(statsRaw?.offerings),
+      donations: asNumber(statsRaw?.donations),
+    },
+  };
+}
+
 export function computeContributionsStats(
   entries: Contribution[],
 ): ContributionsStats {

@@ -7,6 +7,7 @@ import {
   saveFund,
   setPrimaryFund,
 } from "@/lib/services/funds";
+import { revalidateFundsCatalog } from "@/lib/cache/catalog-tags";
 import { revalidatePath } from "next/cache";
 
 export type FundActionResult =
@@ -57,6 +58,7 @@ export async function saveFundAction(
 
     const { supabase, churchId } = await sessionContext();
     await saveFund(supabase, churchId, input);
+    revalidateFundsCatalog(churchId);
     revalidatePath("/finances/funds");
     return { ok: true };
   } catch (e) {
@@ -77,6 +79,7 @@ export async function deleteFundAction(
 
     const { supabase, churchId } = await sessionContext();
     await deleteFund(supabase, churchId, fundId);
+    revalidateFundsCatalog(churchId);
     revalidatePath("/finances/funds");
     return { ok: true };
   } catch (e) {
@@ -97,6 +100,7 @@ export async function setPrimaryFundAction(
 
     const { supabase, churchId } = await sessionContext();
     await setPrimaryFund(supabase, churchId, fundId);
+    revalidateFundsCatalog(churchId);
     revalidatePath("/finances/funds");
     return { ok: true };
   } catch (e) {

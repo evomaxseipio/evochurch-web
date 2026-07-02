@@ -1,12 +1,14 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { getSupabaseEnv, supabaseClientOptions } from "./config";
+import { withRpcTiming } from "./with-rpc-timing";
 
-export async function createClient() {
+export const createClient = cache(async () => {
   const { url, anonKey } = getSupabaseEnv();
   const cookieStore = await cookies();
 
-  return createServerClient(url, anonKey, {
+  return withRpcTiming(createServerClient(url, anonKey, {
     ...supabaseClientOptions,
     cookies: {
       getAll() {
@@ -22,5 +24,5 @@ export async function createClient() {
         }
       },
     },
-  });
-}
+  }));
+});

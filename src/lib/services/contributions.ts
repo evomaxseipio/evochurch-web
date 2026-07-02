@@ -1,17 +1,38 @@
-import { parseIncomeEntriesResponse } from "@/lib/contributions/parse";
+import { parseIncomeEntriesPageResponse } from "@/lib/contributions/parse";
 import type {
   Contribution,
+  ContributionCategoryFilter,
   ContributionInput,
+  ContributionsStats,
   DonorKind,
   IncomeType,
 } from "@/lib/contributions/types";
+import { catalogTags } from "@/lib/cache/catalog-tags";
+import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
 function asRecord(v: unknown): Record<string, unknown> | null {
   return v && typeof v === "object" && !Array.isArray(v)
     ? (v as Record<string, unknown>)
     : null;
 }
+
+export type IncomeEntriesPageResult = {
+  entries: Contribution[];
+  totalCount: number;
+  periodStats: ContributionsStats;
+};
+
+export type FetchIncomeEntriesPageParams = {
+  churchId: number;
+  fundId?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  category?: ContributionCategoryFilter;
+  page: number;
+  pageSize: number;
+};
 
 function parseIncomeTypeRow(row: Record<string, unknown>): IncomeType | null {
   const id = Number(row.id);
@@ -29,6 +50,28 @@ function parseIncomeTypeRow(row: Record<string, unknown>): IncomeType | null {
   };
 }
 
+export async function fetchIncomeEntriesPage(
+  supabase: SupabaseClient,
+  params: FetchIncomeEntriesPageParams,
+): Promise<IncomeEntriesPageResult> {
+  const category =
+    params.category && params.category !== "all" ? params.category : null;
+
+  const { data, error } = await supabase.rpc("sp_get_income_entries", {
+    p_church_id: params.churchId,
+    p_fund_id: params.fundId || null,
+    p_date_from: params.dateFrom || null,
+    p_date_to: params.dateTo || null,
+    p_category: category,
+    p_page: params.page,
+    p_page_size: params.pageSize,
+  });
+
+  if (error) throw error;
+  return parseIncomeEntriesPageResponse(data);
+}
+
+/** Sin paginación — compatibilidad interna (p_page NULL en RPC). */
 export async function fetchIncomeEntries(
   supabase: SupabaseClient,
   churchId: number,
@@ -40,39 +83,23 @@ export async function fetchIncomeEntries(
   });
 
   if (error) throw error;
-  const entries = parseIncomeEntriesResponse(data);
-  return attachIncomeTypeIds(supabase, entries);
-}
-
-async function attachIncomeTypeIds(
-  supabase: SupabaseClient,
-  entries: Contribution[],
-): Promise<Contribution[]> {
-  if (entries.length === 0) return entries;
-
-  const ids = entries.map((e) => e.incomeId);
-  const { data, error } = await supabase
-    .from("income_entries")
-    .select("income_id, income_type_id")
-    .in("income_id", ids);
-
-  if (error) throw error;
-
-  const typeByIncomeId = new Map<string, number>();
-  for (const row of data ?? []) {
-    typeByIncomeId.set(String(row.income_id), Number(row.income_type_id));
-  }
-
-  return entries.map((entry) => ({
-    ...entry,
-    incomeTypeId: typeByIncomeId.get(entry.incomeId) ?? entry.incomeTypeId,
-  }));
+  const parsed = parseIncomeEntriesPageResponse(data);
+  return parsed.entries;
 }
 
 export async function fetchIncomeTypes(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   churchId: number,
 ): Promise<IncomeType[]> {
+  return unstable_cache(
+    () => fetchIncomeTypesFromDb(churchId),
+    ["catalog:income-types", String(churchId)],
+    { tags: [catalogTags.incomeTypes(churchId)], revalidate: 300 },
+  )();
+}
+
+async function fetchIncomeTypesFromDb(churchId: number): Promise<IncomeType[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("income_type_catalog")
     .select("id, type_name, category")

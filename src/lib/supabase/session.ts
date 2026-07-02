@@ -14,11 +14,11 @@ export const getSessionUser = cache(async (): Promise<User | null> => {
   return session?.user ?? null;
 });
 
-/** getUser() verificado — usar en server actions y rutas que mutan datos. */
-export async function getVerifiedUser(): Promise<User | null> {
+/** getUser() verificado — una sola llamada por request RSC (React.cache). */
+export const getVerifiedUser = cache(async (): Promise<User | null> => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
+});

@@ -7,7 +7,10 @@ import {
 import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { PROJECT_USER_ROLES } from "@/lib/admin-users/roles";
+import { generateTempPassword } from "@/lib/admin-users/temp-password";
 import type { AdminUserRow } from "@/lib/admin-users/types";
+import { memberFullName } from "@/lib/members/parse";
+import type { Member } from "@/lib/members/types";
 import { toast } from "@/lib/toast";
 import {
   useActionState,
@@ -152,15 +155,26 @@ export function AdminUserFormDrawer({
   open,
   mode,
   user,
+  presetMember = null,
+  initialTempPassword = null,
   onClose,
   onSaved,
+  onPasswordIssued,
 }: {
   open: boolean;
   mode: "new" | "edit";
   user: AdminUserRow | null;
+  /** Miembro vinculado desde Miembros — identidad readonly, rol editable. */
+  presetMember?: Member | null;
+  /** Contraseña temporal vigente (solo lectura en edición). */
+  initialTempPassword?: string | null;
   onClose: () => void;
   onSaved: () => void;
+  onPasswordIssued?: (payload: { email: string; tempPassword: string }) => void;
 }) {
+  const lockedMember = presetMember != null;
+  const showTempSection =
+    mode === "new" || (mode === "edit" && (user?.isTempPassword ?? false));
   const [state, formAction, pending] = useActionState(saveAdminUserAction, initial);
   const [vals, setVals] = useState<FormValues>({
     firstName: "",
@@ -170,18 +184,22 @@ export function AdminUserFormDrawer({
     active: true,
   });
   const [errs, setErrs] = useState<Partial<Record<keyof FormValues, string>>>({});
+  const [tempPassword, setTempPassword] = useState("");
+  const [showStoredTemp, setShowStoredTemp] = useState(false);
 
   useEffect(() => {
     if (!open) return;
     setVals({
-      firstName: user?.firstName ?? "",
-      lastName: user?.lastName ?? "",
-      email: user?.email ?? "",
+      firstName: presetMember?.firstName ?? user?.firstName ?? "",
+      lastName: presetMember?.lastName ?? user?.lastName ?? "",
+      email: presetMember?.contact.email ?? user?.email ?? "",
       role: user?.role ?? "",
       active: user?.active ?? true,
     });
+    setTempPassword("");
+    setShowStoredTemp(false);
     setErrs({});
-  }, [open, user, mode]);
+  }, [open, user, mode, presetMember]);
 
   const handledRef = useRef<AdminUserActionResult | null>(null);
 
@@ -194,17 +212,15 @@ export function AdminUserFormDrawer({
     handledRef.current = state;
 
     if (state.ok) {
-      if (state.tempPassword) {
-        toast.success(
-          "Usuario creado",
-          `${vals.email} ya puede iniciar sesión. Contraseña temporal: ${state.tempPassword}`,
-        );
+      if (state.tempPassword && onPasswordIssued) {
+        onPasswordIssued({
+          email: state.email ?? vals.email,
+          tempPassword: state.tempPassword,
+        });
       } else {
         toast.success(
           mode === "new" ? "Usuario creado" : "Usuario actualizado",
-          mode === "new"
-            ? `${vals.email} ya puede iniciar sesión.`
-            : `${vals.email} guardado.`,
+          `${vals.email} guardado correctamente.`,
         );
       }
       onSaved();
@@ -212,15 +228,24 @@ export function AdminUserFormDrawer({
     } else {
       toast.error(state.error);
     }
-  }, [state, mode, vals.email, onSaved, onClose]);
+  }, [state, mode, vals.email, onSaved, onClose, onPasswordIssued]);
 
   if (!open) return null;
 
-  const title = mode === "new" ? "Nuevo usuario" : "Editar";
+  const title = lockedMember
+    ? mode === "new"
+      ? "Dar acceso al sistema"
+      : "Editar acceso"
+    : mode === "new"
+      ? "Nuevo usuario"
+      : "Editar";
 
   const submit = () => {
     const nextErrs: Partial<Record<keyof FormValues, string>> = {};
     for (const f of FIELDS) {
+      if (lockedMember && (f.key === "firstName" || f.key === "lastName")) {
+        continue;
+      }
       if (!f.required) continue;
       const v = vals[f.key];
       if (v === "" || v == null) nextErrs[f.key] = "Obligatorio";
@@ -231,12 +256,14 @@ export function AdminUserFormDrawer({
     const fd = new FormData();
     fd.set("mode", mode === "new" ? "create" : "update");
     if (user?.authUserId) fd.set("authUserId", user.authUserId);
-    if (user?.profileId) fd.set("profileId", user.profileId);
+    const profileId = presetMember?.memberId ?? user?.profileId;
+    if (profileId) fd.set("profileId", profileId);
     fd.set("firstName", vals.firstName);
     fd.set("lastName", vals.lastName);
     fd.set("email", vals.email);
     fd.set("roleLabel", vals.role);
     fd.set("isActive", String(vals.active));
+    if (tempPassword.trim()) fd.set("password", tempPassword.trim());
     startTransition(() => formAction(fd));
   };
 
@@ -247,7 +274,11 @@ export function AdminUserFormDrawer({
         <div className="drawer-head">
           <div style={{ flex: 1 }}>
             <div className="eyebrow">
-              {mode === "new" ? "Nuevo registro" : "Edición"}
+              {lockedMember
+                ? "Acceso · Miembro"
+                : mode === "new"
+                  ? "Nuevo registro"
+                  : "Edición"}
             </div>
             <h2 style={{ margin: "4px 0 0", fontSize: 18 }}>{title}</h2>
           </div>
@@ -256,7 +287,29 @@ export function AdminUserFormDrawer({
           </button>
         </div>
         <div className="drawer-body col gap-md">
-          {FIELDS.map((f) => (
+          {lockedMember ? (
+            <div className="field">
+              <label>Miembro</label>
+              <div className="card flat" style={{ padding: 14 }}>
+                <div className="row" style={{ gap: 10 }}>
+                  <span className="chip">
+                    <span className="pip" /> Miembro bautizado
+                  </span>
+                  <span style={{ fontWeight: 600 }}>
+                    {memberFullName(presetMember)}
+                  </span>
+                </div>
+                <div className="help" style={{ marginTop: 6 }}>
+                  El acceso quedará vinculado a este perfil.
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {FIELDS.map((f) => {
+            if (lockedMember && (f.key === "firstName" || f.key === "lastName")) {
+              return null;
+            }
+            return (
             <FieldRow
               key={f.key}
               field={f}
@@ -264,7 +317,69 @@ export function AdminUserFormDrawer({
               error={errs[f.key]}
               onChange={(v) => setVals((s) => ({ ...s, [f.key]: v }))}
             />
-          ))}
+            );
+          })}
+          {showTempSection ? (
+            <div className="field">
+              <label>
+                {mode === "new" ? "Contraseña temporal" : "Nueva contraseña temporal"}
+              </label>
+              {mode === "edit" && user?.isTempPassword && initialTempPassword ? (
+                <div className="card flat" style={{ padding: 12, marginBottom: 10 }}>
+                  <div className="row between" style={{ gap: 10, alignItems: "center" }}>
+                    <div>
+                      <div className="tiny muted">Temporal activa</div>
+                      <div
+                        style={{
+                          fontFamily: "var(--font-mono)",
+                          fontSize: 14,
+                          fontWeight: 600,
+                          marginTop: 4,
+                          letterSpacing: "0.04em",
+                        }}
+                      >
+                        {showStoredTemp ? initialTempPassword : "••••••••••••"}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn outline sm"
+                      onClick={() => setShowStoredTemp((v) => !v)}
+                    >
+                      {showStoredTemp ? "Ocultar" : "Ver"}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+              <div className="row" style={{ gap: 8 }}>
+                <div className="input-wrap" style={{ flex: 1 }}>
+                  <input
+                    type="text"
+                    value={tempPassword}
+                    placeholder={
+                      mode === "new"
+                        ? "Vacío = generar automáticamente"
+                        : "Dejar vacío para no cambiar"
+                    }
+                    onChange={(e) => setTempPassword(e.target.value)}
+                    autoComplete="off"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn outline"
+                  onClick={() => setTempPassword(generateTempPassword())}
+                >
+                  Generar
+                </button>
+              </div>
+              <div className="help">
+                {mode === "new"
+                  ? "Se marcará como temporal hasta que el hermano la cambie al iniciar sesión."
+                  : "Si defines una nueva, reemplaza la temporal anterior."}
+              </div>
+            </div>
+          ) : null}
         </div>
         <div className="drawer-foot">
           <button type="button" className="btn outline" onClick={onClose}>
@@ -280,7 +395,9 @@ export function AdminUserFormDrawer({
             {pending
               ? "Guardando…"
               : mode === "new"
-                ? "Crear"
+                ? lockedMember
+                  ? "Crear acceso"
+                  : "Crear"
                 : "Guardar cambios"}
           </button>
         </div>

@@ -1,0 +1,13 @@
+export default function ContributionsLoading() {
+  return (
+    <div className="animate-pulse space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-20 rounded-2xl bg-surface" />
+        ))}
+      </div>
+      <div className="h-12 rounded-xl bg-surface" />
+      <div className="h-96 rounded-2xl bg-surface" />
+    </div>
+  );
+}

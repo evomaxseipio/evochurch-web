@@ -2,7 +2,7 @@
 
 import { MemberProfileView } from "@/components/members/member-profile-view";
 import type { ProfileTabId } from "@/components/members/member-profile-toolbar";
-import type { Member, MembershipRecord } from "@/lib/members/types";
+import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -19,10 +19,12 @@ export function MemberProfileShell({
   member: memberFromServer,
   roles,
   membership: membershipFromServer,
+  finances = null,
 }: {
   member: Member;
   roles: string[];
   membership: MembershipRecord | null;
+  finances?: MemberFinanceData | null;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,6 +58,9 @@ export function MemberProfileShell({
     }
     const qs = params.toString();
     router.replace(qs ? `?${qs}` : "?", { scroll: false });
+    if (next === "finances") {
+      router.refresh();
+    }
   }
 
   return (
@@ -68,6 +73,7 @@ export function MemberProfileShell({
         onTabChange={handleTabChange}
         onMemberUpdated={setMember}
         onMembershipUpdated={setMembership}
+        finances={finances}
       />
     </div>
   );

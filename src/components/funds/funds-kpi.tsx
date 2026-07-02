@@ -1,6 +1,15 @@
 import { Sparkline } from "@/components/dashboard/sparkline";
 import { Icons } from "@/components/icons";
-import type { ReactNode } from "react";
+import type { ReactNode, CSSProperties } from "react";
+
+const iconBoxStyle: CSSProperties = {
+  width: 32,
+  height: 32,
+  borderRadius: 9,
+  flexShrink: 0,
+  display: "grid",
+  placeItems: "center",
+};
 
 /** KPI de finanzas — igual que `KPI` en `project/components.jsx`. */
 export function FundsKpi({
@@ -13,7 +22,9 @@ export function FundsKpi({
   feature,
   accent,
   icon,
-  iconPosition = "left",
+  iconPosition = "right",
+  tone,
+  totalSummary,
 }: {
   label: string;
   value: string;
@@ -25,42 +36,29 @@ export function FundsKpi({
   accent?: string;
   icon?: ReactNode;
   iconPosition?: "left" | "right";
+  tone?: "d-funds" | "d-income" | "d-donation" | "d-system";
+  totalSummary?: boolean;
 }) {
   const deltaClass = deltaDir === "up" ? "up" : "dn";
   const sparkColor = feature ? "var(--glow)" : accent || "var(--accent)";
+  const iconAccent = accent || "var(--d-funds)";
 
   const iconEl = icon ? (
-    <div
-      style={{
-        width: 32,
-        height: 32,
-        borderRadius: 9,
-        flexShrink: 0,
-        display: "grid",
-        placeItems: "center",
-        background: `color-mix(in oklab, ${accent || "var(--d-funds)"} 18%, transparent)`,
-        color: accent || "var(--d-funds)",
-      }}
-    >
+    <div className={tone ? `ic ${tone}` : "ic"} style={tone ? iconBoxStyle : { ...iconBoxStyle, background: `color-mix(in oklab, ${iconAccent} 18%, transparent)`, color: iconAccent }}>
       {icon}
     </div>
   ) : null;
 
   const labelEl = (
-    <span
-      className="label"
-      style={{
-        flex: icon ? 1 : undefined,
-        minWidth: 0,
-        textAlign: icon && iconPosition === "left" ? "right" : undefined,
-      }}
-    >
+    <span className="label" style={{ flex: icon ? 1 : undefined, minWidth: 0 }}>
       {label}
     </span>
   );
 
   return (
-    <div className={`kpi ${kind}${feature ? " feature" : ""}`}>
+    <div
+      className={`kpi ${kind}${feature ? " feature" : ""}${totalSummary ? " total-summary" : ""}`}
+    >
       <div
         className="head"
         style={{

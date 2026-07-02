@@ -1,12 +1,22 @@
 "use client";
 
-import { AddMemberModal } from "@/components/members/add-member-modal";
+import {
+  fetchContributionCatalogAction,
+} from "@/app/(app)/members/actions";
+import {
+  getMemberSystemAccessContextAction,
+  resetMemberAccessPasswordAction,
+} from "@/app/(app)/settings/users/actions";
+import { SYSTEM_ACCESS_MESSAGES } from "@/lib/admin-users/eligibility";
+import type { AdminUserRow } from "@/lib/admin-users/types";
+import type { PresetContributor } from "@/components/contributions/contribution-form-drawer";
 import {
   MemberAvatar,
   RoleChip,
   StatusChip,
 } from "@/components/members/member-ui";
 import { Icons } from "@/components/icons";
+import { CopyPasswordDialog } from "@/components/ui/copy-password-dialog";
 import { DataTable } from "@/components/ui/data-table";
 import { FilterToolbar } from "@/components/ui/filter-toolbar";
 import {
@@ -22,11 +32,36 @@ import type {
   MembersListStats,
   MembersPagination,
 } from "@/lib/members/types";
+import type { IncomeType } from "@/lib/contributions/types";
+import type { Fund } from "@/lib/funds/types";
 import { toast } from "@/lib/toast";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+const AddMemberModal = dynamic(
+  () =>
+    import("@/components/members/add-member-modal").then((m) => m.AddMemberModal),
+  { ssr: false },
+);
+
+const ContributionFormDrawer = dynamic(
+  () =>
+    import("@/components/contributions/contribution-form-drawer").then(
+      (m) => m.ContributionFormDrawer,
+    ),
+  { ssr: false },
+);
+
+const AdminUserFormDrawer = dynamic(
+  () =>
+    import("@/components/admin-users/admin-user-form-drawer").then(
+      (m) => m.AdminUserFormDrawer,
+    ),
+  { ssr: false },
+);
 
 const FILTERS: { key: MemberFilterKey; label: string }[] = [
   { key: "all", label: "Todos" },
@@ -57,6 +92,8 @@ export function MembersListView({
   pagination,
   filter,
   query: queryFromServer,
+  canManageUsers,
+  systemAccessProfileIds = [],
 }: {
   members: Member[];
   roles: string[];
@@ -64,12 +101,40 @@ export function MembersListView({
   pagination: MembersPagination;
   filter: MemberFilterKey;
   query: string;
+  canManageUsers: boolean;
+  systemAccessProfileIds?: string[];
 }) {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState(queryFromServer);
   const [addOpen, setAddOpen] = useState(false);
   const [menuId, setMenuId] = useState<string | null>(null);
+  const [contributionMember, setContributionMember] = useState<Member | null>(null);
+  const [contributionCatalogs, setContributionCatalogs] = useState<{
+    funds: Fund[];
+    incomeTypes: IncomeType[];
+  }>({ funds: [], incomeTypes: [] });
+  const [contributionCatalogsLoading, setContributionCatalogsLoading] =
+    useState(false);
+  const [systemUserDrawer, setSystemUserDrawer] = useState<{
+    mode: "new" | "edit";
+    member: Member;
+    user: AdminUserRow | null;
+    initialTempPassword: string | null;
+  } | null>(null);
+  const [systemUserPending, setSystemUserPending] = useState(false);
+  const [resetAccessPending, setResetAccessPending] = useState(false);
+  const [passwordDialog, setPasswordDialog] = useState<{
+    title: string;
+    message: string;
+    email: string;
+    password: string;
+  } | null>(null);
   const isDesktop = useIsDesktop();
+
+  const systemAccessSet = useMemo(
+    () => new Set(systemAccessProfileIds),
+    [systemAccessProfileIds],
+  );
 
   const page = pagination.page;
   const pageSize: MembersPageSize = MEMBERS_PAGE_SIZE_OPTIONS.includes(
@@ -131,8 +196,110 @@ export function MembersListView({
     return stats.inactive;
   }
 
+  function memberPresetContributor(member: Member): PresetContributor {
+    return {
+      profileId: member.memberId,
+      profileName: memberFullName(member),
+      donorKind: member.isMember ? "member" : "visitor",
+    };
+  }
+
+  async function openContributionDrawer(member: Member) {
+    setContributionMember(member);
+    if (
+      contributionCatalogs.funds.length > 0 &&
+      contributionCatalogs.incomeTypes.length > 0
+    ) {
+      return;
+    }
+
+    setContributionCatalogsLoading(true);
+    try {
+      const result = await fetchContributionCatalogAction();
+      if (!result.ok) {
+        toast.error("Aportes", result.error);
+        setContributionMember(null);
+        return;
+      }
+      setContributionCatalogs({
+        funds: result.funds,
+        incomeTypes: result.incomeTypes,
+      });
+    } finally {
+      setContributionCatalogsLoading(false);
+    }
+  }
+
+  async function handleConfigureSystemUser(member: Member) {
+    if (!canManageUsers) {
+      toast.error(
+        "Acceso denegado",
+        "Solo un Administrador General puede configurar usuarios del sistema.",
+      );
+      return;
+    }
+
+    if (!member.isMember) {
+      toast.error("Acceso no permitido", SYSTEM_ACCESS_MESSAGES.visit);
+      return;
+    }
+
+    setSystemUserPending(true);
+    try {
+      const result = await getMemberSystemAccessContextAction(member.memberId);
+      if (!result.ok) {
+        toast.error("Acceso no permitido", result.error);
+        return;
+      }
+
+      setSystemUserDrawer({
+        mode: result.existingUser ? "edit" : "new",
+        member,
+        user: result.existingUser,
+        initialTempPassword: result.tempPassword,
+      });
+    } finally {
+      setSystemUserPending(false);
+    }
+  }
+
+  async function handleResetAccess(member: Member) {
+    if (!canManageUsers) {
+      toast.error(
+        "Acceso denegado",
+        "Solo un Administrador General puede restablecer acceso.",
+      );
+      return;
+    }
+
+    if (!member.isMember) {
+      toast.error("Acceso no permitido", SYSTEM_ACCESS_MESSAGES.visit);
+      return;
+    }
+
+    setResetAccessPending(true);
+    try {
+      const result = await resetMemberAccessPasswordAction(member.memberId);
+      if (!result.ok) {
+        toast.error("No se pudo restablecer", result.error);
+        return;
+      }
+
+      setPasswordDialog({
+        title: "Acceso restablecido",
+        message:
+          "Se generó una nueva contraseña temporal. Compártela con el hermano; deberá cambiarla al iniciar sesión.",
+        email: result.email,
+        password: result.tempPassword,
+      });
+      router.refresh();
+    } finally {
+      setResetAccessPending(false);
+    }
+  }
+
   return (
-    <div onClick={() => setMenuId(null)}>
+    <>
       <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
         <div>
           <div className="eyebrow">Comunidad</div>
@@ -256,7 +423,7 @@ export function MembersListView({
         query={searchInput}
         onQueryChange={setSearchInput}
         queryPlaceholder="Buscar por nombre, rol o sector…"
-        maxSearchWidth={9999}
+        searchWidthPercent={50}
         filters={isDesktop ? FILTERS : undefined}
         activeFilter={filter}
         onFilterChange={onFilterChange}
@@ -330,6 +497,13 @@ export function MembersListView({
               }
               onClose={() => setMenuId(null)}
               member={m}
+              canManageUsers={canManageUsers}
+              hasSystemAccess={systemAccessSet.has(m.memberId)}
+              onAddContribution={() => void openContributionDrawer(m)}
+              onConfigureSystemUser={() => handleConfigureSystemUser(m)}
+              onResetAccess={() => handleResetAccess(m)}
+              configureUserPending={systemUserPending}
+              resetAccessPending={resetAccessPending}
             />
           )}
           empty={
@@ -363,6 +537,13 @@ export function MembersListView({
                     }
                     onClose={() => setMenuId(null)}
                     member={m}
+                    canManageUsers={canManageUsers}
+                    hasSystemAccess={systemAccessSet.has(m.memberId)}
+                    onAddContribution={() => void openContributionDrawer(m)}
+                    onConfigureSystemUser={() => handleConfigureSystemUser(m)}
+                    onResetAccess={() => handleResetAccess(m)}
+                    configureUserPending={systemUserPending}
+                    resetAccessPending={resetAccessPending}
                   />
                 </div>
                 <Link href={`/members/profile?id=${m.memberId}`} className="row" style={{ gap: 12, textDecoration: "none", color: "inherit" }}>
@@ -396,7 +577,47 @@ export function MembersListView({
       ) : null}
 
       <AddMemberModal open={addOpen} onClose={() => setAddOpen(false)} roles={roles} />
-    </div>
+
+      <ContributionFormDrawer
+        mode="new"
+        entry={null}
+        open={contributionMember !== null && !contributionCatalogsLoading}
+        onClose={() => setContributionMember(null)}
+        funds={contributionCatalogs.funds}
+        incomeTypes={contributionCatalogs.incomeTypes}
+        presetContributor={
+          contributionMember ? memberPresetContributor(contributionMember) : null
+        }
+      />
+
+      <AdminUserFormDrawer
+        open={systemUserDrawer !== null}
+        mode={systemUserDrawer?.mode ?? "new"}
+        user={systemUserDrawer?.user ?? null}
+        presetMember={systemUserDrawer?.member ?? null}
+        initialTempPassword={systemUserDrawer?.initialTempPassword ?? null}
+        onClose={() => setSystemUserDrawer(null)}
+        onSaved={() => router.refresh()}
+        onPasswordIssued={({ email, tempPassword }) =>
+          setPasswordDialog({
+            title: "Acceso al sistema",
+            message:
+              "Usuario creado con contraseña temporal. Compártela con el hermano; deberá cambiarla al iniciar sesión.",
+            email,
+            password: tempPassword,
+          })
+        }
+      />
+
+      <CopyPasswordDialog
+        open={passwordDialog !== null}
+        title={passwordDialog?.title ?? ""}
+        message={passwordDialog?.message ?? ""}
+        email={passwordDialog?.email ?? ""}
+        password={passwordDialog?.password ?? ""}
+        onClose={() => setPasswordDialog(null)}
+      />
+    </>
   );
 }
 
@@ -405,79 +626,137 @@ function RowMenu({
   onToggle,
   onClose,
   member,
+  canManageUsers,
+  hasSystemAccess,
+  onAddContribution,
+  onConfigureSystemUser,
+  onResetAccess,
+  configureUserPending,
+  resetAccessPending,
 }: {
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
   member: Member;
+  canManageUsers: boolean;
+  hasSystemAccess: boolean;
+  onAddContribution: () => void;
+  onConfigureSystemUser: () => void;
+  onResetAccess: () => void;
+  configureUserPending: boolean;
+  resetAccessPending: boolean;
 }) {
-  const menuRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState<{
+    top: number | "auto";
+    bottom: number | "auto";
+    left: number | "auto";
+    right: number | "auto";
+  }>({ top: 0, bottom: "auto", left: 0, right: "auto" });
   const profileHref = `/members/profile?id=${member.memberId}`;
   const name = memberFullName(member);
 
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e: PointerEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open, onClose]);
+  const menu = useMemo(() => {
+    const items: Array<{
+      id: string;
+      label: string;
+      icon: ReactNode;
+      on?: () => void;
+      href?: string;
+      disabled?: boolean;
+      danger?: boolean;
+    }> = [
+      {
+        id: "edit",
+        label: "Editar perfil",
+        icon: <Icons.edit size={15} />,
+        href: profileHref,
+      },
+      {
+        id: "contribution",
+        label: "Agregar Contribución",
+        icon: <Icons.wallet size={15} />,
+        on: onAddContribution,
+      },
+      {
+        id: "msg",
+        label: "Mensajes",
+        icon: <Icons.chat size={15} />,
+        on: () => toast.info("Mensajes", `Chat con ${name} (próximamente)`),
+        disabled: true,
+      },
+    ];
 
-  const menu = [
-    {
-      id: "edit",
-      label: "Editar perfil",
-      icon: <Icons.edit size={15} />,
-      on: () => {},
-      href: profileHref,
-    },
-    {
-      id: "tithe",
-      label: "Registrar diezmo",
-      icon: <Icons.wallet size={15} />,
-      on: () => toast.info("Nuevo diezmo", `Registrando diezmo para ${name} (próximamente)`),
-    },
-    {
-      id: "offer",
-      label: "Registrar ofrenda",
-      icon: <Icons.wallet size={15} />,
-      on: () => toast.info("Nueva ofrenda", `Registrando ofrenda para ${name} (próximamente)`),
-    },
-    {
-      id: "msg",
-      label: "Mensajes",
-      icon: <Icons.chat size={15} />,
-      on: () => toast.info("Mensajes", `Chat con ${name} (próximamente)`),
-      disabled: true,
-    },
-    {
-      id: "userapp",
-      label: "Configurar usuario",
-      icon: <Icons.users size={15} />,
-      on: () => toast.success("Invitación enviada", `${name} recibirá un correo (próximamente)`),
-    },
-    {
+    if (canManageUsers && member.isMember) {
+      items.push({
+        id: "userapp",
+        label: "Configurar usuario",
+        icon: <Icons.users size={15} />,
+        on: onConfigureSystemUser,
+        disabled: configureUserPending,
+      });
+      if (hasSystemAccess) {
+        items.push({
+          id: "reset",
+          label: "Restablecer acceso",
+          icon: <Icons.settings size={15} />,
+          on: onResetAccess,
+          disabled: resetAccessPending,
+        });
+      }
+    }
+
+    items.push({
       id: "del",
       label: "Eliminar",
       icon: <Icons.trash size={15} />,
       danger: true,
-      on: () => toast.error("Confirmar eliminación", `Confirma desde el panel del miembro`),
-    },
-  ] as const;
+      on: () =>
+        toast.error("Confirmar eliminación", `Confirma desde el panel del miembro`),
+    });
+
+    return items;
+  }, [
+    profileHref,
+    name,
+    member.isMember,
+    onAddContribution,
+    canManageUsers,
+    onConfigureSystemUser,
+    configureUserPending,
+    hasSystemAccess,
+    onResetAccess,
+    resetAccessPending,
+  ]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open || !btnRef.current) return;
+    const r = btnRef.current.getBoundingClientRect();
+    const menuW = 200;
+    const menuH = menu.length * 38 + 24;
+    const openUp = window.innerHeight - r.bottom < menuH + 16;
+    const openLeft = window.innerWidth - r.left < menuW + 8;
+    setMenuPos({
+      top: openUp ? "auto" : r.bottom + 6,
+      bottom: openUp ? window.innerHeight - r.top + 6 : "auto",
+      left: openLeft ? "auto" : r.left,
+      right: openLeft ? window.innerWidth - r.right : "auto",
+    });
+  }, [open, menu.length]);
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }} ref={menuRef}>
+    <div style={{ display: "inline-block" }}>
       <button
+        ref={btnRef}
         type="button"
         className="btn ghost icon-only sm"
         onClick={(e) => {
@@ -491,24 +770,33 @@ function RowMenu({
         <Icons.menu size={16} />
       </button>
       {open ? (
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            position: "absolute",
-            top: "calc(100% + 6px)",
-            left: 0,
-            zIndex: 30,
-            minWidth: 200,
-            background: "var(--bg-1)",
-            border: "1px solid var(--line)",
-            borderRadius: 10,
-            boxShadow: "var(--shadow-3)",
-            padding: 6,
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
+        <>
+          <div
+            onClick={onClose}
+            style={{ position: "fixed", inset: 0, zIndex: 200 }}
+            aria-hidden
+          />
+          <div
+            role="menu"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              top: menuPos.top,
+              bottom: menuPos.bottom,
+              left: menuPos.left,
+              right: menuPos.right,
+              zIndex: 201,
+              minWidth: 200,
+              background: "var(--bg-1)",
+              border: "1px solid var(--line)",
+              borderRadius: 10,
+              boxShadow: "var(--shadow-3)",
+              padding: 6,
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+            }}
+          >
           {menu.map((item, index) => (
             <div key={item.id}>
               {index === menu.length - 1 ? (
@@ -549,7 +837,7 @@ function RowMenu({
                   disabled={"disabled" in item && item.disabled}
                   onClick={() => {
                     if ("disabled" in item && item.disabled) return;
-                    item.on();
+                    item.on?.();
                     onClose();
                   }}
                   className="action-menu-item"
@@ -595,7 +883,8 @@ function RowMenu({
               )}
             </div>
           ))}
-        </div>
+          </div>
+        </>
       ) : null}
     </div>
   );

@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { resolveSessionRequiresPasswordChange } from "@/lib/auth/fetch-session-password-gate";
+import { UPDATE_PASSWORD_PATH } from "@/lib/auth/temp-password-flow";
 import { getSupabaseEnv, supabaseClientOptions } from "./config";
 
 function hasSupabaseSessionCookie(request: NextRequest): boolean {
@@ -46,6 +48,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/login/") ||
     pathname.startsWith("/auth");
 
+  const isUpdatePasswordRoute = pathname === UPDATE_PASSWORD_PATH;
+
   const isProtected =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/members") ||
@@ -62,7 +66,28 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthRoute) {
+  if (user && (isProtected || isUpdatePasswordRoute || isAuthRoute)) {
+    const mustChangePassword = await resolveSessionRequiresPasswordChange(
+      supabase,
+      user,
+    );
+
+    if (mustChangePassword && (isProtected || (isAuthRoute && !isUpdatePasswordRoute))) {
+      const url = request.nextUrl.clone();
+      url.pathname = UPDATE_PASSWORD_PATH;
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    if (!mustChangePassword && isUpdatePasswordRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  if (user && isAuthRoute && !isUpdatePasswordRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);

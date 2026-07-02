@@ -1,10 +1,12 @@
 import { MemberProfileShell } from "@/components/members/member-profile-shell";
 import type { Member, MembershipRecord } from "@/lib/members/types";
+import type { MemberFinanceData } from "@/lib/members/types";
 import {
   fetchMemberById,
   fetchMemberRoles,
   fetchMembership,
 } from "@/lib/services/members";
+import { fetchMemberFinancePayload } from "@/lib/services/member-finances";
 import { getAppSession } from "@/lib/auth/app-session";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -21,9 +23,13 @@ type ProfileData =
       member: Member;
       roles: string[];
       membership: MembershipRecord | null;
+      finances: MemberFinanceData | null;
     };
 
-async function loadProfileData(id: string | undefined): Promise<ProfileData> {
+async function loadProfileData(
+  id: string | undefined,
+  tab: string | undefined,
+): Promise<ProfileData> {
   if (!id) return { kind: "missing-id" };
 
   const supabase = await createClient();
@@ -33,9 +39,14 @@ async function loadProfileData(id: string | undefined): Promise<ProfileData> {
 
   try {
     const churchId = session.churchId;
-    const [member, roles] = await Promise.all([
+    const loadFinances = tab === "finances";
+
+    const [member, roles, finances] = await Promise.all([
       fetchMemberById(supabase, churchId, id),
       fetchMemberRoles(supabase).catch(() => [] as string[]),
+      loadFinances
+        ? fetchMemberFinancePayload(supabase, churchId, id).catch(() => null)
+        : Promise.resolve(null),
     ]);
 
     if (!member) return { kind: "not-found" };
@@ -49,6 +60,7 @@ async function loadProfileData(id: string | undefined): Promise<ProfileData> {
       member,
       roles,
       membership,
+      finances,
     };
   } catch (e) {
     return {
@@ -61,10 +73,10 @@ async function loadProfileData(id: string | undefined): Promise<ProfileData> {
 export default async function MemberProfilePage({
   searchParams,
 }: {
-  searchParams: Promise<{ id?: string }>;
+  searchParams: Promise<{ id?: string; tab?: string }>;
 }) {
-  const { id } = await searchParams;
-  const data = await loadProfileData(id);
+  const { id, tab } = await searchParams;
+  const data = await loadProfileData(id, tab);
 
   if (data.kind === "missing-id") {
     return (
@@ -108,6 +120,7 @@ export default async function MemberProfilePage({
         member={data.member}
         roles={data.roles}
         membership={data.membership}
+        finances={data.finances}
       />
     </Suspense>
   );

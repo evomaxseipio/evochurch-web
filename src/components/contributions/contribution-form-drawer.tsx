@@ -14,6 +14,12 @@ import type {
   DonorKind,
   IncomeType,
 } from "@/lib/contributions/types";
+
+export type PresetContributor = {
+  profileId: string;
+  profileName: string;
+  donorKind: "member" | "visitor";
+};
 import type { Fund } from "@/lib/funds/types";
 import { fmtRD } from "@/lib/format-currency";
 import {
@@ -72,6 +78,7 @@ function defaultFormValues(
   funds: Fund[],
   incomeTypes: IncomeType[],
   presetFundId?: string | null,
+  presetContributor?: PresetContributor | null,
 ): FormValues {
   const today = new Date().toISOString().slice(0, 10);
   const primaryFund = funds.find((f) => f.isPrimary) ?? funds[0];
@@ -81,9 +88,9 @@ function defaultFormValues(
     incomeTypeId: titheType ? String(titheType.id) : "",
     fundId: presetFundId || primaryFund?.fundId || "",
     collectionMode: "individual",
-    donorKind: "member",
-    profileId: "",
-    profileName: "",
+    donorKind: presetContributor?.donorKind ?? "member",
+    profileId: presetContributor?.profileId ?? "",
+    profileName: presetContributor?.profileName ?? "",
     companyName: "",
     amount: "",
     paymentDate: today,
@@ -190,6 +197,7 @@ export function ContributionFormDrawer({
   funds,
   incomeTypes,
   presetFundId,
+  presetContributor = null,
 }: {
   mode: "new" | "edit";
   entry: Contribution | null;
@@ -198,11 +206,14 @@ export function ContributionFormDrawer({
   funds: Fund[];
   incomeTypes: IncomeType[];
   presetFundId?: string | null;
+  presetContributor?: PresetContributor | null;
 }) {
+  const lockedContributor = mode === "new" && presetContributor != null;
+
   const [v, setV] = useState<FormValues>(() =>
     mode === "edit" && entry
       ? contributionToFormValues(entry)
-      : defaultFormValues(funds, incomeTypes, presetFundId),
+      : defaultFormValues(funds, incomeTypes, presetFundId, presetContributor),
   );
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [amountFocused, setAmountFocused] = useState(false);
@@ -224,12 +235,15 @@ export function ContributionFormDrawer({
     setV(
       mode === "edit" && entry
         ? contributionToFormValues(entry)
-        : defaultFormValues(funds, incomeTypes, presetFundId),
+        : defaultFormValues(funds, incomeTypes, presetFundId, presetContributor),
     );
     setErrs({});
-    setMemberQuery(mode === "edit" && entry ? entry.contributorLabel : "");
+    setMemberQuery(
+      presetContributor?.profileName ??
+        (mode === "edit" && entry ? entry.contributorLabel : ""),
+    );
     setMemberResults([]);
-  }, [open, mode, entry, funds, incomeTypes, presetFundId]);
+  }, [open, mode, entry, funds, incomeTypes, presetFundId, presetContributor]);
 
   useActionToast(state, {
     successMessage:
@@ -238,7 +252,7 @@ export function ContributionFormDrawer({
   });
 
   useEffect(() => {
-    if (!open || v.collectionMode !== "individual") return;
+    if (!open || lockedContributor || v.collectionMode !== "individual") return;
     if (v.donorKind !== "member" && v.donorKind !== "visitor") return;
 
     let cancelled = false;
@@ -251,7 +265,7 @@ export function ContributionFormDrawer({
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [open, memberQuery, v.collectionMode, v.donorKind]);
+  }, [open, lockedContributor, memberQuery, v.collectionMode, v.donorKind]);
 
   if (!open) return null;
 
@@ -372,43 +386,58 @@ export function ContributionFormDrawer({
             {errs.fundId && <div className="help error">{errs.fundId}</div>}
           </div>
 
-          <div className="field">
-            <label>Modo de colecta</label>
-            <div className="row" style={{ gap: 10 }}>
-              {(["individual", "collective"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => upd("collectionMode", m)}
-                  className="btn"
-                  style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    fontWeight: 600,
-                    background:
-                      v.collectionMode === m ? "var(--accent-soft)" : "transparent",
-                    color:
-                      v.collectionMode === m ? "var(--accent)" : "var(--fg-dim)",
-                    borderColor:
-                      v.collectionMode === m
-                        ? "color-mix(in oklab, var(--accent) 40%, transparent)"
-                        : "var(--line-2)",
-                  }}
-                >
-                  {m === "individual" ? "Individual" : "Colectivo"}
-                </button>
-              ))}
+          {!lockedContributor ? (
+            <div className="field">
+              <label>Modo de colecta</label>
+              <div className="row" style={{ gap: 10 }}>
+                {(["individual", "collective"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => upd("collectionMode", m)}
+                    className="btn"
+                    style={{
+                      flex: 1,
+                      justifyContent: "center",
+                      fontWeight: 600,
+                      background:
+                        v.collectionMode === m ? "var(--accent-soft)" : "transparent",
+                      color:
+                        v.collectionMode === m ? "var(--accent)" : "var(--fg-dim)",
+                      borderColor:
+                        v.collectionMode === m
+                          ? "color-mix(in oklab, var(--accent) 40%, transparent)"
+                          : "var(--line-2)",
+                    }}
+                  >
+                    {m === "individual" ? "Individual" : "Colectivo"}
+                  </button>
+                ))}
+              </div>
+              <div className="help">
+                {isCollective
+                  ? "Se registrará como “Ofrenda colectiva” sin contribuyente individual."
+                  : "Se asocia a un miembro o es anónimo."}
+              </div>
             </div>
-            <div className="help">
-              {isCollective
-                ? "Se registrará como “Ofrenda colectiva” sin contribuyente individual."
-                : "Se asocia a un miembro o es anónimo."}
-            </div>
-          </div>
+          ) : null}
 
           <div className="field">
             <label>Contribuyente</label>
-            {isCollective ? (
+            {lockedContributor ? (
+              <div className="card flat" style={{ padding: 14 }}>
+                <div className="row" style={{ gap: 10 }}>
+                  <span className="chip">
+                    <span className="pip" />{" "}
+                    {presetContributor?.donorKind === "visitor" ? "Visitante" : "Miembro"}
+                  </span>
+                  <span style={{ fontWeight: 600 }}>{presetContributor?.profileName}</span>
+                </div>
+                <div className="help" style={{ marginTop: 6 }}>
+                  Contribuyente fijado desde el perfil del miembro.
+                </div>
+              </div>
+            ) : isCollective ? (
               <div className="card flat" style={{ padding: 14 }}>
                 <div className="row" style={{ gap: 10 }}>
                   <span className="chip">

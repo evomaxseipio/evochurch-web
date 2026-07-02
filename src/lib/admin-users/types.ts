@@ -16,6 +16,7 @@ export type ChurchAuthUser = {
   membershipRole: string | null;
   isActive: boolean;
   isVerified: boolean;
+  isTempPassword: boolean;
   lastLoginAt: string | null;
   createdAt: string | null;
   updatedAt: string | null;
@@ -51,4 +52,5 @@ export type AdminUserRow = {
   role: string;
   lastLogin: string;
   active: boolean;
+  isTempPassword: boolean;
 };

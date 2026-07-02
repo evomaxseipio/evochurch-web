@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUser } from "@/lib/supabase/session";
+import { sessionRequiresPasswordChange } from "@/lib/auth/temp-password-flow";
 import { cache } from "react";
 
 export type AppSession = {
@@ -15,6 +16,7 @@ export type AppSession = {
   canAuthorizeFinances: boolean;
   isActive: boolean;
   isVerified: boolean;
+  isTempPassword: boolean;
 };
 
 type SessionContextRow = {
@@ -30,6 +32,7 @@ type SessionContextRow = {
   can_authorize_finances?: boolean;
   is_active?: boolean;
   is_verified?: boolean;
+  is_temp_password?: boolean;
 };
 
 function parseChurchId(raw: unknown): number | null {
@@ -83,6 +86,7 @@ export function parseAppSession(data: unknown): AppSession | null {
     canAuthorizeFinances: row.can_authorize_finances === true,
     isActive: row.is_active === true,
     isVerified: row.is_verified === true,
+    isTempPassword: row.is_temp_password === true,
   };
 }
 
@@ -120,7 +124,10 @@ export async function requireAppSession(): Promise<AppSession> {
 
 /** Supabase + sesión de negocio para server actions (multitenant). */
 export async function getActionSession() {
-  const supabase = await createClient();
   const session = await requireAppSession();
+  if (sessionRequiresPasswordChange(session)) {
+    throw new Error("Debes cambiar tu contraseña temporal antes de continuar.");
+  }
+  const supabase = await createClient();
   return { supabase, session };
 }
