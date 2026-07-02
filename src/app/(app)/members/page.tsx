@@ -1,5 +1,6 @@
 import { MembersListView } from "@/components/members/members-list-view";
 import { parseMembersPageSize } from "@/lib/members/pagination";
+import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
 import { fetchMemberRoles, fetchMembersPage } from "@/lib/services/members";
 import type { MemberFilterKey } from "@/lib/members/types";
 import { getAppSession } from "@/lib/auth/app-session";
@@ -54,10 +55,15 @@ export default async function MembersPage({
   let error: string | null = null;
   let listData: Awaited<ReturnType<typeof fetchMembersPage>> | null = null;
   let roles: string[] = [];
+  let systemAccessProfileIds: string[] = [];
 
   try {
     const churchId = session.churchId;
-    [listData, roles] = await Promise.all([
+    const authUsersPromise = canManageUsers
+      ? fetchChurchAuthUsers(supabase, churchId).catch(() => [])
+      : Promise.resolve([]);
+
+    const [membersResult, rolesResult, authUsers] = await Promise.all([
       fetchMembersPage(supabase, {
         churchId,
         page,
@@ -66,7 +72,14 @@ export default async function MembersPage({
         search: query || null,
       }),
       fetchMemberRoles(supabase).catch(() => [] as string[]),
+      authUsersPromise,
     ]);
+
+    listData = membersResult;
+    roles = rolesResult;
+    systemAccessProfileIds = authUsers
+      .map((u) => u.profileId)
+      .filter((id): id is string => Boolean(id));
   } catch (e) {
     error =
       e instanceof Error ? e.message : "No se pudieron cargar los miembros.";
@@ -94,6 +107,7 @@ export default async function MembersPage({
           filter={filter}
           query={query}
           canManageUsers={canManageUsers}
+          systemAccessProfileIds={systemAccessProfileIds}
         />
       ) : null}
     </>

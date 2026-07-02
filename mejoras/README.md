@@ -37,6 +37,18 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | P3-OBS-3 Web Vitals (`web-vitals`, log dev) | ✅ |
 | P3-OBS-4 `EXPLAIN ANALYZE` staging (`scripts/explain-critical-rpcs.sql`) | ✅ script |
 
+### Baselines post-Sprint 4 (captura manual)
+
+| Métrica | Cómo medir | Objetivo roadmap |
+|---------|------------|------------------|
+| Round-trips dashboard | Contar líneas `rpc_timing` al cargar `/dashboard` (dev) | ≤ 4 |
+| `sp_get_session_context` / navegación | Idem en cambio de ruta | 0–1 |
+| TTFB / LCP | DevTools → logs `web_vital` | −30% vs baseline |
+| Payload dashboard | Network tab → document + RSC | < 50 KB |
+| RPC Postgres | `scripts/explain-critical-rpcs.sql` en staging | sin seq scans críticos |
+
+| P1-AUTH-5 paralelizar auth users en members | ✅ |
+
 ### Cierre Sprint 3 (Jul 2026)
 
 | Entregable | Estado |

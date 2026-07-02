@@ -2,7 +2,6 @@
 
 import {
   fetchContributionCatalogAction,
-  fetchSystemAccessProfileIdsAction,
 } from "@/app/(app)/members/actions";
 import {
   getMemberSystemAccessContextAction,
@@ -94,6 +93,7 @@ export function MembersListView({
   filter,
   query: queryFromServer,
   canManageUsers,
+  systemAccessProfileIds = [],
 }: {
   members: Member[];
   roles: string[];
@@ -102,6 +102,7 @@ export function MembersListView({
   filter: MemberFilterKey;
   query: string;
   canManageUsers: boolean;
+  systemAccessProfileIds?: string[];
 }) {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState(queryFromServer);
@@ -114,9 +115,6 @@ export function MembersListView({
   }>({ funds: [], incomeTypes: [] });
   const [contributionCatalogsLoading, setContributionCatalogsLoading] =
     useState(false);
-  const [systemAccessProfileIds, setSystemAccessProfileIds] = useState<
-    string[]
-  >([]);
   const [systemUserDrawer, setSystemUserDrawer] = useState<{
     mode: "new" | "edit";
     member: Member;
@@ -137,18 +135,6 @@ export function MembersListView({
     () => new Set(systemAccessProfileIds),
     [systemAccessProfileIds],
   );
-
-  useEffect(() => {
-    if (!canManageUsers) return;
-    let cancelled = false;
-    void fetchSystemAccessProfileIdsAction().then((result) => {
-      if (cancelled || !result.ok) return;
-      setSystemAccessProfileIds(result.profileIds);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [canManageUsers]);
 
   const page = pagination.page;
   const pageSize: MembersPageSize = MEMBERS_PAGE_SIZE_OPTIONS.includes(
