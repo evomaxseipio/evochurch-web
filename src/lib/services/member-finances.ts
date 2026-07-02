@@ -75,7 +75,13 @@ export async function fetchMemberFinancePayload(
   supabase: SupabaseClient,
   churchId: number,
   profileId: string,
+  options?: { monthsBack?: number },
 ): Promise<MemberFinanceData> {
+  const monthsBack = options?.monthsBack ?? 12;
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - monthsBack);
+  const cutoffIso = cutoff.toISOString().slice(0, 10);
+
   const { data: contributorRow, error: contributorError } = await supabase
     .from("contributors")
     .select("contributor_id")
@@ -101,7 +107,8 @@ export async function fetchMemberFinancePayload(
       )
     `,
     )
-    .eq("contributor_id", contributorId);
+    .eq("contributor_id", contributorId)
+    .gte("income_entries.payment_date", cutoffIso);
 
   if (rowsError) throw rowsError;
   if (!rows?.length) return emptyMemberFinanceData();

@@ -12,6 +12,11 @@ import type {
   MembershipInput,
   MembershipRecord,
 } from "@/lib/members/types";
+import type { IncomeType } from "@/lib/contributions/types";
+import type { Fund } from "@/lib/funds/types";
+import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
+import { fetchIncomeTypes } from "@/lib/services/contributions";
+import { fetchFunds } from "@/lib/services/funds";
 import {
   fetchMemberById,
   fetchMembership,
@@ -20,11 +25,63 @@ import {
   updateMember,
 } from "@/lib/services/members";
 import { getActionSession } from "@/lib/auth/app-session";
+import { canManageAdminUsers } from "@/lib/auth/require-admin-session";
 import { revalidatePath } from "next/cache";
 
 export type ActionResult =
   | { ok: true; member?: Member; membership?: MembershipRecord | null }
   | { ok: false; error: string };
+
+export type ContributionCatalogResult =
+  | { ok: true; funds: Fund[]; incomeTypes: IncomeType[] }
+  | { ok: false; error: string };
+
+export type SystemAccessProfileIdsResult =
+  | { ok: true; profileIds: string[] }
+  | { ok: false; error: string };
+
+export async function fetchContributionCatalogAction(): Promise<ContributionCatalogResult> {
+  try {
+    const { supabase, session } = await getActionSession();
+    const [funds, incomeTypes] = await Promise.all([
+      fetchFunds(supabase, session.churchId),
+      fetchIncomeTypes(supabase, session.churchId),
+    ]);
+    return { ok: true, funds, incomeTypes };
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "No se pudieron cargar fondos y tipos de ingreso.",
+    };
+  }
+}
+
+export async function fetchSystemAccessProfileIdsAction(): Promise<SystemAccessProfileIdsResult> {
+  try {
+    const { supabase, session } = await getActionSession();
+    if (!canManageAdminUsers(session)) {
+      return { ok: true, profileIds: [] };
+    }
+    const authUsers = await fetchChurchAuthUsers(supabase, session.churchId);
+    return {
+      ok: true,
+      profileIds: authUsers
+        .map((u) => u.profileId)
+        .filter((id): id is string => Boolean(id)),
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "No se pudo cargar el acceso al sistema.",
+    };
+  }
+}
 
 async function sessionContext() {
   const { supabase, session } = await getActionSession();

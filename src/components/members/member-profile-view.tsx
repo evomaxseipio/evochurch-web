@@ -30,7 +30,7 @@ import {
   MARITAL_OPTIONS,
 } from "@/lib/members/catalogs";
 import { memberFullName } from "@/lib/members/parse";
-import type { Member, MembershipRecord } from "@/lib/members/types";
+import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
 import { useActionToast } from "@/hooks/use-action-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -65,6 +65,7 @@ export function MemberProfileView({
   onTabChange,
   onMemberUpdated,
   onMembershipUpdated,
+  finances = null,
 }: {
   member: Member;
   roles: string[];
@@ -73,6 +74,7 @@ export function MemberProfileView({
   onTabChange: (tab: ProfileTabId) => void;
   onMemberUpdated: (member: Member) => void;
   onMembershipUpdated: (membership: MembershipRecord | null) => void;
+  finances?: MemberFinanceData | null;
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
@@ -257,7 +259,10 @@ export function MemberProfileView({
             />
           ) : null}
           {tab === "finances" ? (
-            <MemberFinancesTab memberId={member.memberId} />
+            <MemberFinancesTab
+              memberId={member.memberId}
+              initialFinances={finances}
+            />
           ) : null}
           {tab === "delete" ? <DeleteTab member={member} /> : null}
         </div>

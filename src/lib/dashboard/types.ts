@@ -1,6 +1,4 @@
 import type { IconName } from "@/components/icons";
-import type { Contribution } from "@/lib/contributions/types";
-import type { LedgerEntry } from "@/lib/ledger/types";
 
 export type DashboardChartPeriod = "week" | "month" | "quarter" | "year";
 
@@ -58,13 +56,22 @@ export type PendingAuthorizationItem = {
   movementDate: string;
 };
 
+export type DashboardChartData = Record<DashboardChartPeriod, ChartPoint[]>;
+export type DashboardLedgerChartData = Record<
+  DashboardChartPeriod,
+  IncomeExpenseBarPoint[]
+>;
+
 export type DashboardPayload = {
   hero: DashboardHeroData;
   kpis: DashboardKpi[];
-  contributions: Contribution[];
-  ledgerEntries: LedgerEntry[];
   pendingItems: PendingAuthorizationItem[];
-  contributionMonthlyTotals: number[];
+  contributionCharts: DashboardChartData;
+  ledgerCharts: DashboardLedgerChartData;
+  contributionPeriodTotals: Record<
+    DashboardChartPeriod,
+    { current: number; previous: number }
+  >;
 };
 
 export const CATECHUMEN_ROLE = "Catecumenos";

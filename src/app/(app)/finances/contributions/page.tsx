@@ -1,32 +1,61 @@
 import { ContributionsListView } from "@/components/contributions/contributions-list-view";
 import {
-  fetchIncomeEntries,
+  fetchIncomeEntriesPage,
   fetchIncomeTypes,
 } from "@/lib/services/contributions";
 import { fetchFunds } from "@/lib/services/funds";
+import {
+  contributionDateBoundsFromMonth,
+  parseContributionCategoryFilter,
+  parseFinancePage,
+  parseFinancePageSize,
+  parseYearMonthParam,
+} from "@/lib/finance/pagination";
 import { getAppSession } from "@/lib/auth/app-session";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ContributionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ fund?: string }>;
+  searchParams: Promise<{
+    fund?: string;
+    page?: string;
+    size?: string;
+    month?: string;
+    category?: string;
+  }>;
 }) {
   const session = await getAppSession();
   if (!session) return null;
 
-  const { fund: fundId } = await searchParams;
+  const params = await searchParams;
+  const fundId = params.fund ?? null;
+  const page = parseFinancePage(params.page);
+  const pageSize = parseFinancePageSize(params.size);
+  const month = parseYearMonthParam(params.month);
+  const category = parseContributionCategoryFilter(params.category);
+  const { from, to } = contributionDateBoundsFromMonth(month);
+
   const supabase = await createClient();
 
   let error: string | null = null;
-  let entries: Awaited<ReturnType<typeof fetchIncomeEntries>> = [];
+  let pageResult: Awaited<ReturnType<typeof fetchIncomeEntriesPage>> | null =
+    null;
   let funds: Awaited<ReturnType<typeof fetchFunds>> = [];
   let incomeTypes: Awaited<ReturnType<typeof fetchIncomeTypes>> = [];
 
   try {
     const churchId = session.churchId;
-    [entries, funds, incomeTypes] = await Promise.all([
-      fetchIncomeEntries(supabase, churchId, fundId || null),
+    [pageResult, funds, incomeTypes] = await Promise.all([
+      fetchIncomeEntriesPage(supabase, {
+        churchId,
+        fundId,
+        dateFrom: from,
+        dateTo: to,
+        category,
+        page,
+        pageSize,
+      }),
       fetchFunds(supabase, churchId),
       fetchIncomeTypes(supabase, churchId),
     ]);
@@ -53,15 +82,21 @@ export default async function ContributionsPage({
         >
           {error}
         </p>
-      ) : (
+      ) : pageResult ? (
         <ContributionsListView
-          entries={entries}
+          entries={pageResult.entries}
+          totalCount={pageResult.totalCount}
+          periodStats={pageResult.periodStats}
           funds={funds}
           incomeTypes={incomeTypes}
-          fundFilterId={fundId ?? null}
+          fundFilterId={fundId}
           fundFilterName={fundFilterName}
+          page={page}
+          pageSize={pageSize}
+          month={month}
+          category={category}
         />
-      )}
+      ) : null}
     </>
   );
 }
