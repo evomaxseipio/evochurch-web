@@ -7,7 +7,6 @@ import { breadcrumbsFromPath } from "@/lib/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Clock } from "@/components/shell/clock";
 
 function initials(label: string) {
   return label
@@ -89,8 +88,6 @@ export function AppTopbar({
         <input placeholder="Buscar miembros, transacciones, eventos…" />
         <kbd>⌘K</kbd>
       </div>
-
-      <Clock />
 
       <button
         type="button"

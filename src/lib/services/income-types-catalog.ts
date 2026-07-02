@@ -3,12 +3,15 @@ import type {
   CatalogItemInput,
   IncomeTypeCatalogRow,
 } from "@/lib/catalog/types";
+import { catalogTags } from "@/lib/cache/catalog-tags";
+import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
-export async function fetchOperationalIncomeTypeCatalog(
-  supabase: SupabaseClient,
+async function fetchOperationalIncomeTypeCatalogFromDb(
   churchId: number,
 ): Promise<IncomeTypeCatalogRow[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("income_type_catalog")
     .select("id, type_name, description, is_active")
@@ -18,6 +21,17 @@ export async function fetchOperationalIncomeTypeCatalog(
 
   if (error) throw error;
   return parseIncomeTypeCatalogRows(data);
+}
+
+export async function fetchOperationalIncomeTypeCatalog(
+  _supabase: SupabaseClient,
+  churchId: number,
+): Promise<IncomeTypeCatalogRow[]> {
+  return unstable_cache(
+    () => fetchOperationalIncomeTypeCatalogFromDb(churchId),
+    ["catalog:income-types-operational", String(churchId)],
+    { tags: [catalogTags.incomeTypesOperational(churchId)], revalidate: 300 },
+  )();
 }
 
 export async function saveIncomeTypeCatalogItem(

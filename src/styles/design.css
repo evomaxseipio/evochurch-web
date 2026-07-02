@@ -232,18 +232,20 @@ body {
 }
 
 [data-theme="light"] .sidebar {
-  --sb-brand:       var(--accent);
-  --sb-bg:          var(--sb-brand);
-  --sb-bg-2:        color-mix(in oklab, var(--sb-brand) 86%, #ffffff);
-  --sb-bg-3:        color-mix(in oklab, var(--sb-brand) 72%, #ffffff);
-  --sb-line:        color-mix(in oklab, var(--sb-brand) 66%, #ffffff);
-  --sb-line-2:      color-mix(in oklab, var(--sb-brand) 56%, #ffffff);
+  --sb-brand:       var(--accent-strong);
+  --sb-bg:          var(--accent-strong);
+  --sb-bg-2:        rgba(255, 255, 255, 0.1);
+  --sb-bg-3:        rgba(255, 255, 255, 0.16);
+  --sb-line:        rgba(255, 255, 255, 0.12);
+  --sb-line-2:      rgba(255, 255, 255, 0.2);
   --sb-fg:          #ffffff;
   --sb-fg-dim:      rgba(255, 255, 255, 0.92);
   --sb-muted:       rgba(255, 255, 255, 0.72);
   --sb-dim:         rgba(255, 255, 255, 0.58);
-  --sb-active-bg:   rgba(255, 255, 255, 0.18);
+  --sb-active-bg:   rgba(255, 255, 255, 0.16);
   --sb-active-fg:   #ffffff;
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+  border-right-color: color-mix(in oklab, var(--accent) 40%, transparent);
   color: #ffffff;
   color-scheme: dark;
 }
@@ -295,7 +297,7 @@ body {
 .sidebar .user-chip { border: 1px solid transparent; }
 [data-theme="light"] .sidebar .user-chip {
   background: rgba(255, 255, 255, 0.1);
-  border-color: var(--sb-line);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 .sidebar .user-chip:hover { background: var(--sb-bg-2); }
 [data-theme="light"] .sidebar .user-chip:hover {
@@ -394,7 +396,7 @@ body {
 /* Light sidebar — texto e iconos legibles sobre morado de marca */
 [data-theme="light"] .sidebar .nav-eyebrow,
 [data-theme="light"] .sidebar .sidebar-logo .sub {
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(255, 255, 255, 0.72);
 }
 [data-theme="light"] .sidebar .sidebar-logo .name,
 [data-theme="light"] .sidebar .sidebar-logo .name em {
@@ -406,6 +408,16 @@ body {
 [data-theme="light"] .sidebar a.nav-item:visited,
 [data-theme="light"] .sidebar .nav-item.nav-parent {
   color: rgba(255, 255, 255, 0.92);
+}
+[data-theme="light"] .sidebar .nav-item .label {
+  color: rgba(255, 255, 255, 0.92);
+}
+[data-theme="light"] .sidebar .nav-item.nav-child {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+}
+[data-theme="light"] .sidebar .nav-item.nav-child .label {
+  color: rgba(255, 255, 255, 0.72);
 }
 [data-theme="light"] .sidebar .nav-item.active::before {
   background: #ffffff;
@@ -434,15 +446,14 @@ body {
 }
 [data-theme="light"] .sidebar .nav-parent.within:not(.open) {
   background: transparent;
-  color: rgba(255, 255, 255, 0.95);
-}
-[data-theme="light"] .sidebar .nav-item.nav-child {
-  background: transparent;
-  color: rgba(255, 255, 255, 0.82);
+  color: #ffffff;
 }
 [data-theme="light"] .sidebar .nav-item.nav-child:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.1);
+}
+[data-theme="light"] .sidebar .nav-item.nav-child:hover .label {
+  color: #ffffff;
 }
 [data-theme="light"] .sidebar .nav-item.nav-child.active {
   color: #ffffff;
@@ -556,25 +567,6 @@ body {
   width: 6px; height: 6px; border-radius: 999px;
   background: var(--warm); box-shadow: 0 0 0 2px var(--bg-1), 0 0 8px var(--warm);
 }
-
-.clock {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 12.5px;
-  color: var(--fg-dim);
-  padding: 6px 10px;
-  background: var(--bg-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  display: flex; align-items: center; gap: 8px;
-  letter-spacing: 0.02em;
-}
-.clock .pip {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--ok); box-shadow: 0 0 8px var(--ok);
-  animation: pulse 2s ease infinite;
-}
-@keyframes pulse { 50% { opacity: 0.4; } }
 
 /* ===== Content ===== */
 .content { overflow-y: auto; height: 100%; background: var(--bg); }
@@ -1030,7 +1022,6 @@ body {
   .bottom-nav { display: flex; }
   .topbar { padding: 0 14px; height: 52px; }
   .search { display: none; }
-  .clock { display: none; }
   .page { padding: 14px 14px 28px; }
   .topbar-mobile-logo { display: flex; }
 }
@@ -1399,5 +1390,3 @@ body {
 .mobile-drawer-toggle { display: none; }
 @media (max-width: 900px) { .mobile-drawer-toggle { display: grid; } }
 
-/* Topbar logo on mobile */
-[data-theme="light"] .clock { background: var(--bg-2); }

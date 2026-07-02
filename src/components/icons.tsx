@@ -187,6 +187,13 @@ export const Icons = {
       <circle cx="12" cy="12" r="0.5" fill="currentColor" stroke="none" />
     </svg>
   ),
+  pendingActions: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <path d="M9 14h6M9 18h4" />
+    </svg>
+  ),
   google: (p: IconProps) => (
     <svg viewBox="0 0 24 24" width={p.size ?? 16} height={p.size ?? 16} {...p}>
       <path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.3h6c-.3 1.4-1.1 2.6-2.4 3.4v2.8h3.9c2.3-2.1 3.6-5.2 3.6-8.3z" />

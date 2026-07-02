@@ -24,7 +24,21 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 
 **Sprint 2:** escalabilidad datos financieros — rama `perf/sprint-2-data-scale` (**cerrado**). Ver `AGENT-PROMPT-SPRINT-2.md`, `QA-PROMPT-SPRINT-2.md` y `scripts/qa-sprint2.mjs`.
 
-**Sprint 3 (siguiente):** cache de lectura + streaming UX — ver `PERFORMANCE-ROADMAP.md` § Sprint 3.
+**Sprint 3:** cache + UX — rama `perf/sprint-3-cache-ux` (**cerrado**).
+
+**Sprint 4 (siguiente):** observabilidad — ver `PERFORMANCE-ROADMAP.md` § Sprint 4.
+
+### Cierre Sprint 3 (Jul 2026)
+
+| Entregable | Estado |
+|------------|--------|
+| P2-CACHE-1 `unstable_cache` catálogos/fondos/roles/versículo | ✅ |
+| Invalidación `revalidateTag` en actions finanzas/settings | ✅ |
+| P2-UX-1 `loading.tsx` dashboard, contributions, transactions, members | ✅ |
+| P2-BUNDLE-1 componentes dashboard/contrib muertos eliminados | ✅ |
+| P2-BUNDLE-2 `react-icons` removido | ✅ |
+| P2-UX-2 reloj eliminado del topbar | ✅ |
+| P2-ARCH-1 dashboard server islands | ⏭ omitido (opcional) |
 
 ### Cierre Sprint 2 (Jul 2026)
 

@@ -11,6 +11,7 @@ import {
   saveContribution,
   updateContribution,
 } from "@/lib/services/contributions";
+import { revalidateFundsCatalog } from "@/lib/cache/catalog-tags";
 import { revalidatePath } from "next/cache";
 
 export type ContributionActionResult =
@@ -87,6 +88,7 @@ export async function saveContributionAction(
       await saveContribution(supabase, churchId, userId, input);
     }
 
+    revalidateFundsCatalog(churchId);
     revalidatePath("/finances/contributions");
     revalidatePath("/finances/funds");
     revalidatePath("/members");
@@ -110,6 +112,7 @@ export async function deleteContributionAction(
 
     const { supabase, churchId } = await sessionContext();
     await deleteContribution(supabase, churchId, incomeId);
+    revalidateFundsCatalog(churchId);
     revalidatePath("/finances/contributions");
     revalidatePath("/finances/funds");
     return { ok: true };
