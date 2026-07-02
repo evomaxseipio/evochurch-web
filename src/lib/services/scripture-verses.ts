@@ -1,6 +1,9 @@
 import { daysSinceEpoch } from "@/lib/dashboard/period";
 import type { ScriptureVerse } from "@/lib/dashboard/types";
+import { catalogTags } from "@/lib/cache/catalog-tags";
+import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
 type VerseRow = {
   id: number;
@@ -16,8 +19,18 @@ const FALLBACK_VERSES: ScriptureVerse[] = [
 ];
 
 export async function fetchDailyScriptureVerse(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
 ): Promise<ScriptureVerse> {
+  const dayKey = String(daysSinceEpoch());
+  return unstable_cache(
+    () => fetchDailyScriptureVerseFromDb(),
+    ["catalog:scripture-daily", dayKey],
+    { tags: [catalogTags.scriptureDaily()], revalidate: 86_400 },
+  )();
+}
+
+async function fetchDailyScriptureVerseFromDb(): Promise<ScriptureVerse> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("scripture_verses")
     .select("id, reference, text")

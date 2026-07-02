@@ -6,6 +6,7 @@ import {
   deleteExpenseType,
   saveExpenseType,
 } from "@/lib/services/expense-types-catalog";
+import { revalidateExpenseTypesCatalog } from "@/lib/cache/catalog-tags";
 import { revalidatePath } from "next/cache";
 
 export type CatalogActionResult =
@@ -51,6 +52,7 @@ export async function saveExpenseTypeAction(
 
     const { supabase, churchId } = await sessionContext();
     await saveExpenseType(supabase, churchId, input);
+    revalidateExpenseTypesCatalog(churchId);
     revalidatePath("/settings/expenses");
     revalidatePath("/finances/transactions");
     return { ok: true };
@@ -81,6 +83,7 @@ export async function deleteExpenseTypeAction(
 
     const { supabase, churchId } = await sessionContext();
     await deleteExpenseType(supabase, churchId, id);
+    revalidateExpenseTypesCatalog(churchId);
     revalidatePath("/settings/expenses");
     revalidatePath("/finances/transactions");
     return { ok: true };

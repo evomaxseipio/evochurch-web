@@ -2,7 +2,6 @@
 
 import { FundsKpi } from "@/components/funds/funds-kpi";
 import { Icons } from "@/components/icons";
-import { TransactionKpiIcons } from "@/components/transactions/transaction-kpi-icons";
 import type { LedgerKpiVisuals, LedgerStats } from "@/lib/ledger/types";
 import { fmtRDshort } from "@/lib/format-currency";
 
@@ -56,7 +55,7 @@ export function TransactionsKpi({
           kind={KPI_KIND}
           label="Pendientes de autorizar"
           value={String(stats.pendingAuthorization)}
-          icon={TransactionKpiIcons.pendingCount(16)}
+          icon={<Icons.pendingActions size={16} />}
           accent="var(--warm)"
         />
       </div>

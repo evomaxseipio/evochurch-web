@@ -1,3 +1,4 @@
+import { catalogTags } from "@/lib/cache/catalog-tags";
 import { monthDateBounds, type YearMonth } from "@/lib/finance/month-period";
 import {
   parseExpenseTypesResponse,
@@ -13,7 +14,9 @@ import type {
   OperationalIncomeInput,
   OperationalIncomeType,
 } from "@/lib/ledger/types";
+import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
 export type FinanceLedgerPageResult = {
   entries: LedgerEntry[];
@@ -82,9 +85,18 @@ export async function fetchFinanceLedger(
 }
 
 export async function fetchExpenseTypes(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   churchId: number,
 ): Promise<ExpenseType[]> {
+  return unstable_cache(
+    () => fetchExpenseTypesFromDb(churchId),
+    ["catalog:expense-types-ledger", String(churchId)],
+    { tags: [catalogTags.expenseTypes(churchId)], revalidate: 300 },
+  )();
+}
+
+async function fetchExpenseTypesFromDb(churchId: number): Promise<ExpenseType[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc("spgetexpensestypes", {
     p_church_id: churchId,
   });
@@ -94,9 +106,20 @@ export async function fetchExpenseTypes(
 }
 
 export async function fetchOperationalIncomeTypes(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
   churchId: number,
 ): Promise<OperationalIncomeType[]> {
+  return unstable_cache(
+    () => fetchOperationalIncomeTypesFromDb(churchId),
+    ["catalog:income-types-operational-ledger", String(churchId)],
+    { tags: [catalogTags.incomeTypesOperational(churchId)], revalidate: 300 },
+  )();
+}
+
+async function fetchOperationalIncomeTypesFromDb(
+  churchId: number,
+): Promise<OperationalIncomeType[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("income_type_catalog")
     .select("id, type_name, description, is_active")

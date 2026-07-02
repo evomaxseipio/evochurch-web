@@ -25,6 +25,7 @@ import {
   rejectTransaction,
   updateTransaction,
 } from "@/lib/services/transactions";
+import { revalidateFundsCatalog } from "@/lib/cache/catalog-tags";
 import { revalidatePath } from "next/cache";
 
 export type TransactionActionResult =
@@ -144,6 +145,7 @@ export async function saveLedgerEntryAction(
       }
     }
 
+    revalidateFundsCatalog(churchId);
     revalidatePath("/finances/transactions");
     revalidatePath("/finances/funds");
     revalidatePath("/finances/contributions");
@@ -277,6 +279,7 @@ export async function deleteLedgerEntryAction(
       await deleteTransaction(supabase, churchId, transactionId);
     }
 
+    revalidateFundsCatalog(churchId);
     revalidatePath("/finances/transactions");
     revalidatePath("/finances/funds");
     revalidatePath("/finances/contributions");

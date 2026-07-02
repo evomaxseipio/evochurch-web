@@ -6,6 +6,7 @@ import {
   deleteIncomeTypeCatalogItem,
   saveIncomeTypeCatalogItem,
 } from "@/lib/services/income-types-catalog";
+import { revalidateIncomeTypesCatalog } from "@/lib/cache/catalog-tags";
 import { revalidatePath } from "next/cache";
 
 export type CatalogActionResult =
@@ -51,6 +52,7 @@ export async function saveIncomeTypeAction(
 
     const { supabase, churchId } = await sessionContext();
     await saveIncomeTypeCatalogItem(supabase, churchId, input);
+    revalidateIncomeTypesCatalog(churchId);
     revalidatePath("/settings/income-types");
     revalidatePath("/finances/transactions");
     revalidatePath("/finances/contributions");
@@ -84,6 +86,7 @@ export async function deleteIncomeTypeAction(
 
     const { supabase, churchId } = await sessionContext();
     await deleteIncomeTypeCatalogItem(supabase, churchId, id);
+    revalidateIncomeTypesCatalog(churchId);
     revalidatePath("/settings/income-types");
     revalidatePath("/finances/transactions");
     revalidatePath("/finances/contributions");

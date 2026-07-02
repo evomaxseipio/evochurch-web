@@ -12,8 +12,11 @@ import type {
   MembershipInput,
   MembershipRecord,
 } from "@/lib/members/types";
+import { catalogTags } from "@/lib/cache/catalog-tags";
 import { assertRpcSuccess } from "@/lib/supabase/rpc-result";
+import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
 export type FetchMembersPageParams = {
   churchId: number;
@@ -75,8 +78,17 @@ export async function fetchMemberById(
 }
 
 export async function fetchMemberRoles(
-  supabase: SupabaseClient,
+  _supabase: SupabaseClient,
 ): Promise<string[]> {
+  return unstable_cache(
+    fetchMemberRolesFromDb,
+    ["catalog:member-roles"],
+    { tags: [catalogTags.memberRoles()], revalidate: 3600 },
+  )();
+}
+
+async function fetchMemberRolesFromDb(): Promise<string[]> {
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from("member_roles")
     .select("role_name")
