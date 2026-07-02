@@ -27,6 +27,14 @@ export type FetchMembersPageParams = {
 };
 
 /** Siempre usa la sobrecarga paginada (PostgREST no resuelve spgetprofiles() sin args). */
+function resolveMembersPageSize(
+  pageSize: number | null | undefined,
+): number | null {
+  if (pageSize === null) return null;
+  if (pageSize === undefined) return DEFAULT_MEMBERS_PAGE_SIZE;
+  return pageSize;
+}
+
 export async function fetchMembersPage(
   supabase: SupabaseClient,
   params: FetchMembersPageParams,
@@ -34,7 +42,7 @@ export async function fetchMembersPage(
   const { data, error } = await supabase.rpc("spgetprofiles", {
     p_church_id: params.churchId,
     p_page: params.page ?? 1,
-    p_page_size: params.pageSize ?? DEFAULT_MEMBERS_PAGE_SIZE,
+    p_page_size: resolveMembersPageSize(params.pageSize),
     p_filter: params.filter ?? "all",
     p_search: params.search?.trim() || null,
   });
