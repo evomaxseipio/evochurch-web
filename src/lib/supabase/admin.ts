@@ -1,5 +1,6 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseEnv, supabaseClientOptions } from "./config";
+import { withRpcTiming } from "./with-rpc-timing";
 
 /** Cliente con service role — solo servidor, nunca importar en componentes cliente. */
 export function createAdminClient() {
@@ -7,11 +8,13 @@ export function createAdminClient() {
   if (!serviceRoleKey) return null;
 
   const { url } = getSupabaseEnv();
-  return createSupabaseClient(url, serviceRoleKey, {
-    ...supabaseClientOptions,
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  return withRpcTiming(
+    createSupabaseClient(url, serviceRoleKey, {
+      ...supabaseClientOptions,
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }),
+  );
 }

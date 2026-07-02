@@ -1,3 +1,4 @@
+import { WebVitalsReporter } from "@/components/observability/web-vitals-reporter";
 import { ThemeInit } from "@/components/theme-init";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
@@ -32,6 +33,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
+        <WebVitalsReporter />
         <ThemeInit />
         <Toaster />
         {children}
