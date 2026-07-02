@@ -1,17 +1,16 @@
 "use client";
 
-import { AddMemberModal } from "@/components/members/add-member-modal";
-import { AdminUserFormDrawer } from "@/components/admin-users/admin-user-form-drawer";
+import {
+  fetchContributionCatalogAction,
+  fetchSystemAccessProfileIdsAction,
+} from "@/app/(app)/members/actions";
 import {
   getMemberSystemAccessContextAction,
   resetMemberAccessPasswordAction,
 } from "@/app/(app)/settings/users/actions";
 import { SYSTEM_ACCESS_MESSAGES } from "@/lib/admin-users/eligibility";
 import type { AdminUserRow } from "@/lib/admin-users/types";
-import {
-  ContributionFormDrawer,
-  type PresetContributor,
-} from "@/components/contributions/contribution-form-drawer";
+import type { PresetContributor } from "@/components/contributions/contribution-form-drawer";
 import {
   MemberAvatar,
   RoleChip,
@@ -38,9 +37,32 @@ import type { IncomeType } from "@/lib/contributions/types";
 import type { Fund } from "@/lib/funds/types";
 import { toast } from "@/lib/toast";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+const AddMemberModal = dynamic(
+  () =>
+    import("@/components/members/add-member-modal").then((m) => m.AddMemberModal),
+  { ssr: false },
+);
+
+const ContributionFormDrawer = dynamic(
+  () =>
+    import("@/components/contributions/contribution-form-drawer").then(
+      (m) => m.ContributionFormDrawer,
+    ),
+  { ssr: false },
+);
+
+const AdminUserFormDrawer = dynamic(
+  () =>
+    import("@/components/admin-users/admin-user-form-drawer").then(
+      (m) => m.AdminUserFormDrawer,
+    ),
+  { ssr: false },
+);
 
 const FILTERS: { key: MemberFilterKey; label: string }[] = [
   { key: "all", label: "Todos" },
@@ -71,10 +93,7 @@ export function MembersListView({
   pagination,
   filter,
   query: queryFromServer,
-  funds,
-  incomeTypes,
   canManageUsers,
-  systemAccessProfileIds,
 }: {
   members: Member[];
   roles: string[];
@@ -82,17 +101,22 @@ export function MembersListView({
   pagination: MembersPagination;
   filter: MemberFilterKey;
   query: string;
-  funds: Fund[];
-  incomeTypes: IncomeType[];
   canManageUsers: boolean;
-  /** Perfiles con cuenta en el sistema (para menú Restablecer acceso). */
-  systemAccessProfileIds: string[];
 }) {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState(queryFromServer);
   const [addOpen, setAddOpen] = useState(false);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [contributionMember, setContributionMember] = useState<Member | null>(null);
+  const [contributionCatalogs, setContributionCatalogs] = useState<{
+    funds: Fund[];
+    incomeTypes: IncomeType[];
+  }>({ funds: [], incomeTypes: [] });
+  const [contributionCatalogsLoading, setContributionCatalogsLoading] =
+    useState(false);
+  const [systemAccessProfileIds, setSystemAccessProfileIds] = useState<
+    string[]
+  >([]);
   const [systemUserDrawer, setSystemUserDrawer] = useState<{
     mode: "new" | "edit";
     member: Member;
@@ -113,6 +137,18 @@ export function MembersListView({
     () => new Set(systemAccessProfileIds),
     [systemAccessProfileIds],
   );
+
+  useEffect(() => {
+    if (!canManageUsers) return;
+    let cancelled = false;
+    void fetchSystemAccessProfileIdsAction().then((result) => {
+      if (cancelled || !result.ok) return;
+      setSystemAccessProfileIds(result.profileIds);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [canManageUsers]);
 
   const page = pagination.page;
   const pageSize: MembersPageSize = MEMBERS_PAGE_SIZE_OPTIONS.includes(
@@ -180,6 +216,32 @@ export function MembersListView({
       profileName: memberFullName(member),
       donorKind: member.isMember ? "member" : "visitor",
     };
+  }
+
+  async function openContributionDrawer(member: Member) {
+    setContributionMember(member);
+    if (
+      contributionCatalogs.funds.length > 0 &&
+      contributionCatalogs.incomeTypes.length > 0
+    ) {
+      return;
+    }
+
+    setContributionCatalogsLoading(true);
+    try {
+      const result = await fetchContributionCatalogAction();
+      if (!result.ok) {
+        toast.error("Aportes", result.error);
+        setContributionMember(null);
+        return;
+      }
+      setContributionCatalogs({
+        funds: result.funds,
+        incomeTypes: result.incomeTypes,
+      });
+    } finally {
+      setContributionCatalogsLoading(false);
+    }
   }
 
   async function handleConfigureSystemUser(member: Member) {
@@ -451,7 +513,7 @@ export function MembersListView({
               member={m}
               canManageUsers={canManageUsers}
               hasSystemAccess={systemAccessSet.has(m.memberId)}
-              onAddContribution={() => setContributionMember(m)}
+              onAddContribution={() => void openContributionDrawer(m)}
               onConfigureSystemUser={() => handleConfigureSystemUser(m)}
               onResetAccess={() => handleResetAccess(m)}
               configureUserPending={systemUserPending}
@@ -491,7 +553,7 @@ export function MembersListView({
                     member={m}
                     canManageUsers={canManageUsers}
                     hasSystemAccess={systemAccessSet.has(m.memberId)}
-                    onAddContribution={() => setContributionMember(m)}
+                    onAddContribution={() => void openContributionDrawer(m)}
                     onConfigureSystemUser={() => handleConfigureSystemUser(m)}
                     onResetAccess={() => handleResetAccess(m)}
                     configureUserPending={systemUserPending}
@@ -533,10 +595,10 @@ export function MembersListView({
       <ContributionFormDrawer
         mode="new"
         entry={null}
-        open={contributionMember !== null}
+        open={contributionMember !== null && !contributionCatalogsLoading}
         onClose={() => setContributionMember(null)}
-        funds={funds}
-        incomeTypes={incomeTypes}
+        funds={contributionCatalogs.funds}
+        incomeTypes={contributionCatalogs.incomeTypes}
         presetContributor={
           contributionMember ? memberPresetContributor(contributionMember) : null
         }

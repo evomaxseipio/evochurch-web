@@ -28,36 +28,32 @@ import { PaginationBar } from "@/components/ui/pagination-bar";
 import { TruncatedTooltip } from "@/components/ui/truncated-tooltip";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
+import type { DateRange } from "@/lib/finance/date-range";
 import {
-  defaultYearToDateRange,
-  type DateRange,
-} from "@/lib/finance/date-range";
+  FINANCE_PAGE_SIZE_OPTIONS,
+  type FinancePageSize,
+} from "@/lib/finance/pagination";
 import type { Fund } from "@/lib/funds/types";
 import {
   computeLedgerKpiVisuals,
-  computeLedgerStats,
-  filterLedgerEntries,
   isPendingFundTransferExpense,
 } from "@/lib/ledger/parse";
 import type {
   ExpenseType,
   LedgerEntry,
+  LedgerStats,
   LedgerStatusFilter,
   OperationalIncomeType,
 } from "@/lib/ledger/types";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   useActionState,
-  useEffect,
   useMemo,
   useState,
   startTransition,
 } from "react";
-
-const PAGE_SIZE_OPTIONS = [10, 15, 25, 50] as const;
-type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
 
 const STATUS_FILTERS: { key: LedgerStatusFilter; label: string }[] = [
   { key: "all", label: "Todos" },
@@ -66,6 +62,41 @@ const STATUS_FILTERS: { key: LedgerStatusFilter; label: string }[] = [
 ];
 
 const deleteInitial: TransactionActionResult | null = null;
+
+function buildTransactionsQuery(
+  base: URLSearchParams,
+  updates: {
+    page?: number;
+    pageSize?: number;
+    dateRange?: DateRange;
+    status?: LedgerStatusFilter;
+  },
+): string {
+  const params = new URLSearchParams(base.toString());
+
+  if (updates.page !== undefined) {
+    if (updates.page <= 1) params.delete("page");
+    else params.set("page", String(updates.page));
+  }
+
+  if (updates.pageSize !== undefined) {
+    if (updates.pageSize === 25) params.delete("size");
+    else params.set("size", String(updates.pageSize));
+  }
+
+  if (updates.dateRange) {
+    params.set("from", updates.dateRange.from);
+    params.set("to", updates.dateRange.to);
+  }
+
+  if (updates.status !== undefined) {
+    if (updates.status === "all") params.delete("status");
+    else params.set("status", updates.status);
+  }
+
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+}
 
 function canEditEntry(entry: LedgerEntry): boolean {
   if (isPendingFundTransferExpense(entry)) return true;
@@ -83,28 +114,44 @@ function canDeleteEntry(entry: LedgerEntry): boolean {
 
 export function TransactionsListView({
   entries,
+  totalCount,
+  periodStats,
   funds,
   expenseTypes,
   incomeTypes,
   fundFilterId,
   fundFilterName,
   canAuthorizeFinances = false,
+  page,
+  pageSize,
+  dateFrom,
+  dateTo,
+  statusFilter,
 }: {
   entries: LedgerEntry[];
+  totalCount: number;
+  periodStats: LedgerStats;
   funds: Fund[];
   expenseTypes: ExpenseType[];
   incomeTypes: OperationalIncomeType[];
   fundFilterId?: string | null;
   fundFilterName?: string | null;
   canAuthorizeFinances?: boolean;
+  page: number;
+  pageSize: FinancePageSize;
+  dateFrom: string;
+  dateTo: string;
+  statusFilter: LedgerStatusFilter;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
-  const [dateRange, setDateRange] = useState<DateRange>(defaultYearToDateRange);
+  const dateRange = useMemo(
+    () => ({ from: dateFrom, to: dateTo }),
+    [dateFrom, dateTo],
+  );
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<LedgerStatusFilter>("all");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSize>(10);
   const [formState, setFormState] = useState<{
     mode: "new" | "edit";
     entry: LedgerEntry | null;
@@ -127,40 +174,45 @@ export function TransactionsListView({
     },
   });
 
-  const filtered = useMemo(
-    () =>
-      filterLedgerEntries(entries, {
-        dateRange,
-        statusFilter,
-        query,
-        fundFilterId,
-      }),
-    [entries, dateRange, query, statusFilter, fundFilterId],
-  );
+  function navigate(updates: Parameters<typeof buildTransactionsQuery>[1]) {
+    const href = `${pathname}${buildTransactionsQuery(searchParams, updates)}`;
+    router.push(href);
+  }
 
-  const stats = useMemo(() => computeLedgerStats(filtered), [filtered]);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return entries;
+    return entries.filter((entry) =>
+      [
+        entry.description,
+        entry.fundName,
+        entry.typeName,
+        entry.createdBy,
+        entry.authorizedBy,
+        entry.paymentMethod,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [entries, query]);
 
   const kpiVisuals = useMemo(
     () =>
-      computeLedgerKpiVisuals(filtered, entries, {
+      computeLedgerKpiVisuals(filtered, filtered, {
         dateRange,
         statusFilter,
-        query,
+        query: "",
         fundFilterId,
       }),
-    [filtered, entries, dateRange, statusFilter, query, fundFilterId],
+    [filtered, dateRange, statusFilter, fundFilterId],
   );
 
-  useEffect(() => {
-    setPage(1);
-  }, [query, statusFilter, fundFilterId, dateRange, pageSize]);
-
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
-  const pageEnd = Math.min(pageStart + pageSize, total);
-  const pageRows = filtered.slice(pageStart, pageEnd);
+  const pageEnd = Math.min(pageStart + entries.length, totalCount);
+  const pageRows = filtered;
 
   const exportBase = `Transacciones_${dateRangeExportSlug(dateRange)}`;
 
@@ -249,7 +301,7 @@ export function TransactionsListView({
   );
 
   const emptyMessage =
-    entries.length === 0
+    totalCount === 0
       ? "No hay movimientos registrados."
       : "No hay movimientos que coincidan con los filtros.";
 
@@ -284,7 +336,7 @@ export function TransactionsListView({
         </Link>
       ) : null}
 
-      <TransactionsKpi stats={stats} visuals={kpiVisuals} />
+      <TransactionsKpi stats={periodStats} visuals={kpiVisuals} />
 
       <FilterToolbar
         style={{ marginTop: 0 }}
@@ -295,8 +347,13 @@ export function TransactionsListView({
         compactSearch
         filters={STATUS_FILTERS}
         activeFilter={statusFilter}
-        onFilterChange={setStatusFilter}
-        middle={<DateRangeFilter value={dateRange} onChange={setDateRange} />}
+        onFilterChange={(next) => navigate({ status: next, page: 1 })}
+        middle={
+          <DateRangeFilter
+            value={dateRange}
+            onChange={(next) => navigate({ dateRange: next, page: 1 })}
+          />
+        }
         trailing={
           isDesktop ? (
             <button type="button" className="btn primary" onClick={openNew}>
@@ -343,7 +400,7 @@ export function TransactionsListView({
                 <Icons.wallet size={40} />
               </span>
               <div className="muted">{emptyMessage}</div>
-              {entries.length === 0 ? (
+              {totalCount === 0 ? (
                 <button
                   type="button"
                   className="btn primary"
@@ -371,7 +428,7 @@ export function TransactionsListView({
                 <Icons.wallet size={40} />
               </span>
               <div className="muted">{emptyMessage}</div>
-              {entries.length === 0 ? (
+              {totalCount === 0 ? (
                 <button
                   type="button"
                   className="btn primary"
@@ -397,18 +454,20 @@ export function TransactionsListView({
         </div>
       )}
 
-      {total > 0 ? (
+      {totalCount > 0 ? (
         <PaginationBar
           page={safePage}
           totalPages={totalPages}
-          total={total}
+          total={totalCount}
           pageStart={pageStart}
           pageEnd={pageEnd}
           pageSize={pageSize}
-          onPage={setPage}
-          onPageSize={(s) => setPageSize(s as PageSize)}
+          onPage={(p) => navigate({ page: p })}
+          onPageSize={(s) =>
+            navigate({ pageSize: s as FinancePageSize, page: 1 })
+          }
           noun="movimientos"
-          sizeOptions={PAGE_SIZE_OPTIONS}
+          sizeOptions={FINANCE_PAGE_SIZE_OPTIONS}
         />
       ) : null}
 

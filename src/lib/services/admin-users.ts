@@ -1,5 +1,6 @@
 import {
   parseAppUserRoles,
+  parseChurchAuthUser,
   parseChurchAuthUsersResponse,
 } from "@/lib/admin-users/parse";
 import type { AdminUserInput, AppUserRole, ChurchAuthUser } from "@/lib/admin-users/types";
@@ -24,6 +25,51 @@ export async function fetchChurchAuthUsers(
   if (error) throw error;
   assertRpcSuccess(data, "No se pudieron cargar los usuarios.");
   return parseChurchAuthUsersResponse(data);
+}
+
+export async function findProfileByEmail(
+  supabase: SupabaseClient,
+  churchId: number,
+  email: string,
+): Promise<string | null> {
+  const { data, error } = await supabase.rpc("sp_find_profile_by_email", {
+    p_church_id: churchId,
+    p_email: email,
+  });
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo buscar el miembro.");
+  const root =
+    data && typeof data === "object" && !Array.isArray(data)
+      ? (data as Record<string, unknown>)
+      : null;
+  const profile =
+    root?.profile && typeof root.profile === "object"
+      ? (root.profile as Record<string, unknown>)
+      : null;
+  const profileId = profile?.profile_id;
+  return profileId != null ? String(profileId) : null;
+}
+
+export async function fetchChurchAuthUserByProfile(
+  supabase: SupabaseClient,
+  churchId: number,
+  profileId: string,
+): Promise<ChurchAuthUser | null> {
+  const { data, error } = await supabase.rpc(
+    "sp_get_church_auth_user_by_profile",
+    {
+      p_church_id: churchId,
+      p_profile_id: profileId,
+    },
+  );
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo cargar el usuario.");
+  const root =
+    data && typeof data === "object" && !Array.isArray(data)
+      ? (data as Record<string, unknown>)
+      : null;
+  if (!root?.user) return null;
+  return parseChurchAuthUser(root.user);
 }
 
 export async function registerChurchAuthUser(

@@ -1,0 +1,288 @@
+import {
+  buildDashboardHero,
+  formatPeriodDelta,
+} from "@/lib/dashboard/aggregate";
+import type {
+  ChartPoint,
+  DashboardChartData,
+  DashboardChartPeriod,
+  DashboardHeroData,
+  DashboardKpi,
+  DashboardLedgerChartData,
+  DashboardPayload,
+  IncomeExpenseBarPoint,
+  PendingAuthorizationItem,
+} from "@/lib/dashboard/types";
+import { CHART_PERIODS } from "@/lib/dashboard/types";
+import { formatHeroDateLabel } from "@/lib/dashboard/period";
+import { fmtRDshort } from "@/lib/format-currency";
+import type { MembersListStats } from "@/lib/members/types";
+import { dashboardMock } from "@/lib/mock/dashboard-data";
+
+function asRecord(v: unknown): Record<string, unknown> | null {
+  return v && typeof v === "object" && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : null;
+}
+
+function asNumber(v: unknown, fallback = 0): number {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v);
+    if (Number.isFinite(n)) return n;
+  }
+  return fallback;
+}
+
+function asString(v: unknown): string {
+  return typeof v === "string" ? v : v != null ? String(v) : "";
+}
+
+function parseChartPoints(raw: unknown): ChartPoint[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => asRecord(item))
+    .filter((item): item is Record<string, unknown> => item !== null)
+    .map((row) => ({
+      label: asString(row.label),
+      value: Math.round(asNumber(row.value)),
+    }));
+}
+
+function parseLedgerBarPoints(raw: unknown): IncomeExpenseBarPoint[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => asRecord(item))
+    .filter((item): item is Record<string, unknown> => item !== null)
+    .map((row) => ({
+      label: asString(row.label),
+      income: Math.round(asNumber(row.income)),
+      expense: Math.round(asNumber(row.expense)),
+    }));
+}
+
+function parsePeriodCharts(raw: unknown): DashboardChartData {
+  const root = asRecord(raw) ?? {};
+  const out = {} as DashboardChartData;
+  for (const period of CHART_PERIODS) {
+    out[period] = parseChartPoints(root[period]);
+  }
+  return out;
+}
+
+function parseLedgerPeriodCharts(raw: unknown): DashboardLedgerChartData {
+  const root = asRecord(raw) ?? {};
+  const out = {} as DashboardLedgerChartData;
+  for (const period of CHART_PERIODS) {
+    out[period] = parseLedgerBarPoints(root[period]);
+  }
+  return out;
+}
+
+function sumChartValues(points: ChartPoint[]): number {
+  return points.reduce((sum, point) => sum + point.value, 0);
+}
+
+function periodTotalsFromCharts(
+  charts: DashboardChartData,
+): DashboardPayload["contributionPeriodTotals"] {
+  const out = {} as DashboardPayload["contributionPeriodTotals"];
+  for (const period of CHART_PERIODS) {
+    const points = charts[period];
+    const current = sumChartValues(points);
+    const previous =
+      points.length >= 2
+        ? points[points.length - 2]?.value ?? 0
+        : 0;
+    out[period] = { current, previous };
+  }
+  return out;
+}
+
+function parsePendingItems(raw: unknown): PendingAuthorizationItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => asRecord(item))
+    .filter((item): item is Record<string, unknown> => item !== null)
+    .map((row) => ({
+      id: asString(row.id),
+      kind: (asString(row.kind) === "fund_transfer"
+        ? "fund_transfer"
+        : "expense") as PendingAuthorizationItem["kind"],
+      title: asString(row.title),
+      subtitle: asString(row.subtitle),
+      amount: Math.round(asNumber(row.amount)),
+      movementDate: asString(row.movement_date ?? row.movementDate),
+    }))
+    .filter((item) => item.id.length > 0);
+}
+
+function buildDashboardKpisFromSummary(params: {
+  memberStats: MembersListStats;
+  fundsSummary: { totalBalance: number; activeCount: number };
+  contributionMonthlyTotals: number[];
+  kpiMonth: {
+    contributionsThisMonth: number;
+    contributionsPrevMonth: number;
+    ledgerIncomeThisMonth: number;
+    ledgerIncomePrevMonth: number;
+    ledgerExpenseThisMonth: number;
+    ledgerExpensePrevMonth: number;
+  };
+}): DashboardKpi[] {
+  const contributionsDelta = formatPeriodDelta(
+    params.kpiMonth.contributionsThisMonth,
+    params.kpiMonth.contributionsPrevMonth,
+  );
+  const incomeDelta = formatPeriodDelta(
+    params.kpiMonth.ledgerIncomeThisMonth,
+    params.kpiMonth.ledgerIncomePrevMonth,
+  );
+  const expenseDelta = formatPeriodDelta(
+    params.kpiMonth.ledgerExpenseThisMonth,
+    params.kpiMonth.ledgerExpensePrevMonth,
+    true,
+  );
+
+  const mockEvents = dashboardMock.kpis[3];
+  const mockVisitors = dashboardMock.kpis[4];
+
+  return [
+    {
+      label: "Total de Miembros",
+      value: params.memberStats.total.toLocaleString("es-DO"),
+      delta: `${params.memberStats.active.toLocaleString("es-DO")} activos`,
+      deltaDir: "up",
+      feature: true,
+      icon: "users",
+      accent: "var(--d-people)",
+    },
+    {
+      label: "Saldo en fondos",
+      value: fmtRDshort(params.fundsSummary.totalBalance),
+      delta: `${params.fundsSummary.activeCount} fondo${params.fundsSummary.activeCount === 1 ? "" : "s"} activo${params.fundsSummary.activeCount === 1 ? "" : "s"}`,
+      deltaDir: "up",
+      icon: "wallet",
+      accent: "var(--d-funds)",
+    },
+    {
+      label: "Contribuciones (mes)",
+      value: fmtRDshort(params.kpiMonth.contributionsThisMonth),
+      delta: contributionsDelta.delta,
+      deltaDir: contributionsDelta.deltaDir,
+      icon: "wallet",
+      accent: "var(--d-income)",
+      spark: params.contributionMonthlyTotals,
+    },
+    {
+      label: mockEvents.label,
+      value: mockEvents.value,
+      delta: mockEvents.delta,
+      deltaDir: mockEvents.deltaDir,
+      icon: mockEvents.icon,
+      accent: mockEvents.accent,
+      mock: true,
+    },
+    {
+      label: mockVisitors.label,
+      value: mockVisitors.value,
+      delta: mockVisitors.delta,
+      deltaDir: mockVisitors.deltaDir,
+      icon: mockVisitors.icon,
+      accent: mockVisitors.accent,
+      spark: mockVisitors.spark,
+      mock: true,
+    },
+    {
+      label: "Ingresos recibidos (mes)",
+      value: fmtRDshort(params.kpiMonth.ledgerIncomeThisMonth),
+      delta: incomeDelta.delta,
+      deltaDir: incomeDelta.deltaDir,
+      icon: "trendUp",
+      accent: "var(--success)",
+    },
+    {
+      label: "Transacciones (mes)",
+      value: fmtRDshort(params.kpiMonth.ledgerExpenseThisMonth),
+      delta: expenseDelta.delta,
+      deltaDir: expenseDelta.deltaDir,
+      icon: "arrowDn",
+      accent: "var(--warm)",
+    },
+  ];
+}
+
+export function parseDashboardSummaryResponse(
+  data: unknown,
+  verse: { reference: string; text: string } | null,
+): DashboardPayload {
+  const root = asRecord(data);
+  if (!root || root.success === false) {
+    throw new Error(asString(root?.message) || "No se pudo cargar el dashboard.");
+  }
+
+  const memberStatsRaw = asRecord(root.member_stats) ?? {};
+  const fundsRaw = asRecord(root.funds_summary) ?? {};
+  const kpiMonthRaw = asRecord(root.kpi_month) ?? {};
+
+  const memberStats: MembersListStats = {
+    total: asNumber(memberStatsRaw.total),
+    members: asNumber(memberStatsRaw.members),
+    visits: asNumber(memberStatsRaw.visits),
+    active: asNumber(memberStatsRaw.active),
+    inactive: asNumber(memberStatsRaw.inactive),
+  };
+
+  const contributionMonthlyTotals = Array.isArray(root.contribution_monthly_totals)
+    ? root.contribution_monthly_totals.map((v) => Math.round(asNumber(v)))
+    : [];
+
+  const contributionCharts = parsePeriodCharts(root.contribution_chart);
+  const ledgerCharts = parseLedgerPeriodCharts(root.ledger_chart);
+
+  const hero: DashboardHeroData = buildDashboardHero({
+    verse,
+    offeringToday: Math.round(asNumber(root.offering_today)),
+    catechumenCount: asNumber(root.catechumen_count),
+  });
+
+  const kpis = buildDashboardKpisFromSummary({
+    memberStats,
+    fundsSummary: {
+      totalBalance: Math.round(asNumber(fundsRaw.total_balance)),
+      activeCount: asNumber(fundsRaw.active_count),
+    },
+    contributionMonthlyTotals,
+    kpiMonth: {
+      contributionsThisMonth: Math.round(
+        asNumber(kpiMonthRaw.contributions_this_month),
+      ),
+      contributionsPrevMonth: Math.round(
+        asNumber(kpiMonthRaw.contributions_prev_month),
+      ),
+      ledgerIncomeThisMonth: Math.round(
+        asNumber(kpiMonthRaw.ledger_income_this_month),
+      ),
+      ledgerIncomePrevMonth: Math.round(
+        asNumber(kpiMonthRaw.ledger_income_prev_month),
+      ),
+      ledgerExpenseThisMonth: Math.round(
+        asNumber(kpiMonthRaw.ledger_expense_this_month),
+      ),
+      ledgerExpensePrevMonth: Math.round(
+        asNumber(kpiMonthRaw.ledger_expense_prev_month),
+      ),
+    },
+  });
+
+  return {
+    hero,
+    kpis,
+    pendingItems: parsePendingItems(root.pending_authorizations),
+    contributionCharts,
+    ledgerCharts,
+    contributionPeriodTotals: periodTotalsFromCharts(contributionCharts),
+  };
+}
+
+export { formatHeroDateLabel };

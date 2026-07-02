@@ -1,16 +1,57 @@
 import { monthDateBounds, type YearMonth } from "@/lib/finance/month-period";
 import {
   parseExpenseTypesResponse,
+  parseLedgerPageResponse,
   parseLedgerResponse,
   parseOperationalIncomeTypes,
 } from "@/lib/ledger/parse";
 import type {
   ExpenseType,
   LedgerEntry,
+  LedgerStats,
+  LedgerStatusFilter,
   OperationalIncomeInput,
   OperationalIncomeType,
 } from "@/lib/ledger/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
+
+export type FinanceLedgerPageResult = {
+  entries: LedgerEntry[];
+  totalCount: number;
+  periodStats: LedgerStats;
+  pendingAuthorization: number;
+};
+
+export type FetchFinanceLedgerPageParams = {
+  churchId: number;
+  fundId?: string | null;
+  dateFrom?: string | null;
+  dateTo?: string | null;
+  status?: LedgerStatusFilter;
+  page: number;
+  pageSize: number;
+};
+
+export async function fetchFinanceLedgerPage(
+  supabase: SupabaseClient,
+  params: FetchFinanceLedgerPageParams,
+): Promise<FinanceLedgerPageResult> {
+  const status =
+    params.status && params.status !== "all" ? params.status : null;
+
+  const { data, error } = await supabase.rpc("sp_get_finance_ledger", {
+    p_church_id: params.churchId,
+    p_fund_id: params.fundId || null,
+    p_date_from: params.dateFrom || null,
+    p_date_to: params.dateTo || null,
+    p_status: status,
+    p_page: params.page,
+    p_page_size: params.pageSize,
+  });
+
+  if (error) throw error;
+  return parseLedgerPageResponse(data);
+}
 
 export async function fetchFinanceLedger(
   supabase: SupabaseClient,

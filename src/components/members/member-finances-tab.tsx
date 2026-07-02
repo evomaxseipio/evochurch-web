@@ -45,11 +45,25 @@ function typeStyle(collectionType: number) {
   );
 }
 
-export function MemberFinancesTab({ memberId }: { memberId: string }) {
-  const [finances, setFinances] = useState<MemberFinanceData | null>(null);
-  const [loading, setLoading] = useState(true);
+export function MemberFinancesTab({
+  memberId,
+  initialFinances = null,
+}: {
+  memberId: string;
+  initialFinances?: MemberFinanceData | null;
+}) {
+  const [finances, setFinances] = useState<MemberFinanceData | null>(
+    initialFinances,
+  );
+  const [loading, setLoading] = useState(initialFinances == null);
 
   useEffect(() => {
+    if (initialFinances != null) {
+      setFinances(initialFinances);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     async function load() {
@@ -69,7 +83,7 @@ export function MemberFinancesTab({ memberId }: { memberId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [memberId]);
+  }, [memberId, initialFinances]);
 
   if (loading || !finances) {
     return (

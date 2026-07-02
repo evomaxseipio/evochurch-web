@@ -23,31 +23,32 @@ import { useActionToast } from "@/hooks/use-action-toast";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
 import {
   categoryChipClass,
-  computeContributionsStats,
   formatContributionDateShort,
   paymentMethodLabel,
 } from "@/lib/contributions/parse";
 import type {
   Contribution,
   ContributionCategoryFilter,
+  ContributionsStats,
   IncomeType,
 } from "@/lib/contributions/types";
 import type { Fund } from "@/lib/funds/types";
+import {
+  FINANCE_PAGE_SIZE_OPTIONS,
+  yearMonthToParam,
+  type FinancePageSize,
+} from "@/lib/finance/pagination";
 import { fmtRD } from "@/lib/format-currency";
-import { isDateInMonth, type YearMonth } from "@/lib/finance/month-period";
+import type { YearMonth } from "@/lib/finance/month-period";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   useActionState,
-  useEffect,
   useMemo,
   useState,
   startTransition,
 } from "react";
-
-const PAGE_SIZE_OPTIONS = [10, 15, 25, 50] as const;
-type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
 
 const CATEGORY_FILTERS: { key: ContributionCategoryFilter; label: string }[] = [
   { key: "all", label: "Todos" },
@@ -58,27 +59,71 @@ const CATEGORY_FILTERS: { key: ContributionCategoryFilter; label: string }[] = [
 
 const deleteInitial: ContributionActionResult | null = null;
 
+function buildContributionsQuery(
+  base: URLSearchParams,
+  updates: {
+    page?: number;
+    pageSize?: number;
+    month?: YearMonth | null;
+    category?: ContributionCategoryFilter;
+  },
+): string {
+  const params = new URLSearchParams(base.toString());
+
+  if (updates.page !== undefined) {
+    if (updates.page <= 1) params.delete("page");
+    else params.set("page", String(updates.page));
+  }
+
+  if (updates.pageSize !== undefined) {
+    if (updates.pageSize === 25) params.delete("size");
+    else params.set("size", String(updates.pageSize));
+  }
+
+  if (updates.month !== undefined) {
+    if (updates.month) params.set("month", yearMonthToParam(updates.month));
+    else params.delete("month");
+  }
+
+  if (updates.category !== undefined) {
+    if (updates.category === "all") params.delete("category");
+    else params.set("category", updates.category);
+  }
+
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+}
+
 export function ContributionsListView({
   entries,
+  totalCount,
+  periodStats,
   funds,
   incomeTypes,
   fundFilterId,
   fundFilterName,
+  page,
+  pageSize,
+  month,
+  category,
 }: {
   entries: Contribution[];
+  totalCount: number;
+  periodStats: ContributionsStats;
   funds: Fund[];
   incomeTypes: IncomeType[];
   fundFilterId?: string | null;
   fundFilterName?: string | null;
+  page: number;
+  pageSize: FinancePageSize;
+  month: YearMonth | null;
+  category: ContributionCategoryFilter;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
-  const [period, setPeriod] = useState<YearMonth | null>(null);
   const [query, setQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] =
-    useState<ContributionCategoryFilter>("all");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState<PageSize>(10);
   const [formState, setFormState] = useState<{
     mode: "new" | "edit";
     entry: Contribution | null;
@@ -98,42 +143,29 @@ export function ContributionsListView({
     },
   });
 
-  const scopedEntries = useMemo(() => {
-    if (!period) return entries;
-    return entries.filter((e) => isDateInMonth(e.paymentDate, period));
-  }, [entries, period]);
+  function navigate(updates: Parameters<typeof buildContributionsQuery>[1]) {
+    const href = `${pathname}${buildContributionsQuery(searchParams, updates)}`;
+    router.push(href);
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return scopedEntries.filter((e) => {
-      if (categoryFilter !== "all" && e.category !== categoryFilter) {
-        return false;
-      }
-      if (!q) return true;
-      return [e.contributorLabel, e.fundName, e.typeName, e.paymentMethod]
+    if (!q) return entries;
+    return entries.filter((e) =>
+      [e.contributorLabel, e.fundName, e.typeName, e.paymentMethod]
         .join(" ")
         .toLowerCase()
-        .includes(q);
-    });
-  }, [scopedEntries, query, categoryFilter]);
+        .includes(q),
+    );
+  }, [entries, query]);
 
-  const periodStats = useMemo(
-    () => computeContributionsStats(scopedEntries),
-    [scopedEntries],
-  );
-
-  useEffect(() => {
-    setPage(1);
-  }, [query, categoryFilter, period, pageSize]);
-
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
-  const pageEnd = Math.min(pageStart + pageSize, total);
-  const pageRows = filtered.slice(pageStart, pageEnd);
+  const pageEnd = Math.min(pageStart + entries.length, totalCount);
+  const pageRows = filtered;
 
-  const exportBase = `Contribuciones_${monthPeriodExportLabel(period)}`;
+  const exportBase = `Contribuciones_${monthPeriodExportLabel(month)}`;
 
   function openNew() {
     setFormState({ mode: "new", entry: null });
@@ -204,7 +236,7 @@ export function ContributionsListView({
   );
 
   const emptyMessage =
-    entries.length === 0
+    totalCount === 0
       ? "No hay ingresos registrados."
       : "No hay ingresos que coincidan con los filtros.";
 
@@ -248,10 +280,15 @@ export function ContributionsListView({
         queryPlaceholder="Buscar por contribuyente, fondo, método…"
         maxSearchWidth={9999}
         filters={CATEGORY_FILTERS}
-        activeFilter={categoryFilter}
-        onFilterChange={setCategoryFilter}
+        activeFilter={category}
+        onFilterChange={(next) =>
+          navigate({ category: next, page: 1 })
+        }
         middle={
-          <MonthPeriodFilter value={period} onChange={setPeriod} />
+          <MonthPeriodFilter
+            value={month}
+            onChange={(next) => navigate({ month: next, page: 1 })}
+          />
         }
         trailing={
           isDesktop ? (
@@ -283,7 +320,7 @@ export function ContributionsListView({
           {pageRows.length === 0 ? (
             <div className="card" style={{ padding: 40, textAlign: "center" }}>
               <div className="muted">{emptyMessage}</div>
-              {entries.length === 0 ? (
+              {totalCount === 0 ? (
                 <button
                   type="button"
                   className="btn primary"
@@ -307,18 +344,20 @@ export function ContributionsListView({
         </div>
       )}
 
-      {total > 0 ? (
+      {totalCount > 0 ? (
         <PaginationBar
           page={safePage}
           totalPages={totalPages}
-          total={total}
+          total={totalCount}
           pageStart={pageStart}
           pageEnd={pageEnd}
           pageSize={pageSize}
-          onPage={setPage}
-          onPageSize={(s) => setPageSize(s as PageSize)}
+          onPage={(p) => navigate({ page: p })}
+          onPageSize={(s) =>
+            navigate({ pageSize: s as FinancePageSize, page: 1 })
+          }
           noun="ingresos"
-          sizeOptions={PAGE_SIZE_OPTIONS}
+          sizeOptions={FINANCE_PAGE_SIZE_OPTIONS}
         />
       ) : null}
 

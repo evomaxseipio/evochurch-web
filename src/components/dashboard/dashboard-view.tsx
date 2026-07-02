@@ -8,61 +8,40 @@ import { IncomeExpenseBarChart } from "@/components/dashboard/income-expense-bar
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { LastEventCard } from "@/components/dashboard/last-event-card";
 import { PendingTransactionsList } from "@/components/dashboard/pending-transactions-list";
-import {
-  aggregateContributionsChart,
-  aggregateIncomeExpenseChart,
-  formatPeriodDelta,
-} from "@/lib/dashboard/aggregate";
-import { buildPeriodBuckets } from "@/lib/dashboard/period";
+import { formatPeriodDelta } from "@/lib/dashboard/aggregate";
 import type {
+  DashboardChartData,
   DashboardChartPeriod,
   DashboardHeroData,
   DashboardKpi,
+  DashboardLedgerChartData,
   PendingAuthorizationItem,
 } from "@/lib/dashboard/types";
-import type { Contribution } from "@/lib/contributions/types";
 import { fmtRD } from "@/lib/format-currency";
 import { dashboardMock } from "@/lib/mock/dashboard-data";
-import type { LedgerEntry } from "@/lib/ledger/types";
 import { toast } from "@/lib/toast";
 import { useMemo, useState } from "react";
-
-function sumChartPoints(values: { value: number }[]): number {
-  return values.reduce((sum, point) => sum + point.value, 0);
-}
-
-function contributionsPeriodTotal(
-  contributions: Contribution[],
-  period: DashboardChartPeriod,
-): number {
-  const buckets = buildPeriodBuckets(period);
-  let total = 0;
-  for (const bucket of buckets) {
-    for (const entry of contributions) {
-      const date = entry.paymentDate.slice(0, 10);
-      if (date >= bucket.from && date <= bucket.to) {
-        total += entry.amount;
-      }
-    }
-  }
-  return total;
-}
 
 export function DashboardView({
   pastorName,
   churchName,
   hero,
   kpis,
-  contributions,
-  ledgerEntries,
+  contributionCharts,
+  ledgerCharts,
+  contributionPeriodTotals,
   pendingItems,
 }: {
   pastorName?: string;
   churchName?: string | null;
   hero: DashboardHeroData;
   kpis: DashboardKpi[];
-  contributions: Contribution[];
-  ledgerEntries: LedgerEntry[];
+  contributionCharts: DashboardChartData;
+  ledgerCharts: DashboardLedgerChartData;
+  contributionPeriodTotals: Record<
+    DashboardChartPeriod,
+    { current: number; previous: number }
+  >;
   pendingItems: PendingAuthorizationItem[];
 }) {
   const pastor = pastorName ?? "Pastor";
@@ -72,40 +51,25 @@ export function DashboardView({
     useState<DashboardChartPeriod>("month");
 
   const ledgerChart = useMemo(
-    () => aggregateIncomeExpenseChart(ledgerEntries, ledgerPeriod),
-    [ledgerEntries, ledgerPeriod],
+    () => ledgerCharts[ledgerPeriod] ?? [],
+    [ledgerCharts, ledgerPeriod],
   );
 
   const contributionsChart = useMemo(
-    () => aggregateContributionsChart(contributions, contributionsPeriod),
-    [contributions, contributionsPeriod],
+    () => contributionCharts[contributionsPeriod] ?? [],
+    [contributionCharts, contributionsPeriod],
   );
 
   const contributionsTotal = useMemo(
-    () => sumChartPoints(contributionsChart),
-    [contributionsChart],
+    () => contributionPeriodTotals[contributionsPeriod]?.current ?? 0,
+    [contributionPeriodTotals, contributionsPeriod],
   );
 
   const contributionsDelta = useMemo(() => {
-    const current = contributionsPeriodTotal(contributions, contributionsPeriod);
-    const buckets = buildPeriodBuckets(contributionsPeriod);
-    const spanMs =
-      new Date(`${buckets[buckets.length - 1].to}T00:00:00`).getTime() -
-      new Date(`${buckets[0].from}T00:00:00`).getTime();
-    const prevEnd = new Date(`${buckets[0].from}T00:00:00`);
-    prevEnd.setDate(prevEnd.getDate() - 1);
-    const prevStart = new Date(prevEnd.getTime() - spanMs);
-    let previous = 0;
-    for (const entry of contributions) {
-      const date = entry.paymentDate.slice(0, 10);
-      const from = prevStart.toISOString().slice(0, 10);
-      const to = prevEnd.toISOString().slice(0, 10);
-      if (date >= from && date <= to) {
-        previous += entry.amount;
-      }
-    }
-    return formatPeriodDelta(current, previous);
-  }, [contributions, contributionsPeriod]);
+    const totals = contributionPeriodTotals[contributionsPeriod];
+    if (!totals) return {};
+    return formatPeriodDelta(totals.current, totals.previous);
+  }, [contributionPeriodTotals, contributionsPeriod]);
 
   const featureKpi = kpis[0];
   const restKpis = kpis.slice(1);

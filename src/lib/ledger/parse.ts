@@ -104,6 +104,15 @@ function parseLedgerRow(row: Record<string, unknown>): LedgerEntry | null {
   };
 }
 
+function parseLedgerList(list: unknown): LedgerEntry[] {
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((item) => asRecord(item))
+    .filter((item): item is Record<string, unknown> => item !== null)
+    .map(parseLedgerRow)
+    .filter((e): e is LedgerEntry => e !== null);
+}
+
 export function parseLedgerResponse(data: unknown): {
   entries: LedgerEntry[];
   pendingAuthorization: number;
@@ -117,17 +126,49 @@ export function parseLedgerResponse(data: unknown): {
     );
   }
 
-  const list = root.ledger_list;
-  const entries = Array.isArray(list)
-    ? list
-        .map((item) => asRecord(item))
-        .filter((item): item is Record<string, unknown> => item !== null)
-        .map(parseLedgerRow)
-        .filter((e): e is LedgerEntry => e !== null)
-    : [];
-
   return {
-    entries,
+    entries: parseLedgerList(root.ledger_list),
+    pendingAuthorization: asNumber(root.pending_authorization_count),
+  };
+}
+
+export function parseLedgerPageResponse(data: unknown): {
+  entries: LedgerEntry[];
+  totalCount: number;
+  periodStats: LedgerStats;
+  pendingAuthorization: number;
+} {
+  const root = asRecord(data);
+  if (!root) {
+    return {
+      entries: [],
+      totalCount: 0,
+      periodStats: {
+        movements: 0,
+        incomeAmount: 0,
+        expenseAmount: 0,
+        pendingAuthorization: 0,
+      },
+      pendingAuthorization: 0,
+    };
+  }
+
+  if (root.success === false) {
+    throw new Error(
+      asString(root.message) || "No se pudo cargar el libro de transacciones.",
+    );
+  }
+
+  const statsRaw = asRecord(root.period_stats);
+  return {
+    entries: parseLedgerList(root.ledger_list),
+    totalCount: asNumber(root.total_count),
+    periodStats: {
+      movements: asNumber(statsRaw?.movements),
+      incomeAmount: asNumber(statsRaw?.income_amount),
+      expenseAmount: asNumber(statsRaw?.expense_amount),
+      pendingAuthorization: asNumber(statsRaw?.pending_authorization),
+    },
     pendingAuthorization: asNumber(root.pending_authorization_count),
   };
 }

@@ -10,7 +10,9 @@ import { generateTempPassword } from "@/lib/admin-users/temp-password";
 import type { AdminUserInput, AdminUserRow } from "@/lib/admin-users/types";
 import { requireAdminSession } from "@/lib/auth/require-admin-session";
 import {
+  fetchChurchAuthUserByProfile,
   fetchChurchAuthUsers,
+  findProfileByEmail,
   getAuthUserTempPassword,
   registerChurchAuthUser,
   resetChurchAuthUserPassword,
@@ -20,7 +22,6 @@ import {
 import {
   fetchMemberById,
   fetchMembership,
-  fetchMembersPage,
   saveMembership,
   updateMember,
 } from "@/lib/services/members";
@@ -89,26 +90,7 @@ async function resolveProfileId(
   input: AdminUserInput,
 ): Promise<string | null> {
   if (input.profileId) return input.profileId;
-
-  const { members } = await fetchMembersPage(supabase, {
-    churchId,
-    page: 1,
-    pageSize: null,
-  });
-
-  const email = input.email.toLowerCase();
-  const byEmail = members.find(
-    (m) => m.contact.email?.trim().toLowerCase() === email,
-  );
-  if (byEmail) return byEmail.memberId;
-
-  const full = `${input.firstName} ${input.lastName}`.trim().toLowerCase();
-  const byName = members.find(
-    (m) =>
-      `${m.firstName} ${m.lastName}`.trim().toLowerCase() === full &&
-      m.contact.email?.trim().toLowerCase() === email,
-  );
-  return byName?.memberId ?? null;
+  return findProfileByEmail(supabase, churchId, input.email);
 }
 
 async function assertEligibleForSystemAccess(
@@ -148,8 +130,11 @@ export async function getMemberSystemAccessContextAction(
       return { ok: false, error: eligibilityError };
     }
 
-    const users = await fetchChurchAuthUsers(supabase, session.churchId);
-    const existing = users.find((u) => u.profileId === profileId) ?? null;
+    const existing = await fetchChurchAuthUserByProfile(
+      supabase,
+      session.churchId,
+      profileId,
+    );
     let tempPassword: string | null = null;
 
     if (existing?.isTempPassword) {
@@ -192,8 +177,11 @@ export async function resetMemberAccessPasswordAction(
       return { ok: false, error: eligibilityError };
     }
 
-    const users = await fetchChurchAuthUsers(supabase, session.churchId);
-    const existing = users.find((u) => u.profileId === profileId);
+    const existing = await fetchChurchAuthUserByProfile(
+      supabase,
+      session.churchId,
+      profileId,
+    );
     if (!existing) {
       return {
         ok: false,

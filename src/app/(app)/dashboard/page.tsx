@@ -43,8 +43,9 @@ export default async function DashboardPage() {
       churchName={churchName}
       hero={payload.hero}
       kpis={payload.kpis}
-      contributions={payload.contributions}
-      ledgerEntries={payload.ledgerEntries}
+      contributionCharts={payload.contributionCharts}
+      ledgerCharts={payload.ledgerCharts}
+      contributionPeriodTotals={payload.contributionPeriodTotals}
       pendingItems={payload.pendingItems}
     />
   );
