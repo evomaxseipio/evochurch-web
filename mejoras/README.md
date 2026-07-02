@@ -26,7 +26,16 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 
 **Sprint 3:** cache + UX — rama `perf/sprint-3-cache-ux` (**cerrado**).
 
-**Sprint 4 (siguiente):** observabilidad — ver `PERFORMANCE-ROADMAP.md` § Sprint 4.
+**Sprint 4:** observabilidad — rama `perf/sprint-4-observability` (**en progreso**). Ver `PERFORMANCE-ROADMAP.md` § Sprint 4.
+
+### Cierre Sprint 4 (Jul 2026)
+
+| Entregable | Estado |
+|------------|--------|
+| P3-OBS-1 `@next/bundle-analyzer` + `npm run analyze` | ✅ |
+| P3-OBS-2 timing RPC en dev (`withRpcTiming`) | ✅ |
+| P3-OBS-3 Web Vitals (`web-vitals`, log dev) | ✅ |
+| P3-OBS-4 `EXPLAIN ANALYZE` staging (`scripts/explain-critical-rpcs.sql`) | ✅ script |
 
 ### Cierre Sprint 3 (Jul 2026)
 
