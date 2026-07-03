@@ -27,7 +27,11 @@ export async function login(
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: "Credenciales inválidas. Intenta de nuevo." };
+    const params = new URLSearchParams();
+    params.set("error", "credentials");
+    params.set("email", email);
+    if (next.startsWith("/")) params.set("next", next);
+    redirect(`/login?${params.toString()}`);
   }
 
   const { data: sessionContext, error: contextError } = await supabase.rpc(
@@ -37,10 +41,11 @@ export async function login(
 
   if (contextError || !session) {
     await supabase.auth.signOut();
-    return {
-      error:
-        "Tu cuenta no está vinculada a una iglesia. Contacta al administrador.",
-    };
+    const params = new URLSearchParams();
+    params.set("error", "no_church");
+    params.set("email", email);
+    if (next.startsWith("/")) params.set("next", next);
+    redirect(`/login?${params.toString()}`);
   }
 
   await syncAuthAppMetadata(session, supabase);

@@ -4,6 +4,7 @@ import {
   deleteMinistryAction,
   saveMinistryAction,
 } from "@/app/(app)/ministerios/actions";
+import type { PermissionKey } from "@/lib/auth/permission-keys";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { MinistryCard } from "@/components/ministries/ministry-card";
 import { MinistryFormDrawer } from "@/components/ministries/ministry-form-drawer";
@@ -68,11 +69,20 @@ export function MinistriesListView({
   ministries,
   stats,
   members,
+  permissions,
+  profileId,
 }: {
   ministries: Ministry[];
   stats: MinistryStats;
   members: Member[];
+  permissions: PermissionKey[];
+  profileId: string;
 }) {
+  const canCreate = permissions.includes("ministerios:write");
+  const canEditMinistry = (ministry: Ministry) =>
+    permissions.includes("ministerios:write") ||
+    (permissions.includes("ministerios:write_own") &&
+      (ministry.leaderProfileIds ?? []).includes(profileId));
   const router = useRouter();
   const deleteInitial = null;
   const [deleteState, deleteFormAction, deletePending] = useActionState(
@@ -131,14 +141,18 @@ export function MinistriesListView({
     startTransition(() => deleteFormAction(fd));
   };
 
-  const menuHandlers = (ministry: Ministry) => ({
-    onEdit: () => setFormState({ mode: "edit", ministry }),
-    onViewMembers: () =>
-      toast.info("Miembros", `${ministry.name} · ${ministry.memberProfileIds.length} miembros`),
-    onAssignLeader: () => setFormState({ mode: "edit", ministry }),
-    onViewEvents: () => router.push("/eventos"),
-    onDelete: () => setDeleteTarget(ministry),
-  });
+  const menuHandlers = (ministry: Ministry) => {
+    const editable = canEditMinistry(ministry);
+    const noop = () => {};
+    return {
+      onEdit: editable ? () => setFormState({ mode: "edit", ministry }) : noop,
+      onViewMembers: () =>
+        toast.info("Miembros", `${ministry.name} · ${ministry.memberProfileIds.length} miembros`),
+      onAssignLeader: editable ? () => setFormState({ mode: "edit", ministry }) : noop,
+      onViewEvents: () => router.push("/eventos"),
+      onDelete: editable ? () => setDeleteTarget(ministry) : noop,
+    };
+  };
 
   return (
     <div>
@@ -223,6 +237,7 @@ export function MinistriesListView({
                 </button>
               ))}
             </div>
+            {canCreate ? (
             <button
               type="button"
               className="btn primary"
@@ -230,6 +245,7 @@ export function MinistriesListView({
             >
               <Icons.plus size={14} /> Nuevo ministerio
             </button>
+            ) : null}
           </>
         }
       />

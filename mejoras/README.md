@@ -8,6 +8,8 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 |-----------|-----------|
 | [PERFORMANCE-ROADMAP.md](./PERFORMANCE-ROADMAP.md) | Roadmap completo de performance (4 sprints) |
 | [AGENT-PROMPT-PERFORMANCE.md](./AGENT-PROMPT-PERFORMANCE.md) | Prompt base + reglas para el agente |
+| [AGENT-PROMPT-RBAC-SPRINT.md](./AGENT-PROMPT-RBAC-SPRINT.md) | **Sprint RBAC** — roles, rutas, acciones, permisos por iglesia |
+| [QA-PROMPT-RBAC-SPRINT.md](./QA-PROMPT-RBAC-SPRINT.md) | QA Sprint RBAC — 100% PASS obligatorio; `node scripts/qa-rbac.mjs` |
 | [QA-PROMPT-SPRINT-1.md](./QA-PROMPT-SPRINT-1.md) | QA del Sprint 1 (auth deduplicada) |
 | [AGENT-PROMPT-SPRINT-2.md](./AGENT-PROMPT-SPRINT-2.md) | Implementación Sprint 2 (datos financieros) |
 | [QA-PROMPT-SPRINT-2.md](./QA-PROMPT-SPRINT-2.md) | QA del Sprint 2 (datos financieros) |
@@ -15,10 +17,13 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 ## Cómo usar
 
 1. Abre el chat en **Agent mode**.
-2. Adjunta o referencia `@mejoras/AGENT-PROMPT-PERFORMANCE.md` y el sprint concreto de `@mejoras/PERFORMANCE-ROADMAP.md`.
-3. Indica el sprint o tarea: *"Ejecuta Sprint 1"* o *"Ejecuta P0-1"*.
+2. Implementación: `@mejoras/AGENT-PROMPT-RBAC-SPRINT.md`
+3. Tras implementar, QA: `@mejoras/QA-PROMPT-RBAC-SPRINT.md` → `npm run qa:rbac:full`
+4. **No cerrar sprint** hasta `qa:rbac:full` exit 0 + ROLE-02 manual
 
 ## Prioridad actual
+
+**Sprint RBAC:** configuración basada en roles — rama `feat/rbac-sprint`. Ver [AGENT-PROMPT-RBAC-SPRINT.md](./AGENT-PROMPT-RBAC-SPRINT.md).
 
 **Sprint 1:** deduplicación auth — rama `perf/sprint-1-auth-dedup` (mergeado o listo para merge).
 

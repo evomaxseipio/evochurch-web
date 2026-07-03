@@ -1,13 +1,12 @@
 import { ExpenseTypesListView } from "@/components/catalog/expense-types-list-view";
 import { computeCatalogStats } from "@/lib/catalog/parse";
-import { getAppSession } from "@/lib/auth/app-session";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchAllExpenseTypes } from "@/lib/services/expense-types-catalog";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
 export default async function ExpensesSettingsPage() {
-  const session = await getAppSession();
-  if (!session) redirect("/login");
+  const session = await requirePageAccess("/settings/expenses");
 
   const supabase = await createClient();
   let error: string | null = null;

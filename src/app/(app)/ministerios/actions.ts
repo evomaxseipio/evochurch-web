@@ -1,6 +1,10 @@
 "use server";
 
 import { getActionSession } from "@/lib/auth/app-session";
+import {
+  hasPermission,
+  requirePermission,
+} from "@/lib/auth/permissions";
 import { revalidateMinistriesCatalog } from "@/lib/cache/catalog-tags";
 import type { MinistryColor, MinistryFormInput } from "@/lib/ministries/types";
 import {
@@ -17,7 +21,29 @@ const MINISTRY_COLORS = new Set<MinistryColor>(["violet", "lila", "green"]);
 
 async function sessionContext() {
   const { supabase, session } = await getActionSession();
-  return { supabase, churchId: session.churchId };
+  return { supabase, churchId: session.churchId, session };
+}
+
+async function assertMinistryAccess(
+  ministryId: string | null,
+): Promise<Awaited<ReturnType<typeof sessionContext>>> {
+  const ctx = await sessionContext();
+  const { supabase, session } = ctx;
+
+  if (!ministryId) {
+    requirePermission(session, "ministerios:write");
+    return ctx;
+  }
+
+  if (hasPermission(session, "ministerios:write")) return ctx;
+
+  const { data, error } = await supabase.rpc("fn_can_edit_ministry", {
+    p_ministry_id: ministryId,
+  });
+  if (error || data !== true) {
+    throw new Error("No tienes permiso para modificar este ministerio.");
+  }
+  return ctx;
 }
 
 function parseProfileIds(raw: string): string[] {
@@ -80,7 +106,7 @@ export async function saveMinistryAction(
     const validationError = validateMinistryInput(input);
     if (validationError) return { ok: false, error: validationError };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await assertMinistryAccess(input.id);
     await saveMinistry(supabase, churchId, input);
     revalidateMinistriesCatalog(churchId);
     revalidatePath("/ministerios");
@@ -102,7 +128,7 @@ export async function deleteMinistryAction(
     const id = String(formData.get("id") ?? "").trim();
     if (!id) return { ok: false, error: "Registro no válido." };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await assertMinistryAccess(id);
     await deleteMinistry(supabase, churchId, id);
     revalidateMinistriesCatalog(churchId);
     revalidatePath("/ministerios");

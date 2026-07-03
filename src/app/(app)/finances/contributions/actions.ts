@@ -1,6 +1,6 @@
 "use server";
 
-import { getActionSession } from "@/lib/auth/app-session";
+import { getActionSessionWith } from "@/lib/auth/permissions";
 import type {
   ContributionInput,
   DonorKind,
@@ -18,13 +18,22 @@ export type ContributionActionResult =
   | { ok: true }
   | { ok: false; error: string };
 
-async function sessionContext() {
-  const { supabase, session } = await getActionSession();
+async function writeSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "finances:contributions:write",
+  );
   return {
     supabase,
     churchId: session.churchId,
     userId: session.authUserId,
   };
+}
+
+async function deleteSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "finances:contributions:delete",
+  );
+  return { supabase, churchId: session.churchId };
 }
 
 function parseContributionInput(formData: FormData): ContributionInput {
@@ -80,7 +89,7 @@ export async function saveContributionAction(
     const validationError = validateContributionInput(input);
     if (validationError) return { ok: false, error: validationError };
 
-    const { supabase, churchId, userId } = await sessionContext();
+    const { supabase, churchId, userId } = await writeSessionContext();
 
     if (input.incomeId) {
       await updateContribution(supabase, churchId, userId, input);
@@ -110,7 +119,7 @@ export async function deleteContributionAction(
     const incomeId = String(formData.get("incomeId") ?? "").trim();
     if (!incomeId) return { ok: false, error: "Registro no válido." };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await deleteSessionContext();
     await deleteContribution(supabase, churchId, incomeId);
     revalidateFundsCatalog(churchId);
     revalidatePath("/finances/contributions");
@@ -129,7 +138,7 @@ export async function searchMembersForContributionAction(
   query: string,
 ): Promise<{ id: string; name: string }[]> {
   try {
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await writeSessionContext();
     const result = await fetchMembersPage(supabase, {
       churchId,
       page: 1,

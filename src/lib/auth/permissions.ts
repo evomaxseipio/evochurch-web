@@ -1,0 +1,48 @@
+import type { AppSession } from "@/lib/auth/app-session";
+import { getActionSession, requireAppSession } from "@/lib/auth/app-session";
+import type { PermissionKey } from "@/lib/auth/permission-keys";
+
+export function hasPermission(session: AppSession, key: PermissionKey): boolean {
+  return session.permissions.includes(key);
+}
+
+export function hasAnyPermission(
+  session: AppSession,
+  keys: PermissionKey[],
+): boolean {
+  return keys.some((k) => hasPermission(session, k));
+}
+
+export function requirePermission(session: AppSession, key: PermissionKey): void {
+  if (!hasPermission(session, key)) {
+    throw new Error(`Acceso denegado: se requiere permiso ${key}.`);
+  }
+}
+
+export async function getActionSessionWith(permission: PermissionKey) {
+  const { supabase, session } = await getActionSession();
+  requirePermission(session, permission);
+  return { supabase, session };
+}
+
+export async function requirePermissionSession(key: PermissionKey) {
+  const session = await requireAppSession();
+  requirePermission(session, key);
+  return session;
+}
+
+/** Usuario sin rol operativo — solo perfil y settings. */
+export function isProfileOnlySession(session: AppSession): boolean {
+  return (
+    !hasPermission(session, "dashboard:read") &&
+    hasPermission(session, "profile:read")
+  );
+}
+
+export function canAuthorizeFinances(session: AppSession): boolean {
+  return hasPermission(session, "finances:transactions:authorize");
+}
+
+export function canManageAdminUsers(session: AppSession): boolean {
+  return hasPermission(session, "admin_users:manage");
+}

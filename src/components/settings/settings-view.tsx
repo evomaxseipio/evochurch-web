@@ -11,7 +11,6 @@ type SettingsTab =
   | "perfil"
   | "apariencia"
   | "idioma"
-  | "roles"
   | "notif"
   | "acceso";
 
@@ -33,7 +32,6 @@ const NAV_ITEMS: {
   { id: "perfil", label: "Perfil", icon: "users" },
   { id: "apariencia", label: "Apariencia", icon: "moon" },
   { id: "idioma", label: "Idioma", icon: "globe" },
-  { id: "roles", label: "Roles y permisos", icon: "settings" },
   { id: "notif", label: "Notificaciones", icon: "bell" },
   { id: "acceso", label: "Acceso y catálogos", icon: "grid" },
 ];
@@ -47,15 +45,6 @@ const LANGUAGE_OPTIONS: {
   { code: "es", label: "Español (Internacional)", flag: "🌎" },
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "ht", label: "Kreyòl Ayisyen", flag: "🇭🇹" },
-];
-
-const SYSTEM_ROLES = [
-  { name: "Administrador", members: 2, permissions: "Acceso total", color: "var(--primary)" },
-  { name: "Pastor", members: 3, permissions: "Miembros, Eventos, Comunicación", color: "var(--accent-600)" },
-  { name: "Tesorero", members: 1, permissions: "Finanzas, Reportes", color: "var(--success)" },
-  { name: "Secretario", members: 4, permissions: "Miembros, Eventos", color: "var(--info)" },
-  { name: "Líder", members: 8, permissions: "Miembros (lectura), Eventos", color: "#A855F7" },
-  { name: "Miembro", members: 1230, permissions: "Solo lectura", color: "var(--ink-3)" },
 ];
 
 const NOTIFICATION_ITEMS = [
@@ -267,51 +256,19 @@ export function SettingsView({
         <div className="span-9">
           {tab === "perfil" ? (
             <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-              <div
-                style={{
-                  padding: 32,
-                  background:
-                    "linear-gradient(135deg, var(--primary), var(--primary-500))",
-                  color: "#fff",
-                  borderRadius: "var(--radius-lg) var(--radius-lg) 0 0",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="settings-profile-hero">
                 <svg
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    right: 0,
-                    width: 240,
-                    height: 200,
-                    opacity: 0.18,
-                  }}
+                  className="settings-profile-hero-glow"
                   viewBox="0 0 200 200"
                   aria-hidden
                 >
-                  <circle cx="160" cy="40" r="80" fill="var(--glow)" />
+                  <circle cx="160" cy="40" r="80" fill="#fff" />
                 </svg>
                 <div
                   className="row"
                   style={{ gap: 20, position: "relative", alignItems: "center" }}
                 >
-                  <div
-                    style={{
-                      width: 96,
-                      height: 96,
-                      borderRadius: 24,
-                      background:
-                        "linear-gradient(135deg, var(--lila), var(--accent))",
-                      color: "#fff",
-                      display: "grid",
-                      placeItems: "center",
-                      fontFamily: "var(--font-display)",
-                      fontSize: 36,
-                      fontWeight: 600,
-                      boxShadow: "0 8px 24px -8px rgba(0,0,0,0.4)",
-                    }}
-                  >
+                  <div className="settings-profile-hero-avatar">
                     {initials(profile.fullName)}
                   </div>
                   <div>
@@ -327,32 +284,14 @@ export function SettingsView({
                         </>
                       ) : null}
                     </div>
-                    <div style={{ opacity: 0.85, marginTop: 4 }}>
+                    <div className="settings-profile-hero-sub">
                       {profile.jobTitle || roleLabel}
                       {churchName ? ` · ${churchName}` : ""}
                     </div>
                     <div className="row" style={{ gap: 8, marginTop: 12 }}>
-                      <span
-                        className="chip"
-                        style={{
-                          background: "rgba(255,255,255,0.2)",
-                          color: "#fff",
-                          border: 0,
-                        }}
-                      >
-                        {roleLabel}
-                      </span>
+                      <span className="chip">{roleLabel}</span>
                       {isVerified ? (
-                        <span
-                          className="chip"
-                          style={{
-                            background: "rgba(255,255,255,0.2)",
-                            color: "#fff",
-                            border: 0,
-                          }}
-                        >
-                          Verificado
-                        </span>
+                        <span className="chip">Verificado</span>
                       ) : null}
                     </div>
                   </div>
@@ -456,17 +395,11 @@ export function SettingsView({
                         value: "light" as const,
                         label: "Claro",
                         icon: "sun" as const,
-                        bg: "linear-gradient(135deg, #FAFAF7, #FFFFFF)",
-                        border: "var(--hairline)",
-                        darkText: true,
                       },
                       {
                         value: "dark" as const,
                         label: "Oscuro",
                         icon: "moon" as const,
-                        bg: "linear-gradient(135deg, #07101F, #0E1B33)",
-                        border: "rgba(255,255,255,0.1)",
-                        darkText: false,
                       },
                     ] as const
                   ).map((t) => {
@@ -476,90 +409,26 @@ export function SettingsView({
                       <button
                         key={t.value}
                         type="button"
-                        className="span-6"
+                        className={`span-6 theme-picker-card theme-picker-card--${t.value}${selected ? " is-selected" : ""}`}
                         onClick={() => selectTheme(t.value)}
-                        style={{
-                          padding: 18,
-                          borderRadius: 16,
-                          cursor: "pointer",
-                          border: `2px solid ${selected ? "var(--primary)" : "transparent"}`,
-                          background: t.bg,
-                          color: t.darkText ? "var(--ink)" : "#fff",
-                          textAlign: "left",
-                        }}
                       >
                         <div className="row between">
                           <div className="row" style={{ gap: 10 }}>
                             <Icon width={20} />
-                            <span style={{ fontWeight: 600 }}>{t.label}</span>
+                            <span className="theme-picker-label">{t.label}</span>
                           </div>
                           {selected ? (
-                            <span
-                              style={{
-                                width: 22,
-                                height: 22,
-                                borderRadius: 999,
-                                background: "var(--primary)",
-                                color: "#fff",
-                                display: "grid",
-                                placeItems: "center",
-                              }}
-                            >
+                            <span className="theme-picker-check">
                               <Icons.check width={14} />
                             </span>
                           ) : null}
                         </div>
-                        <div
-                          style={{
-                            marginTop: 12,
-                            height: 60,
-                            borderRadius: 8,
-                            border: `1px solid ${t.border}`,
-                            padding: 8,
-                            display: "flex",
-                            gap: 6,
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: 24,
-                              background: "rgba(127,127,127,0.2)",
-                              borderRadius: 4,
-                            }}
-                          />
-                          <div
-                            style={{
-                              flex: 1,
-                              display: "flex",
-                              flexDirection: "column",
-                              gap: 4,
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: 6,
-                                background: "rgba(127,127,127,0.3)",
-                                borderRadius: 3,
-                                width: "70%",
-                              }}
-                            />
-                            <div
-                              style={{
-                                height: 6,
-                                background: "rgba(127,127,127,0.2)",
-                                borderRadius: 3,
-                                width: "50%",
-                              }}
-                            />
-                            <div
-                              style={{
-                                marginTop: "auto",
-                                height: 8,
-                                background: "var(--primary)",
-                                borderRadius: 3,
-                                width: 40,
-                              }}
-                            />
+                        <div className="theme-picker-preview">
+                          <div className="theme-picker-preview-thumb" />
+                          <div className="theme-picker-preview-body">
+                            <div className="theme-picker-preview-line long" />
+                            <div className="theme-picker-preview-line short" />
+                            <div className="theme-picker-preview-accent" />
                           </div>
                         </div>
                       </button>
@@ -610,68 +479,6 @@ export function SettingsView({
                     </button>
                   );
                 })}
-              </div>
-            </div>
-          ) : null}
-
-          {tab === "roles" ? (
-            <div className="card">
-              <div className="eyebrow">Permisos</div>
-              <div
-                className="display"
-                style={{ fontSize: 22, marginTop: 4, marginBottom: 18 }}
-              >
-                Roles del sistema
-              </div>
-              <div className="table-wrap">
-                <table className="table" style={{ marginTop: 8 }}>
-                  <thead>
-                    <tr>
-                      <th>Rol</th>
-                      <th>Miembros</th>
-                      <th>Permisos clave</th>
-                      <th className="col-actions" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {SYSTEM_ROLES.map((r) => (
-                      <tr key={r.name}>
-                        <td>
-                          <div className="row" style={{ gap: 10 }}>
-                            <span
-                              style={{
-                                width: 8,
-                                height: 24,
-                                background: r.color,
-                                borderRadius: 4,
-                                flexShrink: 0,
-                              }}
-                            />
-                            <span style={{ fontWeight: 600 }}>{r.name}</span>
-                          </div>
-                        </td>
-                        <td className="muted tnum">
-                          {r.members.toLocaleString("es-DO")}
-                        </td>
-                        <td className="muted tiny">{r.permissions}</td>
-                        <td className="col-actions">
-                          <button
-                            type="button"
-                            className="btn ghost sm"
-                            onClick={() =>
-                              toast.info(
-                                "Próximamente",
-                                "La edición de roles estará disponible pronto.",
-                              )
-                            }
-                          >
-                            Editar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             </div>
           ) : null}

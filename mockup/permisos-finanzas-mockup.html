@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es-DO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EvoChurch · Permisos Finanzas (mockup)</title>
+  <style>
+    :root {
+      --primary: #5B21B6;
+      --primary-50: #F5F3FF;
+      --ink: #0F172A;
+      --ink-3: #64748B;
+      --muted: #94A3B8;
+      --surface: #fff;
+      --surface-2: #F8FAFC;
+      --hairline: #E2E8F0;
+      --green: #059669;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAF7;
+      color: var(--ink);
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 28px 20px 48px; }
+    .eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--ink-3);
+    }
+    h1 { font-size: 34px; margin: 4px 0 6px; letter-spacing: -.02em; }
+    h1 span { color: var(--ink-3); font-style: italic; font-weight: 400; }
+    .muted { color: var(--ink-3); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--hairline);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 22px;
+    }
+    .panel-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .role-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--green) 12%, transparent);
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .module-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border: 0;
+      background: var(--primary-50);
+      cursor: pointer;
+      text-align: left;
+    }
+    .module-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: grid; place-items: center;
+      background: color-mix(in srgb, var(--green) 14%, transparent);
+      color: var(--green);
+      font-size: 18px;
+    }
+    .module-label { font-weight: 700; font-size: 15px; display: block; }
+    .module-desc { font-size: 13px; color: var(--ink-3); margin-top: 2px; display: block; }
+    .module-meta { margin-left: auto; font-size: 13px; color: var(--ink-3); font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 12px 10px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--ink-3);
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--hairline);
+      text-align: center;
+    }
+    thead th:first-child { text-align: left; padding-left: 20px; }
+    .col-key { display: block; font-size: 10px; font-weight: 500; color: var(--muted); text-transform: lowercase; margin-top: 2px; }
+    tbody td {
+      padding: 14px 10px;
+      border-bottom: 1px solid var(--hairline);
+      text-align: center;
+      vertical-align: middle;
+    }
+    tbody td:first-child { text-align: left; padding-left: 20px; }
+    .perm-label { font-weight: 600; font-size: 14px; display: block; }
+    .perm-key {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 11px;
+      font-family: ui-monospace, monospace;
+      color: var(--ink-3);
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .check input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .check-box {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--hairline);
+      border-radius: 5px;
+      background: #fff;
+      display: grid;
+      place-items: center;
+    }
+    .check input:checked + .check-box {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+    .check input:checked + .check-box::after {
+      content: "";
+      width: 5px;
+      height: 9px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-top: -2px;
+    }
+    .check input:disabled + .check-box {
+      opacity: .35;
+      cursor: not-allowed;
+      background: var(--surface-2);
+    }
+    .check input:disabled { cursor: not-allowed; }
+    .legend {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      font-size: 13px;
+      color: var(--ink-3);
+      line-height: 1.5;
+    }
+    .legend strong { color: var(--ink); }
+    @media (max-width: 720px) {
+      .module-meta { display: none; }
+      thead th, tbody td { padding: 10px 6px; font-size: 11px; }
+      .perm-key { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Configuración · Acceso</div>
+    <h1>Roles y permisos <span>· matriz Finanzas</span></h1>
+    <p class="muted" style="margin:0;">Mockup de lo que acordamos: módulo → sub-recurso → acciones en columnas. Checkbox en todas las celdas; deshabilitado donde no aplica.</p>
+
+    <div class="card">
+      <div class="panel-head">
+        <div class="eyebrow">Matriz de permisos</div>
+        <div style="font-size:20px; font-weight:700; margin-top:4px;">
+          Permisos del rol: <span style="color:var(--primary)">Tesorero</span>
+        </div>
+        <span class="role-badge">Ejemplo editable — no persiste en BD</span>
+      </div>
+
+      <button type="button" class="module-toggle" aria-expanded="true">
+        <span class="module-icon">💰</span>
+        <span>
+          <span class="module-label">Finanzas</span>
+          <span class="module-desc">Ingresos, egresos, transferencias y reportes</span>
+        </span>
+        <span class="module-meta">8 / 11 activos</span>
+      </button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Recurso</th>
+            <th>Ver<span class="col-key">(read)</span></th>
+            <th>Registrar<span class="col-key">(write)</span></th>
+            <th>Autorizar<span class="col-key">(authorize)</span></th>
+            <th>Eliminar<span class="col-key">(delete)</span></th>
+            <th>Exportar<span class="col-key">(export)</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Fondos: sin authorize -->
+          <tr>
+            <td>
+              <span class="perm-label">Fondos</span>
+              <code class="perm-key">finances:funds:*</code>
+            </td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:funds:read" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:funds:write" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" disabled /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:funds:delete" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:funds:export" /><span class="check-box"></span></label></td>
+          </tr>
+
+          <!-- Transacciones: todas las acciones -->
+          <tr>
+            <td>
+              <span class="perm-label">Transacciones</span>
+              <code class="perm-key">finances:transactions:*</code>
+            </td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:transactions:read" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:transactions:write" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:transactions:authorize" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" data-key="finances:transactions:delete" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:transactions:export" /><span class="check-box"></span></label></td>
+          </tr>
+
+          <!-- Contribuciones: sin authorize -->
+          <tr>
+            <td>
+              <span class="perm-label">Contribuciones</span>
+              <code class="perm-key">finances:contributions:*</code>
+            </td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:contributions:read" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:contributions:write" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" disabled /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" data-key="finances:contributions:delete" /><span class="check-box"></span></label></td>
+            <td><label class="check"><input type="checkbox" checked data-key="finances:contributions:export" /><span class="check-box"></span></label></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="legend">
+      <strong>Notas del diseño</strong><br />
+      · Cada fila = sub-recurso (<code>funds</code>, <code>transactions</code>, <code>contributions</code>).<br />
+      · Cada columna = acción atómica en <code>app_permissions</code> (ej. <code>finances:funds:read</code>).<br />
+      · <strong>Autorizar</strong> solo aplica en Transacciones; la celda sigue visible pero deshabilitada en Fondos y Contribuciones.<br />
+      · Ingresos/Egresos no son filas de permisos: son tipos dentro de Transacciones (filtro en UI).<br />
+      · Hoy en BD existen solo <code>finances:read</code>, <code>finances:write</code>, <code>finances:authorize</code> — esto es el target acordado.
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.check input:not(:disabled)').forEach(function (input) {
+      input.addEventListener('change', function () {
+        var active = document.querySelectorAll('.check input:checked:not(:disabled)').length;
+        var total = document.querySelectorAll('.check input:not(:disabled)').length;
+        document.querySelector('.module-meta').textContent = active + ' / ' + total + ' activos';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 "use server";
 
-import { getActionSession } from "@/lib/auth/app-session";
+import { getActionSessionWith } from "@/lib/auth/permissions";
+import { requirePermission } from "@/lib/auth/permissions";
 import type {
   ExpenseInput,
   FundTransferInput,
@@ -32,14 +33,35 @@ export type TransactionActionResult =
   | { ok: true }
   | { ok: false; error: string };
 
-async function sessionContext() {
-  const { supabase, session } = await getActionSession();
+async function writeSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "finances:transactions:write",
+  );
   return {
     supabase,
     churchId: session.churchId,
     profileId: session.profileId,
     userId: session.authUserId,
     canAuthorizeFinances: session.canAuthorizeFinances,
+  };
+}
+
+async function deleteSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "finances:transactions:delete",
+  );
+  return { supabase, churchId: session.churchId };
+}
+
+async function authorizeSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "finances:transactions:authorize",
+  );
+  return {
+    supabase,
+    churchId: session.churchId,
+    profileId: session.profileId,
+    userId: session.authUserId,
   };
 }
 
@@ -99,7 +121,7 @@ export async function saveLedgerEntryAction(
 ): Promise<TransactionActionResult> {
   try {
     const movementType = String(formData.get("movementType") ?? "expense");
-    const { supabase, churchId, profileId, userId } = await sessionContext();
+    const { supabase, churchId, profileId, userId } = await writeSessionContext();
 
     if (movementType === "income") {
       const input = parseOperationalInput(formData);
@@ -172,20 +194,10 @@ export async function reviewPendingExpenseAction(
     const decision = String(formData.get("decision") ?? "approve");
     const fundTransferId = String(formData.get("fundTransferId") ?? "").trim();
     const comments = String(formData.get("comments") ?? "").trim() || null;
-    const { supabase, churchId, profileId, userId, canAuthorizeFinances } =
-      await sessionContext();
+    const { supabase, churchId, profileId, userId } =
+      await authorizeSessionContext();
 
     if (fundTransferId) {
-      if (!canAuthorizeFinances) {
-        return {
-          ok: false,
-          error:
-            decision === "reject"
-              ? "No tienes permisos para rechazar transferencias."
-              : "No tienes permisos para autorizar transferencias.",
-        };
-      }
-
       if (decision === "reject") {
         await rejectFundTransfer(
           supabase,
@@ -211,16 +223,6 @@ export async function reviewPendingExpenseAction(
         10,
       );
       if (!transactionId) return { ok: false, error: "Transacción no válida." };
-
-      if (!canAuthorizeFinances) {
-        return {
-          ok: false,
-          error:
-            decision === "reject"
-              ? "No tienes permisos para rechazar egresos."
-              : "No tienes permisos para autorizar egresos.",
-        };
-      }
 
       if (decision === "reject") {
         await rejectTransaction(
@@ -263,7 +265,7 @@ export async function deleteLedgerEntryAction(
     const fundTransferId = String(formData.get("fundTransferId") ?? "").trim();
     const entryKind = String(formData.get("entryKind") ?? "");
     const entryId = String(formData.get("entryId") ?? "").trim();
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await deleteSessionContext();
 
     if (fundTransferId) {
       await deleteFundTransfer(supabase, churchId, fundTransferId);

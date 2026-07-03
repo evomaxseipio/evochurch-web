@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es-DO">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EvoChurch · Finanzas (mockup)</title>
+  <style>
+    :root {
+      --primary: #5B21B6;
+      --success: #059669;
+      --danger: #DC2626;
+      --ink: #0F172A;
+      --muted: #64748B;
+      --surface: #fff;
+      --surface-2: #F1F5F9;
+      --hairline: #E2E8F0;
+      --success-bg: #D1FAE5;
+      --danger-bg: #FEE2E2;
+      --warn-bg: #FEF3C7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #FAFAF7;
+      color: var(--ink);
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    h1 { font-size: 36px; margin: 4px 0 6px; }
+    h1 em { color: var(--muted); font-style: italic; font-weight: 400; }
+    .muted { color: var(--muted); }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .between { justify-content: space-between; }
+    .btn {
+      border: 0; border-radius: 10px; padding: 10px 14px;
+      font-weight: 600; cursor: pointer; background: var(--primary); color: #fff;
+    }
+    .btn.outline { background: #fff; color: var(--ink); border: 1px solid var(--hairline); }
+    .btn.sm { padding: 6px 12px; font-size: 13px; }
+    .kpis { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; margin-top: 22px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--hairline);
+      border-radius: 16px; padding: 18px;
+    }
+    .kpi-label { font-size: 13px; color: var(--muted); }
+    .kpi-value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+    .tabs { display: flex; gap: 8px; margin-top: 28px; border-bottom: 1px solid var(--hairline); }
+    .tab {
+      padding: 12px 16px; cursor: pointer; color: var(--muted); font-weight: 600;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .panel { display: none; margin-top: 18px; }
+    .panel.active { display: block; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .fund-name { font-size: 22px; font-weight: 700; margin-top: 4px; }
+    .fund-balance { font-size: 36px; font-weight: 700; margin-top: 14px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+      background: var(--surface-2);
+    }
+    .chip.success { background: var(--success-bg); color: var(--success); }
+    .chip.warn { background: var(--warn-bg); color: #B45309; }
+    .filters {
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+      margin-bottom: 14px;
+    }
+    .filter-group {
+      display: flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: 10px;
+    }
+    .filter-group button {
+      border: 0; background: transparent; padding: 6px 12px; border-radius: 8px;
+      cursor: pointer; font-weight: 500; color: var(--muted);
+    }
+    .filter-group button.active {
+      background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; }
+    th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--hairline); font-size: 14px; }
+    th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: #FAFAFA; }
+    .amount-in { color: var(--success); font-weight: 700; }
+    .amount-out { color: var(--danger); font-weight: 700; }
+    .icon-box {
+      width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center;
+    }
+    .icon-box.in { background: var(--success-bg); color: var(--success); }
+    .icon-box.out { background: var(--danger-bg); color: var(--danger); }
+    .contrib-row {
+      display: grid; grid-template-columns: 32px 1fr 120px 110px; gap: 12px;
+      align-items: center; padding: 10px 0; border-bottom: 1px solid var(--hairline);
+    }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+      color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+    }
+    @media (max-width: 800px) {
+      .kpis, .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="row between" style="flex-wrap:wrap; gap:16px;">
+      <div>
+        <div class="eyebrow">Mayordomía</div>
+        <h1>Finanzas <em>· Mayo 2026</em></h1>
+        <p class="muted" style="margin:0;">Diezmos, ofrendas y mayordomía de los recursos del Señor.</p>
+      </div>
+      <div class="row">
+        <button class="btn outline sm">PDF</button>
+        <button class="btn outline sm">Excel</button>
+        <button class="btn sm">+ Registrar movimiento</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="card">
+        <div class="kpi-label">Balance General</div>
+        <div class="kpi-value">RD$ 2.38M</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">Ingresos (mes)</div>
+        <div class="kpi-value" style="color:var(--success)">RD$ 57K</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">Egresos (mes)</div>
+        <div class="kpi-value" style="color:var(--danger)">RD$ 65K</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="fondos">Fondos</div>
+      <div class="tab" data-tab="transacciones">Transacciones</div>
+      <div class="tab" data-tab="contribuciones">Contribuciones</div>
+    </div>
+
+    <div id="fondos" class="panel active">
+      <div class="grid-2">
+        <div class="card">
+          <div class="eyebrow">Fondo</div>
+          <div class="fund-name">General</div>
+          <div class="fund-balance">RD$ 845,000</div>
+          <div class="row between" style="margin-top:14px;">
+            <span class="muted" style="font-size:12px">Actualizado hoy</span>
+            <span class="chip success">+4.2%</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Fondo</div>
+          <div class="fund-name">Construcción</div>
+          <div class="fund-balance">RD$ 1,284,000</div>
+          <div class="row between" style="margin-top:14px;">
+            <span class="muted" style="font-size:12px">Actualizado hoy</span>
+            <span class="chip success">+9.1%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="transacciones" class="panel">
+      <div class="card filters">
+        <input placeholder="Buscar por descripción, miembro, fondo…" style="flex:1; min-width:220px; padding:10px 12px; border:1px solid var(--hairline); border-radius:10px;" />
+        <div class="filter-group" id="txFilter">
+          <button class="active" data-type="all">Todos</button>
+          <button data-type="ingreso">Ingresos</button>
+          <button data-type="egreso">Egresos</button>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Miembro</th>
+            <th>Fondo</th>
+            <th>Monto</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="txBody">
+          <tr data-type="ingreso">
+            <td>08 May</td>
+            <td><div class="row"><span class="icon-box in">↑</span><div><strong>Diezmo dominical</strong><div class="muted" style="font-size:12px">Ingreso</div></div></div></td>
+            <td>Wilkin Almonte</td>
+            <td><span class="chip">General</span></td>
+            <td class="amount-in">+RD$ 12,500</td>
+            <td><span class="chip success">Confirmado</span></td>
+          </tr>
+          <tr data-type="egreso">
+            <td>07 May</td>
+            <td><div class="row"><span class="icon-box out">↓</span><div><strong>Pago electricidad</strong><div class="muted" style="font-size:12px">Egreso</div></div></div></td>
+            <td>—</td>
+            <td><span class="chip">General</span></td>
+            <td class="amount-out">−RD$ 8,420</td>
+            <td><span class="chip success">Confirmado</span></td>
+          </tr>
+          <tr data-type="egreso">
+            <td>06 May</td>
+            <td><div class="row"><span class="icon-box out">↓</span><div><strong>Compra instrumentos</strong><div class="muted" style="font-size:12px">Egreso</div></div></div></td>
+            <td>—</td>
+            <td><span class="chip">General</span></td>
+            <td class="amount-out">−RD$ 42,000</td>
+            <td><span class="chip warn">Pendiente</span></td>
+          </tr>
+          <tr data-type="ingreso">
+            <td>05 May</td>
+            <td><div class="row"><span class="icon-box in">↑</span><div><strong>Ofrenda misionera</strong><div class="muted" style="font-size:12px">Ingreso</div></div></div></td>
+            <td>Yokasta Mejía</td>
+            <td><span class="chip">Misiones Haití</span></td>
+            <td class="amount-in">+RD$ 4,500</td>
+            <td><span class="chip success">Confirmado</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="contribuciones" class="panel">
+      <div class="grid-2">
+        <div class="card">
+          <div class="eyebrow">Top contribuyentes — Mayo 2026</div>
+          <div style="font-size:22px; font-weight:700; margin:8px 0 16px">Hermanos fieles</div>
+          <div class="contrib-row">
+            <div class="muted">01</div>
+            <div class="row"><span class="avatar">WA</span><div><strong>Wilkin Almonte</strong><div class="muted" style="font-size:12px">Miembro</div></div></div>
+            <div class="muted">████████░░</div>
+            <div style="text-align:right; font-weight:700">RD$ 48,200</div>
+          </div>
+          <div class="contrib-row">
+            <div class="muted">02</div>
+            <div class="row"><span class="avatar">FB</span><div><strong>Francisco Báez</strong><div class="muted" style="font-size:12px">Líder</div></div></div>
+            <div class="muted">██████░░░░</div>
+            <div style="text-align:right; font-weight:700">RD$ 35,000</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Distribución por fondo</div>
+          <div style="font-size:22px; font-weight:700; margin:8px 0 16px">Dónde se invierte</div>
+          <div class="contrib-row"><span class="chip">General</span><span></span><span></span><strong>RD$ 845K</strong></div>
+          <div class="contrib-row"><span class="chip">Construcción</span><span></span><span></span><strong>RD$ 1,284K</strong></div>
+          <div class="contrib-row"><span class="chip">Misiones Haití</span><span></span><span></span><strong>RD$ 158K</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll(".tab").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        document.querySelectorAll(".tab").forEach(function (t) {
+          t.classList.remove("active");
+        });
+        document.querySelectorAll(".panel").forEach(function (p) {
+          p.classList.remove("active");
+        });
+        tab.classList.add("active");
+        document.getElementById(tab.dataset.tab).classList.add("active");
+      });
+    });
+
+    document.querySelectorAll("#txFilter button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll("#txFilter button").forEach(function (b) {
+          b.classList.remove("active");
+        });
+        btn.classList.add("active");
+        var type = btn.dataset.type;
+        document.querySelectorAll("#txBody tr").forEach(function (row) {
+          row.style.display = type === "all" || row.dataset.type === type ? "" : "none";
+        });
+      });
+    });
+  </script>
+</body>
+</html>

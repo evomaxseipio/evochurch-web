@@ -1,13 +1,9 @@
 import { SettingsView } from "@/components/settings/settings-view";
-import {
-  getAppSession,
-  getSessionDisplayRole,
-} from "@/lib/auth/app-session";
-import { redirect } from "next/navigation";
+import { getSessionDisplayRole } from "@/lib/auth/app-session";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 
 export default async function SettingsPage() {
-  const session = await getAppSession();
-  if (!session) redirect("/login");
+  const session = await requirePageAccess("/settings");
 
   const fullName =
     session.fullName?.trim() ||

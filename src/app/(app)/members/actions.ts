@@ -24,6 +24,7 @@ import {
   updateMember,
 } from "@/lib/services/members";
 import { getActionSession } from "@/lib/auth/app-session";
+import { getActionSessionWith } from "@/lib/auth/permissions";
 import { revalidatePath } from "next/cache";
 
 export type ActionResult =
@@ -54,7 +55,7 @@ export async function fetchContributionCatalogAction(): Promise<ContributionCata
 }
 
 async function sessionContext() {
-  const { supabase, session } = await getActionSession();
+  const { supabase, session } = await getActionSessionWith("members:write");
   return { supabase, churchId: session.churchId };
 }
 

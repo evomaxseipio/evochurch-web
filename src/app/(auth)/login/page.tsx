@@ -5,9 +5,9 @@ import { Icons } from "@/components/icons";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }) {
-  const { next, error } = await searchParams;
+  const { next, error, email } = await searchParams;
 
   return (
     <div className="login">
@@ -20,7 +20,11 @@ export default async function LoginPage({
             Evo<em style={{ fontStyle: "italic", color: "var(--accent)" }}>Church</em>
           </div>
         </div>
-        <LoginForm next={next} authError={error === "auth"} />
+        <LoginForm
+          next={next}
+          email={email}
+          loginError={error}
+        />
       </div>
 
       <div className="visual">

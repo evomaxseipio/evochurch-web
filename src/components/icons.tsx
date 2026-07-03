@@ -180,6 +180,21 @@ export const Icons = {
       <path d="m12 2 3.1 6.3L20 9.3l-5 4.9 1.2 6.9L12 17.8l-6.2 3.3 1.2-6.9-5-4.9 4.9-1L12 2z" />
     </svg>
   ),
+  shield: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <path d="M12 2.5L4.5 5.5v5.8c0 4.6 3.2 8.9 7.5 9.7 4.3-.8 7.5-5.1 7.5-9.7V5.5L12 2.5z" />
+      <path d="M12 8v4" />
+      <path d="M10 10.5L12 13l2-2.5" />
+    </svg>
+  ),
+  refresh: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <path d="M4 12a8 8 0 0113.6-5.6" />
+      <path d="M4 4v4h4" />
+      <path d="M20 12a8 8 0 01-13.6 5.6" />
+      <path d="M20 20v-4h-4" />
+    </svg>
+  ),
   target: (p: IconProps) => (
     <svg viewBox="0 0 24 24" {...base(p)}>
       <circle cx="12" cy="12" r="9" />

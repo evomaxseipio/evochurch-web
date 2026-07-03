@@ -1,26 +1,13 @@
 import { MinistriesListView } from "@/components/ministries/ministries-list-view";
 import { computeMinistryStats } from "@/lib/ministries/parse";
-import { getAppSession } from "@/lib/auth/app-session";
+import { hasPermission } from "@/lib/auth/permissions";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchMembersPage } from "@/lib/services/members";
 import { fetchMinistries } from "@/lib/services/ministries";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function MinisteriosPage() {
-  const session = await getAppSession();
-  if (!session) {
-    return (
-      <p
-        className="rounded-xl px-4 py-3 text-sm"
-        style={{
-          background: "var(--danger-bg)",
-          color: "var(--danger)",
-        }}
-      >
-        No se pudo cargar la sesión de la iglesia. Recarga la página o vuelve a
-        iniciar sesión.
-      </p>
-    );
-  }
+  const session = await requirePageAccess("/ministerios");
 
   const supabase = await createClient();
   let error: string | null = null;
@@ -65,6 +52,8 @@ export default async function MinisteriosPage() {
       ministries={ministries}
       stats={computeMinistryStats(ministries)}
       members={members}
+      permissions={session.permissions}
+      profileId={session.profileId}
     />
   );
 }

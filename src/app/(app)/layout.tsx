@@ -56,6 +56,7 @@ export default async function AppLayout({
       userLabel={userLabel}
       userEmail={session.email}
       userRole={getSessionDisplayRole(session)}
+      permissions={session.permissions}
     >
       {children}
     </AppShell>

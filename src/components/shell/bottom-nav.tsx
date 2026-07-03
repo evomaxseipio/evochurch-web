@@ -1,39 +1,58 @@
 "use client";
 
 import { Icons, NavIcon } from "@/components/icons";
-import { isNavGroup, MAIN_NAV, navIdFromPath } from "@/lib/navigation";
+import type { PermissionKey } from "@/lib/auth/permission-keys";
+import {
+  filterNavByPermissions,
+  isNavGroup,
+  MAIN_NAV,
+  navIdFromPath,
+} from "@/lib/navigation";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-
-const finGroup = MAIN_NAV.find((n) => n.id === "finanzas");
-const finChildren =
-  finGroup && isNavGroup(finGroup) ? finGroup.children : [];
+import { useMemo, useState } from "react";
 
 type BottomItem =
-  | { type: "link"; id: string; href: string; label: string; icon: string }
+  | { type: "link"; id: string; href: string; label: string; icon: string; permission?: PermissionKey }
   | { type: "finanzas"; id: string; label: string; icon: string };
 
 const bottomItems: BottomItem[] = [
-  { type: "link", id: "dashboard", href: "/dashboard", label: "Dashboard", icon: "home" },
-  { type: "link", id: "miembros", href: "/members", label: "Miembros", icon: "users" },
+  { type: "link", id: "dashboard", href: "/dashboard", label: "Dashboard", icon: "home", permission: "dashboard:read" },
+  { type: "link", id: "miembros", href: "/members", label: "Miembros", icon: "users", permission: "members:read" },
   { type: "finanzas", id: "finanzas", label: "Finanzas", icon: "wallet" },
-  { type: "link", id: "comunicacion", href: "/comunicacion", label: "Comunicación", icon: "chat" },
-  { type: "link", id: "settings", href: "/settings", label: "Configuración", icon: "settings" },
+  { type: "link", id: "comunicacion", href: "/comunicacion", label: "Comunicación", icon: "chat", permission: "dashboard:read" },
+  { type: "link", id: "settings", href: "/settings", label: "Configuración", icon: "settings", permission: "settings:read" },
 ];
 
-export function BottomNav() {
+export function BottomNav({ permissions = [] }: { permissions?: PermissionKey[] }) {
   const pathname = usePathname();
   const router = useRouter();
   const activeId = navIdFromPath(pathname);
   const [finOpen, setFinOpen] = useState(false);
+
+  const finChildren = useMemo(() => {
+    const finGroup = filterNavByPermissions(MAIN_NAV, permissions).find(
+      (n) => n.id === "finanzas",
+    );
+    return finGroup && isNavGroup(finGroup) ? finGroup.children : [];
+  }, [permissions]);
+
+  const visibleItems = useMemo(
+    () =>
+      bottomItems.filter((item) => {
+        if (item.type === "finanzas") return finChildren.length > 0;
+        if (!item.permission) return true;
+        return permissions.includes(item.permission);
+      }),
+    [permissions, finChildren.length],
+  );
 
   const finRoutes = finChildren.map((c) => c.id);
   const finActive = finRoutes.includes(activeId);
 
   return (
     <nav className="bottom-nav">
-      {bottomItems.map((item) => {
+      {visibleItems.map((item) => {
         if (item.type === "finanzas") {
           return (
             <div key={item.id} className="bn-wrap" style={{ flex: 1, position: "relative" }}>

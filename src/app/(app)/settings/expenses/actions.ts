@@ -1,6 +1,6 @@
 "use server";
 
-import { getActionSession } from "@/lib/auth/app-session";
+import { getActionSessionWith } from "@/lib/auth/permissions";
 import type { CatalogItemInput } from "@/lib/catalog/types";
 import {
   deleteExpenseType,
@@ -14,7 +14,7 @@ export type CatalogActionResult =
   | { ok: false; error: string };
 
 async function sessionContext() {
-  const { supabase, session } = await getActionSession();
+  const { supabase, session } = await getActionSessionWith("settings:catalogs");
   return { supabase, churchId: session.churchId };
 }
 

@@ -1,5 +1,5 @@
 import { TransactionsListView } from "@/components/transactions/transactions-list-view";
-import { getAppSession } from "@/lib/auth/app-session";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { defaultYearToDateRange } from "@/lib/finance/date-range";
 import {
   parseFinancePage,
@@ -26,8 +26,7 @@ export default async function TransactionsPage({
     status?: string;
   }>;
 }) {
-  const session = await getAppSession();
-  if (!session) return null;
+  const session = await requirePageAccess("/finances/transactions");
 
   const params = await searchParams;
   const fundId = params.fund ?? null;

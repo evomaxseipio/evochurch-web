@@ -2,8 +2,11 @@
 
 import { Icons, NavIcon } from "@/components/icons";
 import { signOut } from "@/app/(auth)/login/actions";
+import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
   CONFIG_NAV,
+  filterNavByPermissions,
+  filterNavItemsByPermissions,
   isNavGroup,
   MAIN_NAV,
   navIdFromPath,
@@ -120,6 +123,7 @@ export function Sidebar({
   churchShort,
   userLabel,
   userRole,
+  permissions = [],
   collapsed,
   onNavigate,
   className = "",
@@ -128,11 +132,14 @@ export function Sidebar({
   churchShort?: string | null;
   userLabel: string;
   userRole?: string;
+  permissions?: PermissionKey[];
   collapsed: boolean;
   onNavigate?: () => void;
   className?: string;
 }) {
   const pathname = usePathname();
+  const mainNav = filterNavByPermissions(MAIN_NAV, permissions);
+  const configNav = filterNavItemsByPermissions(CONFIG_NAV, permissions);
 
   return (
     <aside className={`sidebar${collapsed ? " is-collapsed" : ""} ${className}`.trim()}>
@@ -154,7 +161,7 @@ export function Sidebar({
 
       <nav className="nav-section" onClick={onNavigate}>
         <div className="nav-eyebrow">Principal</div>
-        {MAIN_NAV.map((entry) =>
+        {mainNav.map((entry) =>
           isNavGroup(entry) ? (
             <NavGroupItem
               key={entry.id}
@@ -170,7 +177,7 @@ export function Sidebar({
 
       <nav className="nav-section" onClick={onNavigate}>
         <div className="nav-eyebrow">Configuración</div>
-        {CONFIG_NAV.map((item) => (
+        {configNav.map((item) => (
           <NavLink key={item.id} item={item} pathname={pathname} />
         ))}
       </nav>

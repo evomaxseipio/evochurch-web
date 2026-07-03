@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { PermissionKey } from "@/lib/auth/permission-keys";
 
 export type NavItem = {
   id: string;
@@ -6,6 +6,7 @@ export type NavItem = {
   label: string;
   icon: string;
   badge?: string;
+  permission?: PermissionKey;
 };
 
 export type NavGroup = {
@@ -23,55 +24,143 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
 }
 
 export const MAIN_NAV: NavEntry[] = [
-  { id: "dashboard", href: "/dashboard", label: "Dashboard", icon: "home" },
-  { id: "miembros", href: "/members", label: "Miembros", icon: "users" },
-  { id: "ministerios", href: "/ministerios", label: "Ministerios", icon: "pin" },
+  {
+    id: "dashboard",
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: "home",
+    permission: "dashboard:read",
+  },
+  {
+    id: "miembros",
+    href: "/members",
+    label: "Miembros",
+    icon: "users",
+    permission: "members:read",
+  },
+  {
+    id: "ministerios",
+    href: "/ministerios",
+    label: "Ministerios",
+    icon: "pin",
+    permission: "ministerios:read",
+  },
   {
     id: "finanzas",
     label: "Finanzas",
     icon: "wallet",
     children: [
-      { id: "fondos", href: "/finances/funds", label: "Fondos", icon: "wallet" },
+      {
+        id: "fondos",
+        href: "/finances/funds",
+        label: "Fondos",
+        icon: "wallet",
+        permission: "finances:funds:read",
+      },
       {
         id: "transacciones",
         href: "/finances/transactions",
         label: "Transacciones",
         icon: "wallet",
+        permission: "finances:transactions:read",
       },
       {
         id: "contribuciones",
         href: "/finances/contributions",
         label: "Contribuciones",
         icon: "wallet",
+        permission: "finances:contributions:read",
       },
     ],
   },
-  { id: "eventos", href: "/eventos", label: "Eventos", icon: "cal", badge: "3" },
+  {
+    id: "eventos",
+    href: "/eventos",
+    label: "Eventos",
+    icon: "cal",
+    badge: "3",
+    permission: "dashboard:read",
+  },
   {
     id: "comunicacion",
     href: "/comunicacion",
     label: "Comunicación",
     icon: "chat",
     badge: "4",
+    permission: "dashboard:read",
   },
 ];
 
 export const CONFIG_NAV: NavItem[] = [
-  { id: "usuarios", href: "/settings/users", label: "Usuarios", icon: "users" },
+  {
+    id: "roles",
+    href: "/settings/roles",
+    label: "Roles y permisos",
+    icon: "star",
+    permission: "roles:manage",
+  },
+  {
+    id: "usuarios",
+    href: "/settings/users",
+    label: "Usuarios",
+    icon: "users",
+    permission: "admin_users:manage",
+  },
   {
     id: "gastos",
     href: "/settings/expenses",
     label: "Tipos de gasto",
     icon: "wallet",
+    permission: "settings:catalogs",
   },
   {
     id: "ingresos-tipos",
     href: "/settings/income-types",
     label: "Tipos de ingreso",
     icon: "trendUp",
+    permission: "settings:catalogs",
   },
-  { id: "settings", href: "/settings", label: "Configuración", icon: "settings" },
+  {
+    id: "settings",
+    href: "/settings",
+    label: "Configuración",
+    icon: "settings",
+    permission: "settings:read",
+  },
 ];
+
+function canSeeItem(
+  permission: PermissionKey | undefined,
+  permissions: PermissionKey[],
+): boolean {
+  if (!permission) return true;
+  return permissions.includes(permission);
+}
+
+export function filterNavItemsByPermissions(
+  items: NavItem[],
+  permissions: PermissionKey[],
+): NavItem[] {
+  return items.filter((item) => canSeeItem(item.permission, permissions));
+}
+
+export function filterNavByPermissions(
+  entries: NavEntry[],
+  permissions: PermissionKey[],
+): NavEntry[] {
+  return entries
+    .map((entry) => {
+      if (isNavGroup(entry)) {
+        const children = entry.children.filter((c) =>
+          canSeeItem(c.permission, permissions),
+        );
+        if (children.length === 0) return null;
+        return { ...entry, children };
+      }
+      return canSeeItem(entry.permission, permissions) ? entry : null;
+    })
+    .filter((e): e is NavEntry => e != null);
+}
 
 export const BREADCRUMBS: Record<string, [string, string]> = {
   dashboard: ["Inicio", "Dashboard"],
@@ -85,6 +174,7 @@ export const BREADCRUMBS: Record<string, [string, string]> = {
   usuarios: ["Configuración", "Usuarios admin"],
   gastos: ["Configuración", "Tipos de gasto"],
   "ingresos-tipos": ["Configuración", "Tipos de ingreso"],
+  roles: ["Configuración", "Roles y permisos"],
   settings: ["Cuenta", "Configuración"],
 };
 
@@ -101,6 +191,7 @@ export function navIdFromPath(pathname: string): string {
   if (pathname.startsWith("/settings/users")) return "usuarios";
   if (pathname.startsWith("/settings/expenses")) return "gastos";
   if (pathname.startsWith("/settings/income-types")) return "ingresos-tipos";
+  if (pathname.startsWith("/settings/roles")) return "roles";
   if (pathname.startsWith("/settings")) return "settings";
   return "dashboard";
 }
@@ -110,7 +201,6 @@ export function breadcrumbsFromPath(pathname: string): [string, string] {
   return BREADCRUMBS[id] ?? ["", pathname.replace(/^\//, "") || "Home"];
 }
 
-/** Bottom nav: Dashboard, Miembros, Finanzas (popup), Comunicación, Configuración */
 export const BOTTOM_NAV_IDS = [
   "dashboard",
   "miembros",

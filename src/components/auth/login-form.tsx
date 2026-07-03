@@ -7,15 +7,26 @@ import { useActionState, useState } from "react";
 
 const initial: LoginState = {};
 
+const LOGIN_ERRORS: Record<string, string> = {
+  auth: "No se pudo completar el inicio de sesión. Intenta de nuevo.",
+  credentials: "Credenciales inválidas. Intenta de nuevo.",
+  no_church:
+    "Tu cuenta no está vinculada a una iglesia. Contacta al administrador.",
+};
+
 export function LoginForm({
   next,
-  authError,
+  email,
+  loginError,
 }: {
   next?: string;
-  authError?: boolean;
+  email?: string;
+  loginError?: string;
 }) {
   const [state, formAction, pending] = useActionState(login, initial);
   const [showPw, setShowPw] = useState(false);
+  const bannerError =
+    (loginError ? LOGIN_ERRORS[loginError] : undefined) ?? state.error;
 
   return (
     <div className="inner">
@@ -37,17 +48,19 @@ export function LoginForm({
         </p>
       </div>
 
-      {authError ? (
+      {bannerError ? (
         <p
           className="help error"
+          role="alert"
           style={{
             marginBottom: 12,
             padding: "10px 12px",
             borderRadius: 8,
             background: "var(--danger-bg)",
+            color: "var(--danger)",
           }}
         >
-          No se pudo completar el inicio de sesión. Intenta de nuevo.
+          {bannerError}
         </p>
       ) : null}
 
@@ -62,6 +75,7 @@ export function LoginForm({
               name="email"
               type="email"
               required
+              defaultValue={email ?? ""}
               placeholder="tu@iglesia.do"
             />
           </div>
@@ -115,10 +129,6 @@ export function LoginForm({
             ¿Olvidaste tu clave?
           </Link>
         </div>
-
-        {state.error ? (
-          <div className="help error">{state.error}</div>
-        ) : null}
 
         <button type="submit" className="btn primary lg" style={{ marginTop: 8 }} disabled={pending}>
           {pending ? (

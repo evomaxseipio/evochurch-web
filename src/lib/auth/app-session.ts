@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUser } from "@/lib/supabase/session";
 import { sessionRequiresPasswordChange } from "@/lib/auth/temp-password-flow";
+import { parsePermissionKeys, type PermissionKey } from "@/lib/auth/permission-keys";
+
 import { cache } from "react";
 
+export type { PermissionKey };
 export type AppSession = {
   authUserId: string;
   profileId: string;
@@ -13,6 +16,7 @@ export type AppSession = {
   appRoleId: number | null;
   appRoleName: string | null;
   membershipRole: string | null;
+  permissions: PermissionKey[];
   canAuthorizeFinances: boolean;
   isActive: boolean;
   isVerified: boolean;
@@ -33,6 +37,7 @@ type SessionContextRow = {
   is_active?: boolean;
   is_verified?: boolean;
   is_temp_password?: boolean;
+  permissions?: unknown;
 };
 
 function parseChurchId(raw: unknown): number | null {
@@ -83,7 +88,12 @@ export function parseAppSession(data: unknown): AppSession | null {
       row.membership_role.length > 0
         ? row.membership_role
         : null,
-    canAuthorizeFinances: row.can_authorize_finances === true,
+    permissions: parsePermissionKeys(row.permissions),
+    canAuthorizeFinances:
+      row.can_authorize_finances === true ||
+      parsePermissionKeys(row.permissions).includes(
+        "finances:transactions:authorize",
+      ),
     isActive: row.is_active === true,
     isVerified: row.is_verified === true,
     isTempPassword: row.is_temp_password === true,

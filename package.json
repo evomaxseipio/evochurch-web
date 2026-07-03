@@ -7,7 +7,11 @@
     "build": "next build",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "qa:rbac": "node scripts/qa-rbac.mjs",
+    "qa:rbac:seed": "node scripts/seed-rbac-qa-users.mjs --write-env",
+    "qa:rbac:e2e": "playwright test e2e/rbac",
+    "qa:rbac:full": "node scripts/qa-rbac-full.mjs --seed"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
@@ -20,6 +24,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.10",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -27,6 +32,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "ws": "^8.21.0"
   }
 }

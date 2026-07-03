@@ -3,6 +3,7 @@
 import { AppTopbar } from "@/components/shell/app-topbar";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { Sidebar } from "@/components/shell/sidebar";
+import type { PermissionKey } from "@/lib/auth/permission-keys";
 import { useCallback, useState } from "react";
 
 const SIDEBAR_KEY = "evochurch-sidebar-collapsed";
@@ -18,6 +19,7 @@ export function AppShell({
   userLabel,
   userEmail,
   userRole,
+  permissions = [],
   children,
 }: {
   churchName: string | null;
@@ -25,6 +27,7 @@ export function AppShell({
   userLabel: string;
   userEmail?: string | null;
   userRole?: string;
+  permissions?: PermissionKey[];
   children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(() =>
@@ -46,6 +49,7 @@ export function AppShell({
         churchShort={churchShort}
         userLabel={userLabel}
         userRole={userRole}
+        permissions={permissions}
         collapsed={collapsed}
       />
 
@@ -60,7 +64,7 @@ export function AppShell({
         </div>
       </main>
 
-      <BottomNav />
+      <BottomNav permissions={permissions} />
     </div>
   );
 }

@@ -1,12 +1,11 @@
 import { FundsListView } from "@/components/funds/funds-list-view";
 import { computeFundsStats } from "@/lib/funds/parse";
 import { fetchFunds } from "@/lib/services/funds";
-import { getAppSession } from "@/lib/auth/app-session";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function FundsPage() {
-  const session = await getAppSession();
-  if (!session) return null;
+  const session = await requirePageAccess("/finances/funds");
 
   const supabase = await createClient();
 

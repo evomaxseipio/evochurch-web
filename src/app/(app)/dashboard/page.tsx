@@ -1,11 +1,11 @@
 import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { getAppSession } from "@/lib/auth/app-session";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchDashboardPayload } from "@/lib/services/dashboard";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardPage() {
-  const session = await getAppSession();
-  if (!session) return null;
+  const session = await requirePageAccess("/dashboard");
 
   const pastorName = session.fullName?.split(" ")[0] ?? undefined;
   const churchName = session.churchName ?? null;

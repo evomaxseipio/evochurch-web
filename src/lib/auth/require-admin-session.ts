@@ -3,9 +3,10 @@ import {
   requireAppSession,
   type AppSession,
 } from "@/lib/auth/app-session";
+import { canManageAdminUsers as hasAdminPerm } from "@/lib/auth/permissions";
 
 export function canManageAdminUsers(session: AppSession): boolean {
-  return session.appRoleId === 1;
+  return hasAdminPerm(session);
 }
 
 export async function requireAdminSession(): Promise<AppSession> {

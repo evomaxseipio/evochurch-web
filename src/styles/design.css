@@ -1386,7 +1386,578 @@ body {
 /* Logo display fallback (legacy markup) */
 .display em { color: var(--accent); font-style: italic; }
 
+/* Settings — banner de perfil (morado de marca fijo; no usar --primary/--accent del tema) */
+.settings-profile-hero {
+  padding: 32px;
+  color: #fff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%);
+}
+
+[data-theme="dark"] .settings-profile-hero {
+  background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.settings-profile-hero .display,
+.settings-profile-hero .display em {
+  color: #fff;
+}
+
+.settings-profile-hero-sub {
+  color: rgba(255, 255, 255, 0.88);
+  margin-top: 4px;
+}
+
+.settings-profile-hero-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.45);
+}
+
+.settings-profile-hero-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 240px;
+  height: 200px;
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+.settings-profile-hero .chip {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+/* Settings — selector de tema (colores fijos; no heredar --fg del tema activo) */
+.theme-picker-card {
+  padding: 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  border: 2px solid transparent;
+  appearance: none;
+  font: inherit;
+}
+
+.theme-picker-card--light {
+  background: linear-gradient(135deg, #fafaf7, #ffffff) !important;
+  color: #1a1330 !important;
+}
+
+.theme-picker-card--light .theme-picker-label,
+.theme-picker-card--light svg {
+  color: #1a1330 !important;
+  stroke: #1a1330;
+}
+
+.theme-picker-card--light .theme-picker-preview {
+  border-color: rgba(26, 19, 48, 0.14);
+}
+
+.theme-picker-card--dark {
+  background: linear-gradient(135deg, #07101f, #0e1b33) !important;
+  color: #ffffff !important;
+}
+
+.theme-picker-card--dark .theme-picker-label,
+.theme-picker-card--dark svg {
+  color: #ffffff !important;
+  stroke: #ffffff;
+}
+
+.theme-picker-card--dark .theme-picker-preview {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.theme-picker-card.is-selected {
+  border-color: var(--primary);
+}
+
+.theme-picker-label {
+  font-weight: 600;
+}
+
+.theme-picker-preview {
+  margin-top: 12px;
+  height: 60px;
+  border-radius: 8px;
+  border: 1px solid;
+  padding: 8px;
+  display: flex;
+  gap: 6px;
+}
+
+.theme-picker-preview-thumb {
+  width: 24px;
+  background: rgba(127, 127, 127, 0.2);
+  border-radius: 4px;
+}
+
+.theme-picker-preview-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.theme-picker-preview-line {
+  height: 6px;
+  background: rgba(127, 127, 127, 0.3);
+  border-radius: 3px;
+}
+
+.theme-picker-preview-line.short {
+  width: 50%;
+  background: rgba(127, 127, 127, 0.2);
+}
+
+.theme-picker-preview-line.long {
+  width: 70%;
+}
+
+.theme-picker-preview-accent {
+  margin-top: auto;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 3px;
+  width: 40px;
+}
+
+.theme-picker-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
 /* Mobile drawer stub */
 .mobile-drawer-toggle { display: none; }
 @media (max-width: 900px) { .mobile-drawer-toggle { display: grid; } }
 
+/* Settings — Roles y permisos (matriz RBAC) */
+.roles-page-root {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 130px);
+  min-height: 520px;
+  overflow: hidden;
+}
+@media (max-width: 960px) {
+  .roles-page-root {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+}
+
+.roles-layout {
+  display: grid;
+  grid-template-columns: minmax(400px, 460px) minmax(0, 1fr);
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+  margin-top: 22px;
+  overflow: hidden;
+}
+@media (max-width: 1200px) {
+  .roles-layout { grid-template-columns: minmax(360px, 42%) minmax(0, 1fr); }
+}
+@media (max-width: 960px) {
+  .roles-layout {
+    grid-template-columns: 1fr;
+    overflow: visible;
+    flex: none;
+  }
+}
+
+.roles-list-panel,
+.roles-matrix-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  padding: 20px 22px;
+}
+@media (max-width: 960px) {
+  .roles-list-panel,
+  .roles-matrix-panel {
+    min-height: 420px;
+    max-height: 520px;
+  }
+}
+
+.roles-panel-head {
+  flex-shrink: 0;
+  margin-bottom: 14px;
+}
+
+.roles-matrix-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.roles-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.roles-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: center;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  appearance: none;
+  font: inherit;
+  color: inherit;
+}
+.roles-card-icon {
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.roles-card-main {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-self: center;
+}
+.roles-card-aside {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  align-self: center;
+  padding-left: 8px;
+}
+.roles-card-create {
+  cursor: default;
+  border: 1px dashed color-mix(in srgb, var(--primary) 45%, var(--hairline));
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.roles-card-create .roles-card-main {
+  grid-column: auto;
+  grid-row: auto;
+}
+.roles-card-create .roles-card-icon {
+  grid-row: auto;
+}
+.roles-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 25%, var(--hairline));
+}
+.roles-card.is-selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+[data-theme="dark"] .roles-card.is-selected {
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  border-color: var(--primary);
+}
+.roles-card-create:hover { border-color: color-mix(in srgb, var(--primary) 45%, var(--hairline)); }
+.roles-card-icon-create {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  border-radius: 999px;
+  width: 44px;
+  height: 44px;
+}
+.roles-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.roles-card-name {
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--fg);
+  line-height: 1.25;
+}
+.roles-card-name-create {
+  color: var(--primary);
+}
+.roles-card-desc {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.roles-card-count {
+  font-size: 11px;
+  color: var(--dim);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+[data-theme="dark"] .roles-card-count {
+  background: var(--surface-2);
+  border-color: var(--hairline);
+}
+.roles-card-chevron { flex-shrink: 0; opacity: 0.55; }
+.roles-card.is-selected .roles-card-chevron { opacity: 1; }
+.roles-chip-system {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #7c3aed;
+  border: none;
+}
+[data-theme="dark"] .roles-chip-system {
+  background: color-mix(in srgb, #7c3aed 18%, transparent);
+  color: #a78bfa;
+}
+
+.roles-chip-dirty {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success) 16%, transparent);
+  color: var(--success);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.roles-matrix-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 4px;
+}
+.roles-module-accordion {
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.roles-module-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background 0.15s;
+}
+.roles-module-toggle:hover {
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface-2));
+}
+.roles-module-toggle.is-open {
+  border-bottom: 1px solid var(--hairline);
+}
+.roles-module-toggle-text {
+  flex: 1;
+  min-width: 0;
+}
+.roles-module-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.roles-module-count {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--dim);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.roles-module-body {
+  overflow-x: auto;
+}
+.roles-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.roles-matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-2);
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--fg);
+  border-bottom: 1px solid var(--hairline);
+  white-space: nowrap;
+}
+.roles-col-key {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--dim);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+.roles-matrix-perm-col {
+  min-width: 240px;
+  text-align: left;
+}
+.roles-matrix-action-col {
+  width: 88px;
+  text-align: center;
+}
+.roles-module-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.roles-module-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.roles-module-label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--fg);
+}
+.roles-module-desc {
+  display: block;
+  font-size: 11.5px;
+  margin-top: 2px;
+}
+.roles-perm-row td {
+  border-bottom: 1px solid var(--hairline);
+}
+.roles-perm-cell {
+  padding: 12px 14px !important;
+  vertical-align: middle;
+}
+.roles-perm-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg);
+}
+.roles-perm-key {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--dim);
+}
+.roles-matrix-check-cell {
+  text-align: center;
+  vertical-align: middle;
+  padding: 8px !important;
+}
+
+.roles-check {
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  position: relative;
+}
+.roles-check input {
+  position: absolute;
+  opacity: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  cursor: pointer;
+}
+.roles-check input:disabled { cursor: not-allowed; }
+.roles-check-box {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  transition: background 0.12s, border-color 0.12s;
+}
+[data-theme="dark"] .roles-check-box {
+  background: var(--surface);
+  border-color: var(--hairline);
+}
+.roles-check input:checked + .roles-check-box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.roles-check input:checked + .roles-check-box::after {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -2px);
+  margin: 3px auto 0;
+}
+.roles-check input:disabled + .roles-check-box { opacity: 0.5; }
+
+.roles-matrix-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-top: 16px;
+  margin-top: 0;
+  border-top: 1px solid var(--hairline);
+}

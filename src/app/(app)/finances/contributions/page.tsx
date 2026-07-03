@@ -11,7 +11,7 @@ import {
   parseFinancePageSize,
   parseYearMonthParam,
 } from "@/lib/finance/pagination";
-import { getAppSession } from "@/lib/auth/app-session";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ContributionsPage({
@@ -25,8 +25,7 @@ export default async function ContributionsPage({
     category?: string;
   }>;
 }) {
-  const session = await getAppSession();
-  if (!session) return null;
+  const session = await requirePageAccess("/finances/contributions");
 
   const params = await searchParams;
   const fundId = params.fund ?? null;

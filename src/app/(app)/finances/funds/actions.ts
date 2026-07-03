@@ -1,6 +1,6 @@
 "use server";
 
-import { getActionSession } from "@/lib/auth/app-session";
+import { getActionSessionWith } from "@/lib/auth/permissions";
 import type { FundInput } from "@/lib/funds/types";
 import {
   deleteFund,
@@ -14,8 +14,13 @@ export type FundActionResult =
   | { ok: true }
   | { ok: false; error: string };
 
-async function sessionContext() {
-  const { supabase, session } = await getActionSession();
+async function writeSessionContext() {
+  const { supabase, session } = await getActionSessionWith("finances:funds:write");
+  return { supabase, churchId: session.churchId };
+}
+
+async function deleteSessionContext() {
+  const { supabase, session } = await getActionSessionWith("finances:funds:delete");
   return { supabase, churchId: session.churchId };
 }
 
@@ -56,7 +61,7 @@ export async function saveFundAction(
     const validationError = validateFundInput(input);
     if (validationError) return { ok: false, error: validationError };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await writeSessionContext();
     await saveFund(supabase, churchId, input);
     revalidateFundsCatalog(churchId);
     revalidatePath("/finances/funds");
@@ -77,7 +82,7 @@ export async function deleteFundAction(
     const fundId = String(formData.get("fundId") ?? "").trim();
     if (!fundId) return { ok: false, error: "Fondo no válido." };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await deleteSessionContext();
     await deleteFund(supabase, churchId, fundId);
     revalidateFundsCatalog(churchId);
     revalidatePath("/finances/funds");
@@ -98,7 +103,7 @@ export async function setPrimaryFundAction(
     const fundId = String(formData.get("fundId") ?? "").trim();
     if (!fundId) return { ok: false, error: "Fondo no válido." };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await writeSessionContext();
     await setPrimaryFund(supabase, churchId, fundId);
     revalidateFundsCatalog(churchId);
     revalidatePath("/finances/funds");
