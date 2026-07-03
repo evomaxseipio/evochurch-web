@@ -1,28 +1,9 @@
-/** Textos de UI — no modifican app_users_role ni app_permissions en BD. */
+/** UI de matriz de permisos. Metadatos de roles → role_config en BD (ver role-config.ts). */
 
-export const ROLE_UI_SUMMARY: Record<number, string> = {
-  1: "Acceso total a todas las funciones",
-  2: "Miembros, ministerios y configuración básica",
-  3: "Gestión financiera",
-  4: "Liderazgo pastoral, miembros y ministerios",
-  10: "Ministerios asignados (ABAC como líder)",
-};
-
-export const ROLE_UI_COLORS: Record<number, string> = {
-  1: "#7C3AED",
-  2: "#0891B2",
-  3: "#059669",
-  4: "#CA8A04",
-  10: "#EA580C",
-};
-
-export function roleUiSummary(appRoleId: number): string {
-  return ROLE_UI_SUMMARY[appRoleId] ?? "";
-}
-
-export function roleUiColor(appRoleId: number): string {
-  return ROLE_UI_COLORS[appRoleId] ?? "var(--primary)";
-}
+export {
+  roleDisplayColor as roleUiColor,
+  roleDisplaySummary as roleUiSummary,
+} from "@/lib/roles/role-config";
 
 /** Módulos visibles en la matriz (como el mock). */
 export const MATRIX_MODULES = [
@@ -83,7 +64,12 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "comunicacion:delete": "Eliminar anuncios y mensajes",
   "dashboard:read": "Ver dashboard",
   "settings:read": "Ver configuración propia",
-  "settings:catalogs": "Editar catálogos (tipos de ingreso y gasto)",
+  "settings:expense_types:read": "Ver tipos de gasto",
+  "settings:expense_types:write": "Editar tipos de gasto",
+  "settings:expense_types:delete": "Eliminar tipos de gasto",
+  "settings:income_types:read": "Ver tipos de ingreso",
+  "settings:income_types:write": "Editar tipos de ingreso",
+  "settings:income_types:delete": "Eliminar tipos de ingreso",
   "admin_users:manage": "Gestionar usuarios del sistema",
   "roles:manage": "Editar roles y permisos por iglesia",
 };
@@ -124,7 +110,8 @@ export const MODULE_ACTION_COLUMN_LABELS: Record<
   },
   settings: {
     read: "Ver",
-    write: "Catálogos",
+    write: "Editar",
+    delete: "Eliminar",
   },
   admin_users: {
     write: "Gestionar",
@@ -160,8 +147,14 @@ export const MODULE_ACTION_COLUMN_LABELS: Record<
 };
 
 export const MODULE_MATRIX_NOTES: Record<string, string> = {
+  members:
+    "Ver solo permite listar y abrir perfiles en lectura. Editar y Eliminar son permisos aparte. Registrar contribuciones desde Miembros usa Finanzas → Contribuciones.",
   ministerios:
     "Gestionar permite crear, editar y eliminar cualquier ministerio. Como líder aplica ABAC: el usuario solo modifica ministerios donde su perfil figura en leader_profile_ids. Ver es obligatorio para acceder al módulo.",
+  finances:
+    "Cada fila (Fondos, Transacciones, Contribuciones) tiene permisos independientes por columna.",
+  settings:
+    "Tipos de gasto e ingreso son permisos separados. Configuración y perfil solo requiere Ver.",
 };
 
 export function moduleMatrixNote(module: string): string | null {

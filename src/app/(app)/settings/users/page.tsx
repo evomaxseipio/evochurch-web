@@ -6,6 +6,7 @@ import {
   toAdminUserRow,
 } from "@/lib/admin-users/parse";
 import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
+import { fetchAssignableRoles } from "@/lib/services/roles";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function UsersSettingsPage() {
@@ -30,9 +31,13 @@ export default async function UsersSettingsPage() {
   const supabase = await createClient();
   let error: string | null = null;
   let users: Awaited<ReturnType<typeof fetchChurchAuthUsers>> = [];
+  let assignableRoles: Awaited<ReturnType<typeof fetchAssignableRoles>> = [];
 
   try {
-    users = await fetchChurchAuthUsers(supabase, adminSession.churchId);
+    [users, assignableRoles] = await Promise.all([
+      fetchChurchAuthUsers(supabase, adminSession.churchId),
+      fetchAssignableRoles(supabase, adminSession.churchId),
+    ]);
   } catch (e) {
     error =
       e instanceof Error ? e.message : "No se pudieron cargar los usuarios.";
@@ -53,6 +58,7 @@ export default async function UsersSettingsPage() {
     <AdminUsersListView
       rows={users.map(toAdminUserRow)}
       stats={computeChurchAuthUsersStats(users)}
+      assignableRoles={assignableRoles}
     />
   );
 }

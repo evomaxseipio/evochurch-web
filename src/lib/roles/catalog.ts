@@ -46,6 +46,25 @@ export const MINISTERIOS_RESOURCE_DEFS = [
   },
 ] as const;
 
+/** Catálogos de configuración — una fila por recurso (como finanzas). */
+export const SETTINGS_RESOURCE_DEFS = [
+  {
+    key: "expense_types",
+    label: "Tipos de gasto",
+    actions: ["read", "write", "delete"],
+  },
+  {
+    key: "income_types",
+    label: "Tipos de ingreso",
+    actions: ["read", "write", "delete"],
+  },
+  {
+    key: "profile",
+    label: "Configuración y perfil",
+    actions: ["read"],
+  },
+] as const;
+
 /** Módulos con una fila y acciones en columnas (como finanzas). */
 export const MODULE_MATRIX_RESOURCE_DEFS: Record<
   string,
@@ -56,9 +75,6 @@ export const MODULE_MATRIX_RESOURCE_DEFS: Record<
   eventos: [{ key: "eventos", label: "Eventos", actions: ["read", "write", "delete"] }],
   comunicacion: [
     { key: "comunicacion", label: "Comunicación", actions: ["read", "write", "delete"] },
-  ],
-  settings: [
-    { key: "settings", label: "Configuración", actions: ["read", "write"] },
   ],
   admin_users: [
     { key: "admin_users", label: "Usuarios admin", actions: ["write"] },
@@ -140,6 +156,23 @@ export function applyStandardPermissionRules(
 ): void {
   const module = key.split(":")[0];
   const crudModules = ["members", "eventos", "comunicacion"];
+  const settingsCatalogResources = ["expense_types", "income_types"] as const;
+
+  if (settingsCatalogResources.some((r) => key.startsWith(`settings:${r}:`))) {
+    const resource = key.split(":")[1];
+    const readKey = `settings:${resource}:read` as PermissionKey;
+    if (checked) {
+      if (key.endsWith(":write") || key.endsWith(":delete")) {
+        draft.add(readKey);
+      }
+      return;
+    }
+    if (key.endsWith(":read")) {
+      draft.delete(`settings:${resource}:write` as PermissionKey);
+      draft.delete(`settings:${resource}:delete` as PermissionKey);
+    }
+    return;
+  }
 
   if (crudModules.some((m) => key.startsWith(`${m}:`))) {
     if (checked) {
@@ -154,14 +187,64 @@ export function applyStandardPermissionRules(
     }
     return;
   }
+}
 
-  if (key === "settings:catalogs" && checked) {
-    draft.add("settings:read");
-    return;
+const CRUD_MODULES = ["members", "eventos", "comunicacion"] as const;
+
+const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types"] as const;
+
+const FINANCE_RESOURCES = ["funds", "transactions", "contributions"] as const;
+
+const FINANCE_ACTIONS = [
+  "write",
+  "delete",
+  "export",
+  "authorize",
+] as const;
+
+/**
+ * Normaliza el draft antes de persistir: cada acción es independiente en BD.
+ * Quita write/delete/export/authorize huérfanos si falta read del mismo recurso.
+ */
+export function sanitizePermissionDraftForSave(
+  keys: Iterable<PermissionKey>,
+): PermissionKey[] {
+  const set = new Set(keys);
+
+  for (const module of CRUD_MODULES) {
+    const readKey = `${module}:read` as PermissionKey;
+    if (!set.has(readKey)) {
+      set.delete(`${module}:write` as PermissionKey);
+      set.delete(`${module}:delete` as PermissionKey);
+    }
   }
-  if (key === "settings:read" && !checked) {
-    draft.delete("settings:catalogs");
+
+  if (set.has("ministerios:write") || set.has("ministerios:write_own")) {
+    set.add("ministerios:read");
   }
+  if (!set.has("ministerios:read")) {
+    set.delete("ministerios:write");
+    set.delete("ministerios:write_own");
+  }
+
+  for (const resource of SETTINGS_CATALOG_RESOURCES) {
+    const readKey = `settings:${resource}:read` as PermissionKey;
+    if (!set.has(readKey)) {
+      set.delete(`settings:${resource}:write` as PermissionKey);
+      set.delete(`settings:${resource}:delete` as PermissionKey);
+    }
+  }
+
+  for (const resource of FINANCE_RESOURCES) {
+    const readKey = `finances:${resource}:read` as PermissionKey;
+    if (set.has(readKey)) continue;
+    for (const action of FINANCE_ACTIONS) {
+      if (resource !== "transactions" && action === "authorize") continue;
+      set.delete(`finances:${resource}:${action}` as PermissionKey);
+    }
+  }
+
+  return [...set].sort();
 }
 
 /** Al guardar la matriz: write / write_own implican read; sin read no hay escritura. */
@@ -196,11 +279,18 @@ export function ministeriosPermissionKey(action: string): PermissionKey {
   return `ministerios:${action}` as PermissionKey;
 }
 
+export function settingsPermissionKey(
+  resource: string,
+  action: string,
+): PermissionKey {
+  if (resource === "profile" && action === "read") return "settings:read";
+  return `settings:${resource}:${action}` as PermissionKey;
+}
+
 export function moduleMatrixPermissionKey(
   module: string,
   action: string,
 ): PermissionKey {
-  if (module === "settings" && action === "write") return "settings:catalogs";
   if (module === "admin_users" && action === "write") return "admin_users:manage";
   if (module === "roles" && action === "write") return "roles:manage";
   return `${module}:${action}` as PermissionKey;
@@ -277,6 +367,24 @@ export function groupMatrixCatalog(catalog: AppPermissionRow[]): MatrixModuleGro
             def,
             byKey,
             (action) => ministeriosPermissionKey(action),
+          ),
+      );
+      const permissions = resources.flatMap((r) =>
+        Object.values(r.permissionsByAction).filter(
+          (row): row is AppPermissionRow => row != null,
+        ),
+      );
+      return { module, permissions, resources };
+    }
+
+    if (module === "settings") {
+      const resources: MatrixResourceGroup[] = SETTINGS_RESOURCE_DEFS.map(
+        (def) =>
+          buildResourceGroup(
+            "settings",
+            def,
+            byKey,
+            (action) => settingsPermissionKey(def.key, action),
           ),
       );
       const permissions = resources.flatMap((r) =>

@@ -1,11 +1,18 @@
 "use client";
 
 import {
+  deactivateChurchRoleAction,
   setChurchRolePermissionsAction,
+  type DeactivateRoleActionResult,
   type RolePermissionsActionResult,
 } from "@/app/(app)/settings/roles/actions";
 import { Icons } from "@/components/icons";
+import { RoleCardActionMenu } from "@/components/settings/role-card-action-menu";
+import { RoleFormDrawer } from "@/components/settings/role-form-drawer";
+import { RoleUsersDialog } from "@/components/settings/role-users-dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useActionToast } from "@/hooks/use-action-toast";
+import type { ChurchAuthUser } from "@/lib/admin-users/types";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
   MODULE_COLORS,
@@ -16,6 +23,7 @@ import {
   applyMinistryPermissionRules,
   applyStandardPermissionRules,
   groupMatrixCatalog,
+  sanitizePermissionDraftForSave,
   isActionApplicable,
   matrixResourcePermissionPattern,
   moduleLabel,
@@ -28,8 +36,11 @@ import {
   roleUiSummary,
 } from "@/lib/roles/display";
 import type { AppPermissionRow, ChurchRolePermissions } from "@/lib/roles/types";
-import { ADMIN_APP_ROLE_ID } from "@/lib/roles/types";
-import { toast } from "@/lib/toast";
+import {
+  isAdminRole,
+  isSystemLockedRole,
+  canDeactivateRole,
+} from "@/lib/roles/keys";
 import { useRouter } from "next/navigation";
 import {
   useActionState,
@@ -41,6 +52,7 @@ import {
 } from "react";
 
 const saveInitial: RolePermissionsActionResult | null = null;
+const deactivateInitial: DeactivateRoleActionResult | null = null;
 
 function permissionSet(keys: PermissionKey[]): Set<PermissionKey> {
   return new Set(keys);
@@ -55,7 +67,7 @@ function setsEqual(a: Set<PermissionKey>, b: Set<PermissionKey>): boolean {
 }
 
 function defaultSelectedRoleId(roles: ChurchRolePermissions[]): number | null {
-  const editable = roles.find((r) => r.appRoleId !== ADMIN_APP_ROLE_ID);
+  const editable = roles.find((r) => !isSystemLockedRole(r));
   return editable?.appRoleId ?? roles[0]?.appRoleId ?? null;
 }
 
@@ -64,11 +76,13 @@ export function RolesPermissionsView({
   catalog,
   canManage,
   churchName,
+  users = [],
 }: {
   roles: ChurchRolePermissions[];
   catalog: AppPermissionRow[];
   canManage: boolean;
   churchName: string | null;
+  users?: ChurchAuthUser[];
 }) {
   const router = useRouter();
   const churchLabel = churchName?.trim() || "esta iglesia";
@@ -78,6 +92,16 @@ export function RolesPermissionsView({
   );
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
     () => new Set(),
+  );
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
+  const [editRole, setEditRole] = useState<ChurchRolePermissions | null>(null);
+  const [usersDialogRole, setUsersDialogRole] =
+    useState<ChurchRolePermissions | null>(null);
+  const [deactivateRole, setDeactivateRole] = useState<ChurchRolePermissions | null>(
+    null,
+  );
+  const [pendingSelectRoleId, setPendingSelectRoleId] = useState<number | null>(
+    null,
   );
   const [savedByRole, setSavedByRole] = useState<
     Record<number, Set<PermissionKey>>
@@ -96,8 +120,28 @@ export function RolesPermissionsView({
     setChurchRolePermissionsAction,
     saveInitial,
   );
+  const [deactivateState, deactivateAction, deactivatePending] = useActionState(
+    deactivateChurchRoleAction,
+    deactivateInitial,
+  );
   useActionToast(saveState, {
     successMessage: "Permisos guardados correctamente.",
+  });
+  useActionToast(deactivateState, {
+    successMessage: "Rol inactivado correctamente.",
+    onSuccess: () => {
+      if (deactivateRole && selectedRoleId === deactivateRole.appRoleId) {
+        const next = roles.find(
+          (r) => r.appRoleId !== deactivateRole.appRoleId && !isSystemLockedRole(r),
+        ) ?? roles.find((r) => r.appRoleId !== deactivateRole.appRoleId);
+        if (next) {
+          setSelectedRoleId(next.appRoleId);
+          setDraft(permissionSet(next.permissions));
+        }
+      }
+      setDeactivateRole(null);
+      router.refresh();
+    },
   });
 
   const selectedRole = useMemo(
@@ -105,8 +149,9 @@ export function RolesPermissionsView({
     [roles, selectedRoleId],
   );
 
-  const isAdminRole = selectedRole?.appRoleId === ADMIN_APP_ROLE_ID;
-  const readOnly = !canManage || isAdminRole;
+  const isAdminRoleSelected = selectedRole ? isAdminRole(selectedRole) : false;
+  const isLockedRole = selectedRole ? isSystemLockedRole(selectedRole) : false;
+  const readOnly = !canManage || isLockedRole;
   const savedForSelected = selectedRoleId
     ? (savedByRole[selectedRoleId] ?? permissionSet([]))
     : permissionSet([]);
@@ -159,9 +204,13 @@ export function RolesPermissionsView({
 
   const handleSave = () => {
     if (!selectedRoleId || readOnly || !isDirty) return;
+    const keys = sanitizePermissionDraftForSave(draft);
     const formData = new FormData();
     formData.set("appRoleId", String(selectedRoleId));
-    formData.set("permissionKeys", JSON.stringify([...draft]));
+    if (selectedRole?.roleKind) {
+      formData.set("roleKind", selectedRole.roleKind);
+    }
+    formData.set("permissionKeys", JSON.stringify(keys));
     startTransition(() => saveAction(formData));
   };
 
@@ -181,6 +230,38 @@ export function RolesPermissionsView({
       ),
     );
   }, [roles]);
+
+  useEffect(() => {
+    if (pendingSelectRoleId == null) return;
+    const role = roles.find((r) => r.appRoleId === pendingSelectRoleId);
+    if (!role) return;
+    setSelectedRoleId(role.appRoleId);
+    setDraft(permissionSet(role.permissions));
+    setExpandedModules(new Set());
+    setPendingSelectRoleId(null);
+  }, [roles, pendingSelectRoleId]);
+
+  const handleRoleCreated = useCallback((appRoleId: number) => {
+    setPendingSelectRoleId(appRoleId);
+  }, []);
+
+  const usersByRole = useMemo(() => {
+    const map = new Map<number, ChurchAuthUser[]>();
+    for (const user of users) {
+      if (user.appRoleId == null) continue;
+      const list = map.get(user.appRoleId) ?? [];
+      list.push(user);
+      map.set(user.appRoleId, list);
+    }
+    return map;
+  }, [users]);
+
+  const handleDeactivateRole = () => {
+    if (!deactivateRole) return;
+    const formData = new FormData();
+    formData.set("appRoleId", String(deactivateRole.appRoleId));
+    startTransition(() => deactivateAction(formData));
+  };
 
   return (
     <div className="roles-page-root">
@@ -241,67 +322,84 @@ export function RolesPermissionsView({
           <div className="roles-card-list">
             {roles.map((role) => {
               const selected = role.appRoleId === selectedRoleId;
-              const isSystem = role.appRoleId === ADMIN_APP_ROLE_ID;
-              const color = roleUiColor(role.appRoleId);
-              const summary = roleUiSummary(role.appRoleId);
+              const isLockedSystem = isSystemLockedRole(role);
+              const color = roleUiColor({
+                roleConfig: role.roleConfig,
+                description: role.description,
+              });
+              const summary =
+                roleUiSummary({
+                  roleConfig: role.roleConfig,
+                  description: role.description,
+                  isCustom: role.isCustom,
+                }) || "";
 
               return (
-                <button
+                <div
                   key={role.appRoleId}
-                  type="button"
                   className={`roles-card${selected ? " is-selected" : ""}`}
-                  onClick={() => selectRole(role.appRoleId)}
                 >
-                  <span
-                    className="roles-card-icon"
-                    style={{
-                      color,
-                      background: `color-mix(in srgb, ${color} 12%, transparent)`,
-                    }}
+                  {canManage ? (
+                    <RoleCardActionMenu
+                      showEdit={role.isCustom}
+                      showDeactivate={canDeactivateRole(role)}
+                      onEdit={
+                        role.isCustom
+                          ? () => setEditRole(role)
+                          : undefined
+                      }
+                      onViewUsers={() => setUsersDialogRole(role)}
+                      onDeactivate={
+                        canDeactivateRole(role)
+                          ? () => setDeactivateRole(role)
+                          : undefined
+                      }
+                    />
+                  ) : null}
+                  <button
+                    type="button"
+                    className="roles-card-hit"
+                    onClick={() => selectRole(role.appRoleId)}
                   >
-                    <Icons.shield width={20} stroke={color} />
-                  </span>
-                  <span className="roles-card-main">
-                    <span className="roles-card-name-row">
-                      <span className="roles-card-name">{role.appRoleName}</span>
-                      {isSystem ? (
-                        <span className="roles-chip-system">Sistema</span>
+                    <span
+                      className="roles-card-icon"
+                      style={{
+                        color,
+                        background: `color-mix(in srgb, ${color} 12%, transparent)`,
+                      }}
+                    >
+                      <Icons.shield width={20} stroke={color} />
+                    </span>
+                    <span className="roles-card-main">
+                      <span className="roles-card-name-row">
+                        <span className="roles-card-name">{role.appRoleName}</span>
+                        {isLockedSystem ? (
+                          <span className="roles-chip-system">Sistema</span>
+                        ) : role.isCustom ? (
+                          <span className="roles-chip-custom">Personalizado</span>
+                        ) : null}
+                      </span>
+                      {summary ? (
+                        <span className="roles-card-desc">{summary}</span>
                       ) : null}
                     </span>
-                    {summary ? (
-                      <span className="roles-card-desc">{summary}</span>
-                    ) : null}
-                  </span>
-                  <span className="roles-card-aside">
-                    <span className="roles-card-count">
-                      {role.userCount}{" "}
-                      {role.userCount === 1 ? "usuario" : "usuarios"}
+                    <span className="roles-card-aside">
+                      <span className="roles-card-count">
+                        {role.userCount}{" "}
+                        {role.userCount === 1 ? "usuario" : "usuarios"}
+                      </span>
+                      {!isLockedSystem ? (
+                        <Icons.arrowRight
+                          width={16}
+                          stroke={selected ? "var(--primary)" : "var(--muted)"}
+                          className="roles-card-chevron"
+                        />
+                      ) : null}
                     </span>
-                    {!isSystem ? (
-                      <Icons.arrowRight
-                        width={16}
-                        stroke={selected ? "var(--primary)" : "var(--muted)"}
-                        className="roles-card-chevron"
-                      />
-                    ) : null}
-                  </span>
-                </button>
+                  </button>
+                </div>
               );
             })}
-
-            <div className="roles-card roles-card-create">
-              <span className="roles-card-icon roles-card-icon-create">
-                <Icons.plus width={18} stroke="var(--primary)" />
-              </span>
-              <span className="roles-card-main">
-                <span className="roles-card-name roles-card-name-create">
-                  Crear rol
-                </span>
-                <span className="roles-card-desc">
-                  Próximamente: crear nuevos roles del sistema
-                </span>
-              </span>
-            </div>
           </div>
         </aside>
 
@@ -328,26 +426,25 @@ export function RolesPermissionsView({
                       </span>
                     </h2>
                     <p className="muted tiny" style={{ margin: "6px 0 0" }}>
-                      Edita los permisos que tendrá este rol en {churchLabel}.
+                      {isLockedRole
+                        ? "Los permisos de este rol del sistema son fijos y no se pueden modificar."
+                        : `Edita los permisos que tendrá este rol en ${churchLabel}.`}
                     </p>
                   </div>
                   <div className="roles-matrix-actions">
-                    {isDirty && canManage && !isAdminRole ? (
+                    {isDirty && canManage && !isLockedRole ? (
                       <span className="roles-chip-dirty">Cambios sin guardar</span>
                     ) : null}
-                    <button
-                      type="button"
-                      className="btn primary sm"
-                      onClick={() =>
-                        toast.info(
-                          "Próximamente",
-                          "Crear roles estará disponible pronto.",
-                        )
-                      }
-                    >
-                      <Icons.plus width={16} stroke="currentColor" />
-                      Crear rol
-                    </button>
+                    {canManage ? (
+                      <button
+                        type="button"
+                        className="btn primary sm"
+                        onClick={() => setCreateDrawerOpen(true)}
+                      >
+                        <Icons.plus width={16} stroke="currentColor" />
+                        Crear rol
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -448,7 +545,7 @@ export function RolesPermissionsView({
                                     const perm =
                                       resource.permissionsByAction[col.action];
                                     const checked =
-                                      isAdminRole ||
+                                      isAdminRoleSelected ||
                                       (perm != null &&
                                         draft.has(perm.permissionKey));
 
@@ -508,7 +605,7 @@ export function RolesPermissionsView({
                                           const isActionCell =
                                             actionIdx === colIdx;
                                           const checked =
-                                            isAdminRole ||
+                                            isAdminRoleSelected ||
                                             draft.has(perm.permissionKey);
 
                                           return (
@@ -564,7 +661,7 @@ export function RolesPermissionsView({
                 })}
               </div>
 
-              {canManage && !isAdminRole ? (
+              {canManage && !isLockedRole ? (
                 <footer className="roles-matrix-footer">
                   <button
                     type="button"
@@ -591,6 +688,42 @@ export function RolesPermissionsView({
           )}
         </section>
       </div>
+
+      <RoleFormDrawer
+        mode="new"
+        open={createDrawerOpen}
+        onClose={() => setCreateDrawerOpen(false)}
+        onCreated={handleRoleCreated}
+      />
+
+      <RoleFormDrawer
+        mode="edit"
+        role={editRole}
+        open={editRole != null}
+        onClose={() => setEditRole(null)}
+      />
+
+      <RoleUsersDialog
+        roleName={usersDialogRole?.appRoleName ?? ""}
+        users={
+          usersDialogRole
+            ? (usersByRole.get(usersDialogRole.appRoleId) ?? [])
+            : []
+        }
+        open={usersDialogRole != null}
+        onClose={() => setUsersDialogRole(null)}
+      />
+
+      {deactivateRole ? (
+        <ConfirmDialog
+          title="Inactivar rol"
+          message="El rol dejará de estar disponible para nuevas asignaciones. Solo puedes inactivar roles sin usuarios asignados."
+          itemName={deactivateRole.appRoleName}
+          pending={deactivatePending}
+          onClose={() => setDeactivateRole(null)}
+          onConfirm={handleDeactivateRole}
+        />
+      ) : null}
     </div>
   );
 }

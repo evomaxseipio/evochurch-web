@@ -1,6 +1,6 @@
 "use server";
 
-import { getActionSessionWith } from "@/lib/auth/permissions";
+import { getActionSessionWith } from "@/lib/auth/permissions-server";
 import type { CatalogItemInput } from "@/lib/catalog/types";
 import {
   deleteIncomeTypeCatalogItem,
@@ -13,8 +13,17 @@ export type CatalogActionResult =
   | { ok: true }
   | { ok: false; error: string };
 
-async function sessionContext() {
-  const { supabase, session } = await getActionSessionWith("settings:catalogs");
+async function writeSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "settings:income_types:write",
+  );
+  return { supabase, churchId: session.churchId };
+}
+
+async function deleteSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "settings:income_types:delete",
+  );
   return { supabase, churchId: session.churchId };
 }
 
@@ -50,7 +59,7 @@ export async function saveIncomeTypeAction(
     const validationError = validateCatalogInput(input);
     if (validationError) return { ok: false, error: validationError };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await writeSessionContext();
     await saveIncomeTypeCatalogItem(supabase, churchId, input);
     revalidateIncomeTypesCatalog(churchId);
     revalidatePath("/settings/income-types");
@@ -84,7 +93,7 @@ export async function deleteIncomeTypeAction(
       };
     }
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await deleteSessionContext();
     await deleteIncomeTypeCatalogItem(supabase, churchId, id);
     revalidateIncomeTypesCatalog(churchId);
     revalidatePath("/settings/income-types");

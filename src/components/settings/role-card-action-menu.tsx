@@ -1,10 +1,10 @@
 "use client";
 
 import { Icons } from "@/components/icons";
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
-function CrudMenuItem({
+function MenuItem({
   icon,
   label,
   onClick,
@@ -53,16 +53,18 @@ function CrudMenuItem({
   );
 }
 
-export function CrudActionMenu({
+export function RoleCardActionMenu({
   onEdit,
-  onDelete,
-  onResetAccess,
-  resetAccessPending = false,
+  onViewUsers,
+  onDeactivate,
+  showEdit = false,
+  showDeactivate = false,
 }: {
   onEdit?: () => void;
-  onDelete?: () => void;
-  onResetAccess?: () => void;
-  resetAccessPending?: boolean;
+  onViewUsers: () => void;
+  onDeactivate?: () => void;
+  showEdit?: boolean;
+  showDeactivate?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{
@@ -82,21 +84,22 @@ export function CrudActionMenu({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const handleToggle = () => {
+  const handleToggle = (e: MouseEvent) => {
+    e.stopPropagation();
     if (!open && btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
       const menuItems =
-        (onEdit ? 1 : 0) + (onResetAccess ? 1 : 0) + (onDelete ? 1 : 0);
+        (showEdit && onEdit ? 1 : 0) + 1 + (showDeactivate && onDeactivate ? 1 : 0);
       const menuH = 44 * menuItems + 20;
-      const menuW = 180;
+      const menuW = 196;
       const below = window.innerHeight - r.bottom;
-      const toLeft = window.innerWidth - r.left;
+      const toLeft = r.left;
       setPos({
         top: below < menuH + 16 ? "auto" : r.bottom + 6,
         bottom:
           below < menuH + 16 ? window.innerHeight - r.top + 6 : "auto",
-        left: toLeft < menuW + 8 ? "auto" : r.left,
-        right: toLeft < menuW + 8 ? window.innerWidth - r.right : "auto",
+        left: toLeft < menuW + 8 ? 8 : "auto",
+        right: toLeft < menuW + 8 ? "auto" : window.innerWidth - r.right,
       });
     }
     setOpen((o) => !o);
@@ -105,12 +108,14 @@ export function CrudActionMenu({
   const close = () => setOpen(false);
 
   return (
-    <div style={{ display: "inline-block" }}>
+    <div className="roles-card-action-menu">
       <button
         ref={btnRef}
         type="button"
-        className="btn ghost icon-only sm"
-        title="Acciones"
+        className="btn ghost icon-only sm roles-card-menu-btn"
+        title="Acciones del rol"
+        aria-label="Acciones del rol"
+        aria-expanded={open}
         onClick={handleToggle}
       >
         <Icons.menu width={16} />
@@ -131,7 +136,7 @@ export function CrudActionMenu({
               left: pos.left,
               right: pos.right,
               zIndex: 201,
-              minWidth: 180,
+              minWidth: 196,
               padding: 6,
               textAlign: "left",
               background: "var(--bg-1)",
@@ -139,9 +144,10 @@ export function CrudActionMenu({
               borderRadius: 12,
               boxShadow: "var(--shadow-3)",
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {onEdit ? (
-              <CrudMenuItem
+            {showEdit && onEdit ? (
+              <MenuItem
                 icon={<Icons.edit width={15} />}
                 label="Editar"
                 onClick={() => {
@@ -150,18 +156,15 @@ export function CrudActionMenu({
                 }}
               />
             ) : null}
-            {onResetAccess ? (
-              <CrudMenuItem
-                icon={<Icons.settings width={15} />}
-                label="Restablecer acceso"
-                onClick={() => {
-                  if (resetAccessPending) return;
-                  close();
-                  onResetAccess();
-                }}
-              />
-            ) : null}
-            {onDelete ? (
+            <MenuItem
+              icon={<Icons.users width={15} />}
+              label="Ver usuarios"
+              onClick={() => {
+                close();
+                onViewUsers();
+              }}
+            />
+            {showDeactivate && onDeactivate ? (
               <>
                 <div
                   style={{
@@ -170,13 +173,13 @@ export function CrudActionMenu({
                     margin: "4px 6px",
                   }}
                 />
-                <CrudMenuItem
+                <MenuItem
                   icon={<Icons.trash width={15} />}
-                  label="Eliminar"
+                  label="Inactivar"
                   danger
                   onClick={() => {
                     close();
-                    onDelete();
+                    onDeactivate();
                   }}
                 />
               </>

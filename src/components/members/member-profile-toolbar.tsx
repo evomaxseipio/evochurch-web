@@ -52,6 +52,8 @@ export function MemberProfileToolbar({
           <Icons.check size={16} />
           {pending ? "Guardando…" : "Guardar cambios"}
         </button>
+      ) : formId ? (
+        <span className="tiny muted">Solo lectura</span>
       ) : null}
     </div>
   );

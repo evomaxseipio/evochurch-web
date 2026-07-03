@@ -48,6 +48,8 @@ export function CatalogTypesListView({
   saveAction,
   deleteAction,
   activeHint,
+  canWrite = false,
+  canDelete = false,
 }: {
   rows: CatalogRow[];
   stats: CatalogStats;
@@ -68,6 +70,8 @@ export function CatalogTypesListView({
     formData: FormData,
   ) => Promise<CatalogActionResult>;
   activeHint: string;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }) {
   const router = useRouter();
   const deleteInitial: CatalogActionResult | null = null;
@@ -289,13 +293,15 @@ export function CatalogTypesListView({
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="btn primary"
-            onClick={() => setDrawer({ mode: "new", row: null })}
-          >
-            <Icons.plus width={14} /> {newLabel}
-          </button>
+          {canWrite ? (
+            <button
+              type="button"
+              className="btn primary"
+              onClick={() => setDrawer({ mode: "new", row: null })}
+            >
+              <Icons.plus width={14} /> {newLabel}
+            </button>
+          ) : null}
         </div>
 
         {filtered.length > 0 ? (
@@ -303,9 +309,11 @@ export function CatalogTypesListView({
             <table className="table">
               <thead>
                 <tr>
-                  <th className="col-actions" style={{ width: 44 }}>
-                    Acciones
-                  </th>
+                  {canWrite || canDelete ? (
+                    <th className="col-actions" style={{ width: 44 }}>
+                      Acciones
+                    </th>
+                  ) : null}
                   <th>Tipo</th>
                   <th>Descripción</th>
                   <th>Estado</th>
@@ -314,14 +322,22 @@ export function CatalogTypesListView({
               <tbody>
                 {pageRows.map((it) => (
                   <tr key={it.id}>
-                    <td className="col-actions">
-                      <CrudActionMenu
-                        onEdit={() => setDrawer({ mode: "edit", row: it })}
-                        onDelete={
-                          it.isLocked ? undefined : () => setConfirm(it)
-                        }
-                      />
-                    </td>
+                    {canWrite || canDelete ? (
+                      <td className="col-actions">
+                        <CrudActionMenu
+                          onEdit={
+                            canWrite
+                              ? () => setDrawer({ mode: "edit", row: it })
+                              : undefined
+                          }
+                          onDelete={
+                            canDelete && !it.isLocked
+                              ? () => setConfirm(it)
+                              : undefined
+                          }
+                        />
+                      </td>
+                    ) : null}
                     <td>
                       <span style={{ fontWeight: 600 }}>{it.name}</span>
                       {it.isLocked ? (
@@ -351,13 +367,15 @@ export function CatalogTypesListView({
             <div className="muted" style={{ marginBottom: 12 }}>
               Sin registros todavía
             </div>
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => setDrawer({ mode: "new", row: null })}
-            >
-              <Icons.plus width={14} /> {newLabel}
-            </button>
+            {canWrite ? (
+              <button
+                type="button"
+                className="btn primary"
+                onClick={() => setDrawer({ mode: "new", row: null })}
+              >
+                <Icons.plus width={14} /> {newLabel}
+              </button>
+            ) : null}
           </div>
         )}
 

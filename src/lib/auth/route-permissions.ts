@@ -11,8 +11,8 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/eventos": "eventos:read",
   "/comunicacion": "comunicacion:read",
   "/settings/users": "admin_users:manage",
-  "/settings/expenses": "settings:catalogs",
-  "/settings/income-types": "settings:catalogs",
+  "/settings/expenses": "settings:expense_types:read",
+  "/settings/income-types": "settings:income_types:read",
   "/settings/roles": "roles:manage",
   "/settings": "settings:read",
 };

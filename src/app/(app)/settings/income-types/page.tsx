@@ -1,9 +1,12 @@
 import { IncomeTypesListView } from "@/components/catalog/income-types-list-view";
 import { computeCatalogStats } from "@/lib/catalog/parse";
+import {
+  canDeleteSettingsCatalog,
+  canWriteSettingsCatalog,
+} from "@/lib/auth/settings-catalog-permissions";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchOperationalIncomeTypeCatalog } from "@/lib/services/income-types-catalog";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
 
 export default async function IncomeTypesPage() {
   const session = await requirePageAccess("/settings/income-types");
@@ -36,6 +39,8 @@ export default async function IncomeTypesPage() {
     <IncomeTypesListView
       rows={rows}
       stats={computeCatalogStats(rows)}
+      canWrite={canWriteSettingsCatalog(session.permissions, "income_types")}
+      canDelete={canDeleteSettingsCatalog(session.permissions, "income_types")}
     />
   );
 }

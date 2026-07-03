@@ -25,6 +25,7 @@ import type {
   AdminUserRow,
   ChurchAuthUsersStats,
 } from "@/lib/admin-users/types";
+import type { AssignableRole } from "@/lib/roles/types";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 import {
@@ -76,9 +77,11 @@ function exportLabel() {
 export function AdminUsersListView({
   rows,
   stats,
+  assignableRoles,
 }: {
   rows: AdminUserRow[];
   stats: ChurchAuthUsersStats;
+  assignableRoles: AssignableRole[];
 }) {
   const router = useRouter();
 
@@ -411,6 +414,7 @@ export function AdminUsersListView({
         open={drawer != null}
         mode={drawer?.mode ?? "new"}
         user={drawer?.user ?? null}
+        assignableRoles={assignableRoles}
         onClose={() => setDrawer(null)}
         onSaved={() => router.refresh()}
         onPasswordIssued={({ email, tempPassword }) =>

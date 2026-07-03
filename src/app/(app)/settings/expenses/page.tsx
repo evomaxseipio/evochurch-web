@@ -1,5 +1,9 @@
 import { ExpenseTypesListView } from "@/components/catalog/expense-types-list-view";
 import { computeCatalogStats } from "@/lib/catalog/parse";
+import {
+  canDeleteSettingsCatalog,
+  canWriteSettingsCatalog,
+} from "@/lib/auth/settings-catalog-permissions";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchAllExpenseTypes } from "@/lib/services/expense-types-catalog";
 import { createClient } from "@/lib/supabase/server";
@@ -34,6 +38,8 @@ export default async function ExpensesSettingsPage() {
     <ExpenseTypesListView
       rows={rows}
       stats={computeCatalogStats(rows)}
+      canWrite={canWriteSettingsCatalog(session.permissions, "expense_types")}
+      canDelete={canDeleteSettingsCatalog(session.permissions, "expense_types")}
     />
   );
 }

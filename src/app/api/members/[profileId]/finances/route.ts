@@ -1,4 +1,5 @@
 import { getAppSession } from "@/lib/auth/app-session";
+import { hasPermission } from "@/lib/auth/permissions";
 import {
   emptyMemberFinanceData,
   fetchMemberFinancePayload,
@@ -21,6 +22,9 @@ export async function GET(
   const session = await getAppSession();
   if (!session) {
     return NextResponse.json({ error: "Sesión no válida." }, { status: 401 });
+  }
+  if (!hasPermission(session, "finances:contributions:read")) {
+    return NextResponse.json({ error: "Acceso denegado." }, { status: 403 });
   }
 
   const supabase = await createClient();

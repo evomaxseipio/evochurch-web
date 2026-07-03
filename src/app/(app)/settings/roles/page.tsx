@@ -27,11 +27,12 @@ export default async function RolesSettingsPage() {
   let error: string | null = null;
   let roles: Awaited<ReturnType<typeof fetchChurchRolesWithPermissions>> = [];
   let catalog: Awaited<ReturnType<typeof fetchAppPermissions>> = [];
+  let users: Awaited<ReturnType<typeof fetchChurchAuthUsers>> = [];
 
   try {
     let userCounts: Record<number, number> = {};
     if (hasPermission(session, "admin_users:manage")) {
-      const users = await fetchChurchAuthUsers(supabase, session.churchId);
+      users = await fetchChurchAuthUsers(supabase, session.churchId);
       userCounts = countUsersByRole(users);
     }
 
@@ -61,6 +62,7 @@ export default async function RolesSettingsPage() {
       catalog={catalog}
       canManage={canManage}
       churchName={session.churchName}
+      users={users}
     />
   );
 }

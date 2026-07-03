@@ -1627,6 +1627,14 @@ body {
   padding-right: 4px;
 }
 .roles-card {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface);
+  transition: border-color 0.15s, background 0.15s;
+}
+.roles-card-hit {
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) auto;
   grid-template-rows: auto auto;
@@ -1634,16 +1642,37 @@ body {
   row-gap: 2px;
   align-items: center;
   width: 100%;
-  padding: 14px 16px;
-  border: 1px solid var(--hairline);
+  padding: 14px 44px 14px 16px;
+  border: 0;
   border-radius: 12px;
-  background: var(--surface);
+  background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
   appearance: none;
   font: inherit;
   color: inherit;
+}
+.roles-card-action-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+.roles-card-menu-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+}
+.roles-card:hover {
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--hairline));
+}
+.roles-card.is-selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+[data-theme="dark"] .roles-card.is-selected {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
 }
 .roles-card-icon {
   grid-row: 1 / span 2;
@@ -1663,6 +1692,9 @@ body {
   gap: 3px;
   align-self: center;
 }
+.roles-card:hover .roles-card-hit {
+  background: transparent;
+}
 .roles-card-aside {
   grid-column: 3;
   grid-row: 1 / span 2;
@@ -1672,40 +1704,6 @@ body {
   flex-shrink: 0;
   align-self: center;
   padding-left: 8px;
-}
-.roles-card-create {
-  cursor: default;
-  border: 1px dashed color-mix(in srgb, var(--primary) 45%, var(--hairline));
-  background: color-mix(in srgb, var(--primary) 4%, var(--surface));
-  margin-top: 6px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.roles-card-create .roles-card-main {
-  grid-column: auto;
-  grid-row: auto;
-}
-.roles-card-create .roles-card-icon {
-  grid-row: auto;
-}
-.roles-card:hover {
-  border-color: color-mix(in srgb, var(--primary) 25%, var(--hairline));
-}
-.roles-card.is-selected {
-  border-color: #3b82f6;
-  background: #eff6ff;
-}
-[data-theme="dark"] .roles-card.is-selected {
-  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
-  border-color: var(--primary);
-}
-.roles-card-create:hover { border-color: color-mix(in srgb, var(--primary) 45%, var(--hairline)); }
-.roles-card-icon-create {
-  background: color-mix(in srgb, var(--primary) 12%, transparent);
-  border-radius: 999px;
-  width: 44px;
-  height: 44px;
 }
 .roles-card-name-row {
   display: flex;
@@ -1718,9 +1716,6 @@ body {
   font-size: 14.5px;
   color: var(--fg);
   line-height: 1.25;
-}
-.roles-card-name-create {
-  color: var(--primary);
 }
 .roles-card-desc {
   font-size: 12.5px;
@@ -1754,6 +1749,16 @@ body {
 [data-theme="dark"] .roles-chip-system {
   background: color-mix(in srgb, #7c3aed 18%, transparent);
   color: #a78bfa;
+}
+
+.roles-chip-custom {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+  color: var(--success);
+  border: none;
 }
 
 .roles-chip-dirty {

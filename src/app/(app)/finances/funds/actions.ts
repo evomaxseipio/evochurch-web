@@ -1,6 +1,6 @@
 "use server";
 
-import { getActionSessionWith } from "@/lib/auth/permissions";
+import { getActionSessionWith } from "@/lib/auth/permissions-server";
 import type { FundInput } from "@/lib/funds/types";
 import {
   deleteFund,

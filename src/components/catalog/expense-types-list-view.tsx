@@ -31,14 +31,20 @@ const STAT_CARDS = [
 export function ExpenseTypesListView({
   rows,
   stats,
+  canWrite = false,
+  canDelete = false,
 }: {
   rows: ExpenseTypeRow[];
   stats: CatalogStats;
+  canWrite?: boolean;
+  canDelete?: boolean;
 }) {
   return (
     <CatalogTypesListView
       rows={rows}
       stats={stats}
+      canWrite={canWrite}
+      canDelete={canDelete}
       eyebrow="Configuración · Finanzas"
       title="Tipos de gasto"
       titleAccent="de la iglesia"

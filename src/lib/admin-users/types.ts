@@ -1,5 +1,6 @@
 export type AppUserRole = {
   appRoleId: number;
+  roleKey: string | null;
   appRoleName: string;
   description: string | null;
   isPrimary: boolean;
@@ -37,6 +38,7 @@ export type AdminUserInput = {
   email: string;
   password?: string;
   roleLabel: string;
+  roleKey?: string | null;
   appRoleId: number | null;
   isActive: boolean;
 };
@@ -50,6 +52,7 @@ export type AdminUserRow = {
   firstName: string;
   lastName: string;
   role: string;
+  appRoleId: number | null;
   lastLogin: string;
   active: boolean;
   isTempPassword: boolean;

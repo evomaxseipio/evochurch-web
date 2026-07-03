@@ -1,6 +1,6 @@
 "use server";
 
-import { getActionSessionWith } from "@/lib/auth/permissions";
+import { getActionSessionWith } from "@/lib/auth/permissions-server";
 import type { CatalogItemInput } from "@/lib/catalog/types";
 import {
   deleteExpenseType,
@@ -13,8 +13,17 @@ export type CatalogActionResult =
   | { ok: true }
   | { ok: false; error: string };
 
-async function sessionContext() {
-  const { supabase, session } = await getActionSessionWith("settings:catalogs");
+async function writeSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "settings:expense_types:write",
+  );
+  return { supabase, churchId: session.churchId };
+}
+
+async function deleteSessionContext() {
+  const { supabase, session } = await getActionSessionWith(
+    "settings:expense_types:delete",
+  );
   return { supabase, churchId: session.churchId };
 }
 
@@ -50,7 +59,7 @@ export async function saveExpenseTypeAction(
     const validationError = validateCatalogInput(input);
     if (validationError) return { ok: false, error: validationError };
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await writeSessionContext();
     await saveExpenseType(supabase, churchId, input);
     revalidateExpenseTypesCatalog(churchId);
     revalidatePath("/settings/expenses");
@@ -81,7 +90,7 @@ export async function deleteExpenseTypeAction(
       };
     }
 
-    const { supabase, churchId } = await sessionContext();
+    const { supabase, churchId } = await deleteSessionContext();
     await deleteExpenseType(supabase, churchId, id);
     revalidateExpenseTypesCatalog(churchId);
     revalidatePath("/settings/expenses");

@@ -2,7 +2,12 @@
 export const PERMISSION_KEYS = [
   "profile:read",
   "settings:read",
-  "settings:catalogs",
+  "settings:expense_types:read",
+  "settings:expense_types:write",
+  "settings:expense_types:delete",
+  "settings:income_types:read",
+  "settings:income_types:write",
+  "settings:income_types:delete",
   "dashboard:read",
   "members:read",
   "members:write",

@@ -91,41 +91,55 @@ export const MAIN_NAV: NavEntry[] = [
   },
 ];
 
-export const CONFIG_NAV: NavItem[] = [
+export const CONFIG_NAV: NavEntry[] = [
   {
-    id: "roles",
-    href: "/settings/roles",
-    label: "Roles y permisos",
-    icon: "star",
-    permission: "roles:manage",
-  },
-  {
-    id: "usuarios",
-    href: "/settings/users",
-    label: "Usuarios",
-    icon: "users",
-    permission: "admin_users:manage",
-  },
-  {
-    id: "gastos",
-    href: "/settings/expenses",
-    label: "Tipos de gasto",
-    icon: "wallet",
-    permission: "settings:catalogs",
-  },
-  {
-    id: "ingresos-tipos",
-    href: "/settings/income-types",
-    label: "Tipos de ingreso",
-    icon: "trendUp",
-    permission: "settings:catalogs",
-  },
-  {
-    id: "settings",
-    href: "/settings",
-    label: "Configuración",
+    id: "config-sistema",
+    label: "Configuración sistema",
     icon: "settings",
-    permission: "settings:read",
+    children: [
+      {
+        id: "gastos",
+        href: "/settings/expenses",
+        label: "Tipos de gasto",
+        icon: "wallet",
+        permission: "settings:expense_types:read",
+      },
+      {
+        id: "ingresos-tipos",
+        href: "/settings/income-types",
+        label: "Tipos de ingreso",
+        icon: "trendUp",
+        permission: "settings:income_types:read",
+      },
+    ],
+  },
+  {
+    id: "config-usuarios",
+    label: "Configuración usuarios",
+    icon: "users",
+    children: [
+      {
+        id: "usuarios",
+        href: "/settings/users",
+        label: "Usuarios sistema",
+        icon: "users",
+        permission: "admin_users:manage",
+      },
+      {
+        id: "roles",
+        href: "/settings/roles",
+        label: "Roles y permisos",
+        icon: "star",
+        permission: "roles:manage",
+      },
+      {
+        id: "settings",
+        href: "/settings",
+        label: "Configuración y perfil",
+        icon: "settings",
+        permission: "settings:read",
+      },
+    ],
   },
 ];
 
@@ -171,11 +185,11 @@ export const BREADCRUMBS: Record<string, [string, string]> = {
   contribuciones: ["Finanzas", "Contribuciones"],
   eventos: ["Agenda", "Eventos"],
   comunicacion: ["Conexión", "Comunicación"],
-  usuarios: ["Configuración", "Usuarios admin"],
-  gastos: ["Configuración", "Tipos de gasto"],
-  "ingresos-tipos": ["Configuración", "Tipos de ingreso"],
-  roles: ["Configuración", "Roles y permisos"],
-  settings: ["Cuenta", "Configuración"],
+  gastos: ["Configuración sistema", "Tipos de gasto"],
+  "ingresos-tipos": ["Configuración sistema", "Tipos de ingreso"],
+  usuarios: ["Configuración usuarios", "Usuarios sistema"],
+  roles: ["Configuración usuarios", "Roles y permisos"],
+  settings: ["Configuración usuarios", "Configuración y perfil"],
 };
 
 export function navIdFromPath(pathname: string): string {

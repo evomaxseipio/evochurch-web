@@ -1,11 +1,9 @@
 "use server";
 
 import { evaluateSystemAccessEligibility } from "@/lib/admin-users/eligibility";
+import { ADMIN_APP_ROLE_ID } from "@/lib/roles/keys";
 import { toAdminUserRow } from "@/lib/admin-users/parse";
-import {
-  isPastorRole,
-  projectRoleToAppRoleId,
-} from "@/lib/admin-users/roles";
+import { isPastorRole } from "@/lib/admin-users/roles";
 import { generateTempPassword } from "@/lib/admin-users/temp-password";
 import type { AdminUserInput, AdminUserRow } from "@/lib/admin-users/types";
 import {
@@ -58,6 +56,12 @@ async function adminSessionContext() {
 
 function parseAdminUserInput(formData: FormData): AdminUserInput {
   const roleLabel = String(formData.get("roleLabel") ?? "").trim();
+  const appRoleIdRaw = String(formData.get("appRoleId") ?? "").trim();
+  const appRoleId = appRoleIdRaw
+    ? Number.parseInt(appRoleIdRaw, 10)
+    : null;
+  const roleKey = String(formData.get("roleKey") ?? "").trim() || null;
+
   return {
     authUserId: String(formData.get("authUserId") ?? "").trim() || null,
     profileId: String(formData.get("profileId") ?? "").trim(),
@@ -66,7 +70,8 @@ function parseAdminUserInput(formData: FormData): AdminUserInput {
     email: String(formData.get("email") ?? "").trim(),
     password: String(formData.get("password") ?? ""),
     roleLabel,
-    appRoleId: projectRoleToAppRoleId(roleLabel),
+    roleKey,
+    appRoleId: appRoleId != null && Number.isFinite(appRoleId) ? appRoleId : null,
     isActive: formData.get("isActive") === "true",
   };
 }
@@ -269,7 +274,7 @@ async function syncProfileAndMembership(
     email: input.email,
   });
 
-  if (isPastorRole(input.roleLabel)) {
+  if (isPastorRole({ roleKey: input.roleKey, roleName: input.roleLabel })) {
     const roles = await fetchMemberRoles(supabase).catch(() => []);
     const pastorRole = findMemberRoleByCode(roles, PASTOR_ROLE_CODE);
     if (pastorRole) {
@@ -293,7 +298,8 @@ function validateAdminUserInput(input: AdminUserInput): string | null {
   if (!input.lastName) return "El apellido es obligatorio.";
   if (!input.email) return "El correo es obligatorio.";
   if (!input.email.includes("@")) return "Correo electrónico no válido.";
-  if (!input.roleLabel) return "Selecciona un rol.";
+  if (!input.roleLabel && input.appRoleId == null) return "Selecciona un rol.";
+  if (input.appRoleId == null) return "Rol no válido.";
   return null;
 }
 
@@ -390,7 +396,7 @@ export async function saveAdminUserAction(
       return { ok: false, error: "Usuario no válido." };
     }
 
-    if (input.authUserId === session.authUserId && input.appRoleId !== 1) {
+    if (input.authUserId === session.authUserId && input.appRoleId !== ADMIN_APP_ROLE_ID) {
       return {
         ok: false,
         error:

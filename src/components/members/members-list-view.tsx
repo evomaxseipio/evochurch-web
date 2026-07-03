@@ -33,6 +33,7 @@ import type {
   MembersListStats,
   MembersPagination,
 } from "@/lib/members/types";
+import type { AssignableRole } from "@/lib/roles/types";
 import type { IncomeType } from "@/lib/contributions/types";
 import type { Fund } from "@/lib/funds/types";
 import { toast } from "@/lib/toast";
@@ -98,6 +99,7 @@ export function MembersListView({
   canDeleteMembers,
   canWriteContributions,
   systemAccessProfileIds = [],
+  assignableRoles = [],
 }: {
   members: Member[];
   roles: MemberRoleCatalog[];
@@ -110,6 +112,7 @@ export function MembersListView({
   canDeleteMembers: boolean;
   canWriteContributions: boolean;
   systemAccessProfileIds?: string[];
+  assignableRoles?: AssignableRole[];
 }) {
   const router = useRouter();
   const [searchInput, setSearchInput] = useState(queryFromServer);
@@ -609,6 +612,7 @@ export function MembersListView({
         open={systemUserDrawer !== null}
         mode={systemUserDrawer?.mode ?? "new"}
         user={systemUserDrawer?.user ?? null}
+        assignableRoles={assignableRoles}
         presetMember={systemUserDrawer?.member ?? null}
         initialTempPassword={systemUserDrawer?.initialTempPassword ?? null}
         onClose={() => setSystemUserDrawer(null)}
@@ -698,7 +702,7 @@ function RowMenu({
     if (canWriteContributions) {
       items.push({
         id: "contribution",
-        label: "Agregar Contribución",
+        label: "Registrar contribución (Finanzas)",
         icon: <Icons.wallet size={15} />,
         on: onAddContribution,
       });

@@ -29,7 +29,7 @@ import {
   updateMember,
 } from "@/lib/services/members";
 import { getActionSession } from "@/lib/auth/app-session";
-import { getActionSessionWith } from "@/lib/auth/permissions";
+import { getActionSessionWith } from "@/lib/auth/permissions-server";
 import { revalidatePath } from "next/cache";
 
 export type ActionResult =
@@ -42,7 +42,9 @@ export type ContributionCatalogResult =
 
 export async function fetchContributionCatalogAction(): Promise<ContributionCatalogResult> {
   try {
-    const { supabase, session } = await getActionSession();
+    const { supabase, session } = await getActionSessionWith(
+      "finances:contributions:write",
+    );
     const [funds, incomeTypes] = await Promise.all([
       fetchFunds(supabase, session.churchId),
       fetchIncomeTypes(supabase, session.churchId),

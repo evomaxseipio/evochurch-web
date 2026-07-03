@@ -1,6 +1,6 @@
 "use server";
 
-import { getActionSessionWith } from "@/lib/auth/permissions";
+import { getActionSessionWith } from "@/lib/auth/permissions-server";
 import { requirePermission } from "@/lib/auth/permissions";
 import type {
   ExpenseInput,

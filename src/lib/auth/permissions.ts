@@ -1,5 +1,4 @@
 import type { AppSession } from "@/lib/auth/app-session";
-import { getActionSession, requireAppSession } from "@/lib/auth/app-session";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 
 export function hasPermission(session: AppSession, key: PermissionKey): boolean {
@@ -19,18 +18,6 @@ export function requirePermission(session: AppSession, key: PermissionKey): void
   }
 }
 
-export async function getActionSessionWith(permission: PermissionKey) {
-  const { supabase, session } = await getActionSession();
-  requirePermission(session, permission);
-  return { supabase, session };
-}
-
-export async function requirePermissionSession(key: PermissionKey) {
-  const session = await requireAppSession();
-  requirePermission(session, key);
-  return session;
-}
-
 /** Usuario sin rol operativo — solo perfil y settings. */
 export function isProfileOnlySession(session: AppSession): boolean {
   return (
@@ -45,6 +32,22 @@ export function canAuthorizeFinances(session: AppSession): boolean {
 
 export function canManageAdminUsers(session: AppSession): boolean {
   return hasPermission(session, "admin_users:manage");
+}
+
+export function canReadMembers(session: AppSession): boolean {
+  return hasPermission(session, "members:read");
+}
+
+export function canWriteMembers(session: AppSession): boolean {
+  return hasPermission(session, "members:write");
+}
+
+export function canDeleteMembers(session: AppSession): boolean {
+  return hasPermission(session, "members:delete");
+}
+
+export function canWriteContributions(session: AppSession): boolean {
+  return hasPermission(session, "finances:contributions:write");
 }
 
 export function canCreateMinistry(session: AppSession): boolean {

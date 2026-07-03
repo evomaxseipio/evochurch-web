@@ -2,11 +2,17 @@ import { MembersListView } from "@/components/members/members-list-view";
 import type { MemberRoleCatalog } from "@/lib/members/roles";
 import { parseMembersPageSize } from "@/lib/members/pagination";
 import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
+import { fetchAssignableRoles } from "@/lib/services/roles";
 import { fetchMemberRoles, fetchMembersPage } from "@/lib/services/members";
+import type { AssignableRole } from "@/lib/roles/types";
 import type { MemberFilterKey } from "@/lib/members/types";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
+import {
+  canDeleteMembers,
+  canWriteContributions,
+  canWriteMembers,
+} from "@/lib/auth/permissions";
 import { canManageAdminUsers } from "@/lib/auth/require-admin-session";
-import { hasPermission } from "@/lib/auth/permissions";
 import { createClient } from "@/lib/supabase/server";
 
 const FILTERS: MemberFilterKey[] = [
@@ -31,12 +37,9 @@ export default async function MembersPage({
 }) {
   const session = await requirePageAccess("/members");
 
-  const canWriteMembers = hasPermission(session, "members:write");
-  const canDeleteMembers = hasPermission(session, "members:delete");
-  const canWriteContributions = hasPermission(
-    session,
-    "finances:contributions:write",
-  );
+  const canWriteMembersFlag = canWriteMembers(session);
+  const canDeleteMembersFlag = canDeleteMembers(session);
+  const canWriteContributionsFlag = canWriteContributions(session);
 
   const { page: pageRaw, filter: filterRaw, q, size: sizeRaw } = await searchParams;
   const page = Math.max(1, Number.parseInt(pageRaw ?? "1", 10) || 1);
@@ -51,14 +54,19 @@ export default async function MembersPage({
   let listData: Awaited<ReturnType<typeof fetchMembersPage>> | null = null;
   let roles: MemberRoleCatalog[] = [];
   let systemAccessProfileIds: string[] = [];
+  let assignableRoles: AssignableRole[] = [];
 
   try {
     const churchId = session.churchId;
     const authUsersPromise = canManageUsers
       ? fetchChurchAuthUsers(supabase, churchId).catch(() => [])
       : Promise.resolve([]);
+    const assignableRolesPromise = canManageUsers
+      ? fetchAssignableRoles(supabase, churchId).catch(() => [])
+      : Promise.resolve([]);
 
-    const [membersResult, rolesResult, authUsers] = await Promise.all([
+    const [membersResult, rolesResult, authUsers, rolesForUsers] =
+      await Promise.all([
       fetchMembersPage(supabase, {
         churchId,
         page,
@@ -68,10 +76,12 @@ export default async function MembersPage({
       }),
       fetchMemberRoles(supabase).catch(() => [] as MemberRoleCatalog[]),
       authUsersPromise,
+      assignableRolesPromise,
     ]);
 
     listData = membersResult;
     roles = rolesResult;
+    assignableRoles = rolesForUsers;
     systemAccessProfileIds = authUsers
       .map((u) => u.profileId)
       .filter((id): id is string => Boolean(id));
@@ -102,10 +112,11 @@ export default async function MembersPage({
           filter={filter}
           query={query}
           canManageUsers={canManageUsers}
-          canWriteMembers={canWriteMembers}
-          canDeleteMembers={canDeleteMembers}
-          canWriteContributions={canWriteContributions}
+          canWriteMembers={canWriteMembersFlag}
+          canDeleteMembers={canDeleteMembersFlag}
+          canWriteContributions={canWriteContributionsFlag}
           systemAccessProfileIds={systemAccessProfileIds}
+          assignableRoles={assignableRoles}
         />
       ) : null}
     </>

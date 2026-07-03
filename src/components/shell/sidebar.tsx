@@ -6,7 +6,6 @@ import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
   CONFIG_NAV,
   filterNavByPermissions,
-  filterNavItemsByPermissions,
   isNavGroup,
   MAIN_NAV,
   navIdFromPath,
@@ -139,7 +138,7 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const mainNav = filterNavByPermissions(MAIN_NAV, permissions);
-  const configNav = filterNavItemsByPermissions(CONFIG_NAV, permissions);
+  const configNav = filterNavByPermissions(CONFIG_NAV, permissions);
 
   return (
     <aside className={`sidebar${collapsed ? " is-collapsed" : ""} ${className}`.trim()}>
@@ -177,9 +176,18 @@ export function Sidebar({
 
       <nav className="nav-section" onClick={onNavigate}>
         <div className="nav-eyebrow">Configuración</div>
-        {configNav.map((item) => (
-          <NavLink key={item.id} item={item} pathname={pathname} />
-        ))}
+        {configNav.map((entry) =>
+          isNavGroup(entry) ? (
+            <NavGroupItem
+              key={entry.id}
+              entry={entry}
+              pathname={pathname}
+              collapsed={collapsed}
+            />
+          ) : (
+            <NavLink key={entry.id} item={entry} pathname={pathname} />
+          ),
+        )}
       </nav>
 
       <div className="sidebar-foot">

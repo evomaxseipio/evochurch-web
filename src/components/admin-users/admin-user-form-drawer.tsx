@@ -6,9 +6,9 @@ import {
 } from "@/app/(app)/settings/users/actions";
 import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
-import { PROJECT_USER_ROLES } from "@/lib/admin-users/roles";
 import { generateTempPassword } from "@/lib/admin-users/temp-password";
 import type { AdminUserRow } from "@/lib/admin-users/types";
+import type { AssignableRole } from "@/lib/roles/types";
 import { memberFullName } from "@/lib/members/parse";
 import type { Member } from "@/lib/members/types";
 import { toast } from "@/lib/toast";
@@ -35,7 +35,7 @@ type FormValues = {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  roleId: string;
   active: boolean;
 };
 
@@ -62,7 +62,7 @@ const FIELDS: FieldDef[] = [
     placeholder: "usuario@iglesia.do",
   },
   {
-    key: "role",
+    key: "roleId",
     label: "Rol",
     type: "select",
     required: true,
@@ -80,11 +80,13 @@ function FieldRow({
   value,
   error,
   onChange,
+  assignableRoles = [],
 }: {
   field: FieldDef;
   value: string | boolean;
   error?: string;
   onChange: (v: string | boolean) => void;
+  assignableRoles?: AssignableRole[];
 }) {
   if (field.type === "switch") {
     return (
@@ -118,9 +120,9 @@ function FieldRow({
             <option value="" disabled>
               Seleccionar…
             </option>
-            {PROJECT_USER_ROLES.map((r) => (
-              <option key={r.id} value={r.name}>
-                {r.name}
+            {assignableRoles.map((r) => (
+              <option key={r.appRoleId} value={String(r.appRoleId)}>
+                {r.appRoleName}
               </option>
             ))}
           </select>
@@ -155,6 +157,7 @@ export function AdminUserFormDrawer({
   open,
   mode,
   user,
+  assignableRoles,
   presetMember = null,
   initialTempPassword = null,
   onClose,
@@ -164,6 +167,7 @@ export function AdminUserFormDrawer({
   open: boolean;
   mode: "new" | "edit";
   user: AdminUserRow | null;
+  assignableRoles: AssignableRole[];
   /** Miembro vinculado desde Miembros — identidad readonly, rol editable. */
   presetMember?: Member | null;
   /** Contraseña temporal vigente (solo lectura en edición). */
@@ -180,7 +184,7 @@ export function AdminUserFormDrawer({
     firstName: "",
     lastName: "",
     email: "",
-    role: "",
+    roleId: "",
     active: true,
   });
   const [errs, setErrs] = useState<Partial<Record<keyof FormValues, string>>>({});
@@ -193,7 +197,8 @@ export function AdminUserFormDrawer({
       firstName: presetMember?.firstName ?? user?.firstName ?? "",
       lastName: presetMember?.lastName ?? user?.lastName ?? "",
       email: presetMember?.contact.email ?? user?.email ?? "",
-      role: user?.role ?? "",
+      roleId:
+        user?.appRoleId != null ? String(user.appRoleId) : "",
       active: user?.active ?? true,
     });
     setTempPassword("");
@@ -261,7 +266,12 @@ export function AdminUserFormDrawer({
     fd.set("firstName", vals.firstName);
     fd.set("lastName", vals.lastName);
     fd.set("email", vals.email);
-    fd.set("roleLabel", vals.role);
+    const selectedRole = assignableRoles.find(
+      (r) => String(r.appRoleId) === vals.roleId,
+    );
+    fd.set("appRoleId", vals.roleId);
+    fd.set("roleLabel", selectedRole?.appRoleName ?? "");
+    if (selectedRole?.roleKey) fd.set("roleKey", selectedRole.roleKey);
     fd.set("isActive", String(vals.active));
     if (tempPassword.trim()) fd.set("password", tempPassword.trim());
     startTransition(() => formAction(fd));
@@ -315,6 +325,7 @@ export function AdminUserFormDrawer({
               field={f}
               value={vals[f.key]}
               error={errs[f.key]}
+              assignableRoles={assignableRoles}
               onChange={(v) => setVals((s) => ({ ...s, [f.key]: v }))}
             />
             );

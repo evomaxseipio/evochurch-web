@@ -1,4 +1,4 @@
-import { PROJECT_ROLE_COLORS } from "@/lib/admin-users/roles";
+import { appRoleChipClass } from "@/lib/admin-users/roles";
 import type { AdminUserRow } from "@/lib/admin-users/types";
 import { churchAuthUserInitials } from "@/lib/admin-users/parse";
 
@@ -24,7 +24,7 @@ export function AdminUserStatusChip({ active }: { active: boolean }) {
 }
 
 export function AdminUserRoleChip({ role }: { role: string }) {
-  const chipClass = PROJECT_ROLE_COLORS[role] || "info";
+  const chipClass = appRoleChipClass(role);
   return <span className={`chip ${chipClass}`}>{role}</span>;
 }
 

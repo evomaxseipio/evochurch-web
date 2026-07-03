@@ -9,7 +9,7 @@ import {
 } from "@/lib/services/members";
 import { fetchMemberFinancePayload } from "@/lib/services/member-finances";
 import { getAppSession } from "@/lib/auth/app-session";
-import { hasPermission } from "@/lib/auth/permissions";
+import { hasPermission, canWriteMembers, canDeleteMembers } from "@/lib/auth/permissions";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -82,8 +82,8 @@ export default async function MemberProfilePage({
   const { id, tab } = await searchParams;
   const data = await loadProfileData(id, tab);
 
-  const canWriteMembers = hasPermission(session, "members:write");
-  const canDeleteMembers = hasPermission(session, "members:delete");
+  const canWriteMembersFlag = canWriteMembers(session);
+  const canDeleteMembersFlag = canDeleteMembers(session);
   const canReadMemberFinances = hasPermission(
     session,
     "finances:contributions:read",
@@ -132,8 +132,8 @@ export default async function MemberProfilePage({
         roles={data.roles}
         membership={data.membership}
         finances={data.finances}
-        canWriteMembers={canWriteMembers}
-        canDeleteMembers={canDeleteMembers}
+        canWriteMembers={canWriteMembersFlag}
+        canDeleteMembers={canDeleteMembersFlag}
         canReadMemberFinances={canReadMemberFinances}
       />
     </Suspense>

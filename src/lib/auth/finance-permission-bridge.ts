@@ -24,6 +24,15 @@ const LEGACY_WRITE_GRANTS: PermissionKey[] = [
   "finances:contributions:delete",
 ];
 
+const LEGACY_SETTINGS_CATALOGS_GRANTS: PermissionKey[] = [
+  "settings:expense_types:read",
+  "settings:expense_types:write",
+  "settings:expense_types:delete",
+  "settings:income_types:read",
+  "settings:income_types:write",
+  "settings:income_types:delete",
+];
+
 /**
  * Normaliza permisos de sesión/roles: claves granulares + expansión de legacy finances:*.
  */
@@ -46,6 +55,8 @@ export function expandPermissionKeys(raw: unknown): PermissionKey[] {
       for (const key of LEGACY_WRITE_GRANTS) set.add(key);
     } else if (item === LEGACY_FINANCE_AUTHORIZE) {
       set.add("finances:transactions:authorize");
+    } else if (item === "settings:catalogs") {
+      for (const key of LEGACY_SETTINGS_CATALOGS_GRANTS) set.add(key);
     }
   }
 

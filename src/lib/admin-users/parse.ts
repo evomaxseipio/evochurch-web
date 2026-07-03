@@ -1,7 +1,4 @@
-import {
-  displayUserRoleLabel,
-  PROJECT_USER_ROLES,
-} from "@/lib/admin-users/roles";
+import { displayUserRoleLabel } from "@/lib/admin-users/roles";
 import type {
   AppUserRole,
   AdminUserRow,
@@ -11,6 +8,7 @@ import type {
 
 type RoleRow = {
   app_role_id?: number | string;
+  role_key?: string | null;
   app_role_name?: string;
   description?: string | null;
   is_primary?: boolean;
@@ -53,6 +51,7 @@ export function parseAppUserRole(row: unknown): AppUserRole | null {
   if (appRoleId == null || !appRoleName) return null;
   return {
     appRoleId,
+    roleKey: typeof r.role_key === "string" ? r.role_key.trim() || null : null,
     appRoleName,
     description: str(r.description),
     isPrimary: r.is_primary === true,
@@ -181,6 +180,7 @@ export function toAdminUserRow(user: ChurchAuthUser): AdminUserRow {
     firstName: user.firstName ?? "",
     lastName: user.lastName ?? "",
     role: displayUserRoleLabel(user),
+    appRoleId: user.appRoleId,
     lastLogin: formatLastLogin(user.lastLoginAt),
     active: user.isActive,
     isTempPassword: user.isTempPassword,
@@ -210,11 +210,4 @@ export function computeChurchAuthUsersStats(
   };
 }
 
-export function appRoleChipClass(roleName: string | null): string {
-  if (!roleName) return "info";
-  const lower = roleName.toLowerCase();
-  if (lower.includes("administrator") || lower.includes("pastor")) return "violet";
-  if (lower.includes("treasurer") || lower.includes("finance")) return "green";
-  if (lower.includes("secretary")) return "lila";
-  return "info";
-}
+export { appRoleChipClass } from "@/lib/admin-users/roles";
