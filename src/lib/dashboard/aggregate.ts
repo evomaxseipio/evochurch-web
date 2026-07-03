@@ -36,19 +36,6 @@ function sumContributionsInBucket(
   return total;
 }
 
-function sumContributionsOnDate(
-  entries: Contribution[],
-  isoDate: string,
-): number {
-  let total = 0;
-  for (const entry of entries) {
-    if (entry.paymentDate.slice(0, 10) === isoDate) {
-      total += entry.amount;
-    }
-  }
-  return total;
-}
-
 function ledgerEntriesInBucket(
   entries: LedgerEntry[],
   bucket: PeriodBucket,
@@ -164,8 +151,6 @@ export function extractPendingAuthorizations(
 
 export function buildDashboardHero(params: {
   verse: ScriptureVerse | null;
-  offeringToday: number;
-  catechumenCount: number;
   anchor?: Date;
 }): DashboardHeroData {
   const anchor = params.anchor ?? new Date();
@@ -177,14 +162,6 @@ export function buildDashboardHero(params: {
 
   return {
     dateLabel: formatHeroDateLabel(anchor),
-    attendance: dashboardMock.hero.attendance,
-    attendanceDisclaimer: "Dato de ejemplo · asistencia real próximamente",
-    offering:
-      params.offeringToday > 0 ? fmtRDshort(params.offeringToday) : "RD$ 0",
-    catechumens:
-      params.catechumenCount === 1
-        ? "1 catecúmeno"
-        : `${params.catechumenCount.toLocaleString("es-DO")} catecúmenos`,
     verse: verse.text,
     verseRef: verse.reference,
   };

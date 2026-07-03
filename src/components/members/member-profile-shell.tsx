@@ -2,6 +2,7 @@
 
 import { MemberProfileView } from "@/components/members/member-profile-view";
 import type { ProfileTabId } from "@/components/members/member-profile-toolbar";
+import type { MemberRoleCatalog } from "@/lib/members/roles";
 import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -20,11 +21,17 @@ export function MemberProfileShell({
   roles,
   membership: membershipFromServer,
   finances = null,
+  canWriteMembers,
+  canDeleteMembers,
+  canReadMemberFinances,
 }: {
   member: Member;
-  roles: string[];
+  roles: MemberRoleCatalog[];
   membership: MembershipRecord | null;
   finances?: MemberFinanceData | null;
+  canWriteMembers: boolean;
+  canDeleteMembers: boolean;
+  canReadMemberFinances: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -74,6 +81,9 @@ export function MemberProfileShell({
         onMemberUpdated={setMember}
         onMembershipUpdated={setMembership}
         finances={finances}
+        canWriteMembers={canWriteMembers}
+        canDeleteMembers={canDeleteMembers}
+        canReadMemberFinances={canReadMemberFinances}
       />
     </div>
   );

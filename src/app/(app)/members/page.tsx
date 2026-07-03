@@ -1,10 +1,12 @@
 import { MembersListView } from "@/components/members/members-list-view";
+import type { MemberRoleCatalog } from "@/lib/members/roles";
 import { parseMembersPageSize } from "@/lib/members/pagination";
 import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
 import { fetchMemberRoles, fetchMembersPage } from "@/lib/services/members";
 import type { MemberFilterKey } from "@/lib/members/types";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { canManageAdminUsers } from "@/lib/auth/require-admin-session";
+import { hasPermission } from "@/lib/auth/permissions";
 import { createClient } from "@/lib/supabase/server";
 
 const FILTERS: MemberFilterKey[] = [
@@ -29,6 +31,13 @@ export default async function MembersPage({
 }) {
   const session = await requirePageAccess("/members");
 
+  const canWriteMembers = hasPermission(session, "members:write");
+  const canDeleteMembers = hasPermission(session, "members:delete");
+  const canWriteContributions = hasPermission(
+    session,
+    "finances:contributions:write",
+  );
+
   const { page: pageRaw, filter: filterRaw, q, size: sizeRaw } = await searchParams;
   const page = Math.max(1, Number.parseInt(pageRaw ?? "1", 10) || 1);
   const filter = parseFilter(filterRaw);
@@ -40,7 +49,7 @@ export default async function MembersPage({
 
   let error: string | null = null;
   let listData: Awaited<ReturnType<typeof fetchMembersPage>> | null = null;
-  let roles: string[] = [];
+  let roles: MemberRoleCatalog[] = [];
   let systemAccessProfileIds: string[] = [];
 
   try {
@@ -57,7 +66,7 @@ export default async function MembersPage({
         filter,
         search: query || null,
       }),
-      fetchMemberRoles(supabase).catch(() => [] as string[]),
+      fetchMemberRoles(supabase).catch(() => [] as MemberRoleCatalog[]),
       authUsersPromise,
     ]);
 
@@ -93,6 +102,9 @@ export default async function MembersPage({
           filter={filter}
           query={query}
           canManageUsers={canManageUsers}
+          canWriteMembers={canWriteMembers}
+          canDeleteMembers={canDeleteMembers}
+          canWriteContributions={canWriteContributions}
           systemAccessProfileIds={systemAccessProfileIds}
         />
       ) : null}

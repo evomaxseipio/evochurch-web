@@ -135,6 +135,9 @@ export function parseMember(raw: unknown): Member | null {
     isActive: bool(json.isActive ?? json.is_active),
     isMember: bool(json.isMember ?? json.is_member),
     bio: str(json.bio),
+    membershipRoleId: str(
+      json.membershipRoleId ?? json.membership_role_id ?? json.memberRoleId,
+    ),
     membershipRole: str(
       json.membershipRole ?? json.membership_role ?? json.role,
       "Visita",
@@ -191,6 +194,7 @@ export function parseMembershipResponse(data: unknown): MembershipRecord | null 
     baptismDate: parseDateOnly(first.baptismDate ?? first.baptism_date),
     baptismChurch: str(first.baptismChurch ?? first.baptism_church),
     baptismPastor: str(first.baptismPastor ?? first.baptism_pastor),
+    membershipRoleId: str(first.membershipRoleId ?? first.membership_role_id),
     membershipRole: str(first.membershipRole ?? first.membership_role),
     baptismChurchCity: str(
       first.baptismChurchCity ?? first.baptism_church_city,

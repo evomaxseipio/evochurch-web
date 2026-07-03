@@ -8,6 +8,10 @@ import {
 } from "@/lib/admin-users/roles";
 import { generateTempPassword } from "@/lib/admin-users/temp-password";
 import type { AdminUserInput, AdminUserRow } from "@/lib/admin-users/types";
+import {
+  findMemberRoleByCode,
+  PASTOR_ROLE_CODE,
+} from "@/lib/members/roles";
 import { requireAdminSession } from "@/lib/auth/require-admin-session";
 import {
   fetchChurchAuthUserByProfile,
@@ -21,6 +25,7 @@ import {
 } from "@/lib/services/admin-users";
 import {
   fetchMemberById,
+  fetchMemberRoles,
   fetchMembership,
   saveMembership,
   updateMember,
@@ -253,6 +258,7 @@ async function syncProfileAndMembership(
     isActive: member.isActive,
     isMember: member.isMember,
     bio: member.bio,
+    membershipRoleId: member.membershipRoleId,
     membershipRole: member.membershipRole,
     streetAddress: member.address.streetAddress,
     stateProvince: member.address.stateProvince,
@@ -264,17 +270,21 @@ async function syncProfileAndMembership(
   });
 
   if (isPastorRole(input.roleLabel)) {
-    await saveMembership(supabase, {
-      profileId,
-      baptismDate: "",
-      baptismChurch: "",
-      baptismPastor: "",
-      membershipRole: "Pastor",
-      baptismChurchCity: "",
-      baptismChurchCountry: "",
-      hasCredential: false,
-      isBaptizedInSpirit: false,
-    });
+    const roles = await fetchMemberRoles(supabase).catch(() => []);
+    const pastorRole = findMemberRoleByCode(roles, PASTOR_ROLE_CODE);
+    if (pastorRole) {
+      await saveMembership(supabase, {
+        profileId,
+        baptismDate: "",
+        baptismChurch: "",
+        baptismPastor: "",
+        membershipRoleId: pastorRole.id,
+        baptismChurchCity: "",
+        baptismChurchCountry: "",
+        hasCredential: false,
+        isBaptizedInSpirit: false,
+      });
+    }
   }
 }
 

@@ -5,6 +5,10 @@ import {
   normalizeIdType,
   normalizeMaritalStatus,
 } from "@/lib/members/catalogs";
+import {
+  findMemberRoleById,
+  type MemberRoleCatalog,
+} from "@/lib/members/roles";
 import { mergeMemberFromInput } from "@/lib/members/merge";
 import type {
   Member,
@@ -18,6 +22,7 @@ import { fetchIncomeTypes } from "@/lib/services/contributions";
 import { fetchFunds } from "@/lib/services/funds";
 import {
   fetchMemberById,
+  fetchMemberRoles,
   fetchMembership,
   insertMember,
   saveMembership,
@@ -59,7 +64,12 @@ async function sessionContext() {
   return { supabase, churchId: session.churchId };
 }
 
-function parseProfileInput(formData: FormData): MemberProfileInput {
+function parseProfileInput(
+  formData: FormData,
+  roles: MemberRoleCatalog[] = [],
+): MemberProfileInput {
+  const membershipRoleId = String(formData.get("membershipRoleId") ?? "").trim();
+  const role = findMemberRoleById(roles, membershipRoleId);
   return {
     firstName: String(formData.get("firstName") ?? "").trim(),
     lastName: String(formData.get("lastName") ?? "").trim(),
@@ -75,7 +85,8 @@ function parseProfileInput(formData: FormData): MemberProfileInput {
     isActive: formData.get("isActive") === "true",
     isMember: formData.get("isMember") === "true",
     bio: String(formData.get("bio") ?? "").trim(),
-    membershipRole: String(formData.get("membershipRole") ?? "").trim(),
+    membershipRoleId,
+    membershipRole: role?.roleName ?? "",
     streetAddress: String(formData.get("streetAddress") ?? "").trim(),
     stateProvince: String(formData.get("stateProvince") ?? "").trim(),
     cityState: String(formData.get("cityState") ?? "").trim(),
@@ -86,13 +97,18 @@ function parseProfileInput(formData: FormData): MemberProfileInput {
   };
 }
 
-function parseMembershipInput(formData: FormData): MembershipInput {
+function parseMembershipInput(
+  formData: FormData,
+  roles: MemberRoleCatalog[] = [],
+): MembershipInput {
+  const membershipRoleId = String(formData.get("membershipRoleId") ?? "").trim();
+  const role = findMemberRoleById(roles, membershipRoleId);
   return {
     profileId: String(formData.get("profileId") ?? "").trim(),
     baptismDate: String(formData.get("baptismDate") ?? "").trim(),
     baptismChurch: String(formData.get("baptismChurch") ?? "").trim(),
     baptismPastor: String(formData.get("baptismPastor") ?? "").trim(),
-    membershipRole: String(formData.get("membershipRole") ?? "").trim(),
+    membershipRoleId,
     baptismChurchCity: String(formData.get("baptismChurchCity") ?? "").trim(),
     baptismChurchCountry: String(
       formData.get("baptismChurchCountry") ?? "",
@@ -102,13 +118,20 @@ function parseMembershipInput(formData: FormData): MembershipInput {
   };
 }
 
-function parseMembershipFormData(formData: FormData): MembershipInput & {
+function parseMembershipFormData(
+  formData: FormData,
+  roles: MemberRoleCatalog[] = [],
+): MembershipInput & {
   isActive: boolean;
   isMember: boolean;
   bio: string;
+  membershipRole: string;
 } {
+  const membership = parseMembershipInput(formData, roles);
+  const role = findMemberRoleById(roles, membership.membershipRoleId);
   return {
-    ...parseMembershipInput(formData),
+    ...membership,
+    membershipRole: role?.roleName ?? "",
     isActive: formData.get("isActive") === "true",
     isMember: formData.get("isMember") === "true",
     bio: String(formData.get("bio") ?? "").trim(),
@@ -132,6 +155,7 @@ function memberToProfileInput(
     isActive: member.isActive,
     isMember: member.isMember,
     bio: member.bio,
+    membershipRoleId: member.membershipRoleId,
     membershipRole: member.membershipRole,
     streetAddress: member.address.streetAddress,
     stateProvince: member.address.stateProvince,
@@ -211,7 +235,8 @@ export async function saveMembershipAction(
 ): Promise<ActionResult> {
   try {
     const { supabase, churchId } = await sessionContext();
-    const input = parseMembershipFormData(formData);
+    const roles = await fetchMemberRoles(supabase).catch(() => []);
+    const input = parseMembershipFormData(formData, roles);
 
     if (!input.profileId) {
       return { ok: false, error: "ID de perfil inválido." };
@@ -228,6 +253,7 @@ export async function saveMembershipAction(
       isActive: input.isActive,
       isMember: input.isMember,
       bio: input.bio,
+      membershipRoleId: input.membershipRoleId || before.membershipRoleId,
       membershipRole: input.membershipRole || before.membershipRole,
     });
     await updateMember(supabase, input.profileId, profileInput);

@@ -1,6 +1,9 @@
 import { PlaceholderPage } from "@/components/ui/placeholder-page";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 
-export default function ComunicacionPage() {
+export default async function ComunicacionPage() {
+  await requirePageAccess("/comunicacion");
+
   return (
     <PlaceholderPage
       title="Comunicación"

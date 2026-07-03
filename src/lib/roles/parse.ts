@@ -1,3 +1,4 @@
+import { expandPermissionKeys } from "@/lib/auth/finance-permission-bridge";
 import { isPermissionKey, type PermissionKey } from "@/lib/auth/permission-keys";
 import type { AppPermissionRow, ChurchRolePermissions } from "@/lib/roles/types";
 
@@ -22,10 +23,7 @@ function parseRoleId(raw: unknown): number | null {
 }
 
 function parsePermissionList(raw: unknown): PermissionKey[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.filter(
-    (k): k is PermissionKey => typeof k === "string" && isPermissionKey(k),
-  );
+  return expandPermissionKeys(raw);
 }
 
 export function parseChurchRolePermissions(

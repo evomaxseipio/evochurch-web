@@ -12,10 +12,12 @@ export function MemberProfileToolbar({
   tab,
   profilePending,
   membershipPending,
+  canWriteMembers,
 }: {
   tab: ProfileTabId;
   profilePending: boolean;
   membershipPending: boolean;
+  canWriteMembers: boolean;
 }) {
   const pending = tab === "profile" ? profilePending : membershipPending;
   const formId =
@@ -40,7 +42,7 @@ export function MemberProfileToolbar({
       >
         <Icons.download size={14} /> Imprimir
       </button>
-      {formId ? (
+      {formId && canWriteMembers ? (
         <button
           type="submit"
           form={formId}

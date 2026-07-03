@@ -71,8 +71,8 @@ export function DashboardView({
     return formatPeriodDelta(totals.current, totals.previous);
   }, [contributionPeriodTotals, contributionsPeriod]);
 
-  const featureKpi = kpis[0];
-  const restKpis = kpis.slice(1);
+  const headKpis = kpis.slice(0, 2);
+  const restKpis = kpis.slice(2);
 
   return (
     <div>
@@ -83,11 +83,11 @@ export function DashboardView({
       />
 
       <div className="grid-12" style={{ marginTop: 24 }}>
-        {featureKpi ? (
-          <div className="span-6">
-            <KpiCard {...featureKpi} feature kind="elevated" />
+        {headKpis.map((kpi, index) => (
+          <div key={kpi.label} className="span-3">
+            <KpiCard {...kpi} feature={index === 0} kind="elevated" />
           </div>
-        ) : null}
+        ))}
         {restKpis.map((kpi) => (
           <div key={kpi.label} className="span-3">
             <KpiCard {...kpi} />

@@ -79,7 +79,7 @@ export const MAIN_NAV: NavEntry[] = [
     label: "Eventos",
     icon: "cal",
     badge: "3",
-    permission: "dashboard:read",
+    permission: "eventos:read",
   },
   {
     id: "comunicacion",
@@ -87,7 +87,7 @@ export const MAIN_NAV: NavEntry[] = [
     label: "Comunicación",
     icon: "chat",
     badge: "4",
-    permission: "dashboard:read",
+    permission: "comunicacion:read",
   },
 ];
 

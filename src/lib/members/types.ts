@@ -26,6 +26,7 @@ export type Member = {
   isActive: boolean;
   isMember: boolean;
   bio: string;
+  membershipRoleId: string;
   membershipRole: string;
   address: MemberAddress;
   contact: MemberContact;
@@ -36,6 +37,7 @@ export type MembershipRecord = {
   baptismDate: string;
   baptismChurch: string;
   baptismPastor: string;
+  membershipRoleId: string;
   membershipRole: string;
   baptismChurchCity: string;
   baptismChurchCountry: string;
@@ -123,6 +125,7 @@ export type MemberProfileInput = {
   isActive: boolean;
   isMember: boolean;
   bio: string;
+  membershipRoleId: string;
   membershipRole: string;
   streetAddress: string;
   stateProvince: string;
@@ -138,7 +141,7 @@ export type MembershipInput = {
   baptismDate: string;
   baptismChurch: string;
   baptismPastor: string;
-  membershipRole: string;
+  membershipRoleId: string;
   baptismChurchCity: string;
   baptismChurchCountry: string;
   hasCredential: boolean;

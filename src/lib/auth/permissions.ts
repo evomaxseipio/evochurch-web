@@ -46,3 +46,37 @@ export function canAuthorizeFinances(session: AppSession): boolean {
 export function canManageAdminUsers(session: AppSession): boolean {
   return hasPermission(session, "admin_users:manage");
 }
+
+export function canCreateMinistry(session: AppSession): boolean {
+  return canCreateMinistryWith(session.permissions);
+}
+
+export function canCreateMinistryWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return permissions.includes("ministerios:write");
+}
+
+/** ABAC: write global o write_own cuando el perfil es líder del ministerio. */
+export function canEditMinistryRecord(
+  session: AppSession,
+  leaderProfileIds: string[],
+): boolean {
+  return canEditMinistryWith(
+    session.permissions,
+    session.profileId,
+    leaderProfileIds,
+  );
+}
+
+export function canEditMinistryWith(
+  permissions: readonly PermissionKey[],
+  profileId: string,
+  leaderProfileIds: string[],
+): boolean {
+  if (permissions.includes("ministerios:write")) return true;
+  return (
+    permissions.includes("ministerios:write_own") &&
+    leaderProfileIds.includes(profileId)
+  );
+}

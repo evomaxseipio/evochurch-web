@@ -12,6 +12,7 @@ import {
   MARITAL_OPTIONS,
   type SelectOption,
 } from "@/lib/members/catalogs";
+import type { MemberRoleCatalog } from "@/lib/members/roles";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
 
@@ -41,7 +42,7 @@ export function AddMemberModal({
 }: {
   open: boolean;
   onClose: () => void;
-  roles: string[];
+  roles: MemberRoleCatalog[];
 }) {
   const [state, formAction, pending] = useActionState(createMemberAction, initial);
   const [firstName, setFirstName] = useState("");
@@ -269,7 +270,7 @@ export function AddMemberModal({
 
           <input type="hidden" name="isActive" value="true" />
           <input type="hidden" name="isMember" value="true" />
-          <input type="hidden" name="membershipRole" value="" />
+          <input type="hidden" name="membershipRoleId" value="" />
           <input type="hidden" name="bio" value="" />
 
           <div className="drawer-foot">

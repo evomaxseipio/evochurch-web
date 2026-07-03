@@ -20,7 +20,7 @@ const bottomItems: BottomItem[] = [
   { type: "link", id: "dashboard", href: "/dashboard", label: "Dashboard", icon: "home", permission: "dashboard:read" },
   { type: "link", id: "miembros", href: "/members", label: "Miembros", icon: "users", permission: "members:read" },
   { type: "finanzas", id: "finanzas", label: "Finanzas", icon: "wallet" },
-  { type: "link", id: "comunicacion", href: "/comunicacion", label: "Comunicación", icon: "chat", permission: "dashboard:read" },
+  { type: "link", id: "comunicacion", href: "/comunicacion", label: "Comunicación", icon: "chat", permission: "comunicacion:read" },
   { type: "link", id: "settings", href: "/settings", label: "Configuración", icon: "settings", permission: "settings:read" },
 ];
 

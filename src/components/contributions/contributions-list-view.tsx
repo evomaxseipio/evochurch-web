@@ -10,9 +10,9 @@ import { ContributionFormDrawer } from "@/components/contributions/contribution-
 import { ContributorCell } from "@/components/contributions/contribution-ui";
 import { ContributionsKpi } from "@/components/contributions/contributions-kpi";
 import {
-  MonthPeriodFilter,
-  monthPeriodExportLabel,
-} from "@/components/finance/month-period-filter";
+  DateRangeFilter,
+  dateRangeExportSlug,
+} from "@/components/finance/date-range-filter";
 import { FinPageHeader } from "@/components/finances/fin-page-header";
 import { Icons } from "@/components/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -21,6 +21,7 @@ import { FilterToolbar } from "@/components/ui/filter-toolbar";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
+import type { DateRange } from "@/lib/finance/date-range";
 import {
   categoryChipClass,
   formatContributionDateShort,
@@ -35,11 +36,9 @@ import type {
 import type { Fund } from "@/lib/funds/types";
 import {
   FINANCE_PAGE_SIZE_OPTIONS,
-  yearMonthToParam,
   type FinancePageSize,
 } from "@/lib/finance/pagination";
 import { fmtRD } from "@/lib/format-currency";
-import type { YearMonth } from "@/lib/finance/month-period";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -64,7 +63,7 @@ function buildContributionsQuery(
   updates: {
     page?: number;
     pageSize?: number;
-    month?: YearMonth | null;
+    dateRange?: DateRange;
     category?: ContributionCategoryFilter;
   },
 ): string {
@@ -80,9 +79,10 @@ function buildContributionsQuery(
     else params.set("size", String(updates.pageSize));
   }
 
-  if (updates.month !== undefined) {
-    if (updates.month) params.set("month", yearMonthToParam(updates.month));
-    else params.delete("month");
+  if (updates.dateRange) {
+    params.set("from", updates.dateRange.from);
+    params.set("to", updates.dateRange.to);
+    params.delete("month");
   }
 
   if (updates.category !== undefined) {
@@ -104,7 +104,8 @@ export function ContributionsListView({
   fundFilterName,
   page,
   pageSize,
-  month,
+  dateFrom,
+  dateTo,
   category,
 }: {
   entries: Contribution[];
@@ -116,13 +117,18 @@ export function ContributionsListView({
   fundFilterName?: string | null;
   page: number;
   pageSize: FinancePageSize;
-  month: YearMonth | null;
+  dateFrom: string;
+  dateTo: string;
   category: ContributionCategoryFilter;
 }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
+  const dateRange = useMemo(
+    () => ({ from: dateFrom, to: dateTo }),
+    [dateFrom, dateTo],
+  );
   const [query, setQuery] = useState("");
   const [formState, setFormState] = useState<{
     mode: "new" | "edit";
@@ -165,7 +171,7 @@ export function ContributionsListView({
   const pageEnd = Math.min(pageStart + entries.length, totalCount);
   const pageRows = filtered;
 
-  const exportBase = `Contribuciones_${monthPeriodExportLabel(month)}`;
+  const exportBase = `Contribuciones_${dateRangeExportSlug(dateRange)}`;
 
   function openNew() {
     setFormState({ mode: "new", entry: null });
@@ -277,17 +283,18 @@ export function ContributionsListView({
         style={{ marginTop: 0 }}
         query={query}
         onQueryChange={setQuery}
-        queryPlaceholder="Buscar por contribuyente, fondo, método…"
-        maxSearchWidth={9999}
+        queryPlaceholder="Buscar por descripción, fondo, categoría…"
+        maxSearchWidth={340}
+        compactSearch
         filters={CATEGORY_FILTERS}
         activeFilter={category}
         onFilterChange={(next) =>
           navigate({ category: next, page: 1 })
         }
         middle={
-          <MonthPeriodFilter
-            value={month}
-            onChange={(next) => navigate({ month: next, page: 1 })}
+          <DateRangeFilter
+            value={dateRange}
+            onChange={(next) => navigate({ dateRange: next, page: 1 })}
           />
         }
         trailing={

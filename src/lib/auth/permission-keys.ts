@@ -10,6 +10,12 @@ export const PERMISSION_KEYS = [
   "ministerios:read",
   "ministerios:write",
   "ministerios:write_own",
+  "eventos:read",
+  "eventos:write",
+  "eventos:delete",
+  "comunicacion:read",
+  "comunicacion:write",
+  "comunicacion:delete",
   "finances:funds:read",
   "finances:funds:write",
   "finances:funds:delete",
@@ -39,7 +45,4 @@ export function isPermissionKey(value: string): value is PermissionKey {
   return (PERMISSION_KEYS as readonly string[]).includes(value);
 }
 
-export function parsePermissionKeys(raw: unknown): PermissionKey[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.filter((k): k is PermissionKey => typeof k === "string" && isPermissionKey(k));
-}
+export { expandPermissionKeys as parsePermissionKeys } from "@/lib/auth/finance-permission-bridge";

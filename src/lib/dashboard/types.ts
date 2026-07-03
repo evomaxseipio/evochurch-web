@@ -34,10 +34,6 @@ export type DashboardKpi = {
 
 export type DashboardHeroData = {
   dateLabel: string;
-  attendance: string;
-  attendanceDisclaimer: string;
-  offering: string;
-  catechumens: string;
   verse: string;
   verseRef: string;
 };
@@ -74,7 +70,7 @@ export type DashboardPayload = {
   >;
 };
 
-export const CATECHUMEN_ROLE = "Catecumenos";
+export const CATECHUMEN_ROLE_CODE = "catecumenos";
 
 export const CHART_PERIOD_LABELS: Record<DashboardChartPeriod, string> = {
   week: "Semana",

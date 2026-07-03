@@ -1,4 +1,5 @@
 import { MemberProfileShell } from "@/components/members/member-profile-shell";
+import type { MemberRoleCatalog } from "@/lib/members/roles";
 import type { Member, MembershipRecord } from "@/lib/members/types";
 import type { MemberFinanceData } from "@/lib/members/types";
 import {
@@ -8,6 +9,8 @@ import {
 } from "@/lib/services/members";
 import { fetchMemberFinancePayload } from "@/lib/services/member-finances";
 import { getAppSession } from "@/lib/auth/app-session";
+import { hasPermission } from "@/lib/auth/permissions";
+import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -21,7 +24,7 @@ type ProfileData =
   | {
       kind: "ok";
       member: Member;
-      roles: string[];
+      roles: MemberRoleCatalog[];
       membership: MembershipRecord | null;
       finances: MemberFinanceData | null;
     };
@@ -43,7 +46,7 @@ async function loadProfileData(
 
     const [member, roles, finances] = await Promise.all([
       fetchMemberById(supabase, churchId, id),
-      fetchMemberRoles(supabase).catch(() => [] as string[]),
+      fetchMemberRoles(supabase).catch(() => [] as MemberRoleCatalog[]),
       loadFinances
         ? fetchMemberFinancePayload(supabase, churchId, id).catch(() => null)
         : Promise.resolve(null),
@@ -75,8 +78,16 @@ export default async function MemberProfilePage({
 }: {
   searchParams: Promise<{ id?: string; tab?: string }>;
 }) {
+  const session = await requirePageAccess("/members");
   const { id, tab } = await searchParams;
   const data = await loadProfileData(id, tab);
+
+  const canWriteMembers = hasPermission(session, "members:write");
+  const canDeleteMembers = hasPermission(session, "members:delete");
+  const canReadMemberFinances = hasPermission(
+    session,
+    "finances:contributions:read",
+  );
 
   if (data.kind === "missing-id") {
     return (
@@ -121,6 +132,9 @@ export default async function MemberProfilePage({
         roles={data.roles}
         membership={data.membership}
         finances={data.finances}
+        canWriteMembers={canWriteMembers}
+        canDeleteMembers={canDeleteMembers}
+        canReadMemberFinances={canReadMemberFinances}
       />
     </Suspense>
   );

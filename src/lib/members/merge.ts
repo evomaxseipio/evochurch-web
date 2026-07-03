@@ -24,6 +24,7 @@ export function mergeMemberFromInput(
     isActive: input.isActive,
     isMember: input.isMember,
     bio: input.bio,
+    membershipRoleId: input.membershipRoleId,
     membershipRole: input.membershipRole,
     address: {
       streetAddress: input.streetAddress,

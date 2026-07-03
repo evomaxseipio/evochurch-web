@@ -43,24 +43,6 @@ export function DashboardHero({
             Que esta semana sea de cosecha.
           </span>
         </h2>
-        <div className="meta-row">
-          <div className="m">
-            Asistencia este domingo
-            <b>{hero.attendance}</b>
-            <span
-              className="tiny muted"
-              style={{ display: "block", marginTop: 4, fontWeight: 500 }}
-            >
-              {hero.attendanceDisclaimer}
-            </span>
-          </div>
-          <div className="m">
-            Ofrenda del día<b>{hero.offering}</b>
-          </div>
-          <div className="m">
-            Catecúmenos<b>{hero.catechumens}</b>
-          </div>
-        </div>
       </div>
       <div className="versecard">
         &ldquo;{hero.verse}&rdquo;

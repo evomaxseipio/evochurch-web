@@ -12,12 +12,17 @@ import {
   MODULE_ICONS,
   PERMISSION_ACTION_COLUMNS,
   actionColumnIndex,
+  actionColumnLabel,
+  applyMinistryPermissionRules,
+  applyStandardPermissionRules,
   groupMatrixCatalog,
   isActionApplicable,
+  matrixResourcePermissionPattern,
   moduleLabel,
 } from "@/lib/roles/catalog";
 import {
   MODULE_UI_DESCRIPTIONS,
+  moduleMatrixNote,
   permissionUiLabel,
   roleUiColor,
   roleUiSummary,
@@ -142,6 +147,8 @@ export function RolesPermissionsView({
       const next = new Set(prev);
       if (checked) next.add(key);
       else next.delete(key);
+      applyStandardPermissionRules(next, key, checked);
+      applyMinistryPermissionRules(next, key, checked);
       return next;
     });
   };
@@ -350,6 +357,7 @@ export function RolesPermissionsView({
                   const ModuleIcon = Icons[MODULE_ICONS[module] ?? "grid"];
                   const color = MODULE_COLORS[module] ?? "var(--muted)";
                   const moduleDesc = MODULE_UI_DESCRIPTIONS[module];
+                  const matrixNote = moduleMatrixNote(module);
                   const expanded = expandedModules.has(module);
                   const enabledCount = permissions.filter((p) =>
                     draft.has(p.permissionKey),
@@ -407,7 +415,7 @@ export function RolesPermissionsView({
                                     key={col.action}
                                     className="roles-matrix-action-col"
                                   >
-                                    {col.label}
+                                    {actionColumnLabel(module, col.action)}
                                     <span className="roles-col-key">
                                       ({col.action})
                                     </span>
@@ -426,7 +434,10 @@ export function RolesPermissionsView({
                                       {resource.label}
                                     </span>
                                     <code className="roles-perm-key mono">
-                                      finances:{resource.resourceKey}:*
+                                      {matrixResourcePermissionPattern(
+                                        module,
+                                        resource.resourceKey,
+                                      )}
                                     </code>
                                   </td>
                                   {PERMISSION_ACTION_COLUMNS.map((col) => {
@@ -533,6 +544,19 @@ export function RolesPermissionsView({
                                 : null}
                             </tbody>
                           </table>
+                          {matrixNote ? (
+                            <p
+                              className="muted tiny"
+                              style={{
+                                margin: 0,
+                                padding: "12px 20px",
+                                borderTop: "1px solid var(--hairline)",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {matrixNote}
+                            </p>
+                          ) : null}
                         </div>
                       ) : null}
                     </div>

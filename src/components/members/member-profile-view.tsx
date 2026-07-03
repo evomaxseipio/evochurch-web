@@ -30,6 +30,7 @@ import {
   MARITAL_OPTIONS,
 } from "@/lib/members/catalogs";
 import { memberFullName } from "@/lib/members/parse";
+import type { MemberRoleCatalog } from "@/lib/members/roles";
 import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
 import { useActionToast } from "@/hooks/use-action-toast";
 import Link from "next/link";
@@ -66,15 +67,21 @@ export function MemberProfileView({
   onMemberUpdated,
   onMembershipUpdated,
   finances = null,
+  canWriteMembers,
+  canDeleteMembers,
+  canReadMemberFinances,
 }: {
   member: Member;
-  roles: string[];
+  roles: MemberRoleCatalog[];
   membership: MembershipRecord | null;
   tab: ProfileTabId;
   onTabChange: (tab: ProfileTabId) => void;
   onMemberUpdated: (member: Member) => void;
   onMembershipUpdated: (membership: MembershipRecord | null) => void;
   finances?: MemberFinanceData | null;
+  canWriteMembers: boolean;
+  canDeleteMembers: boolean;
+  canReadMemberFinances: boolean;
 }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
@@ -85,6 +92,11 @@ export function MemberProfileView({
   const ActiveIcon = Icons[active.icon];
   const sector =
     member.address.stateProvince || member.address.cityState || "—";
+  const visibleTabs = PROFILE_TABS.filter((t) => {
+    if (t.id === "delete") return canDeleteMembers;
+    if (t.id === "finances") return canReadMemberFinances;
+    return true;
+  });
 
   return (
     <div>
@@ -128,6 +140,7 @@ export function MemberProfileView({
           tab={tab}
           profilePending={profilePending}
           membershipPending={membershipPending}
+          canWriteMembers={canWriteMembers}
         />
       </div>
 
@@ -150,7 +163,7 @@ export function MemberProfileView({
             Cuenta del miembro
           </div>
           <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {PROFILE_TABS.filter((t) => !t.isDanger).map((t) => (
+            {visibleTabs.filter((t) => !t.isDanger).map((t) => (
               <ProfileTabBtn
                 key={t.id}
                 tab={t}
@@ -165,7 +178,7 @@ export function MemberProfileView({
                 margin: "10px 6px",
               }}
             />
-            {PROFILE_TABS.filter((t) => t.isDanger).map((t) => (
+            {visibleTabs.filter((t) => t.isDanger).map((t) => (
               <ProfileTabBtn
                 key={t.id}
                 tab={t}
@@ -223,7 +236,7 @@ export function MemberProfileView({
                 <nav
                   style={{ display: "flex", flexDirection: "column", gap: 4 }}
                 >
-                  {PROFILE_TABS.map((t) => (
+                  {visibleTabs.map((t) => (
                     <ProfileTabBtn
                       key={t.id}
                       tab={t}
@@ -246,6 +259,7 @@ export function MemberProfileView({
               member={member}
               onPending={setProfilePending}
               onMemberUpdated={onMemberUpdated}
+              readOnly={!canWriteMembers}
             />
           ) : null}
           {tab === "membership" ? (
@@ -256,6 +270,7 @@ export function MemberProfileView({
               onPending={setMembershipPending}
               onMemberUpdated={onMemberUpdated}
               onMembershipUpdated={onMembershipUpdated}
+              readOnly={!canWriteMembers}
             />
           ) : null}
           {tab === "finances" ? (
@@ -304,10 +319,12 @@ function ProfileTab({
   member,
   onPending,
   onMemberUpdated,
+  readOnly = false,
 }: {
   member: Member;
   onPending: (pending: boolean) => void;
   onMemberUpdated: (member: Member) => void;
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState(updateMemberAction, null);
@@ -334,6 +351,10 @@ function ProfileTab({
       <input type="hidden" name="isMember" value={member.isMember ? "true" : "false"} />
       <input type="hidden" name="bio" value={member.bio} />
 
+      <fieldset
+        disabled={readOnly}
+        style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+      >
       <ProfileSectionCard
         eyebrow="Datos personales"
         title="Información personal"
@@ -452,6 +473,7 @@ function ProfileTab({
           />
         </div>
       </ProfileSectionCard>
+      </fieldset>
     </form>
   );
 }
@@ -470,13 +492,15 @@ function MembershipTab({
   onPending,
   onMemberUpdated,
   onMembershipUpdated,
+  readOnly = false,
 }: {
   member: Member;
   membership: MembershipRecord | null;
-  roles: string[];
+  roles: MemberRoleCatalog[];
   onPending: (pending: boolean) => void;
   onMemberUpdated: (member: Member) => void;
   onMembershipUpdated: (membership: MembershipRecord | null) => void;
+  readOnly?: boolean;
 }) {
   const router = useRouter();
   const [state, formAction] = useActionState(saveMembershipAction, null);
@@ -485,7 +509,15 @@ function MembershipTab({
     () => membershipFormKey(member, membership),
     [member, membership],
   );
-  const roleOptions = roles.length ? roles : [member.membershipRole || "Miembro Regular"];
+  const roleOptions =
+    roles.length > 0
+      ? roles.map((r) => ({ value: r.id, label: r.roleName }))
+      : member.membershipRoleId
+        ? [{ value: member.membershipRoleId, label: member.membershipRole || "Miembro Regular" }]
+        : [];
+
+  const defaultRoleId =
+    m?.membershipRoleId || member.membershipRoleId || roleOptions[0]?.value || "";
 
   useActionToast(state, {
     successMessage: "Membresía guardada correctamente.",
@@ -506,6 +538,10 @@ function MembershipTab({
       <FormPendingReporter onPending={onPending} />
       <input type="hidden" name="profileId" value={member.memberId} />
 
+      <fieldset
+        disabled={readOnly}
+        style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+      >
       <ProfileSectionCard
         eyebrow="Pertenencia"
         title="Rol y estado en la iglesia"
@@ -530,10 +566,10 @@ function MembershipTab({
           />
           <ProfileField
             label="Rol de membresía"
-            name="membershipRole"
+            name="membershipRoleId"
             type="select"
-            options={roleOptions.map((r) => ({ value: r, label: r }))}
-            defaultValue={m?.membershipRole ?? member.membershipRole}
+            options={roleOptions}
+            defaultValue={defaultRoleId}
           />
           <ProfileField
             label="Ciudad del bautismo"
@@ -571,6 +607,7 @@ function MembershipTab({
       </ProfileSectionCard>
 
       <MembershipHistorySection membership={m} />
+      </fieldset>
     </form>
   );
 }

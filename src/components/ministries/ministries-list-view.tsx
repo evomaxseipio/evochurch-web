@@ -5,6 +5,10 @@ import {
   saveMinistryAction,
 } from "@/app/(app)/ministerios/actions";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import {
+  canCreateMinistryWith,
+  canEditMinistryWith,
+} from "@/lib/auth/permissions";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { MinistryCard } from "@/components/ministries/ministry-card";
 import { MinistryFormDrawer } from "@/components/ministries/ministry-form-drawer";
@@ -78,11 +82,7 @@ export function MinistriesListView({
   permissions: PermissionKey[];
   profileId: string;
 }) {
-  const canCreate = permissions.includes("ministerios:write");
-  const canEditMinistry = (ministry: Ministry) =>
-    permissions.includes("ministerios:write") ||
-    (permissions.includes("ministerios:write_own") &&
-      (ministry.leaderProfileIds ?? []).includes(profileId));
+  const canCreate = canCreateMinistryWith(permissions);
   const router = useRouter();
   const deleteInitial = null;
   const [deleteState, deleteFormAction, deletePending] = useActionState(
@@ -142,7 +142,11 @@ export function MinistriesListView({
   };
 
   const menuHandlers = (ministry: Ministry) => {
-    const editable = canEditMinistry(ministry);
+    const editable = canEditMinistryWith(
+      permissions,
+      profileId,
+      ministry.leaderProfileIds,
+    );
     const noop = () => {};
     return {
       onEdit: editable ? () => setFormState({ mode: "edit", ministry }) : noop,

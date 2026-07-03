@@ -10,6 +10,7 @@ import {
 import { SYSTEM_ACCESS_MESSAGES } from "@/lib/admin-users/eligibility";
 import type { AdminUserRow } from "@/lib/admin-users/types";
 import type { PresetContributor } from "@/components/contributions/contribution-form-drawer";
+import type { MemberRoleCatalog } from "@/lib/members/roles";
 import {
   MemberAvatar,
   RoleChip,
@@ -93,15 +94,21 @@ export function MembersListView({
   filter,
   query: queryFromServer,
   canManageUsers,
+  canWriteMembers,
+  canDeleteMembers,
+  canWriteContributions,
   systemAccessProfileIds = [],
 }: {
   members: Member[];
-  roles: string[];
+  roles: MemberRoleCatalog[];
   stats: MembersListStats;
   pagination: MembersPagination;
   filter: MemberFilterKey;
   query: string;
   canManageUsers: boolean;
+  canWriteMembers: boolean;
+  canDeleteMembers: boolean;
+  canWriteContributions: boolean;
   systemAccessProfileIds?: string[];
 }) {
   const router = useRouter();
@@ -428,9 +435,11 @@ export function MembersListView({
         activeFilter={filter}
         onFilterChange={onFilterChange}
         trailing={
-          <button type="button" className="btn primary" onClick={() => setAddOpen(true)}>
-            <Icons.plus size={14} /> Nuevo miembro
-          </button>
+          canWriteMembers ? (
+            <button type="button" className="btn primary" onClick={() => setAddOpen(true)}>
+              <Icons.plus size={14} /> Nuevo miembro
+            </button>
+          ) : null
         }
       />
 
@@ -498,6 +507,9 @@ export function MembersListView({
               onClose={() => setMenuId(null)}
               member={m}
               canManageUsers={canManageUsers}
+              canWriteMembers={canWriteMembers}
+              canWriteContributions={canWriteContributions}
+              canDeleteMembers={canDeleteMembers}
               hasSystemAccess={systemAccessSet.has(m.memberId)}
               onAddContribution={() => void openContributionDrawer(m)}
               onConfigureSystemUser={() => handleConfigureSystemUser(m)}
@@ -538,6 +550,9 @@ export function MembersListView({
                     onClose={() => setMenuId(null)}
                     member={m}
                     canManageUsers={canManageUsers}
+                    canWriteMembers={canWriteMembers}
+                    canWriteContributions={canWriteContributions}
+                    canDeleteMembers={canDeleteMembers}
                     hasSystemAccess={systemAccessSet.has(m.memberId)}
                     onAddContribution={() => void openContributionDrawer(m)}
                     onConfigureSystemUser={() => handleConfigureSystemUser(m)}
@@ -627,6 +642,9 @@ function RowMenu({
   onClose,
   member,
   canManageUsers,
+  canWriteMembers,
+  canWriteContributions,
+  canDeleteMembers,
   hasSystemAccess,
   onAddContribution,
   onConfigureSystemUser,
@@ -639,6 +657,9 @@ function RowMenu({
   onClose: () => void;
   member: Member;
   canManageUsers: boolean;
+  canWriteMembers: boolean;
+  canWriteContributions: boolean;
+  canDeleteMembers: boolean;
   hasSystemAccess: boolean;
   onAddContribution: () => void;
   onConfigureSystemUser: () => void;
@@ -668,24 +689,28 @@ function RowMenu({
     }> = [
       {
         id: "edit",
-        label: "Editar perfil",
+        label: canWriteMembers ? "Editar perfil" : "Ver perfil",
         icon: <Icons.edit size={15} />,
         href: profileHref,
       },
-      {
+    ];
+
+    if (canWriteContributions) {
+      items.push({
         id: "contribution",
         label: "Agregar Contribución",
         icon: <Icons.wallet size={15} />,
         on: onAddContribution,
-      },
-      {
-        id: "msg",
-        label: "Mensajes",
-        icon: <Icons.chat size={15} />,
-        on: () => toast.info("Mensajes", `Chat con ${name} (próximamente)`),
-        disabled: true,
-      },
-    ];
+      });
+    }
+
+    items.push({
+      id: "msg",
+      label: "Mensajes",
+      icon: <Icons.chat size={15} />,
+      on: () => toast.info("Mensajes", `Chat con ${name} (próximamente)`),
+      disabled: true,
+    });
 
     if (canManageUsers && member.isMember) {
       items.push({
@@ -706,14 +731,16 @@ function RowMenu({
       }
     }
 
-    items.push({
-      id: "del",
-      label: "Eliminar",
-      icon: <Icons.trash size={15} />,
-      danger: true,
-      on: () =>
-        toast.error("Confirmar eliminación", `Confirma desde el panel del miembro`),
-    });
+    if (canDeleteMembers) {
+      items.push({
+        id: "del",
+        label: "Eliminar",
+        icon: <Icons.trash size={15} />,
+        danger: true,
+        on: () =>
+          toast.error("Confirmar eliminación", `Confirma desde el panel del miembro`),
+      });
+    }
 
     return items;
   }, [
@@ -721,6 +748,9 @@ function RowMenu({
     name,
     member.isMember,
     onAddContribution,
+    canWriteMembers,
+    canWriteContributions,
+    canDeleteMembers,
     canManageUsers,
     onConfigureSystemUser,
     configureUserPending,

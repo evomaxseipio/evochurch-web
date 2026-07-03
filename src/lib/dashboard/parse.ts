@@ -119,6 +119,7 @@ function parsePendingItems(raw: unknown): PendingAuthorizationItem[] {
 
 function buildDashboardKpisFromSummary(params: {
   memberStats: MembersListStats;
+  catechumenCount: number;
   fundsSummary: { totalBalance: number; activeCount: number };
   contributionMonthlyTotals: number[];
   kpiMonth: {
@@ -156,6 +157,12 @@ function buildDashboardKpisFromSummary(params: {
       feature: true,
       icon: "users",
       accent: "var(--d-people)",
+    },
+    {
+      label: "Total catecúmenos",
+      value: params.catechumenCount.toLocaleString("es-DO"),
+      icon: "cross",
+      accent: "var(--warm)",
     },
     {
       label: "Saldo en fondos",
@@ -240,14 +247,11 @@ export function parseDashboardSummaryResponse(
   const contributionCharts = parsePeriodCharts(root.contribution_chart);
   const ledgerCharts = parseLedgerPeriodCharts(root.ledger_chart);
 
-  const hero: DashboardHeroData = buildDashboardHero({
-    verse,
-    offeringToday: Math.round(asNumber(root.offering_today)),
-    catechumenCount: asNumber(root.catechumen_count),
-  });
+  const hero: DashboardHeroData = buildDashboardHero({ verse });
 
   const kpis = buildDashboardKpisFromSummary({
     memberStats,
+    catechumenCount: asNumber(root.catechumen_count),
     fundsSummary: {
       totalBalance: Math.round(asNumber(fundsRaw.total_balance)),
       activeCount: asNumber(fundsRaw.active_count),

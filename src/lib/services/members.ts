@@ -1,4 +1,5 @@
 import { DEFAULT_MEMBERS_PAGE_SIZE } from "@/lib/members/pagination";
+import type { MemberRoleCatalog } from "@/lib/members/roles";
 import {
   parseMember,
   parseMembersPageResponse,
@@ -87,7 +88,7 @@ export async function fetchMemberById(
 
 export async function fetchMemberRoles(
   _supabase: SupabaseClient,
-): Promise<string[]> {
+): Promise<MemberRoleCatalog[]> {
   return unstable_cache(
     fetchMemberRolesFromDb,
     ["catalog:member-roles"],
@@ -95,18 +96,22 @@ export async function fetchMemberRoles(
   )();
 }
 
-async function fetchMemberRolesFromDb(): Promise<string[]> {
+async function fetchMemberRolesFromDb(): Promise<MemberRoleCatalog[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("member_roles")
-    .select("role_name")
+    .select("id, role_name, role_code")
     .order("role_name", { ascending: true });
 
   if (error) throw error;
 
-  return ((data as { role_name: string }[]) ?? [])
-    .map((r) => r.role_name)
-    .filter((r) => r && r.length > 0);
+  return ((data as { id: string; role_name: string; role_code: string }[]) ?? [])
+    .map((r) => ({
+      id: r.id,
+      roleName: r.role_name?.trim() ?? "",
+      roleCode: r.role_code?.trim() ?? "",
+    }))
+    .filter((r) => r.id && r.roleName);
 }
 
 export async function insertMember(
@@ -201,7 +206,7 @@ export async function saveMembership(
     p_baptism_date: input.baptismDate || null,
     p_baptism_church: input.baptismChurch || null,
     p_baptism_pastor: input.baptismPastor || null,
-    p_membership_role: input.membershipRole || null,
+    p_member_role_id: input.membershipRoleId || null,
     p_baptism_church_city: input.baptismChurchCity || null,
     p_baptism_church_country: input.baptismChurchCountry || null,
     p_has_credential: input.hasCredential,

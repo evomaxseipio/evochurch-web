@@ -4,8 +4,9 @@ import {
   fetchIncomeTypes,
 } from "@/lib/services/contributions";
 import { fetchFunds } from "@/lib/services/funds";
+import { defaultYearToDateRange } from "@/lib/finance/date-range";
+import { monthDateBounds } from "@/lib/finance/month-period";
 import {
-  contributionDateBoundsFromMonth,
   parseContributionCategoryFilter,
   parseFinancePage,
   parseFinancePageSize,
@@ -21,6 +22,8 @@ export default async function ContributionsPage({
     fund?: string;
     page?: string;
     size?: string;
+    from?: string;
+    to?: string;
     month?: string;
     category?: string;
   }>;
@@ -31,9 +34,17 @@ export default async function ContributionsPage({
   const fundId = params.fund ?? null;
   const page = parseFinancePage(params.page);
   const pageSize = parseFinancePageSize(params.size);
-  const month = parseYearMonthParam(params.month);
   const category = parseContributionCategoryFilter(params.category);
-  const { from, to } = contributionDateBoundsFromMonth(month);
+  const defaultRange = defaultYearToDateRange();
+  let dateFrom = params.from ?? defaultRange.from;
+  let dateTo = params.to ?? defaultRange.to;
+
+  const legacyMonth = parseYearMonthParam(params.month);
+  if (legacyMonth && !params.from && !params.to) {
+    const bounds = monthDateBounds(legacyMonth);
+    dateFrom = bounds.from;
+    dateTo = bounds.to;
+  }
 
   const supabase = await createClient();
 
@@ -49,8 +60,8 @@ export default async function ContributionsPage({
       fetchIncomeEntriesPage(supabase, {
         churchId,
         fundId,
-        dateFrom: from,
-        dateTo: to,
+        dateFrom,
+        dateTo,
         category,
         page,
         pageSize,
@@ -92,7 +103,8 @@ export default async function ContributionsPage({
           fundFilterName={fundFilterName}
           page={page}
           pageSize={pageSize}
-          month={month}
+          dateFrom={dateFrom}
+          dateTo={dateTo}
           category={category}
         />
       ) : null}

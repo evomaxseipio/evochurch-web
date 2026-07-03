@@ -16,7 +16,7 @@ export const PROJECT_USER_ROLES: ProjectUserRole[] = [
   {
     id: 2,
     name: "Pastor",
-    description: "Miembros, Eventos, Comunicación.",
+    description: "Miembros, ministerios, eventos y comunicación.",
     appRoleId: 4,
   },
   {
@@ -28,13 +28,13 @@ export const PROJECT_USER_ROLES: ProjectUserRole[] = [
   {
     id: 4,
     name: "Secretario",
-    description: "Miembros, Eventos.",
+    description: "Miembros, ministerios y eventos.",
     appRoleId: 2,
   },
   {
     id: 5,
     name: "Líder",
-    description: "Miembros (lectura), Eventos.",
+    description: "Miembros (lectura) y ministerios donde es líder.",
     appRoleId: 10,
   },
 ];
