@@ -1,10 +1,12 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { signOut } from "@/app/(auth)/login/actions";
 import { applyTheme, resolveTheme, type Theme } from "@/lib/theme";
 import { breadcrumbsFromPath } from "@/lib/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -26,8 +28,9 @@ export function AppTopbar({
   onToggleSidebar: () => void;
 }) {
   const pathname = usePathname();
-  const [crumb, page] = breadcrumbsFromPath(pathname);
-  // Valor fijo en SSR/hidratación; se sincroniza con localStorage tras montar.
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
+  const [crumb, page] = breadcrumbsFromPath(pathname, (k) => tNav(k));
   const [theme, setTheme] = useState<Theme>("dark");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -64,7 +67,7 @@ export function AppTopbar({
         type="button"
         className="icon-btn mobile-drawer-toggle"
         onClick={onToggleSidebar}
-        aria-label="Menú"
+        aria-label={tCommon("menu")}
         style={{ display: "none" }}
       >
         <Icons.menu size={18} />
@@ -85,20 +88,28 @@ export function AppTopbar({
 
       <div className="search">
         <Icons.search size={14} stroke="var(--muted)" />
-        <input placeholder="Buscar miembros, transacciones, eventos…" />
+        <input placeholder={tNav("searchPlaceholder")} />
         <kbd>⌘K</kbd>
       </div>
+
+      <LocaleSwitcher variant="compact" />
 
       <button
         type="button"
         className="icon-btn"
         onClick={toggleTheme}
-        title="Cambiar tema"
+        title={tCommon("themeToggle")}
+        aria-label={tCommon("themeToggle")}
       >
         {theme === "dark" ? <Icons.sun size={18} /> : <Icons.moon size={18} />}
       </button>
 
-      <button type="button" className="icon-btn" title="Notificaciones">
+      <button
+        type="button"
+        className="icon-btn"
+        title={tCommon("notifications")}
+        aria-label={tCommon("notifications")}
+      >
         <Icons.bell size={18} />
         <span className="dot" />
       </button>
@@ -108,7 +119,8 @@ export function AppTopbar({
           type="button"
           className="icon-btn"
           onClick={() => setMenuOpen((o) => !o)}
-          title="Cuenta"
+          title={tCommon("account")}
+          aria-label={tCommon("account")}
           style={{
             width: 32,
             height: 32,
@@ -147,14 +159,14 @@ export function AppTopbar({
               className="block px-4 py-2.5 text-sm"
               onClick={() => setMenuOpen(false)}
             >
-              Mi cuenta
+              {tCommon("myAccount")}
             </Link>
             <Link
               href="/settings"
               className="block px-4 py-2.5 text-sm"
               onClick={() => setMenuOpen(false)}
             >
-              Configuración
+              {tNav("settings")}
             </Link>
             <form action={signOut}>
               <button
@@ -162,7 +174,7 @@ export function AppTopbar({
                 className="block w-full px-4 py-2.5 text-left text-sm"
                 style={{ color: "var(--danger)" }}
               >
-                Cerrar sesión
+                {tCommon("signOut")}
               </button>
             </form>
           </div>

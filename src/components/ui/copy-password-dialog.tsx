@@ -1,6 +1,7 @@
 "use client";
 
 import { toast } from "@/lib/toast";
+import { useTranslations } from "next-intl";
 
 export function CopyPasswordDialog({
   open,
@@ -17,14 +18,17 @@ export function CopyPasswordDialog({
   password: string;
   onClose: () => void;
 }) {
+  const t = useTranslations("common");
+  const tAdmin = useTranslations("adminUsers");
+
   if (!open) return null;
 
   async function copyPassword() {
     try {
       await navigator.clipboard.writeText(password);
-      toast.success("Copiado", "Contraseña copiada al portapapeles.");
+      toast.success(t("copied"), tAdmin("passwordCopied"));
     } catch {
-      toast.error("No se pudo copiar", "Selecciona y copia la contraseña manualmente.");
+      toast.error(tAdmin("copyFailed"), tAdmin("copyFailedHint"));
     }
   }
 
@@ -60,7 +64,7 @@ export function CopyPasswordDialog({
           {message}
         </p>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label className="tiny muted">Correo de acceso</label>
+          <label className="tiny muted">{tAdmin("accessEmail")}</label>
           <div
             className="card flat"
             style={{
@@ -74,7 +78,7 @@ export function CopyPasswordDialog({
           </div>
         </div>
         <div className="field" style={{ marginBottom: 20 }}>
-          <label className="tiny muted">Contraseña temporal</label>
+          <label className="tiny muted">{tAdmin("tempPassword")}</label>
           <div
             className="card flat"
             style={{
@@ -92,10 +96,10 @@ export function CopyPasswordDialog({
         </div>
         <div className="row" style={{ gap: 10, justifyContent: "flex-end" }}>
           <button type="button" className="btn outline" onClick={onClose}>
-            Cerrar
+            {t("close")}
           </button>
           <button type="button" className="btn primary" onClick={copyPassword}>
-            Copiar contraseña
+            {tAdmin("copyPassword")}
           </button>
         </div>
       </div>

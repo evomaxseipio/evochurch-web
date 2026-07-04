@@ -152,8 +152,10 @@ export function extractPendingAuthorizations(
 export function buildDashboardHero(params: {
   verse: ScriptureVerse | null;
   anchor?: Date;
+  locale?: import("@/i18n/config").Locale;
 }): DashboardHeroData {
   const anchor = params.anchor ?? new Date();
+  const locale = params.locale ?? "es";
   const fallbackVerse = {
     text: dashboardMock.hero.verse,
     reference: dashboardMock.hero.verseRef,
@@ -161,7 +163,7 @@ export function buildDashboardHero(params: {
   const verse = params.verse ?? fallbackVerse;
 
   return {
-    dateLabel: formatHeroDateLabel(anchor),
+    dateLabel: formatHeroDateLabel(anchor, locale),
     verse: verse.text,
     verseRef: verse.reference,
   };

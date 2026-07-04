@@ -8,21 +8,24 @@ import {
 import { fetchChurchAuthUsers } from "@/lib/services/admin-users";
 import { fetchAssignableRoles } from "@/lib/services/roles";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function UsersSettingsPage() {
+  const tAdmin = await getTranslations("adminUsers");
+  const tErrors = await getTranslations("errors");
   const session = await requireAppSession();
   const adminSession = canManageAdminUsers(session) ? session : null;
   if (!adminSession) {
     return (
       <div className="card" style={{ padding: 24 }}>
-        <div className="eyebrow">Configuración · Acceso</div>
+        <div className="eyebrow">{tAdmin("settingsAccessEyebrow")}</div>
         <h1 className="display" style={{ fontSize: 28, margin: "8px 0 12px" }}>
-          Usuarios del sistema
+          {tAdmin("title")}
         </h1>
         <p className="muted" style={{ margin: 0, maxWidth: 560 }}>
-          Solo un <strong>Administrador</strong> puede gestionar cuentas de
-          acceso. Tu rol actual es{" "}
-          {session.appRoleName ?? session.membershipRole ?? "sin rol asignado"}.
+          {tAdmin("adminOnlyMessage", {
+            role: session.appRoleName ?? session.membershipRole ?? tAdmin("noRoleAssigned"),
+          })}
         </p>
       </div>
     );
@@ -40,7 +43,7 @@ export default async function UsersSettingsPage() {
     ]);
   } catch (e) {
     error =
-      e instanceof Error ? e.message : "No se pudieron cargar los usuarios.";
+      e instanceof Error ? e.message : tErrors("loadFailed");
   }
 
   if (error) {

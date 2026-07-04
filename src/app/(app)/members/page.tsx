@@ -14,6 +14,7 @@ import {
 } from "@/lib/auth/permissions";
 import { canManageAdminUsers } from "@/lib/auth/require-admin-session";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 const FILTERS: MemberFilterKey[] = [
   "all",
@@ -36,6 +37,7 @@ export default async function MembersPage({
   searchParams: Promise<{ page?: string; filter?: string; q?: string; size?: string }>;
 }) {
   const session = await requirePageAccess("/members");
+  const tErrors = await getTranslations("errors");
 
   const canWriteMembersFlag = canWriteMembers(session);
   const canDeleteMembersFlag = canDeleteMembers(session);
@@ -86,8 +88,7 @@ export default async function MembersPage({
       .map((u) => u.profileId)
       .filter((id): id is string => Boolean(id));
   } catch (e) {
-    error =
-      e instanceof Error ? e.message : "No se pudieron cargar los miembros.";
+    error = e instanceof Error ? e.message : tErrors("loadFailed");
   }
 
   return (

@@ -5,6 +5,7 @@ import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useState, startTransition } from "react";
 
 type CatalogFormValues = {
@@ -48,6 +49,8 @@ export function CatalogFormDrawer({
   ) => Promise<CatalogActionResult>;
   activeHint: string;
 }) {
+  const tCommon = useTranslations("common");
+  const tCatalogs = useTranslations("catalogs");
   const router = useRouter();
   const initial: CatalogActionResult | null = null;
   const [state, formAction, pending] = useActionState(saveAction, initial);
@@ -80,7 +83,7 @@ export function CatalogFormDrawer({
 
   function submit() {
     const e: Record<string, string> = {};
-    if (!v.name.trim()) e.name = "Obligatorio";
+    if (!v.name.trim()) e.name = tCommon("required");
     setErrs(e);
     if (Object.keys(e).length) return;
 
@@ -104,7 +107,7 @@ export function CatalogFormDrawer({
         <div className="drawer-head">
           <div style={{ flex: 1 }}>
             <div className="eyebrow">
-              {mode === "new" ? "Nuevo registro" : "Edición"}
+              {mode === "new" ? tCommon("newRecord") : tCommon("editRecord")}
             </div>
             <h2 id="catalog-form-title" style={{ margin: "4px 0 0", fontSize: 18 }}>
               {mode === "new" ? `Nuevo ${entityLabel.toLowerCase()}` : `Editar ${entityLabel.toLowerCase()}`}
@@ -123,15 +126,12 @@ export function CatalogFormDrawer({
 
         <div className="drawer-body col gap-md">
           <div className="field">
-            <label>
-              Nombre del tipo{" "}
-              <span style={{ color: "var(--danger)" }}>*</span>
-            </label>
+            <label>{tCatalogs("form.typeNameLabel")} <span style={{ color: "var(--danger)" }}>*</span></label>
             <div className={`input-wrap${errs.name ? " error" : ""}`}>
               <input
                 value={v.name}
                 onChange={(e) => upd("name", e.target.value)}
-                placeholder="Ej. Servicios básicos"
+                placeholder={tCatalogs("namePlaceholder")}
               />
             </div>
             {errs.name ? (
@@ -140,13 +140,13 @@ export function CatalogFormDrawer({
           </div>
 
           <div className="field">
-            <label>Descripción</label>
+            <label>{tCommon("description")}</label>
             <div className="input-wrap" style={{ alignItems: "flex-start", padding: "10px 12px" }}>
               <textarea
                 rows={3}
                 value={v.description}
                 onChange={(e) => upd("description", e.target.value)}
-                placeholder="¿Qué tipo de movimientos entran en esta categoría?"
+                placeholder={tCatalogs("descPlaceholder")}
                 style={{ resize: "vertical", minHeight: 72 }}
               />
             </div>
@@ -155,7 +155,7 @@ export function CatalogFormDrawer({
           <div className="field">
             <div className="row between" style={{ alignItems: "center" }}>
               <div>
-                <label style={{ margin: 0 }}>Activo</label>
+                <label style={{ margin: 0 }}>{tCommon("active")}</label>
                 <p className="tiny muted" style={{ margin: "4px 0 0" }}>
                   {activeHint}
                 </p>
@@ -172,7 +172,7 @@ export function CatalogFormDrawer({
             onClick={onClose}
             disabled={pending}
           >
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -180,7 +180,7 @@ export function CatalogFormDrawer({
             onClick={submit}
             disabled={pending}
           >
-            {pending ? "Guardando…" : "Guardar"}
+            {pending ? tCommon("saving") : tCommon("save")}
           </button>
         </div>
       </div>

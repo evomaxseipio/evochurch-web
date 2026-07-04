@@ -1,6 +1,9 @@
+"use client";
+
 import type { SelectOption } from "@/lib/members/catalogs";
 import type { Member } from "@/lib/members/types";
-import { memberInitials, memberStatusLabel } from "@/lib/members/parse";
+import { memberInitials } from "@/lib/members/parse";
+import { useTranslations } from "next-intl";
 
 export function MemberAvatar({
   member,
@@ -21,13 +24,18 @@ export function MemberAvatar({
 }
 
 export function StatusChip({ member }: { member: Member }) {
-  const label = memberStatusLabel(member);
+  const t = useTranslations("members");
+  const label = member.isActive
+    ? member.isMember
+      ? t("statusActive")
+      : t("statusVisit")
+    : t("statusInactive");
   const chipClass =
-    label === "Activo"
+    member.isActive && member.isMember
       ? "success"
-      : label === "Visita"
+      : member.isActive && !member.isMember
         ? "warn"
-        : label === "Inactivo"
+        : !member.isActive
           ? ""
           : "pending";
 
@@ -68,6 +76,7 @@ export function FormField({
   options?: string[];
   optionItems?: readonly SelectOption[];
 }) {
+  const t = useTranslations("common");
   const selectOptions: readonly SelectOption[] =
     optionItems ??
     (options?.map((o) => ({ value: o, label: o })) ?? []);
@@ -87,7 +96,7 @@ export function FormField({
           defaultValue={defaultValue ?? ""}
           className={inputClass}
         >
-          <option value="">Seleccionar…</option>
+          <option value="">{t("selectOption")}</option>
           {selectOptions.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}

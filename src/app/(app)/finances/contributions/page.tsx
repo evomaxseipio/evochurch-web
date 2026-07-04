@@ -14,6 +14,7 @@ import {
 } from "@/lib/finance/pagination";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function ContributionsPage({
   searchParams,
@@ -28,6 +29,7 @@ export default async function ContributionsPage({
     category?: string;
   }>;
 }) {
+  const tErrors = await getTranslations("errors");
   const session = await requirePageAccess("/finances/contributions");
 
   const params = await searchParams;
@@ -73,7 +75,7 @@ export default async function ContributionsPage({
     error =
       e instanceof Error
         ? e.message
-        : "No se pudieron cargar las contribuciones.";
+        : tErrors("loadFailed");
   }
 
   const fundFilterName = fundId

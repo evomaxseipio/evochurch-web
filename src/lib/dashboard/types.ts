@@ -22,6 +22,7 @@ export type IncomeExpenseBarPoint = {
 
 export type DashboardKpi = {
   label: string;
+  labelKey?: string;
   value: string;
   delta?: string;
   deltaDir?: "up" | "down";

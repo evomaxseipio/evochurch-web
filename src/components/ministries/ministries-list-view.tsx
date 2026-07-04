@@ -8,10 +8,12 @@ import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
   canCreateMinistryWith,
   canEditMinistryWith,
+  canReadMembersWith,
 } from "@/lib/auth/permissions";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { MinistryCard } from "@/components/ministries/ministry-card";
 import { MinistryFormDrawer } from "@/components/ministries/ministry-form-drawer";
+import { MinistryMembersDialog } from "@/components/ministries/ministry-members-dialog";
 import {
   MemberAvatarStack,
   MinistryActionMenu,
@@ -38,9 +40,9 @@ import type {
   MinistryStatusFilter,
   MinistryViewMode,
 } from "@/lib/ministries/types";
-import { toast } from "@/lib/toast";
 import type { IconName } from "@/components/icons";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState, startTransition, useActionState } from "react";
 
 const PAGE_SIZE_OPTIONS = [10, 15, 25, 50] as const;
@@ -82,7 +84,10 @@ export function MinistriesListView({
   permissions: PermissionKey[];
   profileId: string;
 }) {
+  const t = useTranslations("ministerios");
+  const tCommon = useTranslations("common");
   const canCreate = canCreateMinistryWith(permissions);
+  const canViewProfiles = canReadMembersWith(permissions);
   const router = useRouter();
   const deleteInitial = null;
   const [deleteState, deleteFormAction, deletePending] = useActionState(
@@ -100,13 +105,16 @@ export function MinistriesListView({
     ministry: Ministry | null;
   } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Ministry | null>(null);
+  const [membersDialogTarget, setMembersDialogTarget] = useState<Ministry | null>(
+    null,
+  );
 
   useEffect(() => {
     setPage(1);
   }, [query, statusFilter, pageSize, view]);
 
   useActionToast(deleteState, {
-    successMessage: "Ministerio eliminado.",
+    successMessage: t("deleted"),
     onSuccess: () => {
       setDeleteTarget(null);
       router.refresh();
@@ -150,8 +158,7 @@ export function MinistriesListView({
     const noop = () => {};
     return {
       onEdit: editable ? () => setFormState({ mode: "edit", ministry }) : noop,
-      onViewMembers: () =>
-        toast.info("Miembros", `${ministry.name} · ${ministry.memberProfileIds.length} miembros`),
+      onViewMembers: () => setMembersDialogTarget(ministry),
       onAssignLeader: editable ? () => setFormState({ mode: "edit", ministry }) : noop,
       onViewEvents: () => router.push("/eventos"),
       onDelete: editable ? () => setDeleteTarget(ministry) : noop,
@@ -165,7 +172,7 @@ export function MinistriesListView({
         style={{ flexWrap: "wrap", gap: 16, marginBottom: 24 }}
       >
         <div>
-          <div className="eyebrow">Comunidad · Configuración</div>
+          <div className="eyebrow">{t("eyebrow")}</div>
           <h1
             className="display"
             style={{
@@ -174,13 +181,13 @@ export function MinistriesListView({
               letterSpacing: "-0.025em",
             }}
           >
-            Ministerios{" "}
+            {t("title")}{" "}
             <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>
-              · equipos de servicio
+              {t("teamsSuffix")}
             </span>
           </h1>
           <p className="muted" style={{ margin: 0 }}>
-            Equipos de servicio dentro de la iglesia. Asigna líderes y miembros.
+            {t("subtitle")}
           </p>
         </div>
       </div>
@@ -201,7 +208,7 @@ export function MinistriesListView({
       <FilterToolbar
         query={query}
         onQueryChange={setQuery}
-        queryPlaceholder="Buscar ministerio o líder…"
+        queryPlaceholder={t("searchPlaceholder")}
         searchWidthPercent={40}
         filters={STATUS_FILTERS}
         activeFilter={statusFilter}
@@ -228,7 +235,7 @@ export function MinistriesListView({
                   type="button"
                   onClick={() => setView(mode)}
                   className="btn sm icon-only"
-                  title={mode === "grid" ? "Cuadrícula" : "Lista"}
+                  title={mode === "grid" ? tCommon("gridView") : tCommon("listView")}
                   style={{
                     background:
                       view === mode ? "var(--surface)" : "transparent",
@@ -247,7 +254,7 @@ export function MinistriesListView({
               className="btn primary"
               onClick={() => setFormState({ mode: "new", ministry: null })}
             >
-              <Icons.plus size={14} /> Nuevo ministerio
+              <Icons.plus size={14} /> {t("addMinistry")}
             </button>
             ) : null}
           </>
@@ -267,7 +274,7 @@ export function MinistriesListView({
           {total === 0 ? (
             <div className="card span-12" style={{ padding: 40, textAlign: "center" }}>
               <div className="muted">
-                No hay ministerios que coincidan con los filtros.
+                {t("noMatches")}
               </div>
             </div>
           ) : null}
@@ -282,14 +289,14 @@ export function MinistriesListView({
           empty={
             <tr>
               <td colSpan={6} style={{ textAlign: "center", padding: 40 }} className="muted">
-                No hay ministerios que coincidan con los filtros.
+                {t("noMatches")}
               </td>
             </tr>
           }
           columns={[
             {
               key: "name",
-              label: "Nombre",
+              label: tCommon("name"),
               render: (row) => (
                 <div className="row" style={{ gap: 10, alignItems: "center" }}>
                   <MinistryIcon
@@ -312,30 +319,35 @@ export function MinistriesListView({
             },
             {
               key: "status",
-              label: "Estado",
+              label: tCommon("status"),
               render: (row) => <MinistryStatusChip active={row.isActive} />,
             },
             {
               key: "leader",
-              label: "Líder",
+              label: t("leader"),
               render: (row) => (
-                <MinistryLeaderRow ministry={row} members={members} />
+                <MinistryLeaderRow
+                  ministry={row}
+                  members={members}
+                  onClick={() => setMembersDialogTarget(row)}
+                />
               ),
             },
             {
               key: "members",
-              label: "Miembros",
+              label: t("members"),
               render: (row) => (
                 <MemberAvatarStack
                   memberIds={row.memberProfileIds}
                   members={members}
                   max={3}
+                  onClick={() => setMembersDialogTarget(row)}
                 />
               ),
             },
             {
               key: "createdAt",
-              label: "Activo desde",
+              label: t("activeSince"),
               render: (row) => (
                 <span className="muted tnum">{formatMinistryDate(row.createdAt)}</span>
               ),
@@ -354,15 +366,15 @@ export function MinistriesListView({
           pageSize={pageSize}
           onPage={setPage}
           onPageSize={(size) => setPageSize(size as PageSize)}
-          noun="ministerios"
+          noun={t("title").toLowerCase()}
           sizeOptions={PAGE_SIZE_OPTIONS}
         />
       ) : null}
 
       {deleteTarget ? (
         <ConfirmDialog
-          title="¿Eliminar ministerio?"
-          message="Se quitará de la lista. Esta acción no se puede deshacer."
+          title={t("deleteMinistry")}
+          message={t("deleteMinistryMessage")}
           itemName={deleteTarget.name}
           onConfirm={confirmDelete}
           onClose={() => setDeleteTarget(null)}
@@ -376,6 +388,14 @@ export function MinistriesListView({
         open={formState != null}
         onClose={() => setFormState(null)}
         saveAction={saveMinistryAction}
+      />
+
+      <MinistryMembersDialog
+        ministry={membersDialogTarget}
+        members={members}
+        canViewProfiles={canViewProfiles}
+        open={membersDialogTarget != null}
+        onClose={() => setMembersDialogTarget(null)}
       />
     </div>
   );

@@ -1,19 +1,9 @@
-import type { ChurchEvent } from "@/lib/mock/dashboard-data";
+"use client";
 
-const MONTHS = [
-  "Ene",
-  "Feb",
-  "Mar",
-  "Abr",
-  "May",
-  "Jun",
-  "Jul",
-  "Ago",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dic",
-] as const;
+import type { ChurchEvent } from "@/lib/mock/dashboard-data";
+import type { Locale } from "@/i18n/config";
+import { formatDate } from "@/lib/i18n/format";
+import { useLocale, useTranslations } from "next-intl";
 
 function eventColors(type: ChurchEvent["type"]) {
   switch (type) {
@@ -35,14 +25,16 @@ function nextEvent(events: ChurchEvent[]): ChurchEvent | null {
 }
 
 export function LastEventCard({ events }: { events: ChurchEvent[] }) {
+  const t = useTranslations("dashboard");
+  const locale = useLocale() as Locale;
   const event = nextEvent(events);
 
   return (
     <div className="card span-3">
       <div style={{ marginBottom: 14 }}>
-        <div className="eyebrow">Agenda</div>
+        <div className="eyebrow">{t("agenda")}</div>
         <div className="display" style={{ fontSize: 22, marginTop: 4 }}>
-          Último evento
+          {t("lastEvent")}
         </div>
       </div>
 
@@ -57,11 +49,13 @@ export function LastEventCard({ events }: { events: ChurchEvent[] }) {
             fontSize: 13,
           }}
         >
-          Sin eventos programados
+          {t("noEventsScheduled")}
         </div>
       ) : (
         (() => {
           const d = new Date(event.date + "T12:00:00");
+          const monthLabel = formatDate(d, locale, { month: "short" });
+          const dayLabel = formatDate(d, locale, { day: "2-digit" });
           const colors = eventColors(event.type);
           return (
             <div
@@ -94,10 +88,10 @@ export function LastEventCard({ events }: { events: ChurchEvent[] }) {
                         letterSpacing: "0.08em",
                       }}
                     >
-                      {MONTHS[d.getMonth()]}
+                      {monthLabel}
                     </div>
                     <div className="display" style={{ fontSize: 24, marginTop: 2 }}>
-                      {d.getDate()}
+                      {dayLabel}
                     </div>
                   </div>
                 </div>

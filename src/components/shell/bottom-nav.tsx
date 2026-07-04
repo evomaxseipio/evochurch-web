@@ -3,46 +3,89 @@
 import { Icons, NavIcon } from "@/components/icons";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
+  BOTTOM_NAV_LABEL_KEYS,
   filterNavByPermissions,
   isNavGroup,
   MAIN_NAV,
   navIdFromPath,
+  resolveNavEntryLabels,
+  type BottomNavId,
 } from "@/lib/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 type BottomItem =
-  | { type: "link"; id: string; href: string; label: string; icon: string; permission?: PermissionKey }
-  | { type: "finanzas"; id: string; label: string; icon: string };
+  | {
+      type: "link";
+      id: BottomNavId;
+      href: string;
+      labelKey: string;
+      icon: string;
+      permission?: PermissionKey;
+    }
+  | { type: "finanzas"; id: "finanzas"; labelKey: string; icon: string };
 
 const bottomItems: BottomItem[] = [
-  { type: "link", id: "dashboard", href: "/dashboard", label: "Dashboard", icon: "home", permission: "dashboard:read" },
-  { type: "link", id: "miembros", href: "/members", label: "Miembros", icon: "users", permission: "members:read" },
-  { type: "finanzas", id: "finanzas", label: "Finanzas", icon: "wallet" },
-  { type: "link", id: "comunicacion", href: "/comunicacion", label: "Comunicación", icon: "chat", permission: "comunicacion:read" },
-  { type: "link", id: "settings", href: "/settings", label: "Configuración", icon: "settings", permission: "settings:read" },
+  {
+    type: "link",
+    id: "dashboard",
+    href: "/dashboard",
+    labelKey: "dashboard",
+    icon: "home",
+    permission: "dashboard:read",
+  },
+  {
+    type: "link",
+    id: "miembros",
+    href: "/members",
+    labelKey: "members",
+    icon: "users",
+    permission: "members:read",
+  },
+  { type: "finanzas", id: "finanzas", labelKey: "finances", icon: "wallet" },
+  {
+    type: "link",
+    id: "comunicacion",
+    href: "/comunicacion",
+    labelKey: "comunicacion",
+    icon: "chat",
+    permission: "comunicacion:read",
+  },
+  {
+    type: "link",
+    id: "settings",
+    href: "/settings",
+    labelKey: "settings",
+    icon: "settings",
+    permission: "settings:read",
+  },
 ];
 
 export function BottomNav({ permissions = [] }: { permissions?: PermissionKey[] }) {
   const pathname = usePathname();
   const router = useRouter();
+  const tNav = useTranslations("nav");
   const activeId = navIdFromPath(pathname);
   const [finOpen, setFinOpen] = useState(false);
 
   const finChildren = useMemo(() => {
-    const finGroup = filterNavByPermissions(MAIN_NAV, permissions).find(
-      (n) => n.id === "finanzas",
-    );
+    const finGroup = resolveNavEntryLabels(
+      filterNavByPermissions(MAIN_NAV, permissions),
+      (k) => tNav(k),
+    ).find((n) => n.id === "finanzas");
     return finGroup && isNavGroup(finGroup) ? finGroup.children : [];
-  }, [permissions]);
+  }, [permissions, tNav]);
 
   const visibleItems = useMemo(
     () =>
       bottomItems.filter((item) => {
         if (item.type === "finanzas") return finChildren.length > 0;
-        if (!item.permission) return true;
-        return permissions.includes(item.permission);
+        if (item.type === "link" && item.permission) {
+          return permissions.includes(item.permission);
+        }
+        return true;
       }),
     [permissions, finChildren.length],
   );
@@ -53,6 +96,12 @@ export function BottomNav({ permissions = [] }: { permissions?: PermissionKey[] 
   return (
     <nav className="bottom-nav">
       {visibleItems.map((item) => {
+        const label = tNav(
+          item.type === "link"
+            ? BOTTOM_NAV_LABEL_KEYS[item.id]
+            : item.labelKey,
+        );
+
         if (item.type === "finanzas") {
           return (
             <div key={item.id} className="bn-wrap" style={{ flex: 1, position: "relative" }}>
@@ -102,7 +151,7 @@ export function BottomNav({ permissions = [] }: { permissions?: PermissionKey[] 
                           color: activeId === c.id ? "var(--accent)" : "var(--fg)",
                         }}
                       >
-                        {c.label}
+                        {tNav(c.labelKey)}
                       </button>
                     ))}
                   </div>
@@ -117,7 +166,7 @@ export function BottomNav({ permissions = [] }: { permissions?: PermissionKey[] 
                 <span className="icon">
                   <NavIcon name={item.icon} size={20} />
                 </span>
-                <span>{item.label}</span>
+                <span>{label}</span>
               </div>
             </div>
           );
@@ -130,7 +179,7 @@ export function BottomNav({ permissions = [] }: { permissions?: PermissionKey[] 
             <span className="icon">
               <NavIcon name={item.icon} size={20} />
             </span>
-            <span>{item.label}</span>
+            <span>{label}</span>
           </Link>
         );
       })}

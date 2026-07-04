@@ -8,7 +8,8 @@ import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { useActionToast } from "@/hooks/use-action-toast";
 import type { Fund } from "@/lib/funds/types";
-import { useActionState, useEffect, useState, startTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useActionState, useState, startTransition } from "react";
 
 const initial: FundActionResult | null = null;
 
@@ -28,18 +29,20 @@ function MoneyInput({
   onChange,
   placeholder,
   hasError,
+  locale,
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   hasError?: boolean;
+  locale: "es" | "en" | "fr";
 }) {
   const [focused, setFocused] = useState(false);
 
   const fmt = (n: string) =>
     n === "" || n === undefined || n === null
       ? ""
-      : Number(n).toLocaleString("es-DO", {
+      : Number(n).toLocaleString(locale, {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         });
@@ -96,6 +99,9 @@ export function FundFormDrawer({
   open: boolean;
   onClose: () => void;
 }) {
+  const tCommon = useTranslations("common");
+  const tFunds = useTranslations("funds");
+  const locale = useLocale() as "es" | "en" | "fr";
   const [state, formAction, pending] = useActionState(saveFundAction, initial);
   const [v, setV] = useState<FundFormValues>(() => fundToFormValues(fund));
   const [errs, setErrs] = useState<Record<string, string>>({});
@@ -103,17 +109,11 @@ export function FundFormDrawer({
   const upd = <K extends keyof FundFormValues>(k: K, val: FundFormValues[K]) =>
     setV((s) => ({ ...s, [k]: val }));
 
-  useEffect(() => {
-    if (!open) return;
-    setV(fundToFormValues(fund));
-    setErrs({});
-  }, [open, fund]);
-
   useActionToast(state, {
     successMessage:
       mode === "new"
-        ? "Fondo creado correctamente."
-        : "Fondo actualizado correctamente.",
+        ? tFunds("messages.created")
+        : tFunds("messages.updated"),
     onSuccess: onClose,
   });
 
@@ -154,10 +154,10 @@ export function FundFormDrawer({
         <div className="drawer-head">
           <div style={{ flex: 1 }}>
             <div className="eyebrow">
-              {mode === "new" ? "Nuevo registro" : "Edición"}
+              {mode === "new" ? tCommon("newRecord") : tCommon("editRecord")}
             </div>
             <h2 id="fund-form-title" style={{ margin: "4px 0 0", fontSize: 18 }}>
-              {mode === "new" ? "Nuevo fondo" : "Editar fondo"}
+              {mode === "new" ? tFunds("newFund") : tFunds("editFund")}
             </h2>
           </div>
           <button
@@ -165,7 +165,7 @@ export function FundFormDrawer({
             className="btn ghost icon-only"
             onClick={onClose}
             disabled={pending}
-            aria-label="Cerrar"
+            aria-label={tCommon("close")}
           >
             <Icons.x size={18} />
           </button>
@@ -174,13 +174,13 @@ export function FundFormDrawer({
         <div className="drawer-body col gap-md">
           <div className="field">
             <label>
-              Nombre del fondo{" "}
+              {tFunds("fundName")}{" "}
               <span style={{ color: "var(--danger)" }}>*</span>
             </label>
             <div className={`input-wrap ${errs.name ? "error" : ""}`}>
               <input
                 value={v.name}
-                placeholder="Ej. Construcción del Templo"
+                placeholder={tFunds("namePlaceholder")}
                 onChange={(e) => upd("name", e.target.value)}
               />
             </div>
@@ -188,7 +188,7 @@ export function FundFormDrawer({
           </div>
 
           <div className="field">
-            <label>Descripción</label>
+            <label>{tCommon("description")}</label>
             <div
               className="input-wrap"
               style={{ alignItems: "flex-start", padding: "10px 12px" }}
@@ -196,7 +196,7 @@ export function FundFormDrawer({
               <textarea
                 rows={3}
                 value={v.description}
-                placeholder="¿Para qué es este fondo?"
+                placeholder={tFunds("descriptionPlaceholder")}
                 onChange={(e) => upd("description", e.target.value)}
               />
             </div>
@@ -205,20 +205,22 @@ export function FundFormDrawer({
           <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
             <div className="field" style={{ flex: "1 1 140px", minWidth: 0 }}>
               <label>
-                Meta <span style={{ color: "var(--danger)" }}>*</span>
+                {tFunds("goal")} <span style={{ color: "var(--danger)" }}>*</span>
               </label>
               <MoneyInput
                 value={v.goal}
                 onChange={(val) => upd("goal", val)}
                 hasError={!!errs.goal}
+                locale={locale}
               />
               {errs.goal && <div className="help error">{errs.goal}</div>}
             </div>
             <div className="field" style={{ flex: "1 1 140px", minWidth: 0 }}>
-              <label>Recaudado</label>
+              <label>{tFunds("totalRaised")}</label>
               <MoneyInput
                 value={v.balance}
                 onChange={(val) => upd("balance", val)}
+                locale={locale}
               />
             </div>
           </div>
@@ -226,7 +228,7 @@ export function FundFormDrawer({
           {v.goal && +v.goal > 0 && (
             <div>
               <div className="row between" style={{ marginBottom: 6 }}>
-                <span className="tiny muted">Avance hacia la meta</span>
+                <span className="tiny muted">{tFunds("progressToGoal")}</span>
                 <span
                   className="tnum mono"
                   style={{
@@ -263,7 +265,7 @@ export function FundFormDrawer({
           <div className="row" style={{ gap: 12 }}>
             <div className="field" style={{ flex: 1 }}>
               <label>
-                Fecha inicio <span style={{ color: "var(--danger)" }}>*</span>
+                {tFunds("startDate")} <span style={{ color: "var(--danger)" }}>*</span>
               </label>
               <div className={`input-wrap ${errs.startDate ? "error" : ""}`}>
                 <input
@@ -277,7 +279,7 @@ export function FundFormDrawer({
               )}
             </div>
             <div className="field" style={{ flex: 1 }}>
-              <label>Fecha fin</label>
+              <label>{tFunds("endDate")}</label>
               <div className="input-wrap">
                 <input
                   type="date"
@@ -293,9 +295,9 @@ export function FundFormDrawer({
             style={{ padding: "10px 0", borderTop: "1px solid var(--line)" }}
           >
             <div>
-              <div style={{ fontWeight: 500, fontSize: 13 }}>Fondo activo</div>
+              <div style={{ fontWeight: 500, fontSize: 13 }}>{tFunds("activeFund")}</div>
               <div className="tiny muted">
-                Si está inactivo, no aparece al registrar movimientos.
+                {tFunds("activeHelp")}
               </div>
             </div>
             <CrudSwitch on={v.active} onChange={(val) => upd("active", val)} />
@@ -307,10 +309,10 @@ export function FundFormDrawer({
           >
             <div>
               <div style={{ fontWeight: 500, fontSize: 13 }}>
-                Marcar como primario
+                {tFunds("markPrimary")}
               </div>
               <div className="tiny muted">
-                El fondo primario recibe los ingresos por defecto.
+                {tFunds("primaryHelp")}
               </div>
             </div>
             <CrudSwitch on={v.primary} onChange={(val) => upd("primary", val)} />
@@ -324,7 +326,7 @@ export function FundFormDrawer({
             onClick={onClose}
             disabled={pending}
           >
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -334,10 +336,10 @@ export function FundFormDrawer({
           >
             <Icons.check size={14} />
             {pending
-              ? "Guardando…"
+              ? tCommon("saving")
               : mode === "new"
-                ? "Crear fondo"
-                : "Guardar cambios"}
+                ? tFunds("createFund")
+                : tCommon("saveChanges")}
           </button>
         </div>
       </div>

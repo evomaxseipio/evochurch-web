@@ -8,12 +8,12 @@ import { Icons } from "@/components/icons";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { fmtRD } from "@/lib/format-currency";
 import {
-  formatMovementDate,
   isPendingFundTransferExpense,
   ledgerEntryToExpenseTransactionId,
-  paymentMethodLabel,
 } from "@/lib/ledger/parse";
 import type { LedgerEntry } from "@/lib/ledger/types";
+import { formatDate } from "@/lib/i18n/format";
+import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useState, startTransition } from "react";
 
 const initial: TransactionActionResult | null = null;
@@ -25,6 +25,10 @@ export function AuthorizeTransactionDialog({
   entry: LedgerEntry;
   onClose: () => void;
 }) {
+  const tCommon = useTranslations("common");
+  const tFinances = useTranslations("finances");
+  const tTransactions = useTranslations("transactions");
+  const locale = useLocale() as "es" | "en" | "fr";
   const [comments, setComments] = useState("");
   const [state, formAction, pending] = useActionState(
     reviewPendingExpenseAction,
@@ -40,11 +44,11 @@ export function AuthorizeTransactionDialog({
     successMessage:
       lastDecision === "reject"
         ? isTransfer
-          ? "Transferencia rechazada."
-          : "Egreso rechazado."
+          ? tTransactions("messages.transferRejected")
+          : tTransactions("messages.expenseRejected")
         : isTransfer
-          ? "Transferencia autorizada correctamente."
-          : "Transacción autorizada correctamente.",
+          ? tTransactions("messages.transferAuthorized")
+          : tTransactions("messages.authorized"),
     onSuccess: onClose,
   });
 
@@ -90,14 +94,14 @@ export function AuthorizeTransactionDialog({
           boxShadow: "var(--shadow-3)",
         }}
       >
-        <div className="eyebrow">Revisión</div>
+        <div className="eyebrow">{tTransactions("review")}</div>
         <h3 id="authorize-tx-title" style={{ margin: "4px 0 0", fontSize: 18 }}>
-          {isTransfer ? "Revisar transferencia" : "Revisar egreso pendiente"}
+          {isTransfer ? tTransactions("reviewTransfer") : tTransactions("reviewPendingExpense")}
         </h3>
         <p className="muted" style={{ margin: "8px 0 16px", fontSize: 13 }}>
           {isTransfer
-            ? "Autoriza para mover el saldo entre fondos, o rechaza si no procede."
-            : "Autoriza para descontar del fondo, o rechaza si no procede."}
+            ? tTransactions("reviewTransferHelp")
+            : tTransactions("reviewExpenseHelp")}
         </p>
 
         <div className="card flat" style={{ padding: 14, marginBottom: 16 }}>
@@ -113,8 +117,12 @@ export function AuthorizeTransactionDialog({
             ) : (
               <>{entry.fundName} · </>
             )}
-            {formatMovementDate(entry.movementDate)} ·{" "}
-            {paymentMethodLabel(entry.paymentMethod)}
+            {formatDate(entry.movementDate, locale, {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}{" "}
+            · {entry.paymentMethod}
           </div>
           <div
             className="tnum mono"
@@ -125,12 +133,14 @@ export function AuthorizeTransactionDialog({
               marginTop: 10,
             }}
           >
-            −{fmtRD(entry.amount)}
+            −{fmtRD(entry.amount, locale)}
           </div>
         </div>
 
         <div className="field">
-          <label>Comentarios (opcional)</label>
+          <label>
+            {tCommon("notes")} ({tCommon("optional").toLowerCase()})
+          </label>
           <div
             className="input-wrap"
             style={{ alignItems: "flex-start", padding: "10px 12px" }}
@@ -138,7 +148,7 @@ export function AuthorizeTransactionDialog({
             <textarea
               rows={2}
               value={comments}
-              placeholder="Motivo de aprobación o rechazo…"
+              placeholder={tFinances("authorizeReason")}
               onChange={(e) => setComments(e.target.value)}
             />
           </div>
@@ -154,7 +164,7 @@ export function AuthorizeTransactionDialog({
             onClick={onClose}
             disabled={pending}
           >
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -166,7 +176,7 @@ export function AuthorizeTransactionDialog({
               borderColor: "color-mix(in oklab, var(--danger) 40%, transparent)",
             }}
           >
-            <Icons.x size={14} /> Rechazar
+            <Icons.x size={14} /> {tFinances("authorizeReject")}
           </button>
           <button
             type="button"
@@ -175,7 +185,7 @@ export function AuthorizeTransactionDialog({
             disabled={pending}
             style={{ flex: 1, maxWidth: 200 }}
           >
-            <Icons.check size={14} /> Autorizar
+            <Icons.check size={14} /> {tFinances("authorizeApprove")}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { appRoleChipClass } from "@/lib/admin-users/roles";
 import type { AdminUserRow } from "@/lib/admin-users/types";
 import { churchAuthUserInitials } from "@/lib/admin-users/parse";
+import { useTranslations } from "next-intl";
 
 export function AdminUserAvatar({ row }: { row: AdminUserRow }) {
   const initials =
@@ -16,9 +17,10 @@ export function AdminUserAvatar({ row }: { row: AdminUserRow }) {
 }
 
 export function AdminUserStatusChip({ active }: { active: boolean }) {
+  const tCommon = useTranslations("common");
   return (
     <span className={`chip ${active ? "green" : ""}`.trim()}>
-      <span className="pip" /> {active ? "Activo" : "Inactivo"}
+      <span className="pip" /> {active ? tCommon("active") : tCommon("inactive")}
     </span>
   );
 }

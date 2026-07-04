@@ -1,8 +1,11 @@
 import { LoginBackdrop } from "@/components/auth/login-backdrop";
 import { LogoMark } from "@/components/auth/logo-mark";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const t = await getTranslations("auth");
+
   return (
     <div className="login-page relative flex min-h-screen items-center justify-center overflow-hidden p-6">
       <LoginBackdrop />
@@ -13,16 +16,13 @@ export default function ForgotPasswordPage() {
             Evo<em className="text-primary-light not-italic">Church</em>
           </div>
         </div>
-        <h1 className="font-serif text-2xl text-white">Recuperar contraseña</h1>
-        <p className="mt-2 text-sm text-white/50">
-          Próximamente: enlace por correo vía Supabase Auth (igual que en la app
-          Flutter).
-        </p>
+        <h1 className="font-serif text-2xl text-white">{t("forgotTitle")}</h1>
+        <p className="mt-2 text-sm text-white/50">{t("forgotSubtitle")}</p>
         <Link
           href="/login"
           className="mt-6 inline-block text-sm font-semibold text-primary-light transition hover:text-white"
         >
-          ← Volver al inicio de sesión
+          {t("backToLogin")}
         </Link>
       </div>
     </div>

@@ -1,14 +1,25 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import type { Locale } from "@/i18n/config";
 import type { PendingAuthorizationItem } from "@/lib/dashboard/types";
-import { fmtRD } from "@/lib/format-currency";
-import { formatMovementDateShort } from "@/lib/ledger/parse";
+import { formatDate, formatNumber } from "@/lib/i18n/format";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
-function itemMeta(item: PendingAuthorizationItem): string {
-  const date = formatMovementDateShort(item.movementDate);
+function formatAmount(value: number, locale: Locale): string {
+  return `RD$ ${formatNumber(Math.abs(value), locale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })}`;
+}
+
+function itemMeta(item: PendingAuthorizationItem, locale: Locale): string {
+  const date = formatDate(`${item.movementDate}T12:00:00`, locale, {
+    day: "2-digit",
+    month: "short",
+  });
   const base = item.subtitle.split(" · ")[0]?.trim() || item.subtitle;
   return `${base} · ${date}`;
 }
@@ -16,10 +27,13 @@ function itemMeta(item: PendingAuthorizationItem): string {
 function PendingRow({
   item,
   href,
+  locale,
 }: {
   item: PendingAuthorizationItem;
   href: string;
+  locale: Locale;
 }) {
+  const t = useTranslations("dashboard");
   const [hover, setHover] = useState(false);
   const isTransfer = item.kind === "fund_transfer";
 
@@ -84,10 +98,10 @@ function PendingRow({
           className="row"
           style={{ gap: 8, marginTop: 5, flexWrap: "wrap", alignItems: "center" }}
         >
-          <span className="tiny muted">{itemMeta(item)}</span>
+          <span className="tiny muted">{itemMeta(item, locale)}</span>
           <span className="chip warn" style={{ padding: "2px 8px", fontSize: 10 }}>
             <span className="pip" />
-            Pendiente
+            {t("pendingStatus")}
           </span>
         </div>
       </div>
@@ -102,7 +116,7 @@ function PendingRow({
             letterSpacing: "-0.02em",
           }}
         >
-          −{fmtRD(item.amount)}
+          −{formatAmount(item.amount, locale)}
         </div>
       </div>
     </Link>
@@ -115,6 +129,8 @@ export function PendingTransactionsList({
 }: {
   items: PendingAuthorizationItem[];
 }) {
+  const t = useTranslations("dashboard");
+  const locale = useLocale() as Locale;
   const totalAmount = useMemo(
     () => items.reduce((sum, item) => sum + item.amount, 0),
     [items],
@@ -125,15 +141,15 @@ export function PendingTransactionsList({
     <div className="card span-4" style={{ display: "flex", flexDirection: "column" }}>
       <div className="row between" style={{ marginBottom: 16, gap: 10 }}>
         <div>
-          <div className="eyebrow">Transacciones</div>
+          <div className="eyebrow">{t("pendingTransactions")}</div>
           <div className="row" style={{ gap: 10, marginTop: 4, alignItems: "baseline" }}>
             <div className="display" style={{ fontSize: 22 }}>
-              Pendientes
+              {t("pending")}
             </div>
             {items.length > 0 ? (
               <span className="chip warn">
                 <span className="pip" />
-                {items.length}
+                {formatNumber(items.length, locale)}
               </span>
             ) : null}
           </div>
@@ -148,7 +164,7 @@ export function PendingTransactionsList({
             whiteSpace: "nowrap",
           }}
         >
-          Ver todo →
+          {t("viewAll")}
         </Link>
       </div>
 
@@ -176,9 +192,9 @@ export function PendingTransactionsList({
             >
               <Icons.check size={20} />
             </span>
-            <div style={{ fontSize: 14, fontWeight: 600 }}>Todo al día</div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>{t("allClear")}</div>
             <div className="tiny muted" style={{ marginTop: 4 }}>
-              No hay egresos por autorizar
+              {t("noPendingExpenses")}
             </div>
           </div>
         </div>
@@ -197,27 +213,31 @@ export function PendingTransactionsList({
           >
             <div>
               <div className="tiny muted" style={{ letterSpacing: "0.06em" }}>
-                TOTAL EN COLA
+                {t("totalInQueue")}
               </div>
               <div
                 className="tnum mono"
                 style={{ fontSize: 20, fontWeight: 700, marginTop: 2, color: "var(--ink)" }}
               >
-                {fmtRD(totalAmount)}
+                {formatAmount(totalAmount, locale)}
               </div>
             </div>
             <span
               className="chip warm"
               style={{ alignSelf: "center", whiteSpace: "nowrap" }}
             >
-              Requiere revisión
+              {t("needsReview")}
             </span>
           </div>
 
           <div className="col" style={{ gap: 2 }}>
             {visible.map((item, index) => (
               <div key={item.id}>
-                <PendingRow item={item} href="/finances/transactions" />
+                <PendingRow
+                  item={item}
+                  href="/finances/transactions"
+                  locale={locale}
+                />
                 {index < visible.length - 1 ? (
                   <div
                     style={{
@@ -246,7 +266,9 @@ export function PendingTransactionsList({
                 textDecoration: "none",
               }}
             >
-              +{items.length - visible.length} más en transacciones
+              {t("moreInTransactions", {
+                count: formatNumber(items.length - visible.length, locale),
+              })}
             </Link>
           ) : null}
         </>

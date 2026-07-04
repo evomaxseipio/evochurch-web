@@ -9,6 +9,8 @@ import { Icons } from "@/components/icons";
 import { formatFundDate, fundProgressPct } from "@/lib/funds/parse";
 import type { Fund } from "@/lib/funds/types";
 import { fmtRD } from "@/lib/format-currency";
+import { formatDate } from "@/lib/i18n/format";
+import { useLocale, useTranslations } from "next-intl";
 
 /** Card de fondo en grid — igual que `fondos.jsx` (FundCard en vista cuadrícula). */
 export function FundCard({
@@ -28,6 +30,8 @@ export function FundCard({
   onViewContrib: () => void;
   onDelete: () => void;
 }) {
+  const tFunds = useTranslations("funds");
+  const locale = useLocale();
   const pct = fundProgressPct(fund);
 
   return (
@@ -82,21 +86,21 @@ export function FundCard({
       </div>
       <div className="row between" style={{ gap: 12 }}>
         <div>
-          <div className="tiny muted">Recaudado</div>
+          <div className="tiny muted">{tFunds("totalRaised")}</div>
           <div
             className="tnum"
             style={{ fontWeight: 700, fontSize: 18, marginTop: 2 }}
           >
-            {fmtRD(fund.totalContributions)}
+            {fmtRD(fund.totalContributions, locale as "es" | "en" | "fr")}
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div className="tiny muted">Meta</div>
+          <div className="tiny muted">{tFunds("goal")}</div>
           <div
             className="tnum mono muted"
             style={{ fontSize: 13, marginTop: 4 }}
           >
-            {fmtRD(fund.targetAmount)}
+            {fmtRD(fund.targetAmount, locale as "es" | "en" | "fr")}
           </div>
         </div>
       </div>
@@ -121,7 +125,14 @@ export function FundCard({
         </div>
         <div className="row between" style={{ marginTop: 6 }}>
           <span className="tiny muted row" style={{ gap: 5 }}>
-            <Icons.cal size={12} /> {formatFundDate(fund.startDate)}
+            <Icons.cal size={12} />{" "}
+            {fund.startDate
+              ? formatDate(fund.startDate, locale as "es" | "en" | "fr", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : formatFundDate(fund.startDate)}
           </span>
           <span
             className="tnum mono"

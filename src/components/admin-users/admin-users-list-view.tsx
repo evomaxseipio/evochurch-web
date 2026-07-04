@@ -17,10 +17,6 @@ import { CopyPasswordDialog } from "@/components/ui/copy-password-dialog";
 import { CrudActionMenu } from "@/components/ui/crud-action-menu";
 import { CrudPagination } from "@/components/ui/crud-pagination";
 import { useActionToast } from "@/hooks/use-action-toast";
-import {
-  computeChurchAuthUsersStats,
-  toAdminUserRow,
-} from "@/lib/admin-users/parse";
 import type {
   AdminUserRow,
   ChurchAuthUsersStats,
@@ -28,6 +24,7 @@ import type {
 import type { AssignableRole } from "@/lib/roles/types";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   useActionState,
   useEffect,
@@ -83,6 +80,9 @@ export function AdminUsersListView({
   stats: ChurchAuthUsersStats;
   assignableRoles: AssignableRole[];
 }) {
+  const tAdmin = useTranslations("adminUsers");
+  const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
   const router = useRouter();
 
   const [query, setQuery] = useState("");
@@ -152,14 +152,13 @@ export function AdminUsersListView({
     try {
       const result = await resetAuthUserAccessPasswordAction(user.authUserId);
       if (!result.ok) {
-        toast.error("No se pudo restablecer", result.error);
+        toast.error(tAdmin("resetFailed"), result.error ?? tErrors("saveFailed"));
         return;
       }
 
       setPasswordDialog({
-        title: "Acceso restablecido",
-        message:
-          "Se generó una nueva contraseña temporal. Compártela con el usuario; deberá cambiarla al iniciar sesión.",
+        title: tAdmin("accessReset"),
+        message: tAdmin("tempPasswordGenerated"),
         email: result.email,
         password: result.tempPassword,
       });
@@ -173,7 +172,7 @@ export function AdminUsersListView({
     <div>
       <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
         <div>
-          <div className="eyebrow">Configuración · Acceso</div>
+          <div className="eyebrow">{tAdmin("settingsAccessEyebrow")}</div>
           <h1
             className="display"
             style={{
@@ -182,14 +181,14 @@ export function AdminUsersListView({
               letterSpacing: "-0.025em",
             }}
           >
-            Usuarios{" "}
+            {tAdmin("users")}{" "}
             <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>
-              del sistema
+              {tAdmin("systemSuffix")}
             </span>
           </h1>
           <p className="muted" style={{ margin: 0 }}>
             {rows.length} cuentas con acceso administrativo · {stats.active}{" "}
-            activas ahora
+            {tAdmin("activeNow")}
           </p>
         </div>
         <div className="row">
@@ -200,7 +199,7 @@ export function AdminUsersListView({
               toast.success("Reporte generado", `${exportLabel()}.pdf descargado`)
             }
           >
-            <Icons.download width={16} /> PDF
+            <Icons.download width={16} /> {tCommon("preview")}
           </button>
           <button
             type="button"
@@ -209,7 +208,7 @@ export function AdminUsersListView({
               toast.success("Reporte generado", `${exportLabel()}.xlsx descargado`)
             }
           >
-            <Icons.download width={16} /> Excel
+            <Icons.download width={16} /> {tCommon("export")}
           </button>
         </div>
       </div>
@@ -283,7 +282,7 @@ export function AdminUsersListView({
           <div className="search" style={{ flex: 1, minWidth: 220, width: "auto" }}>
             <Icons.search width={14} stroke="var(--muted)" />
             <input
-              placeholder="Buscar…"
+              placeholder={tCommon("searchPlaceholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -299,9 +298,9 @@ export function AdminUsersListView({
             }}
           >
             {[
-              { value: "all" as const, label: "Todos" },
-              { value: "true" as const, label: "Activos" },
-              { value: "false" as const, label: "Inactivos" },
+              { value: "all" as const, label: tCommon("all") },
+              { value: "true" as const, label: tCommon("active") },
+              { value: "false" as const, label: tCommon("inactive") },
             ].map((opt) => (
               <button
                 key={opt.value}
@@ -327,7 +326,7 @@ export function AdminUsersListView({
             className="btn primary"
             onClick={() => setDrawer({ mode: "new", user: null })}
           >
-            <Icons.plus width={14} /> Nuevo usuario
+            <Icons.plus width={14} /> {tAdmin("newUser")}
           </button>
         </div>
 
@@ -337,12 +336,12 @@ export function AdminUsersListView({
               <thead>
                 <tr>
                   <th className="col-actions" style={{ width: 44 }}>
-                    Acciones
+                    {tCommon("actions")}
                   </th>
-                  <th>Usuario</th>
-                  <th>Rol</th>
-                  <th>Último acceso</th>
-                  <th>Estado</th>
+                  <th>{tCommon("user")}</th>
+                  <th>{tAdmin("role")}</th>
+                  <th>{tAdmin("lastLogin")}</th>
+                  <th>{tCommon("status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -371,7 +370,7 @@ export function AdminUsersListView({
                       <AdminUserRoleChip role={it.role} />
                     </td>
                     <td>
-                      <span className="tiny muted">{it.lastLogin || "Nunca"}</span>
+                      <span className="tiny muted">{it.lastLogin || tCommon("never")}</span>
                     </td>
                     <td>
                       <AdminUserStatusChip active={it.active} />
@@ -384,14 +383,14 @@ export function AdminUsersListView({
         ) : (
           <div className="card" style={{ padding: 48, textAlign: "center" }}>
             <div className="muted" style={{ marginBottom: 12 }}>
-              Sin registros todavía
+              {tAdmin("noRecords")}
             </div>
             <button
               type="button"
               className="btn primary"
               onClick={() => setDrawer({ mode: "new", user: null })}
             >
-              <Icons.plus width={14} /> Nuevo usuario
+              <Icons.plus width={14} /> {tAdmin("newUser")}
             </button>
           </div>
         )}
@@ -419,9 +418,8 @@ export function AdminUsersListView({
         onSaved={() => router.refresh()}
         onPasswordIssued={({ email, tempPassword }) =>
           setPasswordDialog({
-            title: "Acceso al sistema",
-            message:
-              "Usuario guardado con contraseña temporal. Compártela con el hermano; deberá cambiarla al iniciar sesión.",
+            title: tAdmin("systemAccess"),
+            message: tAdmin("tempPasswordGenerated"),
             email,
             password: tempPassword,
           })
@@ -439,8 +437,8 @@ export function AdminUsersListView({
 
       {confirm ? (
         <ConfirmDialog
-          title="¿Eliminar registro?"
-          message="Esta acción no se puede deshacer."
+          title={tAdmin("deleteRecord")}
+          message={tCommon("cannotUndo")}
           itemName={confirm.email}
           onConfirm={() => {
             const fd = new FormData();

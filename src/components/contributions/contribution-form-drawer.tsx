@@ -22,6 +22,7 @@ export type PresetContributor = {
 };
 import type { Fund } from "@/lib/funds/types";
 import { fmtRD } from "@/lib/format-currency";
+import { useLocale, useTranslations } from "next-intl";
 import {
   useActionState,
   useEffect,
@@ -115,9 +116,9 @@ function contributionToFormValues(entry: Contribution): FormValues {
   };
 }
 
-function fmtInput(n: string) {
+function fmtInput(n: string, locale: "es" | "en" | "fr") {
   if (!n || Number.isNaN(+n)) return "";
-  return (+n).toLocaleString("es-DO", {
+  return (+n).toLocaleString(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
@@ -208,6 +209,9 @@ export function ContributionFormDrawer({
   presetFundId?: string | null;
   presetContributor?: PresetContributor | null;
 }) {
+  const tCommon = useTranslations("common");
+  const tContributions = useTranslations("contributions");
+  const locale = useLocale() as "es" | "en" | "fr";
   const lockedContributor = mode === "new" && presetContributor != null;
 
   const [v, setV] = useState<FormValues>(() =>
@@ -217,7 +221,10 @@ export function ContributionFormDrawer({
   );
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [amountFocused, setAmountFocused] = useState(false);
-  const [memberQuery, setMemberQuery] = useState("");
+  const [memberQuery, setMemberQuery] = useState(
+    presetContributor?.profileName ??
+      (mode === "edit" && entry ? entry.contributorLabel : ""),
+  );
   const [memberResults, setMemberResults] = useState<
     { id: string; name: string }[]
   >([]);
@@ -230,24 +237,9 @@ export function ContributionFormDrawer({
   const upd = <K extends keyof FormValues>(k: K, val: FormValues[K]) =>
     setV((s) => ({ ...s, [k]: val }));
 
-  useEffect(() => {
-    if (!open) return;
-    setV(
-      mode === "edit" && entry
-        ? contributionToFormValues(entry)
-        : defaultFormValues(funds, incomeTypes, presetFundId, presetContributor),
-    );
-    setErrs({});
-    setMemberQuery(
-      presetContributor?.profileName ??
-        (mode === "edit" && entry ? entry.contributorLabel : ""),
-    );
-    setMemberResults([]);
-  }, [open, mode, entry, funds, incomeTypes, presetFundId, presetContributor]);
-
   useActionToast(state, {
     successMessage:
-      mode === "new" ? "Ingreso registrado." : "Cambios guardados.",
+      mode === "new" ? tContributions("messages.saved") : tCommon("saveChanges"),
     onSuccess: onClose,
   });
 
@@ -603,7 +595,7 @@ export function ContributionFormDrawer({
                 <input
                   type="text"
                   inputMode="decimal"
-                  value={amountFocused ? v.amount : fmtInput(v.amount)}
+                  value={amountFocused ? v.amount : fmtInput(v.amount, locale)}
                   placeholder="0.00"
                   style={{ paddingLeft: 44 }}
                   onFocus={() => setAmountFocused(true)}
@@ -648,7 +640,7 @@ export function ContributionFormDrawer({
                       fontVariantNumeric: "tabular-nums",
                     }}
                   >
-                    {fmtRD(+v.amount)}
+                    {fmtRD(+v.amount, locale)}
                   </span>
                 ) : null}
               </div>
@@ -687,7 +679,7 @@ export function ContributionFormDrawer({
             onClick={onClose}
             disabled={pending}
           >
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -697,10 +689,10 @@ export function ContributionFormDrawer({
           >
             <Icons.check size={14} />
             {pending
-              ? "Guardando…"
+              ? tCommon("saving")
               : mode === "new"
-                ? "Registrar ingreso"
-                : "Guardar cambios"}
+                ? tContributions("registerIncome")
+                : tCommon("saveChanges")}
           </button>
         </div>
       </div>

@@ -7,7 +7,9 @@ import {
   financeResourceLabel,
   isMatrixModule,
   permissionUiLabel,
+  reportResourceLabel,
 } from "@/lib/roles/display";
+import { REPORT_RESOURCE_DEFS, reportPermissionKey } from "@/lib/reports/permissions";
 import type { AppPermissionRow } from "@/lib/roles/types";
 
 export const PERMISSION_ACTION_COLUMNS = [
@@ -45,6 +47,12 @@ export const MINISTERIOS_RESOURCE_DEFS = [
     actions: ["read", "write", "write_own"],
   },
 ] as const;
+
+export const REPORT_MATRIX_RESOURCE_DEFS = REPORT_RESOURCE_DEFS.map((def) => ({
+  key: def.key,
+  label: def.label,
+  actions: ["read", "export"] as const,
+}));
 
 /** Catálogos de configuración — una fila por recurso (como finanzas). */
 export const SETTINGS_RESOURCE_DEFS = [
@@ -105,6 +113,7 @@ export const MODULE_LABELS: Record<string, string> = {
   settings: "Configuración",
   admin_users: "Usuarios admin",
   roles: "Roles y permisos",
+  reports: "Reportes",
 };
 
 export const MODULE_ICONS: Record<string, keyof typeof Icons> = {
@@ -117,6 +126,7 @@ export const MODULE_ICONS: Record<string, keyof typeof Icons> = {
   settings: "settings",
   admin_users: "shield",
   roles: "star",
+  reports: "download",
 };
 
 export const MODULE_COLORS: Record<string, string> = {
@@ -129,6 +139,7 @@ export const MODULE_COLORS: Record<string, string> = {
   settings: "#64748B",
   admin_users: "#0891B2",
   roles: "#CA8A04",
+  reports: "#5B21B6",
 };
 
 export function moduleLabel(module: string): string {
@@ -157,6 +168,21 @@ export function applyStandardPermissionRules(
   const module = key.split(":")[0];
   const crudModules = ["members", "eventos", "comunicacion"];
   const settingsCatalogResources = ["expense_types", "income_types"] as const;
+
+  if (key.startsWith("reports:")) {
+    const resource = key.split(":")[1];
+    const readKey = `reports:${resource}:read` as PermissionKey;
+    if (checked) {
+      if (key.endsWith(":export")) {
+        draft.add(readKey);
+      }
+      return;
+    }
+    if (key.endsWith(":read")) {
+      draft.delete(`reports:${resource}:export` as PermissionKey);
+    }
+    return;
+  }
 
   if (settingsCatalogResources.some((r) => key.startsWith(`settings:${r}:`))) {
     const resource = key.split(":")[1];
@@ -194,6 +220,8 @@ const CRUD_MODULES = ["members", "eventos", "comunicacion"] as const;
 const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types"] as const;
 
 const FINANCE_RESOURCES = ["funds", "transactions", "contributions"] as const;
+
+const REPORT_RESOURCES = REPORT_RESOURCE_DEFS.map((def) => def.key);
 
 const FINANCE_ACTIONS = [
   "write",
@@ -242,6 +270,12 @@ export function sanitizePermissionDraftForSave(
       if (resource !== "transactions" && action === "authorize") continue;
       set.delete(`finances:${resource}:${action}` as PermissionKey);
     }
+  }
+
+  for (const resource of REPORT_RESOURCES) {
+    const readKey = `reports:${resource}:read` as PermissionKey;
+    if (set.has(readKey)) continue;
+    set.delete(`reports:${resource}:export` as PermissionKey);
   }
 
   return [...set].sort();
@@ -385,6 +419,27 @@ export function groupMatrixCatalog(catalog: AppPermissionRow[]): MatrixModuleGro
             def,
             byKey,
             (action) => settingsPermissionKey(def.key, action),
+          ),
+      );
+      const permissions = resources.flatMap((r) =>
+        Object.values(r.permissionsByAction).filter(
+          (row): row is AppPermissionRow => row != null,
+        ),
+      );
+      return { module, permissions, resources };
+    }
+
+    if (module === "reports") {
+      const resources: MatrixResourceGroup[] = REPORT_MATRIX_RESOURCE_DEFS.map(
+        (def) =>
+          buildResourceGroup(
+            "reports",
+            {
+              ...def,
+              label: reportResourceLabel(def.key) || def.label,
+            },
+            byKey,
+            (action) => reportPermissionKey(def.key, action as "read" | "export"),
           ),
       );
       const permissions = resources.flatMap((r) =>

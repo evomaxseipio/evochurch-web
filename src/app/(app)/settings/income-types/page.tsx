@@ -7,8 +7,10 @@ import {
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchOperationalIncomeTypeCatalog } from "@/lib/services/income-types-catalog";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function IncomeTypesPage() {
+  const tErrors = await getTranslations("errors");
   const session = await requirePageAccess("/settings/income-types");
 
   const supabase = await createClient();
@@ -21,7 +23,7 @@ export default async function IncomeTypesPage() {
     error =
       e instanceof Error
         ? e.message
-        : "No se pudieron cargar los tipos de ingreso.";
+        : tErrors("loadFailed");
   }
 
   if (error) {

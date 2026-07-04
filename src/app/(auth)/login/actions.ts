@@ -9,7 +9,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export type LoginState = { error?: string };
+export type LoginState = { error?: string; errorKey?: string };
 
 export async function login(
   _prev: LoginState,
@@ -20,7 +20,7 @@ export async function login(
   const next = String(formData.get("next") ?? "/dashboard");
 
   if (!email || !password) {
-    return { error: "Correo y contraseña son obligatorios." };
+    return { errorKey: "auth.errors.emailPasswordRequired" };
   }
 
   const supabase = await createClient();

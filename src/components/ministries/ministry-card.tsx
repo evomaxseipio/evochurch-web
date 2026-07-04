@@ -97,6 +97,7 @@ export function MinistryCard({
         <MemberAvatarStack
           memberIds={ministry.memberProfileIds}
           members={members}
+          onClick={onViewMembers}
         />
       </div>
 
@@ -110,7 +111,11 @@ export function MinistryCard({
           gap: 8,
         }}
       >
-        <MinistryLeaderRow ministry={ministry} members={members} />
+        <MinistryLeaderRow
+          ministry={ministry}
+          members={members}
+          onClick={onViewMembers}
+        />
         <span className="tiny muted row" style={{ gap: 4, flexShrink: 0 }}>
           <Icons.cal size={12} /> {formatMinistryDate(ministry.createdAt)}
         </span>

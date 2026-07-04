@@ -12,6 +12,7 @@ import type { AssignableRole } from "@/lib/roles/types";
 import { memberFullName } from "@/lib/members/parse";
 import type { Member } from "@/lib/members/types";
 import { toast } from "@/lib/toast";
+import { useTranslations } from "next-intl";
 import {
   useActionState,
   useEffect,
@@ -88,6 +89,8 @@ function FieldRow({
   onChange: (v: string | boolean) => void;
   assignableRoles?: AssignableRole[];
 }) {
+  const tAdmin = useTranslations("adminUsers");
+
   if (field.type === "switch") {
     return (
       <div
@@ -118,7 +121,7 @@ function FieldRow({
             onChange={(e) => onChange(e.target.value)}
           >
             <option value="" disabled>
-              Seleccionar…
+              {tAdmin("selectRole")}
             </option>
             {assignableRoles.map((r) => (
               <option key={r.appRoleId} value={String(r.appRoleId)}>
@@ -176,6 +179,8 @@ export function AdminUserFormDrawer({
   onSaved: () => void;
   onPasswordIssued?: (payload: { email: string; tempPassword: string }) => void;
 }) {
+  const tAdmin = useTranslations("adminUsers");
+  const tCommon = useTranslations("common");
   const lockedMember = presetMember != null;
   const showTempSection =
     mode === "new" || (mode === "edit" && (user?.isTempPassword ?? false));
@@ -224,7 +229,7 @@ export function AdminUserFormDrawer({
         });
       } else {
         toast.success(
-          mode === "new" ? "Usuario creado" : "Usuario actualizado",
+          mode === "new" ? tAdmin("userCreated") : tAdmin("userUpdated"),
           `${vals.email} guardado correctamente.`,
         );
       }
@@ -233,7 +238,7 @@ export function AdminUserFormDrawer({
     } else {
       toast.error(state.error);
     }
-  }, [state, mode, vals.email, onSaved, onClose, onPasswordIssued]);
+  }, [state, mode, vals.email, onSaved, onClose, onPasswordIssued, tAdmin]);
 
   if (!open) return null;
 
@@ -253,7 +258,7 @@ export function AdminUserFormDrawer({
       }
       if (!f.required) continue;
       const v = vals[f.key];
-      if (v === "" || v == null) nextErrs[f.key] = "Obligatorio";
+      if (v === "" || v == null) nextErrs[f.key] = tCommon("required");
     }
     setErrs(nextErrs);
     if (Object.keys(nextErrs).length > 0) return;
@@ -394,7 +399,7 @@ export function AdminUserFormDrawer({
         </div>
         <div className="drawer-foot">
           <button type="button" className="btn outline" onClick={onClose}>
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -404,12 +409,12 @@ export function AdminUserFormDrawer({
           >
             <Icons.check width={14} />{" "}
             {pending
-              ? "Guardando…"
+              ? tCommon("saving")
               : mode === "new"
                 ? lockedMember
                   ? "Crear acceso"
                   : "Crear"
-                : "Guardar cambios"}
+                : tCommon("saveChanges")}
           </button>
         </div>
       </div>

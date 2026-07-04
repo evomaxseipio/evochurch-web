@@ -3,8 +3,10 @@ import { computeFundsStats } from "@/lib/funds/parse";
 import { fetchFunds } from "@/lib/services/funds";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function FundsPage() {
+  const tErrors = await getTranslations("errors");
   const session = await requirePageAccess("/finances/funds");
 
   const supabase = await createClient();
@@ -16,7 +18,7 @@ export default async function FundsPage() {
     funds = await fetchFunds(supabase, session.churchId);
   } catch (e) {
     error =
-      e instanceof Error ? e.message : "No se pudieron cargar los fondos.";
+      e instanceof Error ? e.message : tErrors("loadFailed");
   }
 
   const stats = computeFundsStats(funds);

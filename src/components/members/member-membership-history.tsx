@@ -3,6 +3,9 @@
 import { Icons } from "@/components/icons";
 import { ProfileSectionCard } from "@/components/members/member-profile-form-ui";
 import { toast } from "@/lib/toast";
+import { type Locale } from "@/i18n/config";
+import { formatDate, localeCompare } from "@/lib/i18n/format";
+import { useLocale, useTranslations } from "next-intl";
 import type {
   MembershipHistoryEntry,
   MembershipRecord,
@@ -19,27 +22,13 @@ type TimelineItem = {
   icon: ReactNode;
 };
 
-const MONTHS_ES = [
-  "Ene",
-  "Feb",
-  "Mar",
-  "Abr",
-  "May",
-  "Jun",
-  "Jul",
-  "Ago",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dic",
-] as const;
-
-function formatTimelineDate(value: string): string {
+function formatTimelineDate(value: string, locale: Locale): string {
   if (!value) return "—";
-  const d = new Date(`${value.slice(0, 10)}T12:00:00`);
-  if (Number.isNaN(d.getTime())) return value;
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${day} ${MONTHS_ES[d.getMonth()]} ${d.getFullYear()}`;
+  return formatDate(`${value.slice(0, 10)}T12:00:00`, locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function styleForText(text: string, index: number) {
@@ -74,15 +63,17 @@ function styleForText(text: string, index: number) {
 function historyEntryToItem(
   entry: MembershipHistoryEntry,
   index: number,
+  locale: Locale,
+  t: ReturnType<typeof useTranslations<"members">>,
 ): TimelineItem {
   const style = styleForText(entry.observations, index);
   return {
     id: `history-${entry.dateStart}-${index}`,
     sortKey: entry.dateStart || "",
-    dateLabel: formatTimelineDate(entry.dateStart),
-    title: entry.observations || "Evento de membresía",
+    dateLabel: formatTimelineDate(entry.dateStart, locale),
+    title: entry.observations || t("membershipEvent"),
     sub: entry.dateReturned
-      ? `Retorno: ${formatTimelineDate(entry.dateReturned)}`
+      ? t("returnDate", { date: formatTimelineDate(entry.dateReturned, locale) })
       : undefined,
     color: style.color,
     icon: style.icon,
@@ -91,10 +82,14 @@ function historyEntryToItem(
 
 function buildTimelineItems(
   membership: MembershipRecord | null,
+  locale: Locale,
+  t: ReturnType<typeof useTranslations<"members">>,
 ): TimelineItem[] {
   if (!membership) return [];
 
-  const items = membership.membershipHistory.map(historyEntryToItem);
+  const items = membership.membershipHistory.map((entry, index) =>
+    historyEntryToItem(entry, index, locale, t),
+  );
 
   if (membership.baptismDate) {
     const hasBaptism = items.some((item) =>
@@ -113,8 +108,8 @@ function buildTimelineItems(
       items.unshift({
         id: "baptism-synthetic",
         sortKey: membership.baptismDate,
-        dateLabel: formatTimelineDate(membership.baptismDate),
-        title: "Bautismo en agua",
+        dateLabel: formatTimelineDate(membership.baptismDate, locale),
+        title: t("waterBaptism"),
         sub: sub || undefined,
         color: "var(--accent)",
         icon: <Icons.cross size={13} />,
@@ -122,7 +117,7 @@ function buildTimelineItems(
     }
   }
 
-  return items.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  return items.sort((a, b) => localeCompare(a.sortKey, b.sortKey, locale));
 }
 
 export function MembershipHistorySection({
@@ -130,30 +125,32 @@ export function MembershipHistorySection({
 }: {
   membership: MembershipRecord | null;
 }) {
-  const items = buildTimelineItems(membership);
+  const t = useTranslations("members");
+  const locale = useLocale() as Locale;
+  const items = buildTimelineItems(membership, locale, t);
 
   return (
     <ProfileSectionCard
-      eyebrow="Trayectoria"
-      title="Historial de membresía"
+      eyebrow={t("journey")}
+      title={t("membershipHistory")}
       action={
         <button
           type="button"
           className="btn primary sm"
           onClick={() =>
             toast.info(
-              "Próximamente",
-              "Agregar eventos al historial estará disponible en una próxima versión.",
+              t("comingSoon"),
+              t("addHistoryEventSoon"),
             )
           }
         >
-          <Icons.plus size={14} /> Agregar evento
+          <Icons.plus size={14} /> {t("addEvent")}
         </button>
       }
     >
       {items.length === 0 ? (
         <p className="tiny muted" style={{ margin: 0 }}>
-          Aún no hay eventos registrados en el historial de este miembro.
+          {t("membershipHistoryEmpty")}
         </p>
       ) : (
         <ul

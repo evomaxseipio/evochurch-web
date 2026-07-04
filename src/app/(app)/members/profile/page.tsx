@@ -12,6 +12,7 @@ import { getAppSession } from "@/lib/auth/app-session";
 import { hasPermission, canWriteMembers, canDeleteMembers } from "@/lib/auth/permissions";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -20,7 +21,7 @@ export const dynamic = "force-dynamic";
 type ProfileData =
   | { kind: "missing-id" }
   | { kind: "not-found" }
-  | { kind: "error"; message: string }
+  | { kind: "error"; errorKey: string }
   | {
       kind: "ok";
       member: Member;
@@ -38,7 +39,7 @@ async function loadProfileData(
   const supabase = await createClient();
   const session = await getAppSession();
 
-  if (!session) return { kind: "error", message: "Sesión no válida." };
+  if (!session) return { kind: "error", errorKey: "errors.sessionInvalid" };
 
   try {
     const churchId = session.churchId;
@@ -65,10 +66,10 @@ async function loadProfileData(
       membership,
       finances,
     };
-  } catch (e) {
+  } catch {
     return {
       kind: "error",
-      message: e instanceof Error ? e.message : "Error al cargar el perfil.",
+      errorKey: "errors.loadFailed",
     };
   }
 }
@@ -78,6 +79,9 @@ export default async function MemberProfilePage({
 }: {
   searchParams: Promise<{ id?: string; tab?: string }>;
 }) {
+  const tMembers = await getTranslations("members");
+  const tErrors = await getTranslations("errors");
+  const tCommon = await getTranslations("common");
   const session = await requirePageAccess("/members");
   const { id, tab } = await searchParams;
   const data = await loadProfileData(id, tab);
@@ -93,9 +97,9 @@ export default async function MemberProfilePage({
     return (
       <div className="p-6">
         <p className="text-sm text-muted">
-          ID de miembro no especificado.{" "}
+          {tMembers("missingMemberId")}{" "}
           <Link href="/members" className="text-primary underline">
-            Volver al listado
+            {tMembers("backToList")}
           </Link>
         </p>
       </div>
@@ -106,9 +110,9 @@ export default async function MemberProfilePage({
     return (
       <div className="p-6">
         <p className="text-sm text-muted">
-          No se encontró el miembro.{" "}
+          {tErrors("memberNotFound")}{" "}
           <Link href="/members" className="text-primary underline">
-            Volver al listado
+            {tMembers("backToList")}
           </Link>
         </p>
       </div>
@@ -119,14 +123,16 @@ export default async function MemberProfilePage({
     return (
       <div className="p-6">
         <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
-          {data.message}
+          {data.errorKey === "errors.sessionInvalid"
+            ? tErrors("sessionInvalid")
+            : tErrors("loadFailed")}
         </p>
       </div>
     );
   }
 
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-muted">Cargando perfil…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-muted">{tCommon("loading")}</div>}>
       <MemberProfileShell
         member={data.member}
         roles={data.roles}

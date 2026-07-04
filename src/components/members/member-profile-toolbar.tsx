@@ -2,6 +2,7 @@
 
 import { Icons } from "@/components/icons";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export const PROFILE_FORM_ID = "member-profile-form";
 export const MEMBERSHIP_FORM_ID = "member-membership-form";
@@ -19,6 +20,8 @@ export function MemberProfileToolbar({
   membershipPending: boolean;
   canWriteMembers: boolean;
 }) {
+  const t = useTranslations("members");
+  const tCommon = useTranslations("common");
   const pending = tab === "profile" ? profilePending : membershipPending;
   const formId =
     tab === "profile"
@@ -33,14 +36,14 @@ export function MemberProfileToolbar({
         <span style={{ display: "inline-block", transform: "rotate(90deg)" }}>
           <Icons.arrowDn size={12} />
         </span>
-        Volver al listado
+        {t("backToList")}
       </Link>
       <button
         type="button"
         className="btn outline"
         onClick={() => window.print()}
       >
-        <Icons.download size={14} /> Imprimir
+        <Icons.download size={14} /> {tCommon("print")}
       </button>
       {formId && canWriteMembers ? (
         <button
@@ -50,10 +53,10 @@ export function MemberProfileToolbar({
           className="btn primary"
         >
           <Icons.check size={16} />
-          {pending ? "Guardando…" : "Guardar cambios"}
+          {pending ? tCommon("saving") : tCommon("saveChanges")}
         </button>
       ) : formId ? (
-        <span className="tiny muted">Solo lectura</span>
+        <span className="tiny muted">{tCommon("readOnly")}</span>
       ) : null}
     </div>
   );

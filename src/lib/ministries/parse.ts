@@ -128,6 +128,30 @@ export function formatMinistryDate(value: string): string {
   return `${String(d).padStart(2, "0")} ${MONTHS[m - 1]} ${y}`;
 }
 
+export function resolveMinistryLeaders(
+  ministry: Ministry,
+  members: Member[],
+): Member[] {
+  return profileIds(ministry.leaderProfileIds)
+    .map((id) => members.find((m) => m.memberId === id))
+    .filter((member): member is Member => member != null)
+    .sort((a, b) =>
+      memberFullName(a).localeCompare(memberFullName(b), "es"),
+    );
+}
+
+export function resolveMinistryMembers(
+  ministry: Ministry,
+  members: Member[],
+): Member[] {
+  return profileIds(ministry.memberProfileIds)
+    .map((id) => members.find((m) => m.memberId === id))
+    .filter((member): member is Member => member != null)
+    .sort((a, b) =>
+      memberFullName(a).localeCompare(memberFullName(b), "es"),
+    );
+}
+
 export function ministryLeaderNames(
   ministry: Ministry,
   members: Member[],

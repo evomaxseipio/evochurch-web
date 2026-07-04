@@ -33,6 +33,7 @@ import { memberFullName } from "@/lib/members/parse";
 import type { MemberRoleCatalog } from "@/lib/members/roles";
 import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
 import { useActionToast } from "@/hooks/use-action-toast";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
@@ -40,14 +41,14 @@ import { useFormStatus } from "react-dom";
 
 const PROFILE_TABS: {
   id: ProfileTabId;
-  label: string;
+  labelKey: string;
   icon: keyof typeof Icons;
   isDanger?: boolean;
 }[] = [
-  { id: "profile", label: "Perfil", icon: "users" },
-  { id: "membership", label: "Membresía", icon: "cross" },
-  { id: "finances", label: "Finanzas", icon: "wallet" },
-  { id: "delete", label: "Eliminar cuenta", icon: "trash", isDanger: true },
+  { id: "profile", labelKey: "tabProfile", icon: "users" },
+  { id: "membership", labelKey: "tabMembership", icon: "cross" },
+  { id: "finances", labelKey: "tabFinances", icon: "wallet" },
+  { id: "delete", labelKey: "deleteAccount", icon: "trash", isDanger: true },
 ];
 
 const COUNTRY_OPTIONS = [
@@ -83,6 +84,7 @@ export function MemberProfileView({
   canDeleteMembers: boolean;
   canReadMemberFinances: boolean;
 }) {
+  const t = useTranslations("members");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
   const [membershipPending, setMembershipPending] = useState(false);
@@ -115,7 +117,7 @@ export function MemberProfileView({
         <div className="row" style={{ gap: 14, alignItems: "center" }}>
           <MemberAvatar member={member} size="lg" square />
           <div>
-            <div className="eyebrow">Perfil del miembro</div>
+            <div className="eyebrow">{t("memberProfile")}</div>
             <div
               className="display"
               style={{
@@ -151,16 +153,16 @@ export function MemberProfileView({
           onClick={() => setMobileNavOpen(true)}
           style={{ width: "100%" }}
         >
-          <ActiveIcon size={15} /> {active.label}
+          <ActiveIcon size={15} /> {t(active.labelKey)}
           <span style={{ flex: 1 }} />
-          <span className="tiny muted">Cambiar sección</span>
+          <span className="tiny muted">{t("changeSection")}</span>
         </button>
       </div>
 
       <div className="profile-shell">
         <aside className="profile-aside">
           <div className="eyebrow" style={{ padding: "4px 6px 10px" }}>
-            Cuenta del miembro
+            {t("memberAccount")}
           </div>
           <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {visibleTabs.filter((t) => !t.isDanger).map((t) => (
@@ -198,7 +200,7 @@ export function MemberProfileView({
             }}
           >
             <div className="eyebrow" style={{ fontSize: 10 }}>
-              ID de miembro
+              {t("memberId")}
             </div>
             <div
               className="mono"
@@ -221,7 +223,7 @@ export function MemberProfileView({
             <div className="drawer" style={{ width: 280 }}>
               <div className="drawer-head">
                 <div className="display" style={{ fontSize: 18, flex: 1 }}>
-                  Cuenta del miembro
+                  {t("memberAccount")}
                 </div>
                 <button
                   type="button"
@@ -295,6 +297,7 @@ function ProfileTabBtn({
   active: boolean;
   onClick: () => void;
 }) {
+  const t = useTranslations("members");
   const Icon = Icons[tab.icon];
   const cls =
     "ptab" +
@@ -306,7 +309,7 @@ function ProfileTabBtn({
       <span className="pico">
         <Icon size={15} />
       </span>
-      <span style={{ flex: 1 }}>{tab.label}</span>
+      <span style={{ flex: 1 }}>{t(tab.labelKey)}</span>
     </button>
   );
 }
@@ -326,12 +329,21 @@ function ProfileTab({
   onMemberUpdated: (member: Member) => void;
   readOnly?: boolean;
 }) {
+  const t = useTranslations("members");
+  const tErrors = useTranslations("errors");
+  const tValidation = useTranslations("validation");
   const router = useRouter();
   const [state, formAction] = useActionState(updateMemberAction, null);
   const formKey = useMemo(() => profileFormKey(member), [member]);
 
   useActionToast(state, {
-    successMessage: "Perfil guardado correctamente.",
+    successMessage: t("profileSaved"),
+    resolveError: (errorKey) => {
+      if (!errorKey) return tErrors("serverError");
+      if (errorKey.startsWith("validation.")) return tValidation(errorKey.slice(11));
+      if (errorKey.startsWith("errors.")) return tErrors(errorKey.slice(7));
+      return tErrors("serverError");
+    },
     onSuccess: (result) => {
       if (result.member) onMemberUpdated(result.member);
       router.refresh();
@@ -356,91 +368,91 @@ function ProfileTab({
         style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
       >
       <ProfileSectionCard
-        eyebrow="Datos personales"
-        title="Información personal"
-        sub="Nombre legal, identificación y datos básicos del miembro."
+        eyebrow={t("personalData")}
+        title={t("personalInfo")}
+        sub={t("personalDataHint")}
       >
         <div className="form-grid">
           <ProfileField
-            label="Nombre"
+            label={t("firstName")}
             name="firstName"
             defaultValue={member.firstName}
             required
           />
           <ProfileField
-            label="Apellido"
+            label={t("lastName")}
             name="lastName"
             defaultValue={member.lastName}
             required
           />
           <ProfileField
-            label="Apodo"
+            label={t("nickname")}
             name="nickName"
             defaultValue={member.nickName}
           />
           <ProfileField
-            label="Fecha de nacimiento"
+            label={t("birthDate")}
             name="dateOfBirth"
             type="date"
             defaultValue={member.dateOfBirth}
           />
           <ProfileField
-            label="Género"
+            label={t("gender")}
             name="gender"
             type="select"
             options={GENDER_OPTIONS}
             defaultValue={member.gender || "Male"}
           />
           <ProfileField
-            label="Estado civil"
+            label={t("maritalStatus")}
             name="maritalStatus"
             type="select"
             options={MARITAL_OPTIONS}
             defaultValue={member.maritalStatus || "Single"}
           />
           <ProfileField
-            label="Nacionalidad"
+            label={t("nationality")}
             name="nationality"
             defaultValue={member.nationality}
           />
           <ProfileField
-            label="Tipo de identificación"
+            label={t("idType")}
             name="idType"
             type="select"
             options={ID_TYPE_OPTIONS}
             defaultValue={member.idType || "ID Card"}
           />
           <ProfileField
-            label="Número de identificación"
+            label={t("idNumber")}
             name="idNumber"
             defaultValue={member.idNumber}
           />
         </div>
       </ProfileSectionCard>
 
-      <ProfileSectionCard eyebrow="Dirección" title="Información de dirección">
+      <ProfileSectionCard eyebrow={t("addressInfo")} title={t("addressInfoDetail")}>
         <div className="form-grid">
           <ProfileField
-            label="Dirección"
+            label={t("address")}
             name="streetAddress"
             defaultValue={member.address.streetAddress}
             placeholder="Calle Principal #12"
             span={2}
           />
           <ProfileField
-            label="Provincia"
+            label={t("province")}
             name="stateProvince"
             defaultValue={member.address.stateProvince}
             placeholder="San Pedro de Macorís"
           />
           <ProfileField
-            label="Ciudad / Estado"
+            label={t("cityState")}
             name="cityState"
             defaultValue={member.address.cityState}
             placeholder="San Pedro de Macorís"
           />
           <ProfileField
-            label="País"
+            label={t("country")}
             name="country"
             type="select"
             options={COUNTRY_OPTIONS.map((o) => ({ value: o, label: o }))}
@@ -451,23 +463,23 @@ function ProfileTab({
       </ProfileSectionCard>
 
       <ProfileSectionCard
-        eyebrow="Contacto"
-        title="Información de contacto"
+        eyebrow={t("contactInfo")}
+        title={t("contactInfoDetail")}
       >
         <div className="form-grid">
           <ProfileField
-            label="Correo electrónico"
+            label={t("email")}
             name="email"
             type="email"
             defaultValue={member.contact.email}
           />
           <ProfileField
-            label="Teléfono"
+            label={t("phone")}
             name="phone"
             defaultValue={member.contact.phone}
           />
           <ProfileField
-            label="Teléfono alterno"
+            label={t("alternatePhone")}
             name="mobilePhone"
             defaultValue={member.contact.mobilePhone}
           />
@@ -502,6 +514,9 @@ function MembershipTab({
   onMembershipUpdated: (membership: MembershipRecord | null) => void;
   readOnly?: boolean;
 }) {
+  const t = useTranslations("members");
+  const tErrors = useTranslations("errors");
+  const tValidation = useTranslations("validation");
   const router = useRouter();
   const [state, formAction] = useActionState(saveMembershipAction, null);
   const m = membership;
@@ -513,14 +528,20 @@ function MembershipTab({
     roles.length > 0
       ? roles.map((r) => ({ value: r.id, label: r.roleName }))
       : member.membershipRoleId
-        ? [{ value: member.membershipRoleId, label: member.membershipRole || "Miembro Regular" }]
+        ? [{ value: member.membershipRoleId, label: member.membershipRole || t("regularMember") }]
         : [];
 
   const defaultRoleId =
     m?.membershipRoleId || member.membershipRoleId || roleOptions[0]?.value || "";
 
   useActionToast(state, {
-    successMessage: "Membresía guardada correctamente.",
+    successMessage: t("membershipSaved"),
+    resolveError: (errorKey) => {
+      if (!errorKey) return tErrors("serverError");
+      if (errorKey.startsWith("validation.")) return tValidation(errorKey.slice(11));
+      if (errorKey.startsWith("errors.")) return tErrors(errorKey.slice(7));
+      return tErrors("serverError");
+    },
     onSuccess: (result) => {
       if (result.member) onMemberUpdated(result.member);
       if (result.membership !== undefined) onMembershipUpdated(result.membership);
@@ -543,51 +564,51 @@ function MembershipTab({
         style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
       >
       <ProfileSectionCard
-        eyebrow="Pertenencia"
-        title="Rol y estado en la iglesia"
-        sub="Datos del bautismo, credenciales pastorales, rol de servicio y estado de actividad del miembro."
+        eyebrow={t("membership")}
+        title={t("roleAndStatus")}
+        sub={t("membershipDataHint")}
       >
         <div className="form-grid">
           <ProfileField
-            label="Fecha de bautismo"
+            label={t("baptismDate")}
             name="baptismDate"
             type="date"
             defaultValue={m?.baptismDate}
           />
           <ProfileField
-            label="Iglesia de bautismo"
+            label={t("baptismChurch")}
             name="baptismChurch"
             defaultValue={m?.baptismChurch}
           />
           <ProfileField
-            label="Pastor que bautizó"
+            label={t("baptismPastor")}
             name="baptismPastor"
             defaultValue={m?.baptismPastor}
           />
           <ProfileField
-            label="Rol de membresía"
+            label={t("membershipRole")}
             name="membershipRoleId"
             type="select"
             options={roleOptions}
             defaultValue={defaultRoleId}
           />
           <ProfileField
-            label="Ciudad del bautismo"
+            label={t("baptismCity")}
             name="baptismChurchCity"
             defaultValue={m?.baptismChurchCity}
           />
           <ProfileField
-            label="País del bautismo"
+            label={t("baptismCountry")}
             name="baptismChurchCountry"
             defaultValue={m?.baptismChurchCountry}
           />
           <YesNoField
-            label="¿Bautizado(a) en el Espíritu?"
+            label={t("baptizedInSpirit")}
             name="isBaptizedInSpirit"
             defaultValue={m?.isBaptizedInSpirit ?? false}
           />
           <YesNoField
-            label="¿Tiene credencial?"
+            label={t("hasCredential")}
             name="hasCredential"
             defaultValue={m?.hasCredential ?? false}
           />
@@ -596,12 +617,12 @@ function MembershipTab({
             member={member}
           />
           <ProfileField
-            label="Notas pastorales"
+            label={t("pastoralNotes")}
             name="bio"
             type="textarea"
             defaultValue={member.bio}
             span={3}
-            placeholder="Anotaciones, cumpleaños, oración…"
+            placeholder={t("pastoralNotesPlaceholder")}
           />
         </div>
       </ProfileSectionCard>
@@ -613,6 +634,7 @@ function MembershipTab({
 }
 
 function DeleteTab({ member }: { member: Member }) {
+  const t = useTranslations("members");
   const [confirm, setConfirm] = useState("");
   const target = "ELIMINAR";
   const canDelete = confirm.trim().toUpperCase() === target;
@@ -621,9 +643,9 @@ function DeleteTab({ member }: { member: Member }) {
   return (
     <>
       <ProfileSectionCard
-        eyebrow="Zona de peligro"
-        title="Eliminar cuenta del miembro"
-        sub="Esta acción es irreversible. El miembro será removido de la lista junto con sus relaciones a ministerios."
+        eyebrow={t("dangerZone")}
+        title={t("deleteAccount")}
+        sub={t("deleteWarning")}
       >
         <div
           style={{

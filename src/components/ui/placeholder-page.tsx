@@ -1,9 +1,14 @@
+import { getTranslations } from "next-intl/server";
+
 type PlaceholderPageProps = {
   title: string;
   subtitle?: string;
 };
 
-export function PlaceholderPage({ title, subtitle }: PlaceholderPageProps) {
+export async function PlaceholderPage({ title, subtitle }: PlaceholderPageProps) {
+  const tPlaceholder = await getTranslations("placeholder");
+  const tCommon = await getTranslations("common");
+
   return (
     <div>
       <div className="section-head" style={{ marginTop: 0 }}>
@@ -21,10 +26,10 @@ export function PlaceholderPage({ title, subtitle }: PlaceholderPageProps) {
         }}
       >
         <p style={{ fontSize: 15, fontWeight: 600, color: "var(--fg)", margin: 0 }}>
-          Próximamente
+          {tCommon("comingSoon")}
         </p>
         <p style={{ marginTop: 8, fontSize: 13 }}>
-          Esta pantalla se implementará en la siguiente fase del diseño.
+          {tPlaceholder("nextPhase")}
         </p>
       </div>
     </div>

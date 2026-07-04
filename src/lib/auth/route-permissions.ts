@@ -1,4 +1,5 @@
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import { REPORT_READ_PERMISSIONS } from "@/lib/reports/permissions";
 
 export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/dashboard": "dashboard:read",
@@ -17,7 +18,16 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/settings": "settings:read",
 };
 
+export { REPORT_READ_PERMISSIONS };
+
+export function requiresReportsHubAccess(pathname: string): boolean {
+  return pathname === "/reports" || pathname.startsWith("/reports/");
+}
+
 export function permissionForPath(pathname: string): PermissionKey | null {
+  if (requiresReportsHubAccess(pathname)) {
+    return null;
+  }
   const entries = Object.entries(ROUTE_PERMISSIONS).sort(
     ([a], [b]) => b.length - a.length,
   );

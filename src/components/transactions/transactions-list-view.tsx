@@ -47,6 +47,7 @@ import type {
 } from "@/lib/ledger/types";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   useActionState,
@@ -54,12 +55,6 @@ import {
   useState,
   startTransition,
 } from "react";
-
-const STATUS_FILTERS: { key: LedgerStatusFilter; label: string }[] = [
-  { key: "all", label: "Todos" },
-  { key: "pending", label: "Pendientes" },
-  { key: "approved", label: "Aprobadas" },
-];
 
 const deleteInitial: TransactionActionResult | null = null;
 
@@ -143,7 +138,17 @@ export function TransactionsListView({
   dateTo: string;
   statusFilter: LedgerStatusFilter;
 }) {
+  const tCommon = useTranslations("common");
+  const tFinances = useTranslations("finances");
+  const tTransactions = useTranslations("transactions");
+  const locale = useLocale() as "es" | "en" | "fr";
   const router = useRouter();
+  const STATUS_FILTERS: { key: LedgerStatusFilter; label: string }[] = [
+    { key: "all", label: tCommon("all") },
+    { key: "pending", label: tCommon("pending") },
+    { key: "approved", label: tCommon("approved") },
+  ];
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
@@ -167,7 +172,7 @@ export function TransactionsListView({
   );
 
   useActionToast(deleteState, {
-    successMessage: "Movimiento eliminado.",
+    successMessage: tTransactions("messages.deleted"),
     onSuccess: () => {
       setDeleteTarget(null);
       router.refresh();
@@ -214,7 +219,7 @@ export function TransactionsListView({
   const pageEnd = Math.min(pageStart + entries.length, totalCount);
   const pageRows = filtered;
 
-  const exportBase = `Transacciones_${dateRangeExportSlug(dateRange)}`;
+  const exportBase = `transactions_${dateRangeExportSlug(dateRange)}_${locale}`;
 
   function openNew() {
     setFormState({ mode: "new", entry: null });
@@ -236,7 +241,7 @@ export function TransactionsListView({
     () => [
       {
         key: "type",
-        label: "Tipo",
+                label: tCommon("type"),
         className: "col-type",
         render: (entry: LedgerEntry) => (
           <LedgerMovementTypeCell entry={entry} />
@@ -244,14 +249,14 @@ export function TransactionsListView({
       },
       {
         key: "fund",
-        label: "Fondo",
+                label: tCommon("fund"),
         render: (entry: LedgerEntry) => (
           <span className="chip">{entry.fundName}</span>
         ),
       },
       {
         key: "description",
-        label: "Descripción",
+                label: tCommon("description"),
         className: "col-desc",
         render: (entry: LedgerEntry) => (
           <TruncatedTooltip
@@ -262,14 +267,14 @@ export function TransactionsListView({
       },
       {
         key: "amount",
-        label: "Monto",
+                label: tCommon("amount"),
         align: "right" as const,
         className: "tnum mono",
         render: (entry: LedgerEntry) => <LedgerAmount entry={entry} />,
       },
       {
         key: "status",
-        label: "Estado",
+                label: tCommon("status"),
         render: (entry: LedgerEntry) => (
           <div className="row" style={{ gap: 8, alignItems: "center" }}>
             <LedgerStatusChip entry={entry} />
@@ -283,41 +288,49 @@ export function TransactionsListView({
       },
       {
         key: "createdBy",
-        label: "Creado por",
+                label: tCommon("created"),
         className: "muted",
         render: (entry: LedgerEntry) => entry.createdBy,
       },
       {
         key: "authorizedBy",
-        label: "Autorizado por",
+                label: tTransactions("authorizedBy"),
         className: "muted",
         render: (entry: LedgerEntry) =>
           entry.direction === "expense" && entry.status === "PENDING"
-            ? "—"
+            ? tTransactions("na")
             : entry.authorizedBy,
       },
     ],
-    [canAuthorizeFinances],
+    [canAuthorizeFinances, tCommon, tTransactions],
   );
 
   const emptyMessage =
     totalCount === 0
-      ? "No hay movimientos registrados."
-      : "No hay movimientos que coincidan con los filtros.";
+      ? tTransactions("empty")
+      : tTransactions("emptyFiltered");
 
   return (
     <div>
       <FinPageHeader
-        eyebrow="Mayordomía · Finanzas"
+        eyebrow={tFinances("stewardship")}
         title={
-          fundFilterName ? `Transacciones — ${fundFilterName}` : "Transacciones"
+          fundFilterName
+            ? `${tTransactions("title")} — ${fundFilterName}`
+            : tTransactions("title")
         }
-        subtitle="Ingresos operacionales y egresos de todos los fondos de la congregación."
+        subtitle={tTransactions("subtitleLong")}
         onExportPdf={() =>
-          toast.success("Reporte generado", `${exportBase}.pdf descargado`)
+          toast.success(
+            tFinances("reportGenerated"),
+            tFinances("fileDownloaded", { file: `${exportBase}.pdf` }),
+          )
         }
         onExportExcel={() =>
-          toast.success("Reporte generado", `${exportBase}.xlsx descargado`)
+          toast.success(
+            tFinances("reportGenerated"),
+            tFinances("fileDownloaded", { file: `${exportBase}.xlsx` }),
+          )
         }
       />
 
@@ -332,7 +345,7 @@ export function TransactionsListView({
             fontWeight: 600,
           }}
         >
-          Ver todas las transacciones
+          {tTransactions("viewAll")}
         </Link>
       ) : null}
 
@@ -342,7 +355,7 @@ export function TransactionsListView({
         style={{ marginTop: 0 }}
         query={query}
         onQueryChange={setQuery}
-        queryPlaceholder="Buscar por descripción, fondo, categoría…"
+        queryPlaceholder={tTransactions("searchPlaceholder")}
         maxSearchWidth={340}
         compactSearch
         filters={STATUS_FILTERS}
@@ -357,7 +370,7 @@ export function TransactionsListView({
         trailing={
           isDesktop ? (
             <button type="button" className="btn primary" onClick={openNew}>
-              <Icons.plus size={14} /> Registrar movimiento
+              <Icons.plus size={14} /> {tTransactions("registerMovement")}
             </button>
           ) : null
         }
@@ -378,7 +391,7 @@ export function TransactionsListView({
               : undefined
           }
           actionsPosition="start"
-          actionsLabel="Acciones"
+          actionsLabel={tCommon("actions")}
           actions={(entry) => (
             <TransactionActionMenu
               canEdit={canEditEntry(entry)}
@@ -407,7 +420,7 @@ export function TransactionsListView({
                   style={{ marginTop: 16 }}
                   onClick={openNew}
                 >
-                  <Icons.plus size={14} /> Registrar movimiento
+                  <Icons.plus size={14} /> {tTransactions("registerMovement")}
                 </button>
               ) : null}
             </div>
@@ -435,7 +448,7 @@ export function TransactionsListView({
                   style={{ marginTop: 16 }}
                   onClick={openNew}
                 >
-                  <Icons.plus size={14} /> Registrar movimiento
+                  <Icons.plus size={14} /> {tTransactions("registerMovement")}
                 </button>
               ) : null}
             </div>
@@ -466,7 +479,7 @@ export function TransactionsListView({
           onPageSize={(s) =>
             navigate({ pageSize: s as FinancePageSize, page: 1 })
           }
-          noun="movimientos"
+            noun={tTransactions("recordsNoun")}
           sizeOptions={FINANCE_PAGE_SIZE_OPTIONS}
         />
       ) : null}
@@ -485,7 +498,7 @@ export function TransactionsListView({
             padding: "14px 18px",
             boxShadow: "var(--shadow-3)",
           }}
-          aria-label="Registrar movimiento"
+          aria-label={tTransactions("registerMovement")}
         >
           <Icons.plus size={18} />
         </button>
@@ -493,8 +506,8 @@ export function TransactionsListView({
 
       {deleteTarget ? (
         <ConfirmDialog
-          title="¿Eliminar movimiento?"
-          message="Esta acción no se puede deshacer."
+          title={tFinances("deleteMovement")}
+          message={tCommon("cannotUndo")}
           itemName={`${deleteTarget.description} · ${deleteTarget.fundName}`}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeleteTarget(null)}

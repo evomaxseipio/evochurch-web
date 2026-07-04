@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  CHART_PERIOD_LABELS,
   CHART_PERIODS,
   type DashboardChartPeriod,
 } from "@/lib/dashboard/types";
+import { useTranslations } from "next-intl";
 
 export function ChartPeriodToolbar({
   value,
@@ -13,6 +13,8 @@ export function ChartPeriodToolbar({
   value: DashboardChartPeriod;
   onChange: (period: DashboardChartPeriod) => void;
 }) {
+  const t = useTranslations("dashboard");
+
   return (
     <div className="row" style={{ gap: 6 }}>
       {CHART_PERIODS.map((period) => (
@@ -22,7 +24,7 @@ export function ChartPeriodToolbar({
           className={`btn ${value === period ? "outline" : "ghost"} sm`}
           onClick={() => onChange(period)}
         >
-          {CHART_PERIOD_LABELS[period]}
+          {t(`period.${period}`)}
         </button>
       ))}
     </div>

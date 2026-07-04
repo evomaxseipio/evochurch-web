@@ -41,6 +41,7 @@ import {
 import { fmtRD } from "@/lib/format-currency";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   useActionState,
@@ -48,13 +49,6 @@ import {
   useState,
   startTransition,
 } from "react";
-
-const CATEGORY_FILTERS: { key: ContributionCategoryFilter; label: string }[] = [
-  { key: "all", label: "Todos" },
-  { key: "tithe", label: "Diezmos" },
-  { key: "offering", label: "Ofrendas" },
-  { key: "donation", label: "Donaciones" },
-];
 
 const deleteInitial: ContributionActionResult | null = null;
 
@@ -121,7 +115,18 @@ export function ContributionsListView({
   dateTo: string;
   category: ContributionCategoryFilter;
 }) {
+  const tCommon = useTranslations("common");
+  const tFinances = useTranslations("finances");
+  const tContributions = useTranslations("contributions");
+  const locale = useLocale() as "es" | "en" | "fr";
   const router = useRouter();
+  const CATEGORY_FILTERS: { key: ContributionCategoryFilter; label: string }[] = [
+    { key: "all", label: tCommon("all") },
+    { key: "tithe", label: tContributions("tithes") },
+    { key: "offering", label: tContributions("offerings") },
+    { key: "donation", label: tContributions("donations") },
+  ];
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
@@ -142,7 +147,7 @@ export function ContributionsListView({
   );
 
   useActionToast(deleteState, {
-    successMessage: "Ingreso eliminado.",
+    successMessage: tContributions("messages.deleted"),
     onSuccess: () => {
       setDeleteTarget(null);
       router.refresh();
@@ -171,7 +176,7 @@ export function ContributionsListView({
   const pageEnd = Math.min(pageStart + entries.length, totalCount);
   const pageRows = filtered;
 
-  const exportBase = `Contribuciones_${dateRangeExportSlug(dateRange)}`;
+  const exportBase = `contributions_${dateRangeExportSlug(dateRange)}_${locale}`;
 
   function openNew() {
     setFormState({ mode: "new", entry: null });
@@ -188,7 +193,7 @@ export function ContributionsListView({
     () => [
       {
         key: "type",
-        label: "Tipo",
+                label: tCommon("type"),
         render: (c: Contribution) => (
           <span className={`chip ${categoryChipClass(c.category)}`}>
             <span className="pip" /> {c.typeName}
@@ -197,68 +202,78 @@ export function ContributionsListView({
       },
       {
         key: "fund",
-        label: "Fondo",
+                label: tCommon("fund"),
         render: (c: Contribution) => <span className="chip">{c.fundName}</span>,
       },
       {
         key: "contributor",
-        label: "Contribuyente",
+                label: tContributions("contributor"),
         render: (c: Contribution) => <ContributorCell entry={c} />,
       },
       {
         key: "amount",
-        label: "Monto",
+                label: tCommon("amount"),
         align: "right" as const,
         className: "tnum mono",
         render: (c: Contribution) => (
           <span style={{ fontWeight: 600, color: "var(--success)" }}>
-            +{fmtRD(c.amount)}
+            +{fmtRD(c.amount, locale)}
           </span>
         ),
       },
       {
         key: "date",
-        label: "Fecha",
+                label: tCommon("date"),
         className: "muted",
         render: (c: Contribution) => formatContributionDateShort(c.paymentDate),
       },
       {
         key: "method",
-        label: "Método de pago",
+                label: tContributions("paymentMethod"),
         className: "muted",
         render: (c: Contribution) => paymentMethodLabel(c.paymentMethod),
       },
       {
         key: "mode",
-        label: "Modo",
+                label: tContributions("mode"),
         render: (c: Contribution) => (
           <span className="tiny muted" style={{ fontWeight: 600 }}>
-            {c.collectionMode === "collective" ? "Colectivo" : "Individual"}
+            {c.collectionMode === "collective"
+              ? tFinances("contributionTypes.collective")
+              : tFinances("contributionTypes.individual")}
           </span>
         ),
       },
     ],
-    [],
+    [locale, tCommon, tContributions, tFinances],
   );
 
   const emptyMessage =
     totalCount === 0
-      ? "No hay ingresos registrados."
-      : "No hay ingresos que coincidan con los filtros.";
+      ? tContributions("empty")
+      : tContributions("emptyFiltered");
 
   return (
     <div>
       <FinPageHeader
-        eyebrow="Mayordomía · Finanzas"
+        eyebrow={tFinances("stewardship")}
         title={
-          fundFilterName ? `Contribuciones — ${fundFilterName}` : "Contribuciones"
+          fundFilterName
+            ? `${tContributions("title")} — ${fundFilterName}`
+            : tContributions("title")
         }
-        subtitle="Diezmos, ofrendas y donaciones registradas en la congregación."
+        subtitle={tContributions("subtitle")}
         onExportPdf={() =>
-          toast.success("Reporte generado", `${exportBase}.pdf descargado`)
+          toast.success(
+            tFinances("reportGenerated"),
+            tFinances("fileDownloaded", { file: `${exportBase}.pdf` }),
+          )
         }
         onExportExcel={() =>
-          toast.success("Reporte generado", `${exportBase}.xlsx descargado`)
+          toast.success(
+            tFinances("reportGenerated"),
+            tFinances("fileDownloaded", { file: `${exportBase}.xlsx` }),
+          )
         }
       />
 
@@ -273,7 +288,7 @@ export function ContributionsListView({
             fontWeight: 600,
           }}
         >
-          Ver todas las contribuciones
+          {tContributions("viewAll")}
         </Link>
       ) : null}
 
@@ -283,7 +298,7 @@ export function ContributionsListView({
         style={{ marginTop: 0 }}
         query={query}
         onQueryChange={setQuery}
-        queryPlaceholder="Buscar por descripción, fondo, categoría…"
+        queryPlaceholder={tContributions("searchPlaceholder")}
         maxSearchWidth={340}
         compactSearch
         filters={CATEGORY_FILTERS}
@@ -300,7 +315,7 @@ export function ContributionsListView({
         trailing={
           isDesktop ? (
             <button type="button" className="btn primary" onClick={openNew}>
-              <Icons.plus size={14} /> Agregar ingreso
+              <Icons.plus size={14} /> {tContributions("addIncome")}
             </button>
           ) : null
         }
@@ -313,7 +328,7 @@ export function ContributionsListView({
           rows={pageRows}
           rowKey={(c) => c.incomeId}
           actionsPosition="start"
-          actionsLabel="Acciones"
+          actionsLabel={tCommon("actions")}
           actions={(c) => (
             <ContributionActionMenu
               onEdit={() => setFormState({ mode: "edit", entry: c })}
@@ -334,7 +349,7 @@ export function ContributionsListView({
                   style={{ marginTop: 16 }}
                   onClick={openNew}
                 >
-                  <Icons.plus size={14} /> Agregar ingreso
+                  <Icons.plus size={14} /> {tContributions("addIncome")}
                 </button>
               ) : null}
             </div>
@@ -363,7 +378,7 @@ export function ContributionsListView({
           onPageSize={(s) =>
             navigate({ pageSize: s as FinancePageSize, page: 1 })
           }
-          noun="ingresos"
+            noun={tContributions("recordsNoun")}
           sizeOptions={FINANCE_PAGE_SIZE_OPTIONS}
         />
       ) : null}
@@ -382,7 +397,7 @@ export function ContributionsListView({
             padding: "14px 18px",
             boxShadow: "var(--shadow-3)",
           }}
-          aria-label="Agregar ingreso"
+          aria-label={tContributions("addIncome")}
         >
           <Icons.plus size={18} />
         </button>
@@ -390,8 +405,8 @@ export function ContributionsListView({
 
       {deleteTarget ? (
         <ConfirmDialog
-          title="¿Eliminar ingreso?"
-          message="Esta acción no se puede deshacer."
+          title={tFinances("deleteIncome")}
+          message={tCommon("cannotUndo")}
           itemName={`${deleteTarget.typeName} · ${deleteTarget.contributorLabel}`}
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeleteTarget(null)}
@@ -400,6 +415,7 @@ export function ContributionsListView({
       ) : null}
 
       <ContributionFormDrawer
+        key={`${formState?.mode ?? "new"}-${formState?.entry?.incomeId ?? "new"}-${formState !== null ? "open" : "closed"}`}
         mode={formState?.mode ?? "new"}
         entry={formState?.entry ?? null}
         open={formState !== null}

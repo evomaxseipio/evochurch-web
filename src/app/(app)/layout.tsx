@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/shell/app-shell";
 import {
   getAppSession,
@@ -16,6 +17,7 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const session = await getAppSession();
+  const tAuth = await getTranslations("auth");
 
   if (sessionRequiresPasswordChange(session)) {
     redirect(UPDATE_PASSWORD_PATH);
@@ -39,8 +41,7 @@ export default async function AppLayout({
         userEmail={user.email}
       >
         <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-100">
-          Tu cuenta de acceso existe, pero no está vinculada a un perfil de
-          iglesia en EvoChurch. Contacta al administrador de tu congregación.
+          {tAuth("noChurchBanner")}
         </div>
         {children}
       </AppShell>

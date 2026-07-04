@@ -21,6 +21,7 @@ export type AppSession = {
   isActive: boolean;
   isVerified: boolean;
   isTempPassword: boolean;
+  preferredLocale: string;
 };
 
 type SessionContextRow = {
@@ -37,6 +38,7 @@ type SessionContextRow = {
   is_active?: boolean;
   is_verified?: boolean;
   is_temp_password?: boolean;
+  preferred_locale?: string;
   permissions?: unknown;
 };
 
@@ -97,6 +99,11 @@ export function parseAppSession(data: unknown): AppSession | null {
     isActive: row.is_active === true,
     isVerified: row.is_verified === true,
     isTempPassword: row.is_temp_password === true,
+    preferredLocale:
+      typeof row.preferred_locale === "string" &&
+      row.preferred_locale.length > 0
+        ? row.preferred_locale
+        : "es",
   };
 }
 

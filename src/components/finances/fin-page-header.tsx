@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { useTranslations } from "next-intl";
 
 /** Encabezado reutilizable — periodo vive en el filtro de mes, no en el título. */
 export function FinPageHeader({
@@ -16,6 +17,7 @@ export function FinPageHeader({
   onExportPdf: () => void;
   onExportExcel: () => void;
 }) {
+  const tCommon = useTranslations("common");
   return (
     <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
       <div>
@@ -36,10 +38,10 @@ export function FinPageHeader({
       </div>
       <div className="row">
         <button type="button" className="btn outline" onClick={onExportPdf}>
-          <Icons.download size={16} /> PDF
+          <Icons.download size={16} /> {tCommon("download")} PDF
         </button>
         <button type="button" className="btn outline" onClick={onExportExcel}>
-          <Icons.download size={16} /> Excel
+          <Icons.download size={16} /> {tCommon("download")} Excel
         </button>
       </div>
     </div>

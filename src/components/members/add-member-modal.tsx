@@ -15,6 +15,7 @@ import {
 import type { MemberRoleCatalog } from "@/lib/members/roles";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
+import { useTranslations } from "next-intl";
 
 const initial: ActionResult | null = null;
 
@@ -44,6 +45,10 @@ export function AddMemberModal({
   onClose: () => void;
   roles: MemberRoleCatalog[];
 }) {
+  const t = useTranslations("members");
+  const tCommon = useTranslations("common");
+  const tValidation = useTranslations("validation");
+  const tErrors = useTranslations("errors");
   const [state, formAction, pending] = useActionState(createMemberAction, initial);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -56,7 +61,13 @@ export function AddMemberModal({
   }, [open]);
 
   useActionToast(state, {
-    successMessage: "Miembro agregado correctamente.",
+    successMessage: t("memberAdded"),
+    resolveError: (errorKey) => {
+      if (!errorKey) return tErrors("serverError");
+      if (errorKey.startsWith("validation.")) return tValidation(errorKey.slice(11));
+      if (errorKey.startsWith("errors.")) return tErrors(errorKey.slice(7));
+      return tErrors("serverError");
+    },
     onSuccess: onClose,
   });
 
@@ -81,13 +92,13 @@ export function AddMemberModal({
       <div className="drawer" role="dialog" aria-labelledby="add-member-title">
         <div className="drawer-head">
           <div style={{ flex: 1 }}>
-            <div className="eyebrow">Nuevo registro</div>
+            <div className="eyebrow">{t("newMember")}</div>
             <div
               id="add-member-title"
               className="display"
               style={{ fontSize: 24, marginTop: 2 }}
             >
-              Agregar miembro
+              {t("addMember")}
             </div>
           </div>
           <button
@@ -95,7 +106,7 @@ export function AddMemberModal({
             className="btn ghost icon-only"
             onClick={onClose}
             disabled={pending}
-            aria-label="Cerrar"
+            aria-label={tCommon("close")}
           >
             <Icons.x size={18} />
           </button>
@@ -110,12 +121,12 @@ export function AddMemberModal({
             const phone = String(new FormData(form).get("phone") ?? "").trim();
             if (!firstName.trim() || !lastName.trim()) {
               e.preventDefault();
-              toast.error("Campos requeridos", "Nombre y apellido son obligatorios.");
+              toast.error(t("requiredFields"), tValidation("firstNameRequired"));
               return;
             }
             if (!phone) {
               e.preventDefault();
-              toast.error("Campos requeridos", "El teléfono es obligatorio.");
+              toast.error(t("requiredFields"), tValidation("phoneRequired"));
             }
           }}
         >
@@ -133,62 +144,62 @@ export function AddMemberModal({
               <span className="avatar lg sq">{initials}</span>
               <div>
                 <div style={{ fontWeight: 600 }}>
-                  {fullName || "Nombre del nuevo miembro"}
+                  {fullName || t("newMemberName")}
                 </div>
                 <div className="tiny muted">
-                  El avatar se generará automáticamente
+                  {t("avatarAuto")}
                 </div>
               </div>
             </div>
 
             <DrawerSectionCard
-              eyebrow="Datos personales"
-              title="Información personal"
+              eyebrow={t("personalData")}
+              title={t("personalInfo")}
             >
               <div className="mf-grid">
                 <DrawerField
-                  label="Nombre"
+                  label={t("firstName")}
                   name="firstName"
                   required
-                  placeholder="Juan"
+                  placeholder={t("firstNamePlaceholder")}
                   value={firstName}
                   onChange={setFirstName}
                 />
                 <DrawerField
-                  label="Apellido"
+                  label={t("lastName")}
                   name="lastName"
                   required
-                  placeholder="Pérez"
+                  placeholder={t("lastNamePlaceholder")}
                   value={lastName}
                   onChange={setLastName}
                 />
                 <DrawerField
-                  label="Apodo"
+                  label={t("nickname")}
                   name="nickName"
-                  placeholder="Juanito"
+                  placeholder={t("nicknamePlaceholder")}
                 />
                 <DrawerField
-                  label="Fecha de nac."
+                  label={t("birthDateShort")}
                   name="dateOfBirth"
                   type="date"
                   placeholder="yyyy-MM-dd"
                 />
                 <DrawerField
-                  label="Género"
+                  label={t("gender")}
                   name="gender"
                   type="select"
                   options={GENDER_OPTIONS}
                   defaultValue="Male"
                 />
                 <DrawerField
-                  label="Estado civil"
+                  label={t("maritalStatus")}
                   name="maritalStatus"
                   type="select"
                   options={MARITAL_OPTIONS}
                   defaultValue="Single"
                 />
                 <DrawerField
-                  label="Nacionalidad"
+                  label={t("nationality")}
                   name="nationality"
                   type="select"
                   options={NATIONALITY_OPTIONS.map((o) => ({
@@ -198,14 +209,14 @@ export function AddMemberModal({
                   defaultValue="Dominicano/a"
                 />
                 <DrawerField
-                  label="Tipo ID"
+                  label={t("idType")}
                   name="idType"
                   type="select"
                   options={ID_TYPE_OPTIONS}
                   defaultValue="ID Card"
                 />
                 <DrawerField
-                  label="Número ID"
+                  label={t("idNumber")}
                   name="idNumber"
                   placeholder="000-0000000-0"
                   span={2}
@@ -213,28 +224,28 @@ export function AddMemberModal({
               </div>
             </DrawerSectionCard>
 
-            <DrawerSectionCard eyebrow="Ubicación" title="Información de dirección">
+            <DrawerSectionCard eyebrow={t("location")} title={t("addressInfo")}>
               <div className="mf-grid">
                 <DrawerField
-                  label="Dirección"
+                  label={t("address")}
                   name="streetAddress"
                   placeholder="Calle Principal #12"
                   span={2}
                 />
                 <DrawerField
-                  label="Provincia"
+                  label={t("province")}
                   name="stateProvince"
                   placeholder="Santiago"
                   defaultValue="Santiago"
                 />
                 <DrawerField
-                  label="Ciudad / Estado"
+                  label={t("cityState")}
                   name="cityState"
                   placeholder="Santiago"
                   defaultValue="Santiago"
                 />
                 <DrawerField
-                  label="País"
+                  label={t("country")}
                   name="country"
                   type="select"
                   options={COUNTRY_OPTIONS.map((o) => ({ value: o, label: o }))}
@@ -244,21 +255,21 @@ export function AddMemberModal({
               </div>
             </DrawerSectionCard>
 
-            <DrawerSectionCard eyebrow="Comunicación" title="Contacto">
+            <DrawerSectionCard eyebrow={t("communication")} title={t("contactInfo")}>
               <div className="mf-grid">
                 <DrawerField
-                  label="Teléfono"
+                  label={t("phone")}
                   name="phone"
                   required
                   placeholder="809-000-0000"
                 />
                 <DrawerField
-                  label="Celular"
+                  label={t("mobile")}
                   name="mobilePhone"
                   placeholder="829-000-0000"
                 />
                 <DrawerField
-                  label="Email"
+                  label={t("email")}
                   name="email"
                   type="email"
                   placeholder="juan@correo.com"
@@ -280,11 +291,11 @@ export function AddMemberModal({
               onClick={onClose}
               disabled={pending}
             >
-              Cancelar
+              {tCommon("cancel")}
             </button>
             <button type="submit" className="btn primary" disabled={pending}>
               <Icons.check size={16} />
-              {pending ? "Guardando…" : "Guardar miembro"}
+              {pending ? tCommon("saving") : t("saveMember")}
             </button>
           </div>
         </form>

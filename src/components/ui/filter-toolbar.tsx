@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
 
 export type FilterChip<T extends string = string> = {
@@ -53,7 +54,7 @@ function FilterChips<T extends string>({
 export function FilterToolbar<T extends string = string>({
   query,
   onQueryChange,
-  queryPlaceholder = "Buscar…",
+  queryPlaceholder,
   filters,
   activeFilter,
   onFilterChange,
@@ -70,16 +71,16 @@ export function FilterToolbar<T extends string = string>({
   filters?: FilterChip<T>[];
   activeFilter?: T;
   onFilterChange?: (key: T) => void;
-  /** Controles entre búsqueda y filtros (p. ej. fondo, fecha). */
   middle?: ReactNode;
   trailing?: ReactNode;
   maxSearchWidth?: number;
-  /** Búsqueda de ancho fijo; deja espacio para controles intermedios. */
   compactSearch?: boolean;
-  /** Ancho del campo de búsqueda respecto al toolbar (p. ej. 50 = mitad). */
   searchWidthPercent?: number;
   style?: React.CSSProperties;
 }) {
+  const t = useTranslations("common");
+  const placeholder = queryPlaceholder ?? t("searchPlaceholder");
+
   const filterChips =
     filters && filters.length > 0 && onFilterChange && activeFilter != null ? (
       <FilterChips
@@ -119,7 +120,7 @@ export function FilterToolbar<T extends string = string>({
       <div className="search" style={searchStyle}>
         <Icons.search size={16} stroke="var(--ink-3)" />
         <input
-          placeholder={queryPlaceholder}
+          placeholder={placeholder}
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
         />
@@ -128,8 +129,8 @@ export function FilterToolbar<T extends string = string>({
             type="button"
             className="btn ghost icon-only sm"
             onClick={() => onQueryChange("")}
-            aria-label="Limpiar búsqueda"
-            title="Limpiar búsqueda"
+            aria-label={t("clearSearch")}
+            title={t("clearSearch")}
             style={{
               width: 24,
               height: 24,

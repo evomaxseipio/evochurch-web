@@ -7,6 +7,7 @@ import {
   formatLastLogin,
 } from "@/lib/admin-users/parse";
 import type { ChurchAuthUser } from "@/lib/admin-users/types";
+import { useTranslations } from "next-intl";
 
 export function RoleUsersDialog({
   roleName,
@@ -19,6 +20,8 @@ export function RoleUsersDialog({
   open: boolean;
   onClose: () => void;
 }) {
+  const tCommon = useTranslations("common");
+  const tRoles = useTranslations("roles");
   if (!open) return null;
 
   return (
@@ -58,7 +61,7 @@ export function RoleUsersDialog({
           }}
         >
           <div>
-            <div className="eyebrow">Usuarios del rol</div>
+            <div className="eyebrow">{tRoles("roleUsers")}</div>
             <h3 id="role-users-title" style={{ margin: "4px 0 0", fontSize: 18 }}>
               {roleName}
             </h3>
@@ -67,7 +70,7 @@ export function RoleUsersDialog({
             type="button"
             className="btn ghost icon-only"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={tCommon("close")}
           >
             <Icons.x size={18} />
           </button>
@@ -76,7 +79,7 @@ export function RoleUsersDialog({
         <div style={{ padding: "12px 20px 20px", overflowY: "auto" }}>
           {users.length === 0 ? (
             <p className="muted" style={{ margin: 0, fontSize: 14 }}>
-              Ningún usuario tiene asignado este rol.
+              {tRoles("noUsersAssigned")}
             </p>
           ) : (
             <ul
@@ -116,7 +119,7 @@ export function RoleUsersDialog({
                       {user.email}
                     </div>
                     <div className="muted tiny" style={{ marginTop: 4 }}>
-                      Último acceso: {formatLastLogin(user.lastLoginAt)}
+                      {tRoles("lastLoginLabel")}: {formatLastLogin(user.lastLoginAt)}
                     </div>
                   </div>
                 </li>

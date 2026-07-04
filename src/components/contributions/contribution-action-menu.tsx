@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
 function MenuItem({
@@ -58,6 +59,7 @@ export function ContributionActionMenu({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({
     top: 0 as number | "auto",
@@ -99,10 +101,10 @@ export function ContributionActionMenu({
         ref={btnRef}
         type="button"
         className="btn ghost icon-only sm"
-        title="Acciones"
+        title={tCommon("actions")}
         style={{ opacity: 1 }}
         onClick={handleToggle}
-        aria-label="Acciones"
+        aria-label={tCommon("actions")}
       >
         <Icons.menu size={16} />
       </button>
@@ -132,7 +134,7 @@ export function ContributionActionMenu({
           >
             <MenuItem
               icon={<Icons.edit size={15} />}
-              label="Editar"
+              label={tCommon("edit")}
               onClick={() => {
                 setOpen(false);
                 onEdit();
@@ -143,7 +145,7 @@ export function ContributionActionMenu({
             />
             <MenuItem
               icon={<Icons.trash size={15} />}
-              label="Eliminar"
+              label={tCommon("delete")}
               danger
               onClick={() => {
                 setOpen(false);

@@ -4,6 +4,7 @@ import {
   defaultYearToDateRange,
   type DateRange,
 } from "@/lib/finance/date-range";
+import { useTranslations } from "next-intl";
 
 export function DateRangeFilter({
   value,
@@ -12,6 +13,7 @@ export function DateRangeFilter({
   value: DateRange;
   onChange: (next: DateRange) => void;
 }) {
+  const t = useTranslations("finances");
   const defaults = defaultYearToDateRange();
   const isDefault = value.from === defaults.from && value.to === defaults.to;
 
@@ -22,7 +24,7 @@ export function DateRangeFilter({
     >
       <label className="row" style={{ gap: 6, alignItems: "center" }}>
         <span className="tiny muted" style={{ fontWeight: 600 }}>
-          Desde
+          {t("from")}
         </span>
         <input
           type="date"
@@ -31,12 +33,12 @@ export function DateRangeFilter({
           value={value.from}
           max={value.to}
           onChange={(e) => onChange({ ...value, from: e.target.value })}
-          aria-label="Fecha desde"
+          aria-label={t("fromDate")}
         />
       </label>
       <label className="row" style={{ gap: 6, alignItems: "center" }}>
         <span className="tiny muted" style={{ fontWeight: 600 }}>
-          Hasta
+          {t("to")}
         </span>
         <input
           type="date"
@@ -45,7 +47,7 @@ export function DateRangeFilter({
           value={value.to}
           min={value.from}
           onChange={(e) => onChange({ ...value, to: e.target.value })}
-          aria-label="Fecha hasta"
+          aria-label={t("toDate")}
         />
       </label>
       {!isDefault ? (
@@ -54,7 +56,7 @@ export function DateRangeFilter({
           className="btn outline sm"
           onClick={() => onChange(defaultYearToDateRange())}
         >
-          Restablecer
+          {t("resetDateRange")}
         </button>
       ) : null}
     </div>

@@ -13,6 +13,8 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | [QA-PROMPT-SPRINT-1.md](./QA-PROMPT-SPRINT-1.md) | QA del Sprint 1 (auth deduplicada) |
 | [AGENT-PROMPT-SPRINT-2.md](./AGENT-PROMPT-SPRINT-2.md) | Implementación Sprint 2 (datos financieros) |
 | [QA-PROMPT-SPRINT-2.md](./QA-PROMPT-SPRINT-2.md) | QA del Sprint 2 (datos financieros) |
+| [AGENT-PROMPT-REPORTES-MODULE.md](./AGENT-PROMPT-REPORTES-MODULE.md) | **Módulo Reportes** — hub + CEAD + directorio + ejecutivo (por sección REP-0…REP-6) |
+| [AGENT-PROMPT-I18N-MODULE.md](./AGENT-PROMPT-I18N-MODULE.md) | **Internacionalización** — es/en/fr, next-intl, por sección I18N-0…I18N-QA |
 
 ## Cómo usar
 

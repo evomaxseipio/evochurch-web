@@ -7,9 +7,10 @@ import {
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchAllExpenseTypes } from "@/lib/services/expense-types-catalog";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 export default async function ExpensesSettingsPage() {
+  const tErrors = await getTranslations("errors");
   const session = await requirePageAccess("/settings/expenses");
 
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export default async function ExpensesSettingsPage() {
     rows = await fetchAllExpenseTypes(supabase, session.churchId);
   } catch (e) {
     error =
-      e instanceof Error ? e.message : "No se pudieron cargar los tipos de gasto.";
+      e instanceof Error ? e.message : tErrors("loadFailed");
   }
 
   if (error) {

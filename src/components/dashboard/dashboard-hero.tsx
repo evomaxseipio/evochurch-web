@@ -1,12 +1,15 @@
 "use client";
 
 import type { DashboardHeroData } from "@/lib/dashboard/types";
+import { useTranslations } from "next-intl";
 
-function getGreeting(): string {
+function getGreeting(
+  t: (key: "goodMorning" | "goodAfternoon" | "goodEvening") => string,
+): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Buenos días";
-  if (hour < 19) return "Buenas tardes";
-  return "Buenas noches";
+  if (hour < 12) return t("goodMorning");
+  if (hour < 19) return t("goodAfternoon");
+  return t("goodEvening");
 }
 
 export function DashboardHero({
@@ -18,7 +21,8 @@ export function DashboardHero({
   churchName?: string;
   hero: DashboardHeroData;
 }) {
-  const greeting = getGreeting();
+  const t = useTranslations("dashboard");
+  const greeting = getGreeting(t);
 
   return (
     <div className="hero">
@@ -37,10 +41,10 @@ export function DashboardHero({
           ) : null}
         </div>
         <h2>
-          {greeting}, Pastor <em>{pastor}</em>.
+          {greeting}, {t("pastor")} <em>{pastor}</em>.
           <br />
           <span style={{ color: "var(--fg-dim)", fontSize: 26 }}>
-            Que esta semana sea de cosecha.
+            {t("harvestWeek")}
           </span>
         </h2>
       </div>

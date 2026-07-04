@@ -3,16 +3,12 @@
 import { login, type LoginState } from "@/app/(auth)/login/actions";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 
 const initial: LoginState = {};
 
-const LOGIN_ERRORS: Record<string, string> = {
-  auth: "No se pudo completar el inicio de sesión. Intenta de nuevo.",
-  credentials: "Credenciales inválidas. Intenta de nuevo.",
-  no_church:
-    "Tu cuenta no está vinculada a una iglesia. Contacta al administrador.",
-};
+const ERROR_KEYS = ["auth", "credentials", "no_church"] as const;
 
 export function LoginForm({
   next,
@@ -23,10 +19,20 @@ export function LoginForm({
   email?: string;
   loginError?: string;
 }) {
+  const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const tErrors = useTranslations("auth.errors");
   const [state, formAction, pending] = useActionState(login, initial);
   const [showPw, setShowPw] = useState(false);
+
   const bannerError =
-    (loginError ? LOGIN_ERRORS[loginError] : undefined) ?? state.error;
+    (loginError && ERROR_KEYS.includes(loginError as (typeof ERROR_KEYS)[number])
+      ? tErrors(loginError as (typeof ERROR_KEYS)[number])
+      : undefined) ??
+    (state.errorKey
+      ? tErrors(state.errorKey.replace("auth.errors.", "") as (typeof ERROR_KEYS)[number])
+      : undefined) ??
+    state.error;
 
   return (
     <div className="inner">
@@ -41,10 +47,10 @@ export function LoginForm({
             color: "var(--ink)",
           }}
         >
-          Bienvenido de nuevo
+          {t("welcomeBack")}
         </h1>
         <p className="muted" style={{ marginTop: 12, fontSize: 14.5 }}>
-          Ingresa tu correo y contraseña para acceder a tu cuenta.
+          {t("loginSubtitle")}
         </p>
       </div>
 
@@ -68,7 +74,7 @@ export function LoginForm({
         {next ? <input type="hidden" name="next" value={next} /> : null}
 
         <div className="field">
-          <label htmlFor="email">Correo electrónico</label>
+          <label htmlFor="email">{t("email")}</label>
           <div className="input-wrap">
             <input
               id="email"
@@ -82,7 +88,7 @@ export function LoginForm({
         </div>
 
         <div className="field">
-          <label htmlFor="password">Contraseña</label>
+          <label htmlFor="password">{t("password")}</label>
           <div className="input-wrap">
             <input
               id="password"
@@ -102,7 +108,7 @@ export function LoginForm({
                 display: "grid",
                 placeItems: "center",
               }}
-              aria-label={showPw ? "Ocultar contraseña" : "Mostrar contraseña"}
+              aria-label={showPw ? t("hidePassword") : t("showPassword")}
             >
               <Icons.eye width={18} style={{ color: "var(--ink-4)" }} />
             </button>
@@ -120,13 +126,13 @@ export function LoginForm({
               defaultChecked
               style={{ accentColor: "var(--primary)" }}
             />
-            Recordarme
+            {t("rememberMe")}
           </label>
           <Link
             href="/login/forgot"
             style={{ fontSize: 13, color: "var(--primary)", fontWeight: 600 }}
           >
-            ¿Olvidaste tu clave?
+            {t("forgotPassword")}
           </Link>
         </div>
 
@@ -137,33 +143,33 @@ export function LoginForm({
                 className="ring"
                 style={{ width: 16, height: 16, borderWidth: 2, borderTopColor: "#fff" }}
               />
-              Entrando…
+              {t("signingIn")}
             </>
           ) : (
-            "Iniciar sesión"
+            t("signIn")
           )}
         </button>
 
         <div className="row" style={{ gap: 12, alignItems: "center", margin: "10px 0" }}>
           <div style={{ flex: 1, height: 1, background: "var(--hairline)" }} />
-          <span className="tiny muted">o continúa con</span>
+          <span className="tiny muted">{t("orContinueWith")}</span>
           <div style={{ flex: 1, height: 1, background: "var(--hairline)" }} />
         </div>
 
         <div className="row" style={{ gap: 10 }}>
-          <button type="button" className="btn outline" style={{ flex: 1 }} disabled title="Próximamente">
+          <button type="button" className="btn outline" style={{ flex: 1 }} disabled title={tCommon("comingSoon")}>
             <Icons.google width={16} /> Google
           </button>
-          <button type="button" className="btn outline" style={{ flex: 1 }} disabled title="Próximamente">
+          <button type="button" className="btn outline" style={{ flex: 1 }} disabled title={tCommon("comingSoon")}>
             <Icons.apple width={16} /> Apple
           </button>
         </div>
       </form>
 
       <p className="tiny muted" style={{ marginTop: 32, textAlign: "center" }}>
-        ¿Tu iglesia aún no usa EvoChurch?{" "}
+        {t("noChurchYet")}{" "}
         <span style={{ color: "var(--primary)", fontWeight: 600, cursor: "not-allowed" }}>
-          Solicita acceso
+          {t("requestAccess")}
         </span>
       </p>
     </div>

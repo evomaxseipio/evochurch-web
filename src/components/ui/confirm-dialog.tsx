@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { useTranslations } from "next-intl";
 
 export function ConfirmDialog({
   title,
@@ -17,6 +18,8 @@ export function ConfirmDialog({
   onClose: () => void;
   pending?: boolean;
 }) {
+  const t = useTranslations("common");
+
   return (
     <>
       <div
@@ -80,7 +83,7 @@ export function ConfirmDialog({
             onClick={onClose}
             disabled={pending}
           >
-            Cancelar
+            {t("cancel")}
           </button>
           <button
             type="button"
@@ -88,7 +91,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             disabled={pending}
           >
-            <Icons.trash size={14} /> Eliminar
+            <Icons.trash size={14} /> {t("delete")}
           </button>
         </div>
       </div>

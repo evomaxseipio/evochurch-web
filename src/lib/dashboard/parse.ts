@@ -16,6 +16,8 @@ import type {
 import { CHART_PERIODS } from "@/lib/dashboard/types";
 import { formatHeroDateLabel } from "@/lib/dashboard/period";
 import { fmtRDshort } from "@/lib/format-currency";
+import type { Locale } from "@/i18n/config";
+import { formatNumber } from "@/lib/i18n/format";
 import type { MembersListStats } from "@/lib/members/types";
 import { dashboardMock } from "@/lib/mock/dashboard-data";
 
@@ -130,7 +132,9 @@ function buildDashboardKpisFromSummary(params: {
     ledgerExpenseThisMonth: number;
     ledgerExpensePrevMonth: number;
   };
+  locale?: Locale;
 }): DashboardKpi[] {
+  const locale = params.locale ?? "es";
   const contributionsDelta = formatPeriodDelta(
     params.kpiMonth.contributionsThisMonth,
     params.kpiMonth.contributionsPrevMonth,
@@ -150,21 +154,24 @@ function buildDashboardKpisFromSummary(params: {
 
   return [
     {
+      labelKey: "kpiTotalMembers",
       label: "Total de Miembros",
-      value: params.memberStats.total.toLocaleString("es-DO"),
-      delta: `${params.memberStats.active.toLocaleString("es-DO")} activos`,
+      value: formatNumber(params.memberStats.total, locale),
+      delta: `${formatNumber(params.memberStats.active, locale)} active`,
       deltaDir: "up",
       feature: true,
       icon: "users",
       accent: "var(--d-people)",
     },
     {
+      labelKey: "kpiTotalCatechumens",
       label: "Total catecúmenos",
-      value: params.catechumenCount.toLocaleString("es-DO"),
+      value: formatNumber(params.catechumenCount, locale),
       icon: "cross",
       accent: "var(--warm)",
     },
     {
+      labelKey: "kpiFundsBalance",
       label: "Saldo en fondos",
       value: fmtRDshort(params.fundsSummary.totalBalance),
       delta: `${params.fundsSummary.activeCount} fondo${params.fundsSummary.activeCount === 1 ? "" : "s"} activo${params.fundsSummary.activeCount === 1 ? "" : "s"}`,
@@ -173,6 +180,7 @@ function buildDashboardKpisFromSummary(params: {
       accent: "var(--d-funds)",
     },
     {
+      labelKey: "kpiContributionsMonth",
       label: "Contribuciones (mes)",
       value: fmtRDshort(params.kpiMonth.contributionsThisMonth),
       delta: contributionsDelta.delta,
@@ -222,6 +230,7 @@ function buildDashboardKpisFromSummary(params: {
 export function parseDashboardSummaryResponse(
   data: unknown,
   verse: { reference: string; text: string } | null,
+  locale: Locale = "es",
 ): DashboardPayload {
   const root = asRecord(data);
   if (!root || root.success === false) {
@@ -247,7 +256,7 @@ export function parseDashboardSummaryResponse(
   const contributionCharts = parsePeriodCharts(root.contribution_chart);
   const ledgerCharts = parseLedgerPeriodCharts(root.ledger_chart);
 
-  const hero: DashboardHeroData = buildDashboardHero({ verse });
+  const hero: DashboardHeroData = buildDashboardHero({ verse, locale });
 
   const kpis = buildDashboardKpisFromSummary({
     memberStats,
@@ -277,6 +286,7 @@ export function parseDashboardSummaryResponse(
         asNumber(kpiMonthRaw.ledger_expense_prev_month),
       ),
     },
+    locale,
   });
 
   return {

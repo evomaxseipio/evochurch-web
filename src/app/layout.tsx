@@ -3,6 +3,8 @@ import { ThemeInit } from "@/components/theme-init";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
 import { Geist, Instrument_Serif } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import "./globals.css";
 
 const geist = Geist({
@@ -16,27 +18,35 @@ const instrumentSerif = Instrument_Serif({
   weight: "400",
 });
 
-export const metadata: Metadata = {
-  title: "EvoChurch",
-  description: "Administración de iglesias — SaaS multitenant",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("meta");
+  return {
+    title: t("title"),
+    description: t("description"),
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="es"
+      lang={locale}
       className={`${geist.variable} ${instrumentSerif.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <WebVitalsReporter />
-        <ThemeInit />
-        <Toaster />
-        {children}
+        <NextIntlClientProvider messages={messages}>
+          <WebVitalsReporter />
+          <ThemeInit />
+          <Toaster />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

@@ -9,12 +9,13 @@ import {
   isNavGroup,
   MAIN_NAV,
   navIdFromPath,
-  type NavEntry,
+  resolveNavEntryLabels,
   type NavItem,
 } from "@/lib/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 function initials(label: string) {
   return label
@@ -29,7 +30,12 @@ function NavGroupItem({
   pathname,
   collapsed,
 }: {
-  entry: Extract<NavEntry, { children: NavItem[] }>;
+  entry: {
+    id: string;
+    label: string;
+    icon: string;
+    children: Array<NavItem & { label: string }>;
+  };
   pathname: string;
   collapsed: boolean;
 }) {
@@ -97,7 +103,7 @@ function NavLink({
   item,
   pathname,
 }: {
-  item: NavItem;
+  item: NavItem & { label: string };
   pathname: string;
 }) {
   const activeId = navIdFromPath(pathname);
@@ -137,8 +143,25 @@ export function Sidebar({
   className?: string;
 }) {
   const pathname = usePathname();
-  const mainNav = filterNavByPermissions(MAIN_NAV, permissions);
-  const configNav = filterNavByPermissions(CONFIG_NAV, permissions);
+  const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
+
+  const mainNav = useMemo(
+    () =>
+      resolveNavEntryLabels(
+        filterNavByPermissions(MAIN_NAV, permissions),
+        (k) => tNav(k),
+      ),
+    [permissions, tNav],
+  );
+  const configNav = useMemo(
+    () =>
+      resolveNavEntryLabels(
+        filterNavByPermissions(CONFIG_NAV, permissions),
+        (k) => tNav(k),
+      ),
+    [permissions, tNav],
+  );
 
   return (
     <aside className={`sidebar${collapsed ? " is-collapsed" : ""} ${className}`.trim()}>
@@ -159,7 +182,7 @@ export function Sidebar({
       </div>
 
       <nav className="nav-section" onClick={onNavigate}>
-        <div className="nav-eyebrow">Principal</div>
+        <div className="nav-eyebrow">{tNav("sectionMain")}</div>
         {mainNav.map((entry) =>
           isNavGroup(entry) ? (
             <NavGroupItem
@@ -175,7 +198,7 @@ export function Sidebar({
       </nav>
 
       <nav className="nav-section" onClick={onNavigate}>
-        <div className="nav-eyebrow">Configuración</div>
+        <div className="nav-eyebrow">{tNav("sectionConfig")}</div>
         {configNav.map((entry) =>
           isNavGroup(entry) ? (
             <NavGroupItem
@@ -195,7 +218,7 @@ export function Sidebar({
           <button
             type="submit"
             className="user-chip user-chip-btn"
-            title="Cerrar sesión"
+            title={tCommon("signOut")}
           >
             <div className="avatar">{initials(userLabel)}</div>
             {!collapsed ? (

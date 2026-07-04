@@ -6,6 +6,7 @@ import {
 } from "@/app/(app)/settings/expenses/actions";
 import { CatalogTypesListView } from "@/components/catalog/catalog-types-list-view";
 import type { CatalogStats, ExpenseTypeRow } from "@/lib/catalog/types";
+import { useTranslations } from "next-intl";
 
 const STAT_CARDS = [
   {
@@ -39,23 +40,24 @@ export function ExpenseTypesListView({
   canWrite?: boolean;
   canDelete?: boolean;
 }) {
+  const t = useTranslations("catalogs");
   return (
     <CatalogTypesListView
       rows={rows}
       stats={stats}
       canWrite={canWrite}
       canDelete={canDelete}
-      eyebrow="Configuración · Finanzas"
-      title="Tipos de gasto"
-      titleAccent="de la iglesia"
-      subtitle="Categorías para clasificar las salidas de dinero en transacciones."
+      eyebrow={t("configFinances")}
+      title={t("expense.title")}
+      titleAccent={t("churchSuffix")}
+      subtitle={t("expense.subtitle")}
       statCards={STAT_CARDS}
-      entityLabel="Tipo de gasto"
-      newLabel="Nuevo tipo de gasto"
+      entityLabel={t("expense.entityLabel")}
+      newLabel={t("expense.newLabel")}
       exportPrefix="TiposGasto"
       saveAction={saveExpenseTypeAction}
       deleteAction={deleteExpenseTypeAction}
-      activeHint="Si está inactivo, no aparecerá al registrar nuevas transacciones."
+      activeHint={t("expense.activeHint")}
     />
   );
 }

@@ -8,6 +8,7 @@ import { IncomeExpenseBarChart } from "@/components/dashboard/income-expense-bar
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { LastEventCard } from "@/components/dashboard/last-event-card";
 import { PendingTransactionsList } from "@/components/dashboard/pending-transactions-list";
+import type { Locale } from "@/i18n/config";
 import { formatPeriodDelta } from "@/lib/dashboard/aggregate";
 import type {
   DashboardChartData,
@@ -17,9 +18,10 @@ import type {
   DashboardLedgerChartData,
   PendingAuthorizationItem,
 } from "@/lib/dashboard/types";
-import { fmtRD } from "@/lib/format-currency";
+import { formatNumber } from "@/lib/i18n/format";
 import { dashboardMock } from "@/lib/mock/dashboard-data";
 import { toast } from "@/lib/toast";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 export function DashboardView({
@@ -44,7 +46,9 @@ export function DashboardView({
   >;
   pendingItems: PendingAuthorizationItem[];
 }) {
-  const pastor = pastorName ?? "Pastor";
+  const t = useTranslations("dashboard");
+  const locale = useLocale() as Locale;
+  const pastor = pastorName ?? t("pastor");
   const [ledgerPeriod, setLedgerPeriod] =
     useState<DashboardChartPeriod>("month");
   const [contributionsPeriod, setContributionsPeriod] =
@@ -74,6 +78,15 @@ export function DashboardView({
   const headKpis = kpis.slice(0, 2);
   const restKpis = kpis.slice(2);
 
+  function kpiLabel(kpi: DashboardKpi): string {
+    return kpi.labelKey ? t(kpi.labelKey as "kpiTotalMembers") : kpi.label;
+  }
+  const contributionsTotalFormatted = `RD$ ${formatNumber(
+    contributionsTotal,
+    locale,
+    { minimumFractionDigits: 0, maximumFractionDigits: 0 },
+  )}`;
+
   return (
     <div>
       <DashboardHero
@@ -102,9 +115,9 @@ export function DashboardView({
             style={{ marginBottom: 18, flexWrap: "wrap", gap: 12 }}
           >
             <div>
-              <div className="eyebrow">Ingresos y egresos</div>
+              <div className="eyebrow">{t("incomeExpense")}</div>
               <div className="display" style={{ fontSize: 26, marginTop: 4 }}>
-                Balance operativo
+                {t("operationalBalance")}
               </div>
               <div
                 className="row"
@@ -119,7 +132,7 @@ export function DashboardView({
                       background: "var(--success)",
                     }}
                   />
-                  Ingresos
+                  {t("income")}
                 </span>
                 <span className="row" style={{ gap: 6 }}>
                   <span
@@ -130,7 +143,7 @@ export function DashboardView({
                       background: "var(--danger)",
                     }}
                   />
-                  Egresos
+                  {t("expense")}
                 </span>
               </div>
             </div>
@@ -148,14 +161,14 @@ export function DashboardView({
         >
           <div className="row between" style={{ flexWrap: "wrap", gap: 12 }}>
             <div>
-              <div className="eyebrow">Contribuciones</div>
+              <div className="eyebrow">{t("contributions")}</div>
               <div className="display" style={{ fontSize: 26, marginTop: 4 }}>
-                {fmtRD(contributionsTotal)}
+                {contributionsTotalFormatted}
               </div>
               {contributionsDelta.delta ? (
                 <span className="chip success" style={{ marginTop: 4 }}>
-                  <span className="pip" /> {contributionsDelta.delta} vs periodo
-                  anterior
+                  <span className="pip" /> {contributionsDelta.delta}{" "}
+                  {t("vsPreviousPeriod")}
                 </span>
               ) : null}
             </div>
@@ -174,9 +187,9 @@ export function DashboardView({
         <div className="card span-5">
           <div className="row between" style={{ marginBottom: 14 }}>
             <div>
-              <div className="eyebrow">Actividad reciente</div>
+              <div className="eyebrow">{t("recentActivity")}</div>
               <div className="display" style={{ fontSize: 22, marginTop: 4 }}>
-                Lo que está pasando
+                {t("whatsHappening")}
               </div>
             </div>
             <button
@@ -190,10 +203,10 @@ export function DashboardView({
                 cursor: "pointer",
               }}
               onClick={() =>
-                toast.info("Actividad", "Log de acciones — próximamente")
+                toast.info(t("recentActivity"), t("activityLogSoon"))
               }
             >
-              Ver todo →
+              {t("viewAll")}
             </button>
           </div>
           <ActivityFeed items={dashboardMock.activities} />

@@ -12,6 +12,7 @@ import type {
   MinistryFormInput,
 } from "@/lib/ministries/types";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   useActionState,
   useEffect,
@@ -61,6 +62,8 @@ export function MinistryFormDrawer({
     formData: FormData,
   ) => Promise<MinistryActionResult>;
 }) {
+  const t = useTranslations("ministerios");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const initial: MinistryActionResult | null = null;
   const [state, formAction, pending] = useActionState(saveAction, initial);
@@ -276,7 +279,7 @@ export function MinistryFormDrawer({
 
         <div className="drawer-foot">
           <button type="button" className="btn outline" onClick={onClose}>
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -285,7 +288,7 @@ export function MinistryFormDrawer({
             disabled={pending}
           >
             <Icons.check size={14} />{" "}
-            {mode === "new" ? "Crear ministerio" : "Guardar cambios"}
+            {mode === "new" ? t("createMinistry") : tCommon("saveChanges")}
           </button>
         </div>
       </div>

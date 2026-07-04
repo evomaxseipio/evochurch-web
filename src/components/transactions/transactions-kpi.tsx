@@ -4,6 +4,7 @@ import { FundsKpi } from "@/components/funds/funds-kpi";
 import { Icons } from "@/components/icons";
 import type { LedgerKpiVisuals, LedgerStats } from "@/lib/ledger/types";
 import { fmtRDshort } from "@/lib/format-currency";
+import { useLocale, useTranslations } from "next-intl";
 
 const KPI_KIND = "elevated" as const;
 
@@ -15,12 +16,14 @@ export function TransactionsKpi({
   stats: LedgerStats;
   visuals: LedgerKpiVisuals;
 }) {
+  const tTransactions = useTranslations("transactions");
+  const locale = useLocale() as "es" | "en" | "fr";
   return (
     <div className="grid-12" style={{ marginTop: 22, marginBottom: 28 }}>
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Movimientos"
+          label={tTransactions("movements")}
           value={String(stats.movements)}
           icon={<Icons.list size={16} />}
           accent="var(--accent)"
@@ -29,8 +32,8 @@ export function TransactionsKpi({
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Ingresos (periodo)"
-          value={fmtRDshort(stats.incomeAmount)}
+          label={tTransactions("incomePeriod")}
+          value={fmtRDshort(stats.incomeAmount, locale)}
           icon={<Icons.arrowUp width={16} height={16} />}
           delta={visuals.incomeDelta}
           deltaDir={visuals.incomeDeltaDir}
@@ -41,8 +44,8 @@ export function TransactionsKpi({
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Egresos (periodo)"
-          value={fmtRDshort(stats.expenseAmount)}
+          label={tTransactions("expensePeriod")}
+          value={fmtRDshort(stats.expenseAmount, locale)}
           icon={<Icons.arrowDn width={16} height={16} />}
           delta={visuals.expenseDelta}
           deltaDir={visuals.expenseDeltaDir}
@@ -53,7 +56,7 @@ export function TransactionsKpi({
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Pendientes de autorizar"
+          label={tTransactions("pendingToAuthorize")}
           value={String(stats.pendingAuthorization)}
           icon={<Icons.pendingActions size={16} />}
           accent="var(--warm)"

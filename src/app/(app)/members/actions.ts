@@ -28,17 +28,33 @@ import {
   saveMembership,
   updateMember,
 } from "@/lib/services/members";
-import { getActionSession } from "@/lib/auth/app-session";
 import { getActionSessionWith } from "@/lib/auth/permissions-server";
 import { revalidatePath } from "next/cache";
 
 export type ActionResult =
   | { ok: true; member?: Member; membership?: MembershipRecord | null }
-  | { ok: false; error: string };
+  | { ok: false; errorKey: string };
 
 export type ContributionCatalogResult =
   | { ok: true; funds: Fund[]; incomeTypes: IncomeType[] }
-  | { ok: false; error: string };
+  | { ok: false; errorKey: string };
+
+function toErrorKey(error: unknown, fallback: string): string {
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  if (message.includes("unauthorized") || message.includes("not authorized")) {
+    return "errors.unauthorized";
+  }
+  if (message.includes("forbidden") || message.includes("permission")) {
+    return "errors.forbidden";
+  }
+  if (message.includes("not found")) {
+    return "errors.notFound";
+  }
+  if (message.includes("session")) {
+    return "errors.sessionInvalid";
+  }
+  return fallback;
+}
 
 export async function fetchContributionCatalogAction(): Promise<ContributionCatalogResult> {
   try {
@@ -53,10 +69,7 @@ export async function fetchContributionCatalogAction(): Promise<ContributionCata
   } catch (e) {
     return {
       ok: false,
-      error:
-        e instanceof Error
-          ? e.message
-          : "No se pudieron cargar fondos y tipos de ingreso.",
+      errorKey: toErrorKey(e, "errors.loadFailed"),
     };
   }
 }
@@ -99,12 +112,8 @@ function parseProfileInput(
   };
 }
 
-function parseMembershipInput(
-  formData: FormData,
-  roles: MemberRoleCatalog[] = [],
-): MembershipInput {
+function parseMembershipInput(formData: FormData): MembershipInput {
   const membershipRoleId = String(formData.get("membershipRoleId") ?? "").trim();
-  const role = findMemberRoleById(roles, membershipRoleId);
   return {
     profileId: String(formData.get("profileId") ?? "").trim(),
     baptismDate: String(formData.get("baptismDate") ?? "").trim(),
@@ -129,11 +138,11 @@ function parseMembershipFormData(
   bio: string;
   membershipRole: string;
 } {
-  const membership = parseMembershipInput(formData, roles);
-  const role = findMemberRoleById(roles, membership.membershipRoleId);
+  const membership = parseMembershipInput(formData);
   return {
     ...membership,
-    membershipRole: role?.roleName ?? "",
+    membershipRole:
+      findMemberRoleById(roles, membership.membershipRoleId)?.roleName ?? "",
     isActive: formData.get("isActive") === "true",
     isMember: formData.get("isMember") === "true",
     bio: String(formData.get("bio") ?? "").trim(),
@@ -179,7 +188,7 @@ export async function createMemberAction(
     const input = parseProfileInput(formData);
 
     if (!input.firstName || !input.lastName) {
-      return { ok: false, error: "Nombre y apellido son obligatorios." };
+      return { ok: false, errorKey: "validation.firstNameRequired" };
     }
 
     await insertMember(supabase, churchId, input);
@@ -188,7 +197,7 @@ export async function createMemberAction(
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "No se pudo crear el miembro.",
+      errorKey: toErrorKey(e, "errors.saveFailed"),
     };
   }
 }
@@ -203,15 +212,15 @@ export async function updateMemberAction(
     const input = parseProfileInput(formData);
 
     if (!memberId) {
-      return { ok: false, error: "ID de miembro inválido." };
+      return { ok: false, errorKey: "validation.invalidMemberId" };
     }
     if (!input.firstName || !input.lastName) {
-      return { ok: false, error: "Nombre y apellido son obligatorios." };
+      return { ok: false, errorKey: "validation.firstNameRequired" };
     }
 
     const before = await fetchMemberById(supabase, churchId, memberId);
     if (!before) {
-      return { ok: false, error: "Miembro no encontrado." };
+      return { ok: false, errorKey: "errors.memberNotFound" };
     }
 
     await updateMember(supabase, memberId, input);
@@ -226,7 +235,7 @@ export async function updateMemberAction(
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "No se pudo guardar el perfil.",
+      errorKey: toErrorKey(e, "errors.saveFailed"),
     };
   }
 }
@@ -241,12 +250,12 @@ export async function saveMembershipAction(
     const input = parseMembershipFormData(formData, roles);
 
     if (!input.profileId) {
-      return { ok: false, error: "ID de perfil inválido." };
+      return { ok: false, errorKey: "validation.invalidProfileId" };
     }
 
     const before = await fetchMemberById(supabase, churchId, input.profileId);
     if (!before) {
-      return { ok: false, error: "Miembro no encontrado." };
+      return { ok: false, errorKey: "errors.memberNotFound" };
     }
 
     await saveMembership(supabase, input);
@@ -278,8 +287,7 @@ export async function saveMembershipAction(
   } catch (e) {
     return {
       ok: false,
-      error:
-        e instanceof Error ? e.message : "No se pudo guardar la membresía.",
+      errorKey: toErrorKey(e, "errors.saveFailed"),
     };
   }
 }

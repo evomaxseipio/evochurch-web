@@ -1,5 +1,11 @@
 /** UI de matriz de permisos. Metadatos de roles → role_config en BD (ver role-config.ts). */
 
+import { REPORT_RESOURCE_DEFS } from "@/lib/reports/permissions";
+type RoleTranslator = (
+  key: string,
+  values?: Record<string, string | number | Date>,
+) => string;
+
 export {
   roleDisplayColor as roleUiColor,
   roleDisplaySummary as roleUiSummary,
@@ -16,6 +22,7 @@ export const MATRIX_MODULES = [
   "settings",
   "admin_users",
   "roles",
+  "reports",
 ] as const;
 
 export const MODULE_UI_DESCRIPTIONS: Record<string, string> = {
@@ -28,6 +35,20 @@ export const MODULE_UI_DESCRIPTIONS: Record<string, string> = {
   settings: "Configuración personal y catálogos del sistema",
   admin_users: "Usuarios con acceso a la consola web",
   roles: "Matriz de roles y permisos por iglesia",
+  reports: "Informes financieros, membresía y ejecutivos",
+};
+
+const MODULE_UI_DESCRIPTION_KEYS: Record<string, string> = {
+  dashboard: "modules.dashboard",
+  finances: "modules.finances",
+  members: "modules.members",
+  ministerios: "modules.ministerios",
+  eventos: "modules.eventos",
+  comunicacion: "modules.comunicacion",
+  settings: "modules.settings",
+  admin_users: "modules.admin_users",
+  roles: "modules.roles",
+  reports: "modules.reports",
 };
 
 export const FINANCE_RESOURCE_LABELS: Record<string, string> = {
@@ -35,6 +56,27 @@ export const FINANCE_RESOURCE_LABELS: Record<string, string> = {
   transactions: "Transacciones",
   contributions: "Contribuciones",
 };
+
+const FINANCE_RESOURCE_LABEL_KEYS: Record<string, string> = {
+  funds: "financeResources.funds",
+  transactions: "financeResources.transactions",
+  contributions: "financeResources.contributions",
+};
+
+export const REPORT_RESOURCE_LABELS: Record<string, string> = Object.fromEntries(
+  REPORT_RESOURCE_DEFS.map((def) => [def.key, def.label]),
+);
+
+const REPORT_RESOURCE_LABEL_KEYS: Record<string, string> = Object.fromEntries(
+  REPORT_RESOURCE_DEFS.map((def) => [def.key, `reportResources.${def.key}`]),
+);
+
+const REPORT_PERMISSION_UI_LABELS = Object.fromEntries(
+  REPORT_RESOURCE_DEFS.flatMap((def) => [
+    [`reports:${def.key}:read`, `Ver ${def.label.toLowerCase()}`],
+    [`reports:${def.key}:export`, `Exportar ${def.label.toLowerCase()}`],
+  ]),
+);
 
 export const PERMISSION_UI_LABELS: Record<string, string> = {
   "finances:funds:read": "Ver fondos",
@@ -72,6 +114,45 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "settings:income_types:delete": "Eliminar tipos de ingreso",
   "admin_users:manage": "Gestionar usuarios del sistema",
   "roles:manage": "Editar roles y permisos por iglesia",
+  ...REPORT_PERMISSION_UI_LABELS,
+};
+
+const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
+  "finances:funds:read": "permissions.finances.funds.read",
+  "finances:funds:write": "permissions.finances.funds.write",
+  "finances:funds:delete": "permissions.finances.funds.delete",
+  "finances:funds:export": "permissions.finances.funds.export",
+  "finances:transactions:read": "permissions.finances.transactions.read",
+  "finances:transactions:write": "permissions.finances.transactions.write",
+  "finances:transactions:authorize": "permissions.finances.transactions.authorize",
+  "finances:transactions:delete": "permissions.finances.transactions.delete",
+  "finances:transactions:export": "permissions.finances.transactions.export",
+  "finances:contributions:read": "permissions.finances.contributions.read",
+  "finances:contributions:write": "permissions.finances.contributions.write",
+  "finances:contributions:delete": "permissions.finances.contributions.delete",
+  "finances:contributions:export": "permissions.finances.contributions.export",
+  "members:read": "permissions.members.read",
+  "members:write": "permissions.members.write",
+  "members:delete": "permissions.members.delete",
+  "ministerios:read": "permissions.ministerios.read",
+  "ministerios:write": "permissions.ministerios.write",
+  "ministerios:write_own": "permissions.ministerios.write_own",
+  "eventos:read": "permissions.eventos.read",
+  "eventos:write": "permissions.eventos.write",
+  "eventos:delete": "permissions.eventos.delete",
+  "comunicacion:read": "permissions.comunicacion.read",
+  "comunicacion:write": "permissions.comunicacion.write",
+  "comunicacion:delete": "permissions.comunicacion.delete",
+  "dashboard:read": "permissions.dashboard.read",
+  "settings:read": "permissions.settings.read",
+  "settings:expense_types:read": "permissions.settings.expense_types.read",
+  "settings:expense_types:write": "permissions.settings.expense_types.write",
+  "settings:expense_types:delete": "permissions.settings.expense_types.delete",
+  "settings:income_types:read": "permissions.settings.income_types.read",
+  "settings:income_types:write": "permissions.settings.income_types.write",
+  "settings:income_types:delete": "permissions.settings.income_types.delete",
+  "admin_users:manage": "permissions.admin_users.manage",
+  "roles:manage": "permissions.roles.manage",
 };
 
 export const MATRIX_PERMISSION_ORDER: Record<string, string[]> = {
@@ -84,9 +165,18 @@ export const MATRIX_PERMISSION_ORDER: Record<string, string[]> = {
   settings: [],
   admin_users: [],
   roles: [],
+  reports: [],
 };
 
-export function permissionUiLabel(permissionKey: string, fallback: string): string {
+export function permissionUiLabel(
+  permissionKey: string,
+  fallback: string,
+  t?: RoleTranslator,
+): string {
+  if (t) {
+    const key = PERMISSION_UI_LABEL_KEYS[permissionKey];
+    if (key) return t(key);
+  }
   return PERMISSION_UI_LABELS[permissionKey] ?? fallback;
 }
 
@@ -94,8 +184,20 @@ export function isMatrixModule(module: string): boolean {
   return (MATRIX_MODULES as readonly string[]).includes(module);
 }
 
-export function financeResourceLabel(resourceKey: string): string {
+export function financeResourceLabel(resourceKey: string, t?: RoleTranslator): string {
+  if (t) {
+    const key = FINANCE_RESOURCE_LABEL_KEYS[resourceKey];
+    if (key) return t(key);
+  }
   return FINANCE_RESOURCE_LABELS[resourceKey] ?? resourceKey;
+}
+
+export function reportResourceLabel(resourceKey: string, t?: RoleTranslator): string {
+  if (t) {
+    const key = REPORT_RESOURCE_LABEL_KEYS[resourceKey];
+    if (key) return t(key);
+  }
+  return REPORT_RESOURCE_LABELS[resourceKey] ?? resourceKey;
 }
 
 /** Etiquetas de columna por módulo (p. ej. ministerios: write → Gestionar, no Registrar). */
@@ -144,6 +246,10 @@ export const MODULE_ACTION_COLUMN_LABELS: Record<
     delete: "Eliminar",
     export: "Exportar",
   },
+  reports: {
+    read: "Ver",
+    export: "Exportar",
+  },
 };
 
 export const MODULE_MATRIX_NOTES: Record<string, string> = {
@@ -155,8 +261,31 @@ export const MODULE_MATRIX_NOTES: Record<string, string> = {
     "Cada fila (Fondos, Transacciones, Contribuciones) tiene permisos independientes por columna.",
   settings:
     "Tipos de gasto e ingreso son permisos separados. Configuración y perfil solo requiere Ver.",
+  reports:
+    "Cada fila es un informe distinto. Ver permite verlo en el hub; Exportar permite descargar PDF o Excel.",
 };
 
-export function moduleMatrixNote(module: string): string | null {
+/** Solo módulos con nota en roles.notes.* — evita MISSING_MESSAGE en next-intl. */
+const MODULE_MATRIX_NOTE_KEYS: Partial<Record<string, string>> = {
+  members: "notes.members",
+  ministerios: "notes.ministerios",
+  finances: "notes.finances",
+  settings: "notes.settings",
+  reports: "notes.reports",
+};
+
+export function moduleUiDescription(module: string, t?: RoleTranslator): string | null {
+  if (t) {
+    const key = MODULE_UI_DESCRIPTION_KEYS[module];
+    if (key) return t(key);
+  }
+  return MODULE_UI_DESCRIPTIONS[module] ?? null;
+}
+
+export function moduleMatrixNote(module: string, t?: RoleTranslator): string | null {
+  const noteKey = MODULE_MATRIX_NOTE_KEYS[module];
+  if (t && noteKey) {
+    return t(noteKey);
+  }
   return MODULE_MATRIX_NOTES[module] ?? null;
 }

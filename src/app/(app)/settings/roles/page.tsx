@@ -7,6 +7,7 @@ import {
   fetchChurchRolesWithPermissions,
 } from "@/lib/services/roles";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 function countUsersByRole(
   users: Awaited<ReturnType<typeof fetchChurchAuthUsers>>,
@@ -20,6 +21,7 @@ function countUsersByRole(
 }
 
 export default async function RolesSettingsPage() {
+  const tErrors = await getTranslations("errors");
   const session = await requirePageAccess("/settings/roles");
   const canManage = hasPermission(session, "roles:manage");
 
@@ -42,7 +44,7 @@ export default async function RolesSettingsPage() {
     ]);
   } catch (e) {
     error =
-      e instanceof Error ? e.message : "No se pudieron cargar los roles.";
+      e instanceof Error ? e.message : tErrors("loadFailed");
   }
 
   if (error) {

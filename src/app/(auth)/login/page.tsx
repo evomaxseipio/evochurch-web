@@ -1,6 +1,7 @@
 import { LoginForm } from "@/components/auth/login-form";
 import { LoginPreview } from "@/components/auth/login-preview";
 import { Icons } from "@/components/icons";
+import { getTranslations } from "next-intl/server";
 
 export default async function LoginPage({
   searchParams,
@@ -8,6 +9,7 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 }) {
   const { next, error, email } = await searchParams;
+  const t = await getTranslations("auth");
 
   return (
     <div className="login">
@@ -31,15 +33,8 @@ export default async function LoginPage({
         <span className="orb orb-1" />
         <span className="orb orb-2" />
         <div className="promo">
-          <h1>
-            Administra tu ministerio
-            <br />
-            desde un solo lugar.
-          </h1>
-          <p className="sub">
-            Inicia sesión para ver el panel de tu iglesia y gestionar miembros,
-            finanzas y eventos.
-          </p>
+          <h1>{t("promoTitle")}</h1>
+          <p className="sub">{t("promoSubtitle")}</p>
         </div>
         <LoginPreview />
       </div>

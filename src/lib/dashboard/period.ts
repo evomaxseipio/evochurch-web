@@ -1,3 +1,5 @@
+import type { Locale } from "@/i18n/config";
+import { formatDate } from "@/lib/i18n/format";
 import { MONTH_NAMES_SHORT, monthDateBounds } from "@/lib/finance/month-period";
 import type { DashboardChartPeriod, PeriodBucket } from "@/lib/dashboard/types";
 
@@ -138,13 +140,17 @@ export function todayIso(anchor = new Date()): string {
   return isoDate(anchor);
 }
 
-export function formatHeroDateLabel(anchor = new Date()): string {
-  const weekday = anchor.toLocaleDateString("es-DO", { weekday: "long" });
-  const day = anchor.getDate();
-  const month = anchor.toLocaleDateString("es-DO", { month: "long" });
-  const year = anchor.getFullYear();
-  const cap = weekday.charAt(0).toUpperCase() + weekday.slice(1);
-  return `${cap} · ${day} de ${month}, ${year}`;
+export function formatHeroDateLabel(
+  anchor = new Date(),
+  locale: Locale = "es",
+): string {
+  const formatted = formatDate(anchor, locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
 }
 
 export function daysSinceEpoch(anchor = new Date()): number {

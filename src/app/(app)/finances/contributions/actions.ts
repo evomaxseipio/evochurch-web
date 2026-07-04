@@ -16,7 +16,7 @@ import { revalidatePath } from "next/cache";
 
 export type ContributionActionResult =
   | { ok: true }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorKey?: string };
 
 async function writeSessionContext() {
   const { supabase, session } = await getActionSessionWith(
@@ -58,22 +58,22 @@ function parseContributionInput(formData: FormData): ContributionInput {
 }
 
 function validateContributionInput(input: ContributionInput): string | null {
-  if (!input.incomeTypeId) return "Selecciona un tipo de ingreso.";
-  if (!input.fundId) return "Selecciona un fondo destino.";
-  if (!input.amount || input.amount <= 0) return "El monto debe ser mayor que cero.";
-  if (!input.paymentDate) return "La fecha es obligatoria.";
-  if (!input.paymentMethod) return "Selecciona un método de pago.";
+  if (!input.incomeTypeId) return "errors.requiredFields";
+  if (!input.fundId) return "errors.requiredFields";
+  if (!input.amount || input.amount <= 0) return "finances.invalidAmount";
+  if (!input.paymentDate) return "errors.requiredFields";
+  if (!input.paymentMethod) return "errors.requiredFields";
 
   if (input.collectionMode === "individual") {
     if (input.donorKind === "anonymous") return null;
     if (input.donorKind === "company" && !input.companyName?.trim()) {
-      return "Indica el nombre de la empresa.";
+      return "errors.requiredFields";
     }
     if (
       (input.donorKind === "member" || input.donorKind === "visitor") &&
       !input.profileId
     ) {
-      return "Selecciona un contribuyente.";
+      return "contributions.errors.selectContributor";
     }
   }
 
@@ -87,7 +87,8 @@ export async function saveContributionAction(
   try {
     const input = parseContributionInput(formData);
     const validationError = validateContributionInput(input);
-    if (validationError) return { ok: false, error: validationError };
+    if (validationError)
+      return { ok: false, error: validationError, errorKey: validationError };
 
     const { supabase, churchId, userId } = await writeSessionContext();
 
@@ -106,7 +107,8 @@ export async function saveContributionAction(
     return {
       ok: false,
       error:
-        e instanceof Error ? e.message : "No se pudo registrar el ingreso.",
+        e instanceof Error ? e.message : "errors.saveFailed",
+      errorKey: "errors.saveFailed",
     };
   }
 }
@@ -117,7 +119,12 @@ export async function deleteContributionAction(
 ): Promise<ContributionActionResult> {
   try {
     const incomeId = String(formData.get("incomeId") ?? "").trim();
-    if (!incomeId) return { ok: false, error: "Registro no válido." };
+    if (!incomeId)
+      return {
+        ok: false,
+        error: "errors.invalidFormat",
+        errorKey: "errors.invalidFormat",
+      };
 
     const { supabase, churchId } = await deleteSessionContext();
     await deleteContribution(supabase, churchId, incomeId);
@@ -129,7 +136,8 @@ export async function deleteContributionAction(
     return {
       ok: false,
       error:
-        e instanceof Error ? e.message : "No se pudo eliminar la contribución.",
+        e instanceof Error ? e.message : "errors.deleteFailed",
+      errorKey: "errors.deleteFailed",
     };
   }
 }

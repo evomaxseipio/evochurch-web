@@ -1,7 +1,6 @@
 "use server";
 
 import { getActionSessionWith } from "@/lib/auth/permissions-server";
-import { requirePermission } from "@/lib/auth/permissions";
 import type {
   ExpenseInput,
   FundTransferInput,
@@ -31,7 +30,7 @@ import { revalidatePath } from "next/cache";
 
 export type TransactionActionResult =
   | { ok: true }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorKey?: string };
 
 async function writeSessionContext() {
   const { supabase, session } = await getActionSessionWith(
@@ -135,7 +134,8 @@ export async function saveLedgerEntryAction(
       if (input.sourceFundId === input.destinationFundId) {
         return {
           ok: false,
-          error: "El fondo origen y destino deben ser distintos.",
+          error: "transactions.errors.sameFundTransfer",
+          errorKey: "transactions.errors.sameFundTransfer",
         };
       }
       if (input.transferId) {
@@ -175,7 +175,8 @@ export async function saveLedgerEntryAction(
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "No se pudo guardar el movimiento.",
+      error: e instanceof Error ? e.message : "errors.saveFailed",
+      errorKey: "errors.saveFailed",
     };
   }
 }
@@ -222,7 +223,13 @@ export async function reviewPendingExpenseAction(
         String(formData.get("transactionId") ?? ""),
         10,
       );
-      if (!transactionId) return { ok: false, error: "Transacción no válida." };
+      if (!transactionId) {
+        return {
+          ok: false,
+          error: "errors.invalidFormat",
+          errorKey: "errors.invalidFormat",
+        };
+      }
 
       if (decision === "reject") {
         await rejectTransaction(
@@ -252,7 +259,8 @@ export async function reviewPendingExpenseAction(
       error:
         e instanceof Error
           ? e.message
-          : "No se pudo procesar la revisión del movimiento.",
+          : "errors.saveFailed",
+      errorKey: "errors.saveFailed",
     };
   }
 }
@@ -270,13 +278,21 @@ export async function deleteLedgerEntryAction(
     if (fundTransferId) {
       await deleteFundTransfer(supabase, churchId, fundTransferId);
     } else if (!entryId) {
-      return { ok: false, error: "Registro no válido." };
+      return {
+        ok: false,
+        error: "errors.invalidFormat",
+        errorKey: "errors.invalidFormat",
+      };
     } else if (entryKind === "operational_income") {
       await deleteOperationalIncome(supabase, churchId, entryId);
     } else {
       const transactionId = Number.parseInt(entryId, 10);
       if (!transactionId) {
-        return { ok: false, error: "Transacción no válida." };
+        return {
+          ok: false,
+          error: "errors.invalidFormat",
+          errorKey: "errors.invalidFormat",
+        };
       }
       await deleteTransaction(supabase, churchId, transactionId);
     }
@@ -290,7 +306,8 @@ export async function deleteLedgerEntryAction(
     return {
       ok: false,
       error:
-        e instanceof Error ? e.message : "No se pudo eliminar el movimiento.",
+        e instanceof Error ? e.message : "errors.deleteFailed",
+      errorKey: "errors.deleteFailed",
     };
   }
 }

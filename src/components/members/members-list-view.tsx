@@ -26,6 +26,7 @@ import {
   MEMBERS_PAGE_SIZE_OPTIONS,
   type MembersPageSize,
 } from "@/lib/members/pagination";
+import { formatNumber } from "@/lib/i18n/format";
 import { memberFullName } from "@/lib/members/parse";
 import type {
   Member,
@@ -36,11 +37,13 @@ import type {
 import type { AssignableRole } from "@/lib/roles/types";
 import type { IncomeType } from "@/lib/contributions/types";
 import type { Fund } from "@/lib/funds/types";
-import { toast } from "@/lib/toast";
+import Link from "next/link";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
 import dynamic from "next/dynamic";
-import Link from "next/link";
+import { type Locale } from "@/i18n/config";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { toast } from "@/lib/toast";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 const AddMemberModal = dynamic(
@@ -65,26 +68,20 @@ const AdminUserFormDrawer = dynamic(
   { ssr: false },
 );
 
-const FILTERS: { key: MemberFilterKey; label: string }[] = [
-  { key: "all", label: "Todos" },
-  { key: "members", label: "Miembros" },
-  { key: "visits", label: "Visitas" },
-  { key: "active", label: "Activos" },
-  { key: "inactive", label: "Inactivos" },
-];
+const FILTERS: MemberFilterKey[] = ["all", "members", "visits", "active", "inactive"];
 
 const MINI_STATS: {
   key: MemberFilterKey;
-  label: string;
+  labelKey: string;
   delta: string;
   dir: "up" | "dn";
   color: string;
   icon: keyof typeof Icons;
 }[] = [
-  { key: "members", label: "Miembros", delta: "+12.4%", dir: "up", color: "var(--success)", icon: "users" },
-  { key: "visits", label: "Total de visitas", delta: "+8.2%", dir: "up", color: "var(--info)", icon: "pin" },
-  { key: "inactive", label: "Inactivos", delta: "-3.1%", dir: "dn", color: "var(--muted)", icon: "arrowDn" },
-  { key: "active", label: "Activos", delta: "+2", dir: "up", color: "var(--accent-600)", icon: "users" },
+  { key: "members", labelKey: "membersFilter", delta: "+12.4%", dir: "up", color: "var(--success)", icon: "users" },
+  { key: "visits", labelKey: "totalVisits", delta: "+8.2%", dir: "up", color: "var(--info)", icon: "pin" },
+  { key: "inactive", labelKey: "statusInactive", delta: "-3.1%", dir: "dn", color: "var(--muted)", icon: "arrowDn" },
+  { key: "active", labelKey: "statusActive", delta: "+2", dir: "up", color: "var(--accent-600)", icon: "users" },
 ];
 
 export function MembersListView({
@@ -114,6 +111,10 @@ export function MembersListView({
   systemAccessProfileIds?: string[];
   assignableRoles?: AssignableRole[];
 }) {
+  const t = useTranslations("members");
+  const tErrors = useTranslations("errors");
+  const tValidation = useTranslations("validation");
+  const locale = useLocale() as Locale;
   const router = useRouter();
   const [searchInput, setSearchInput] = useState(queryFromServer);
   const [addOpen, setAddOpen] = useState(false);
@@ -140,6 +141,23 @@ export function MembersListView({
     password: string;
   } | null>(null);
   const isDesktop = useIsDesktop();
+  const numberFmt = (value: number) => formatNumber(value, locale);
+
+  function resolveErrorMessage(errorKey?: string) {
+    if (!errorKey) return tErrors("serverError");
+    if (errorKey.startsWith("errors.")) return tErrors(errorKey.slice(7));
+    if (errorKey.startsWith("validation.")) return tValidation(errorKey.slice(11));
+    if (errorKey.startsWith("members.")) return t(errorKey.slice(8));
+    return tErrors("serverError");
+  }
+
+  function filterLabel(key: MemberFilterKey) {
+    if (key === "all") return t("allFilter");
+    if (key === "members") return t("membersFilter");
+    if (key === "visits") return t("visitsFilter");
+    if (key === "active") return t("statusActivePlural");
+    return t("statusInactivePlural");
+  }
 
   const systemAccessSet = useMemo(
     () => new Set(systemAccessProfileIds),
@@ -156,6 +174,7 @@ export function MembersListView({
   const total = pagination.total;
   const pageStart = total === 0 ? 0 : (page - 1) * pageSize;
   const pageEnd = Math.min(pageStart + members.length, total);
+  const filterChips = FILTERS.map((key) => ({ key, label: filterLabel(key) }));
 
   useEffect(() => {
     if (searchInput === queryFromServer) return;
@@ -227,7 +246,7 @@ export function MembersListView({
     try {
       const result = await fetchContributionCatalogAction();
       if (!result.ok) {
-        toast.error("Aportes", result.error);
+        toast.error(t("contributionsTitle"), resolveErrorMessage(result.errorKey));
         setContributionMember(null);
         return;
       }
@@ -243,14 +262,14 @@ export function MembersListView({
   async function handleConfigureSystemUser(member: Member) {
     if (!canManageUsers) {
       toast.error(
-        "Acceso denegado",
-        "Solo un Administrador General puede configurar usuarios del sistema.",
+        t("accessDenied"),
+        t("onlyGeneralAdminUsers"),
       );
       return;
     }
 
     if (!member.isMember) {
-      toast.error("Acceso no permitido", SYSTEM_ACCESS_MESSAGES.visit);
+      toast.error(t("accessNotAllowed"), SYSTEM_ACCESS_MESSAGES.visit);
       return;
     }
 
@@ -258,7 +277,7 @@ export function MembersListView({
     try {
       const result = await getMemberSystemAccessContextAction(member.memberId);
       if (!result.ok) {
-        toast.error("Acceso no permitido", result.error);
+        toast.error(t("accessNotAllowed"), result.error);
         return;
       }
 
@@ -276,14 +295,14 @@ export function MembersListView({
   async function handleResetAccess(member: Member) {
     if (!canManageUsers) {
       toast.error(
-        "Acceso denegado",
-        "Solo un Administrador General puede restablecer acceso.",
+        t("accessDenied"),
+        t("onlyGeneralAdminReset"),
       );
       return;
     }
 
     if (!member.isMember) {
-      toast.error("Acceso no permitido", SYSTEM_ACCESS_MESSAGES.visit);
+      toast.error(t("accessNotAllowed"), SYSTEM_ACCESS_MESSAGES.visit);
       return;
     }
 
@@ -291,14 +310,13 @@ export function MembersListView({
     try {
       const result = await resetMemberAccessPasswordAction(member.memberId);
       if (!result.ok) {
-        toast.error("No se pudo restablecer", result.error);
+        toast.error(t("resetFailed"), result.error);
         return;
       }
 
       setPasswordDialog({
-        title: "Acceso restablecido",
-        message:
-          "Se generó una nueva contraseña temporal. Compártela con el hermano; deberá cambiarla al iniciar sesión.",
+        title: t("accessReset"),
+        message: t("tempPasswordResetHint"),
         email: result.email,
         password: result.tempPassword,
       });
@@ -312,30 +330,21 @@ export function MembersListView({
     <>
       <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
         <div>
-          <div className="eyebrow">Comunidad</div>
+          <div className="eyebrow">{t("community")}</div>
           <h1 className="display" style={{ fontSize: 40, margin: "4px 0 6px", letterSpacing: "-0.025em" }}>
-            Miembros <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>de la familia</span>
+            {t("title")} <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>{t("familyMembers")}</span>
           </h1>
           <p className="muted" style={{ margin: 0 }}>
-            {stats.total.toLocaleString("es-DO")} hermanos registrados ·{" "}
-            {total.toLocaleString("es-DO")} en la vista actual
+            {t("registeredCount", { total: numberFmt(stats.total), view: numberFmt(total) })}
           </p>
         </div>
         <div className="row">
-          <button
-            type="button"
+          <Link
+            href="/reports?report=membership-directory"
             className="btn outline"
-            onClick={() => toast.success("Reporte generado", "Miembros exportados (próximamente)")}
           >
-            <Icons.download size={16} /> PDF
-          </button>
-          <button
-            type="button"
-            className="btn outline"
-            onClick={() => toast.success("Reporte generado", "Miembros exportados (próximamente)")}
-          >
-            <Icons.download size={16} /> Excel
-          </button>
+            <Icons.download size={16} /> {t("exportInReports")}
+          </Link>
         </div>
       </div>
 
@@ -349,7 +358,7 @@ export function MembersListView({
       >
         <div className="card" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
           <div className="row between" style={{ alignItems: "center" }}>
-            <div className="eyebrow">Total de miembros</div>
+            <div className="eyebrow">{t("totalMembers")}</div>
             <div
               style={{
                 width: 36,
@@ -369,7 +378,7 @@ export function MembersListView({
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: "var(--success)" }}>▲ activos {stats.active}</span>
-              <span className="tiny muted">en la iglesia</span>
+              <span className="tiny muted">{t("inChurch")}</span>
             </div>
           </div>
         </div>
@@ -381,7 +390,7 @@ export function MembersListView({
               return (
                 <div key={s.key} className="card" style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
                   <div className="row between" style={{ alignItems: "center" }}>
-                    <div className="eyebrow">{s.label}</div>
+                    <div className="eyebrow">{t(s.labelKey)}</div>
                     <div
                       style={{
                         width: 34,
@@ -404,7 +413,7 @@ export function MembersListView({
                       <span style={{ fontSize: 11, fontWeight: 700, color: s.dir === "up" ? "var(--success)" : "var(--danger)" }}>
                         {s.dir === "up" ? "▲" : "▼"} {s.delta}
                       </span>
-                      <span className="tiny muted">vs anterior</span>
+                      <span className="tiny muted">{t("vsPrevious")}</span>
                     </div>
                   </div>
                 </div>
@@ -415,14 +424,14 @@ export function MembersListView({
 
       {!isDesktop ? (
         <div className="row" style={{ gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-          {FILTERS.map(({ key, label }) => (
+          {FILTERS.map((key) => (
             <button
               key={key}
               type="button"
               className={`btn sm${filter === key ? " primary" : ""}`}
               onClick={() => onFilterChange(key)}
             >
-              {label} ({statCount(key)})
+              {filterLabel(key)} ({statCount(key)})
             </button>
           ))}
         </div>
@@ -432,15 +441,15 @@ export function MembersListView({
         style={{ marginTop: 18 }}
         query={searchInput}
         onQueryChange={setSearchInput}
-        queryPlaceholder="Buscar por nombre, rol o sector…"
+        queryPlaceholder={t("searchPlaceholder")}
         searchWidthPercent={50}
-        filters={isDesktop ? FILTERS : undefined}
+        filters={isDesktop ? filterChips : undefined}
         activeFilter={filter}
         onFilterChange={onFilterChange}
         trailing={
           canWriteMembers ? (
             <button type="button" className="btn primary" onClick={() => setAddOpen(true)}>
-              <Icons.plus size={14} /> Nuevo miembro
+              <Icons.plus size={14} /> {t("newMemberButton")}
             </button>
           ) : null
         }
@@ -452,7 +461,7 @@ export function MembersListView({
           columns={[
             {
               key: "member",
-              label: "Miembro",
+              label: t("member"),
               render: (m) => (
                 <div className="row" style={{ gap: 12 }}>
                   <MemberAvatar member={m} size="md" square />
@@ -467,32 +476,32 @@ export function MembersListView({
             },
             {
               key: "role",
-              label: "Rol",
+              label: t("role"),
               className: "muted",
               render: (m) => m.membershipRole || "—",
             },
             {
               key: "ministry",
-              label: "Ministerio",
+              label: t("ministry"),
               className: "muted",
               render: () => "—",
             },
             {
               key: "sector",
-              label: "Sector",
+              label: t("sector"),
               className: "muted",
               render: (m) =>
                 m.address.stateProvince || m.address.cityState || "—",
             },
             {
               key: "nationality",
-              label: "Nacionalidad",
+              label: t("nationality"),
               className: "muted",
               render: (m) => m.nationality || "—",
             },
             {
               key: "status",
-              label: "Estado",
+              label: t("status"),
               render: (m) => <StatusChip member={m} />,
             },
           ]}
@@ -524,10 +533,10 @@ export function MembersListView({
           empty={
             <>
               <div className="display" style={{ fontSize: 22 }}>
-                Sin resultados
+                {t("noResults")}
               </div>
               <div className="tiny muted">
-                Intenta con otra búsqueda o agrega un miembro
+                {t("noResultsHint")}
               </div>
             </>
           }
@@ -536,8 +545,8 @@ export function MembersListView({
         <div className="col" style={{ gap: 10, marginTop: 18 }}>
           {members.length === 0 ? (
             <div className="card" style={{ padding: 40, textAlign: "center" }}>
-              <div className="display" style={{ fontSize: 22 }}>Sin resultados</div>
-              <div className="tiny muted">Intenta con otra búsqueda</div>
+              <div className="display" style={{ fontSize: 22 }}>{t("noResults")}</div>
+              <div className="tiny muted">{t("tryAnotherSearch")}</div>
             </div>
           ) : (
             members.map((m) => (
@@ -619,9 +628,8 @@ export function MembersListView({
         onSaved={() => router.refresh()}
         onPasswordIssued={({ email, tempPassword }) =>
           setPasswordDialog({
-            title: "Acceso al sistema",
-            message:
-              "Usuario creado con contraseña temporal. Compártela con el hermano; deberá cambiarla al iniciar sesión.",
+            title: t("systemAccessTitle"),
+            message: t("tempPasswordCreatedHint"),
             email,
             password: tempPassword,
           })
@@ -671,6 +679,8 @@ function RowMenu({
   configureUserPending: boolean;
   resetAccessPending: boolean;
 }) {
+  const t = useTranslations("members");
+  const tCommon = useTranslations("common");
   const btnRef = useRef<HTMLButtonElement>(null);
   const [menuPos, setMenuPos] = useState<{
     top: number | "auto";
@@ -693,7 +703,7 @@ function RowMenu({
     }> = [
       {
         id: "edit",
-        label: canWriteMembers ? "Editar perfil" : "Ver perfil",
+        label: canWriteMembers ? t("editProfile") : t("viewProfile"),
         icon: <Icons.edit size={15} />,
         href: profileHref,
       },
@@ -702,7 +712,7 @@ function RowMenu({
     if (canWriteContributions) {
       items.push({
         id: "contribution",
-        label: "Registrar contribución (Finanzas)",
+        label: t("registerContribution"),
         icon: <Icons.wallet size={15} />,
         on: onAddContribution,
       });
@@ -710,16 +720,16 @@ function RowMenu({
 
     items.push({
       id: "msg",
-      label: "Mensajes",
+      label: t("messages"),
       icon: <Icons.chat size={15} />,
-      on: () => toast.info("Mensajes", `Chat con ${name} (próximamente)`),
+      on: () => toast.info(t("messages"), t("chatSoon", { name })),
       disabled: true,
     });
 
     if (canManageUsers && member.isMember) {
       items.push({
         id: "userapp",
-        label: "Configurar usuario",
+        label: t("configureUser"),
         icon: <Icons.users size={15} />,
         on: onConfigureSystemUser,
         disabled: configureUserPending,
@@ -727,7 +737,7 @@ function RowMenu({
       if (hasSystemAccess) {
         items.push({
           id: "reset",
-          label: "Restablecer acceso",
+          label: t("resetAccess"),
           icon: <Icons.settings size={15} />,
           on: onResetAccess,
           disabled: resetAccessPending,
@@ -738,11 +748,11 @@ function RowMenu({
     if (canDeleteMembers) {
       items.push({
         id: "del",
-        label: "Eliminar",
+        label: t("deleteAction"),
         icon: <Icons.trash size={15} />,
         danger: true,
         on: () =>
-          toast.error("Confirmar eliminación", `Confirma desde el panel del miembro`),
+          toast.error(t("confirmDelete"), t("confirmDeleteHint")),
       });
     }
 
@@ -761,6 +771,7 @@ function RowMenu({
     hasSystemAccess,
     onResetAccess,
     resetAccessPending,
+    t,
   ]);
 
   useEffect(() => {
@@ -797,8 +808,8 @@ function RowMenu({
           e.stopPropagation();
           onToggle();
         }}
-        title="Acciones"
-        aria-label="Acciones"
+        title={tCommon("actions")}
+        aria-label={tCommon("actions")}
         aria-expanded={open}
       >
         <Icons.menu size={16} />
@@ -943,6 +954,9 @@ function Pagination({
   onPage: (p: number) => void;
   onPageSize: (size: MembersPageSize) => void;
 }) {
+  const t = useTranslations("members");
+  const tCommon = useTranslations("common");
+  const locale = useLocale() as Locale;
   const pageButtons = useMemo(() => {
     const set = new Set([1, totalPages, page, page - 1, page + 1]);
     const list = [...set].filter((n) => n >= 1 && n <= totalPages).sort((a, b) => a - b);
@@ -975,19 +989,19 @@ function Pagination({
           <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>{pageEnd}</b>
           {" de "}
           <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
-            {total.toLocaleString("es-DO")}
+            {formatNumber(total, locale)}
           </b>{" "}
-          miembros
+          {t("membersFilter").toLowerCase()}
         </span>
         <span style={{ width: 1, height: 18, background: "var(--line)" }} />
         <label className="row" style={{ gap: 6, fontSize: 12, color: "var(--muted)" }}>
-          Filas
+          {tCommon("rows")}
           <select
             className="select"
             style={{ padding: "4px 8px", width: "auto", fontSize: 12 }}
             value={pageSize}
             onChange={(e) => onPageSize(Number(e.target.value) as MembersPageSize)}
-            aria-label="Registros por página"
+            aria-label={tCommon("recordsPerPage")}
           >
             {MEMBERS_PAGE_SIZE_OPTIONS.map((size) => (
               <option key={size} value={size}>
@@ -1008,7 +1022,7 @@ function Pagination({
           <span style={{ display: "inline-block", transform: "rotate(90deg)" }}>
             <Icons.arrowDn size={12} />
           </span>
-          Anterior
+          {tCommon("previous")}
         </button>
         {pageButtons.map((b, i) =>
           b === "…" ? (
@@ -1036,7 +1050,7 @@ function Pagination({
           disabled={page >= totalPages}
           onClick={() => onPage(page + 1)}
         >
-          Siguiente
+          {tCommon("next")}
           <span style={{ display: "inline-block", transform: "rotate(-90deg)" }}>
             <Icons.arrowDn size={12} />
           </span>

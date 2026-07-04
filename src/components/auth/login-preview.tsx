@@ -1,14 +1,20 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export function LoginPreview() {
+  const t = useTranslations("auth.preview");
+
   const stats = [
-    { label: "Balance general", value: "RD$ 2.38M", delta: "+9.2%", c: "#7c5cf5" },
-    { label: "Ingresos del mes", value: "RD$ 184K", delta: "+12.4%", c: "#10b981" },
-    { label: "Miembros activos", value: "312", delta: "+8", c: "#a78bfa" },
+    { label: t("balance"), value: "RD$ 2.38M", delta: "+9.2%", c: "#7c5cf5" },
+    { label: t("monthIncome"), value: "RD$ 184K", delta: "+12.4%", c: "#10b981" },
+    { label: t("activeMembers"), value: "312", delta: "+8", c: "#a78bfa" },
   ];
   const rows = [
-    { n: "Diezmo dominical", who: "Wilkin A.", amt: "+RD$ 12,500", ok: true },
-    { n: "Ofrenda — construcción", who: "Francisco B.", amt: "+RD$ 25,000", ok: true },
-    { n: "Pago electricidad", who: "EDENORTE", amt: "−RD$ 8,420", ok: false },
-    { n: "Diezmo", who: "María P.", amt: "+RD$ 6,800", ok: true },
+    { n: t("row1Name"), who: "Wilkin A.", amt: "+RD$ 12,500", ok: true },
+    { n: t("row2Name"), who: "Francisco B.", amt: "+RD$ 25,000", ok: true },
+    { n: t("row3Name"), who: "EDENORTE", amt: "−RD$ 8,420", ok: false },
+    { n: t("row4Name"), who: "María P.", amt: "+RD$ 6,800", ok: true },
   ];
   const bars = [42, 55, 48, 67, 60, 78, 72, 90];
 
@@ -21,7 +27,7 @@ export function LoginPreview() {
             <span />
             <span />
           </div>
-          <div className="lp-title">Panel de finanzas</div>
+          <div className="lp-title">{t("financePanel")}</div>
         </div>
 
         <div className="lp-stats">
@@ -38,8 +44,8 @@ export function LoginPreview() {
 
         <div className="lp-chart">
           <div className="lp-chart-head">
-            <span className="lp-chart-title">Ingresos por semana</span>
-            <span className="lp-chip">Mayo 2026</span>
+            <span className="lp-chart-title">{t("weeklyIncome")}</span>
+            <span className="lp-chip">{t("sampleMonth")}</span>
           </div>
           <div className="lp-bars">
             {bars.map((h, i) => (
@@ -77,7 +83,7 @@ export function LoginPreview() {
                   color: r.ok ? "#10b981" : "#f87171",
                 }}
               >
-                {r.ok ? "Aprobado" : "Pendiente"}
+                {r.ok ? t("approved") : t("pending")}
               </span>
             </div>
           ))}
@@ -85,7 +91,7 @@ export function LoginPreview() {
       </div>
 
       <div className="lp-card lp-float">
-        <div className="lp-float-label">Distribución de fondos</div>
+        <div className="lp-float-label">{t("fundDistribution")}</div>
         <svg viewBox="0 0 120 120" className="lp-donut">
           <circle cx="60" cy="60" r="46" fill="none" stroke="#ede9fe" strokeWidth="16" />
           <circle
@@ -115,7 +121,7 @@ export function LoginPreview() {
         </svg>
         <div className="lp-float-foot">
           <div className="lp-float-big">RD$ 2.38M</div>
-          <div className="lp-float-sub">8 fondos activos</div>
+          <div className="lp-float-sub">{t("activeFunds")}</div>
         </div>
       </div>
     </div>

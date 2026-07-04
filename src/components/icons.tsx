@@ -85,6 +85,26 @@ export const Icons = {
       <path d="M12 3v13M7 12l5 5 5-5M5 21h14" />
     </svg>
   ),
+  print: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <path d="M7 9V3h10v6" />
+      <rect x="5" y="9" width="14" height="8" rx="1.5" />
+      <path d="M7 17v4h10v-4" />
+    </svg>
+  ),
+  filePdf: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <path d="M14 2v6h6" />
+      <path d="M9 13h6M9 17h4" />
+    </svg>
+  ),
+  fileSpreadsheet: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 9h18M3 15h18M9 3v18" />
+    </svg>
+  ),
   plus: (p: IconProps) => (
     <svg viewBox="0 0 24 24" {...base({ ...p, strokeWidth: 2 })}>
       <path d="M12 5v14M5 12h14" />

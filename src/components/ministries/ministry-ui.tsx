@@ -8,6 +8,7 @@ import {
   ministryLeaderNames,
 } from "@/lib/ministries/parse";
 import type { Ministry, MinistryColor } from "@/lib/ministries/types";
+import { useTranslations } from "next-intl";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 export function MinistryIcon({
@@ -48,20 +49,22 @@ export function MinistryIcon({
 }
 
 export function MinistryStatusChip({ active }: { active: boolean }) {
+  const tCommon = useTranslations("common");
   return (
     <span
       className={`chip ${active ? "success" : ""}`.trim()}
       style={!active ? { color: "var(--ink-3)" } : undefined}
     >
-      <span className="pip" /> {active ? "Activo" : "Inactivo"}
+      <span className="pip" /> {active ? tCommon("active") : tCommon("inactive")}
     </span>
   );
 }
 
 export function MinistryFeaturedBadge() {
+  const t = useTranslations("ministerios");
   return (
     <span className="chip violet" style={{ fontWeight: 600 }}>
-      <Icons.star size={11} /> Destacado
+      <Icons.star size={11} /> {t("featured")}
     </span>
   );
 }
@@ -70,19 +73,22 @@ export function MemberAvatarStack({
   memberIds,
   members,
   max = 4,
+  onClick,
 }: {
   memberIds: string[];
   members: Member[];
   max?: number;
+  onClick?: () => void;
 }) {
+  const t = useTranslations("ministerios");
   const visible = memberIds.slice(0, max);
   const extra = memberIds.length - max;
 
   if (memberIds.length === 0) {
-    return <span className="muted tiny">Sin miembros</span>;
+    return <span className="muted tiny">{t("noMembers")}</span>;
   }
 
-  return (
+  const content = (
     <div style={{ display: "flex", alignItems: "center" }}>
       {visible.map((id, index) => {
         const member = members.find((m) => m.memberId === id);
@@ -112,15 +118,41 @@ export function MemberAvatarStack({
       ) : null}
     </div>
   );
+
+  if (!onClick) return content;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={t("viewMembers")}
+      aria-label={t("viewMembers")}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        background: "transparent",
+        border: 0,
+        padding: 0,
+        cursor: "pointer",
+        font: "inherit",
+        color: "inherit",
+      }}
+    >
+      {content}
+    </button>
+  );
 }
 
 export function MinistryLeaderRow({
   ministry,
   members,
+  onClick,
 }: {
   ministry: Ministry;
   members: Member[];
+  onClick?: () => void;
 }) {
+  const t = useTranslations("ministerios");
   const names = ministryLeaderNames(ministry, members);
   const leaderIds = Array.isArray(ministry.leaderProfileIds)
     ? ministry.leaderProfileIds
@@ -130,7 +162,7 @@ export function MinistryLeaderRow({
     return <span className="muted tiny">—</span>;
   }
 
-  return (
+  const content = (
     <div className="row" style={{ gap: 8, alignItems: "center", minWidth: 0 }}>
       <MemberAvatarStack
         memberIds={leaderIds}
@@ -150,6 +182,31 @@ export function MinistryLeaderRow({
       </span>
     </div>
   );
+
+  if (!onClick) return content;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={t("viewMembers")}
+      aria-label={t("viewMembers")}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        minWidth: 0,
+        background: "transparent",
+        border: 0,
+        padding: 0,
+        cursor: "pointer",
+        font: "inherit",
+        color: "inherit",
+        textAlign: "left",
+      }}
+    >
+      {content}
+    </button>
+  );
 }
 
 type MenuItem = {
@@ -162,7 +219,6 @@ type MenuItem = {
 };
 
 export function MinistryActionMenu({
-  ministry: _ministry,
   onEdit,
   onViewMembers,
   onAssignLeader,
@@ -176,6 +232,8 @@ export function MinistryActionMenu({
   onViewEvents: () => void;
   onDelete: () => void;
 }) {
+  const tCommon = useTranslations("common");
+  const t = useTranslations("ministerios");
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
     null,
@@ -191,32 +249,32 @@ export function MinistryActionMenu({
   const menu: MenuItem[] = [
     {
       id: "edit",
-      label: "Editar",
+      label: tCommon("edit"),
       icon: <Icons.edit size={15} />,
       onClick: onEdit,
     },
     {
       id: "members",
-      label: "Ver miembros",
+      label: t("viewMembers"),
       icon: <Icons.users size={15} />,
       onClick: onViewMembers,
     },
     {
       id: "leader",
-      label: "Asignar líderes",
+      label: t("assignLeaders"),
       icon: <Icons.star size={15} />,
       onClick: onAssignLeader,
       accent: true,
     },
     {
       id: "events",
-      label: "Ver eventos",
+      label: t("viewEvents"),
       icon: <Icons.cal size={15} />,
       onClick: onViewEvents,
     },
     {
       id: "delete",
-      label: "Eliminar",
+      label: tCommon("delete"),
       icon: <Icons.trash size={15} />,
       onClick: onDelete,
       danger: true,
@@ -303,7 +361,7 @@ export function MinistryActionMenu({
         className="btn ghost icon-only sm"
         onClick={toggle}
         title="Acciones"
-        aria-label="Acciones"
+        aria-label={tCommon("actions")}
         aria-expanded={open}
         aria-haspopup="menu"
       >

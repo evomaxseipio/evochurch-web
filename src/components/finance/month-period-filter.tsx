@@ -6,6 +6,7 @@ import {
   shiftYearMonth,
   type YearMonth,
 } from "@/lib/finance/month-period";
+import { useTranslations } from "next-intl";
 
 export function MonthPeriodFilter({
   value,
@@ -14,6 +15,7 @@ export function MonthPeriodFilter({
   value: YearMonth | null;
   onChange: (next: YearMonth | null) => void;
 }) {
+  const t = useTranslations("finances");
   const anchorYear = value?.year ?? new Date().getFullYear();
 
   return (
@@ -27,7 +29,7 @@ export function MonthPeriodFilter({
             type="button"
             className="btn outline sm icon-only"
             onClick={() => onChange(shiftYearMonth(value, -1))}
-            aria-label="Mes anterior"
+            aria-label={t("previousMonth")}
             style={{ fontSize: 18, lineHeight: 1 }}
           >
             ‹
@@ -49,9 +51,9 @@ export function MonthPeriodFilter({
             const [y, m] = raw.split("-").map(Number);
             if (y && m) onChange({ year: y, month: m });
           }}
-          aria-label="Filtrar por mes"
+          aria-label={t("filterByMonth")}
         >
-          <option value="">Todos los meses</option>
+          <option value="">{t("allMonths")}</option>
           {buildMonthOptions(anchorYear).map((opt) => (
             <option key={opt.key} value={opt.key}>
               {opt.label}
@@ -65,7 +67,7 @@ export function MonthPeriodFilter({
             type="button"
             className="btn outline sm icon-only"
             onClick={() => onChange(shiftYearMonth(value, 1))}
-            aria-label="Mes siguiente"
+            aria-label={t("nextMonth")}
             style={{ fontSize: 18, lineHeight: 1 }}
           >
             ›
@@ -75,7 +77,7 @@ export function MonthPeriodFilter({
             className="btn outline sm"
             onClick={() => onChange(null)}
           >
-            Quitar
+            {t("clearMonth")}
           </button>
         </>
       ) : null}

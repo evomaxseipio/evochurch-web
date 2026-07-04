@@ -1,0 +1,121 @@
+/* CONCILIO F.001 — extiende estilos CEAD para pantalla e impresión formulario Excel */
+
+.concilio-f001-dash .concilio-f001-row3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+  align-items: stretch;
+}
+
+.concilio-f001-dash .concilio-f001-council-table td:first-child,
+.concilio-f001-dash .concilio-f001-council-table td:nth-child(3),
+.concilio-f001-dash .concilio-f001-council-table td:nth-child(5) {
+  min-width: 120px;
+}
+
+.concilio-f001-dash .concilio-f001-cooperative p {
+  margin: 0 0 10px;
+}
+
+.concilio-f001-form-print {
+  display: none;
+}
+
+@media (max-width: 980px) {
+  .concilio-f001-dash .concilio-f001-row3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .concilio-f001-dash .concilio-f001-screen {
+    display: none !important;
+  }
+
+  .concilio-f001-form-print {
+    display: block !important;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    color: #000;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    line-height: 1.35;
+  }
+
+  .concilio-f001-form-print .concilio-form-header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .concilio-f001-form-print .concilio-form-council {
+    margin: 0 0 4px;
+    font-size: 9px;
+  }
+
+  .concilio-f001-form-print .concilio-form-rnc {
+    margin: 0 0 6px;
+    font-size: 9px;
+  }
+
+  .concilio-f001-form-print h2 {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .concilio-f001-form-print h3 {
+    margin: 0 0 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+  }
+
+  .concilio-f001-form-print .concilio-form-section {
+    margin-bottom: 12px;
+    break-inside: avoid;
+  }
+
+  .concilio-f001-form-print table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .concilio-f001-form-print th,
+  .concilio-f001-form-print td {
+    border: 1px solid #333;
+    padding: 3px 5px;
+    vertical-align: top;
+  }
+
+  .concilio-f001-form-print th {
+    background: #eee;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  .concilio-f001-form-print .concilio-form-total td,
+  .concilio-f001-form-print .concilio-form-total th {
+    font-weight: 700;
+    background: #f5f5f5;
+  }
+
+  .concilio-f001-form-print .concilio-form-note {
+    margin: 6px 0 0;
+    font-size: 8px;
+  }
+
+  .concilio-f001-form-print .concilio-form-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding-top: 8px;
+    border-top: 1px solid #333;
+    font-size: 9px;
+  }
+
+  .concilio-f001-form-print .mono {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}

@@ -10,6 +10,7 @@ import { Icons } from "@/components/icons";
 import { useActionToast } from "@/hooks/use-action-toast";
 import type { ChurchRolePermissions } from "@/lib/roles/types";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useState, startTransition } from "react";
 
 type FormValues = {
@@ -37,6 +38,8 @@ export function RoleFormDrawer({
   onClose: () => void;
   onCreated?: (appRoleId: number) => void;
 }) {
+  const tCommon = useTranslations("common");
+  const tRoles = useTranslations("roles");
   const router = useRouter();
   const createInitial: CreateRoleActionResult | null = null;
   const updateInitial: UpdateRoleActionResult | null = null;
@@ -82,7 +85,7 @@ export function RoleFormDrawer({
 
   function submit() {
     const nextErrors: Record<string, string> = {};
-    if (!values.name.trim()) nextErrors.name = "Obligatorio";
+    if (!values.name.trim()) nextErrors.name = tCommon("required");
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
@@ -110,7 +113,7 @@ export function RoleFormDrawer({
         <div className="drawer-head">
           <div style={{ flex: 1 }}>
             <div className="eyebrow">
-              {mode === "new" ? "Nuevo rol" : "Editar rol"}
+              {mode === "new" ? tRoles("newRole") : tRoles("editRole")}
             </div>
             <h2 id="role-form-title" style={{ margin: "4px 0 0", fontSize: 18 }}>
               {mode === "new"
@@ -123,7 +126,7 @@ export function RoleFormDrawer({
             className="btn ghost icon-only"
             onClick={onClose}
             disabled={pending}
-            aria-label="Cerrar"
+            aria-label={tCommon("close")}
           >
             <Icons.x size={18} />
           </button>
@@ -184,7 +187,7 @@ export function RoleFormDrawer({
             onClick={onClose}
             disabled={pending}
           >
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -194,11 +197,11 @@ export function RoleFormDrawer({
           >
             {pending
               ? mode === "new"
-                ? "Creando…"
-                : "Guardando…"
+                ? tRoles("creating")
+                : tCommon("saving")
               : mode === "new"
-                ? "Crear rol"
-                : "Guardar cambios"}
+                ? tRoles("createRole")
+                : tCommon("saveChanges")}
           </button>
         </div>
       </div>

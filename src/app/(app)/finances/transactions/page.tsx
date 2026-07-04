@@ -13,6 +13,7 @@ import {
   fetchOperationalIncomeTypes,
 } from "@/lib/services/ledger";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function TransactionsPage({
   searchParams,
@@ -26,6 +27,7 @@ export default async function TransactionsPage({
     status?: string;
   }>;
 }) {
+  const tErrors = await getTranslations("errors");
   const session = await requirePageAccess("/finances/transactions");
 
   const params = await searchParams;
@@ -65,7 +67,7 @@ export default async function TransactionsPage({
     error =
       e instanceof Error
         ? e.message
-        : "No se pudieron cargar las transacciones.";
+        : tErrors("loadFailed");
   }
 
   const fundFilterName = fundId

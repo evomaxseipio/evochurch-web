@@ -29,7 +29,7 @@ import {
   moduleLabel,
 } from "@/lib/roles/catalog";
 import {
-  MODULE_UI_DESCRIPTIONS,
+  moduleUiDescription,
   moduleMatrixNote,
   permissionUiLabel,
   roleUiColor,
@@ -42,6 +42,7 @@ import {
   canDeactivateRole,
 } from "@/lib/roles/keys";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   useActionState,
   useCallback,
@@ -84,8 +85,10 @@ export function RolesPermissionsView({
   churchName: string | null;
   users?: ChurchAuthUser[];
 }) {
+  const tRoles = useTranslations("roles");
+  const tCommon = useTranslations("common");
   const router = useRouter();
-  const churchLabel = churchName?.trim() || "esta iglesia";
+  const churchLabel = churchName?.trim() || tRoles("thisChurch");
 
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(() =>
     defaultSelectedRoleId(roles),
@@ -125,10 +128,10 @@ export function RolesPermissionsView({
     deactivateInitial,
   );
   useActionToast(saveState, {
-    successMessage: "Permisos guardados correctamente.",
+    successMessage: tRoles("permissionsSavedToast"),
   });
   useActionToast(deactivateState, {
-    successMessage: "Rol inactivado correctamente.",
+    successMessage: tRoles("roleDeactivatedToast"),
     onSuccess: () => {
       if (deactivateRole && selectedRoleId === deactivateRole.appRoleId) {
         const next = roles.find(
@@ -165,16 +168,14 @@ export function RolesPermissionsView({
   const selectRole = useCallback(
     (roleId: number) => {
       if (isDirty && canManage) {
-        const proceed = window.confirm(
-          "Hay cambios sin guardar. ¿Descartarlos y cambiar de rol?",
-        );
+        const proceed = window.confirm(tRoles("unsavedDiscardConfirm"));
         if (!proceed) return;
       }
       setSelectedRoleId(roleId);
       setDraft(permissionSet([...(savedByRole[roleId] ?? [])]));
       setExpandedModules(new Set());
     },
-    [canManage, isDirty, savedByRole],
+    [canManage, isDirty, savedByRole, tRoles],
   );
 
   const toggleModule = (module: string) => {
@@ -267,7 +268,7 @@ export function RolesPermissionsView({
     <div className="roles-page-root">
       <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
         <div>
-          <div className="eyebrow">Configuración · Acceso</div>
+          <div className="eyebrow">{tRoles("pageEyebrow")}</div>
           <h1
             className="display"
             style={{
@@ -276,14 +277,16 @@ export function RolesPermissionsView({
               letterSpacing: "-0.025em",
             }}
           >
-            Roles y permisos{" "}
+            {tRoles("title")}{" "}
             <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>
-              por iglesia
+              {tRoles("perChurch")}
             </span>
           </h1>
           <p className="muted" style={{ margin: 0 }}>
-            {roles.length} roles del sistema · {totalAssignedUsers} usuarios con
-            rol asignado
+            {tRoles("pageStats", {
+              roleCount: roles.length,
+              userCount: totalAssignedUsers,
+            })}
           </p>
         </div>
       </div>
@@ -293,7 +296,7 @@ export function RolesPermissionsView({
           <div className="roles-panel-head">
             <div className="row between" style={{ flexWrap: "wrap", gap: 12 }}>
               <div>
-                <div className="eyebrow">Acceso</div>
+                <div className="eyebrow">{tRoles("accessEyebrow")}</div>
                 <h2
                   className="display"
                   style={{
@@ -302,10 +305,10 @@ export function RolesPermissionsView({
                     letterSpacing: "-0.02em",
                   }}
                 >
-                  Roles del sistema
+                  {tRoles("systemRoles")}
                 </h2>
                 <p className="muted tiny" style={{ margin: "6px 0 0" }}>
-                  Selecciona un rol para editar sus permisos.
+                  {tRoles("selectRoleToEdit")}
                 </p>
               </div>
               <button
@@ -314,7 +317,7 @@ export function RolesPermissionsView({
                 onClick={() => router.refresh()}
               >
                 <Icons.refresh width={14} stroke="currentColor" />
-                Actualizar lista
+                {tRoles("refreshList")}
               </button>
             </div>
           </div>
@@ -374,9 +377,9 @@ export function RolesPermissionsView({
                       <span className="roles-card-name-row">
                         <span className="roles-card-name">{role.appRoleName}</span>
                         {isLockedSystem ? (
-                          <span className="roles-chip-system">Sistema</span>
+                          <span className="roles-chip-system">{tCommon("system")}</span>
                         ) : role.isCustom ? (
-                          <span className="roles-chip-custom">Personalizado</span>
+                          <span className="roles-chip-custom">{tCommon("custom")}</span>
                         ) : null}
                       </span>
                       {summary ? (
@@ -385,8 +388,7 @@ export function RolesPermissionsView({
                     </span>
                     <span className="roles-card-aside">
                       <span className="roles-card-count">
-                        {role.userCount}{" "}
-                        {role.userCount === 1 ? "usuario" : "usuarios"}
+                        {tRoles("userCount", { count: role.userCount })}
                       </span>
                       {!isLockedSystem ? (
                         <Icons.arrowRight
@@ -409,7 +411,7 @@ export function RolesPermissionsView({
               <div className="roles-panel-head">
                 <div className="row between" style={{ flexWrap: "wrap", gap: 12 }}>
                   <div>
-                    <div className="eyebrow">Matriz de permisos</div>
+                    <div className="eyebrow">{tRoles("permissionMatrix")}</div>
                     <h2
                       className="display"
                       style={{
@@ -418,7 +420,7 @@ export function RolesPermissionsView({
                         letterSpacing: "-0.02em",
                       }}
                     >
-                      Permisos del rol:{" "}
+                      {tRoles("rolePermissionsTitle")}{" "}
                       <span
                         style={{ color: "var(--primary)", fontStyle: "normal" }}
                       >
@@ -427,13 +429,13 @@ export function RolesPermissionsView({
                     </h2>
                     <p className="muted tiny" style={{ margin: "6px 0 0" }}>
                       {isLockedRole
-                        ? "Los permisos de este rol del sistema son fijos y no se pueden modificar."
-                        : `Edita los permisos que tendrá este rol en ${churchLabel}.`}
+                        ? tRoles("systemRoleFixed")
+                        : tRoles("editPermissionsInChurch", { church: churchLabel })}
                     </p>
                   </div>
                   <div className="roles-matrix-actions">
                     {isDirty && canManage && !isLockedRole ? (
-                      <span className="roles-chip-dirty">Cambios sin guardar</span>
+                      <span className="roles-chip-dirty">{tRoles("unsavedChanges")}</span>
                     ) : null}
                     {canManage ? (
                       <button
@@ -442,7 +444,7 @@ export function RolesPermissionsView({
                         onClick={() => setCreateDrawerOpen(true)}
                       >
                         <Icons.plus width={16} stroke="currentColor" />
-                        Crear rol
+                        {tRoles("createRole")}
                       </button>
                     ) : null}
                   </div>
@@ -453,8 +455,8 @@ export function RolesPermissionsView({
                 {moduleGroups.map(({ module, permissions, resources }) => {
                   const ModuleIcon = Icons[MODULE_ICONS[module] ?? "grid"];
                   const color = MODULE_COLORS[module] ?? "var(--muted)";
-                  const moduleDesc = MODULE_UI_DESCRIPTIONS[module];
-                  const matrixNote = moduleMatrixNote(module);
+                  const moduleDesc = moduleUiDescription(module, tRoles);
+                  const matrixNote = moduleMatrixNote(module, tRoles);
                   const expanded = expandedModules.has(module);
                   const enabledCount = permissions.filter((p) =>
                     draft.has(p.permissionKey),
@@ -591,6 +593,7 @@ export function RolesPermissionsView({
                                           {permissionUiLabel(
                                             perm.permissionKey,
                                             perm.description,
+                                            tRoles,
                                           )}
                                         </span>
                                         <code className="roles-perm-key mono">
@@ -628,7 +631,7 @@ export function RolesPermissionsView({
                                                       e.target.checked,
                                                     )
                                                   }
-                                                  aria-label={`${permissionUiLabel(perm.permissionKey, perm.description)} — ${col.label}`}
+                                                  aria-label={`${permissionUiLabel(perm.permissionKey, perm.description, tRoles)} — ${col.label}`}
                                                 />
                                                 <span className="roles-check-box" />
                                               </label>
@@ -669,7 +672,7 @@ export function RolesPermissionsView({
                     disabled={!isDirty || savePending}
                     onClick={cancelChanges}
                   >
-                    Cancelar cambios
+                    {tCommon("cancelChanges")}
                   </button>
                   <button
                     type="button"
@@ -678,13 +681,13 @@ export function RolesPermissionsView({
                     onClick={handleSave}
                   >
                     <Icons.download width={16} stroke="currentColor" />
-                    {savePending ? "Guardando…" : "Guardar cambios"}
+                    {savePending ? tCommon("saving") : tCommon("saveChanges")}
                   </button>
                 </footer>
               ) : null}
             </>
           ) : (
-            <p className="muted">Selecciona un rol para ver sus permisos.</p>
+            <p className="muted">{tRoles("selectRoleToView")}</p>
           )}
         </section>
       </div>
@@ -716,8 +719,8 @@ export function RolesPermissionsView({
 
       {deactivateRole ? (
         <ConfirmDialog
-          title="Inactivar rol"
-          message="El rol dejará de estar disponible para nuevas asignaciones. Solo puedes inactivar roles sin usuarios asignados."
+          title={tRoles("deactivateRole")}
+          message={tRoles("deactivateRoleMessage")}
           itemName={deactivateRole.appRoleName}
           pending={deactivatePending}
           onClose={() => setDeactivateRole(null)}

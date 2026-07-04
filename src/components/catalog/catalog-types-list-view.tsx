@@ -11,6 +11,7 @@ import { useActionToast } from "@/hooks/use-action-toast";
 import type { CatalogStats } from "@/lib/catalog/types";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   useActionState,
   useEffect,
@@ -73,6 +74,8 @@ export function CatalogTypesListView({
   canWrite?: boolean;
   canDelete?: boolean;
 }) {
+  const tCommon = useTranslations("common");
+  const tCatalogs = useTranslations("catalogs");
   const router = useRouter();
   const deleteInitial: CatalogActionResult | null = null;
 
@@ -254,7 +257,7 @@ export function CatalogTypesListView({
           <div className="search" style={{ flex: 1, minWidth: 220, width: "auto" }}>
             <Icons.search width={14} stroke="var(--muted)" />
             <input
-              placeholder="Buscar…"
+              placeholder={tCommon("searchPlaceholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -270,9 +273,9 @@ export function CatalogTypesListView({
             }}
           >
             {[
-              { value: "all" as const, label: "Todos" },
-              { value: "true" as const, label: "Activos" },
-              { value: "false" as const, label: "Inactivos" },
+              { value: "all" as const, label: tCommon("all") },
+              { value: "true" as const, label: tCommon("active") },
+              { value: "false" as const, label: tCommon("inactive") },
             ].map((opt) => (
               <button
                 key={opt.value}
@@ -311,12 +314,12 @@ export function CatalogTypesListView({
                 <tr>
                   {canWrite || canDelete ? (
                     <th className="col-actions" style={{ width: 44 }}>
-                      Acciones
+                      {tCommon("actions")}
                     </th>
                   ) : null}
-                  <th>Tipo</th>
-                  <th>Descripción</th>
-                  <th>Estado</th>
+                  <th>{tCommon("type")}</th>
+                  <th>{tCommon("description")}</th>
+                  <th>{tCommon("status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -345,13 +348,13 @@ export function CatalogTypesListView({
                           className="chip info"
                           style={{ marginLeft: 8, fontSize: 10 }}
                         >
-                          Sistema
+                          {tCommon("system")}
                         </span>
                       ) : null}
                     </td>
                     <td>
                       <span className="muted" style={{ fontSize: 13 }}>
-                        {it.description || "—"}
+                        {it.description || tCatalogs("dash")}
                       </span>
                     </td>
                     <td>
@@ -365,7 +368,7 @@ export function CatalogTypesListView({
         ) : (
           <div className="card" style={{ padding: 48, textAlign: "center" }}>
             <div className="muted" style={{ marginBottom: 12 }}>
-              Sin registros todavía
+              {tCatalogs("noRecords")}
             </div>
             {canWrite ? (
               <button
@@ -405,8 +408,8 @@ export function CatalogTypesListView({
 
       {confirm ? (
         <ConfirmDialog
-          title={`Eliminar ${entityLabel.toLowerCase()}`}
-          message={`¿Eliminar "${confirm.name}"? Esta acción no se puede deshacer.`}
+          title={tCatalogs("deleteEntityTitle", { entity: entityLabel.toLowerCase() })}
+          message={tCatalogs("deleteEntityMessage", { name: confirm.name })}
           itemName={confirm.name}
           onConfirm={handleDeleteConfirm}
           onClose={() => setConfirm(null)}

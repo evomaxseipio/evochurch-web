@@ -3,6 +3,7 @@
 import { fmtRD } from "@/lib/format-currency";
 import { sortFunds } from "@/lib/funds/parse";
 import type { Fund } from "@/lib/funds/types";
+import { useLocale, useTranslations } from "next-intl";
 
 const FUND_PALETTE = [
   "var(--primary)",
@@ -34,13 +35,14 @@ function FundDonut({
 }) {
   const r = 58;
   const R = 92;
-  let angle = -Math.PI / 2;
   const arcs = slices.map((d, i) => {
+    const startFrac = total
+      ? slices.slice(0, i).reduce((acc, item) => acc + item.v, 0) / total
+      : 0;
     const frac = total ? d.v / total : 0;
     const sweep = frac * Math.PI * 2;
-    const a0 = angle;
-    const a1 = angle + sweep - (slices.length > 1 ? 0.014 : 0);
-    angle += sweep;
+    const a0 = -Math.PI / 2 + startFrac * Math.PI * 2;
+    const a1 = a0 + sweep - (slices.length > 1 ? 0.014 : 0);
     const large = sweep > Math.PI ? 1 : 0;
     const x0 = 100 + R * Math.cos(a0);
     const y0 = 100 + R * Math.sin(a0);
@@ -71,6 +73,9 @@ function FundDonut({
 }
 
 export function FundsSummary({ funds }: { funds: Fund[] }) {
+  const tFinances = useTranslations("finances");
+  const tFunds = useTranslations("funds");
+  const locale = useLocale();
   const sorted = sortFunds(
     funds,
     (a, b) => b.totalContributions - a.totalContributions,
@@ -90,7 +95,7 @@ export function FundsSummary({ funds }: { funds: Fund[] }) {
   }));
   if (rest.length) {
     slices.push({
-      label: `Otros (${rest.length})`,
+      label: `${tFinances("others")} (${rest.length})`,
       v: restSum,
       color: FUND_OTHER_COLOR,
     });
@@ -113,10 +118,10 @@ export function FundsSummary({ funds }: { funds: Fund[] }) {
               className="display"
               style={{ fontSize: 22, letterSpacing: "-0.01em" }}
             >
-              Distribución por fondo
+              {tFunds("distributionByFund")}
             </div>
             <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-              Participación de cada fondo en el total recaudado
+              {tFunds("distributionSubtitle")}
             </div>
           </div>
           <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -128,7 +133,7 @@ export function FundsSummary({ funds }: { funds: Fund[] }) {
                 fontWeight: 600,
               }}
             >
-              Total Fondos
+              {tFunds("totalFunds")}
             </div>
             <div
               className="display tnum"
@@ -138,7 +143,7 @@ export function FundsSummary({ funds }: { funds: Fund[] }) {
                 marginTop: 4,
               }}
             >
-              {fmtRD(total)}
+              {fmtRD(total, locale as "es" | "en" | "fr")}
             </div>
           </div>
         </div>
@@ -196,12 +201,14 @@ export function FundsSummary({ funds }: { funds: Fund[] }) {
       <div className="card span-6">
         <div className="row between" style={{ alignItems: "flex-start" }}>
           <div>
-            <div className="eyebrow">Mayordomía</div>
+            <div className="eyebrow">{tFinances("stewardshipLabel")}</div>
             <div className="display" style={{ fontSize: 22, marginTop: 4 }}>
-              Todos los fondos
+              {tFunds("allFunds")}
             </div>
           </div>
-          <span className="chip">{sorted.length} fondos</span>
+          <span className="chip">
+            {tFunds("fundCount", { count: sorted.length })}
+          </span>
         </div>
         <div
           className="col"

@@ -2,18 +2,21 @@ import { FundsKpi } from "@/components/funds/funds-kpi";
 import { Icons } from "@/components/icons";
 import type { ContributionsStats } from "@/lib/contributions/types";
 import { fmtRDshort } from "@/lib/format-currency";
+import { useLocale, useTranslations } from "next-intl";
 
 const KPI_KIND = "elevated" as const;
 
 /** KPIs — mismo patrón que `funds-list-view.tsx` */
 export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
+  const tContributions = useTranslations("contributions");
+  const locale = useLocale() as "es" | "en" | "fr";
   return (
     <div className="grid-12" style={{ marginTop: 22, marginBottom: 28 }}>
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Total ingresos"
-          value={fmtRDshort(stats.total)}
+          label={tContributions("totalIncome")}
+          value={fmtRDshort(stats.total, locale)}
           icon={<Icons.trendUp size={16} />}
           tone="d-system"
           totalSummary
@@ -24,8 +27,8 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Diezmos"
-          value={fmtRDshort(stats.tithes)}
+          label={tContributions("tithes")}
+          value={fmtRDshort(stats.tithes, locale)}
           icon={<Icons.wallet size={16} />}
           tone="d-funds"
         />
@@ -33,8 +36,8 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Ofrendas"
-          value={fmtRDshort(stats.offerings)}
+          label={tContributions("offerings")}
+          value={fmtRDshort(stats.offerings, locale)}
           icon={<Icons.check size={16} />}
           tone="d-income"
         />
@@ -42,8 +45,8 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
       <div className="span-3">
         <FundsKpi
           kind={KPI_KIND}
-          label="Donaciones"
-          value={fmtRDshort(stats.donations)}
+          label={tContributions("donations")}
+          value={fmtRDshort(stats.donations, locale)}
           icon={<Icons.star size={16} />}
           tone="d-donation"
         />

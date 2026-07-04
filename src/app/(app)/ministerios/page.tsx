@@ -1,12 +1,13 @@
 import { MinistriesListView } from "@/components/ministries/ministries-list-view";
 import { computeMinistryStats } from "@/lib/ministries/parse";
-import { hasPermission } from "@/lib/auth/permissions";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchMembersPage } from "@/lib/services/members";
 import { fetchMinistries } from "@/lib/services/ministries";
 import { createClient } from "@/lib/supabase/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function MinisteriosPage() {
+  const tErrors = await getTranslations("errors");
   const session = await requirePageAccess("/ministerios");
 
   const supabase = await createClient();
@@ -30,7 +31,7 @@ export default async function MinisteriosPage() {
     error =
       e instanceof Error
         ? e.message
-        : "No se pudieron cargar los ministerios.";
+        : tErrors("loadFailed");
   }
 
   if (error) {

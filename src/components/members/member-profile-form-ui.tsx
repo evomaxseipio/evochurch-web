@@ -4,6 +4,7 @@ import type { SelectOption } from "@/lib/members/catalogs";
 import type { Member } from "@/lib/members/types";
 import { Icons } from "@/components/icons";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function ProfileSectionCard({
   eyebrow,
@@ -139,12 +140,13 @@ function memberFlagsFromMembershipStatus(status: (typeof MEMBERSHIP_STATUSES)[nu
 
 /** Pills Activo / Inactivo (mismo estilo que credencial y bautismo en el Espíritu). */
 export function MembershipStatusField({ member }: { member: Member }) {
+  const t = useTranslations("members");
   const [status, setStatus] = useState(() => membershipStatusFromMember(member));
   const flags = memberFlagsFromMembershipStatus(status);
 
   return (
     <div className="field">
-      <label>Estado de membresía</label>
+      <label>{t("membershipStatus")}</label>
       <div
         className="row"
         style={{
@@ -186,7 +188,7 @@ export function MembershipStatusField({ member }: { member: Member }) {
             >
               {isActiveOption && active ? <Icons.check size={12} /> : null}
               {!isActiveOption && active ? <Icons.x size={12} /> : null}
-              {label}
+              {label === "Activo" ? t("statusActive") : t("statusInactive")}
             </button>
           );
         })}
@@ -206,6 +208,7 @@ export function YesNoField({
   name: string;
   defaultValue: boolean;
 }) {
+  const t = useTranslations("common");
   const [value, setValue] = useState(defaultValue ? "yes" : "no");
 
   return (
@@ -228,7 +231,7 @@ export function YesNoField({
             ["yes", "Sí"],
             ["no", "No"],
           ] as const
-        ).map(([val, text]) => (
+        ).map(([val]) => (
           <button
             key={val}
             type="button"
@@ -255,7 +258,7 @@ export function YesNoField({
             }}
           >
             {val === "yes" ? <Icons.check size={12} /> : <Icons.x size={12} />}
-            {text}
+            {val === "yes" ? t("yes") : t("no")}
           </button>
         ))}
       </div>

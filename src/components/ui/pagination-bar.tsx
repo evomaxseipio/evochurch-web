@@ -1,6 +1,9 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { type Locale } from "@/i18n/config";
+import { formatNumber } from "@/lib/i18n/format";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 export function PaginationBar({
@@ -12,7 +15,7 @@ export function PaginationBar({
   pageSize,
   onPage,
   onPageSize,
-  noun = "registros",
+  noun,
   sizeOptions = [10, 15, 25, 50],
 }: {
   page: number;
@@ -26,6 +29,10 @@ export function PaginationBar({
   noun?: string;
   sizeOptions?: readonly number[];
 }) {
+  const t = useTranslations("common");
+  const locale = useLocale() as Locale;
+  const recordsLabel = noun ?? t("records");
+
   const pageButtons = useMemo(() => {
     const set = new Set([1, totalPages, page, page - 1, page + 1]);
     const list = [...set].filter((n) => n >= 1 && n <= totalPages).sort((a, b) => a - b);
@@ -52,29 +59,22 @@ export function PaginationBar({
     >
       <div className="row" style={{ gap: 12, alignItems: "center" }}>
         <span className="tiny muted">
-          Mostrando{" "}
-          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
-            {pageStart + 1}
-          </b>
-          {" – "}
-          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
-            {pageEnd}
-          </b>
-          {" de "}
-          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
-            {total.toLocaleString("es-DO")}
-          </b>{" "}
-          {noun}
+          {t("showing", {
+            from: pageStart + 1,
+            to: pageEnd,
+            total: formatNumber(total, locale),
+          })}{" "}
+          {recordsLabel}
         </span>
         <span style={{ width: 1, height: 18, background: "var(--line)" }} />
         <label className="row" style={{ gap: 6, fontSize: 12, color: "var(--muted)" }}>
-          Filas
+          {t("rows")}
           <select
             className="select"
             style={{ padding: "4px 8px", width: "auto", fontSize: 12 }}
             value={pageSize}
             onChange={(e) => onPageSize(Number.parseInt(e.target.value, 10))}
-            aria-label="Filas por página"
+            aria-label={t("rowsPerPage")}
           >
             {sizeOptions.map((n) => (
               <option key={n} value={n}>{n}</option>
@@ -93,7 +93,7 @@ export function PaginationBar({
           <span style={{ display: "inline-block", transform: "rotate(90deg)" }}>
             <Icons.arrowDn size={12} />
           </span>
-          Anterior
+          {t("previous")}
         </button>
         {pageButtons.map((b, i) =>
           b === "…" ? (
@@ -129,7 +129,7 @@ export function PaginationBar({
           disabled={page >= totalPages}
           onClick={() => onPage(page + 1)}
         >
-          Siguiente
+          {t("next")}
           <span style={{ display: "inline-block", transform: "rotate(-90deg)" }}>
             <Icons.arrowDn size={12} />
           </span>

@@ -1,10 +1,12 @@
 import { DashboardView } from "@/components/dashboard/dashboard-view";
-import { getAppSession } from "@/lib/auth/app-session";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchDashboardPayload } from "@/lib/services/dashboard";
 import { createClient } from "@/lib/supabase/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function DashboardPage() {
+  const t = await getTranslations("dashboard");
+  const locale = await getLocale();
   const session = await requirePageAccess("/dashboard");
 
   const pastorName = session.fullName?.split(" ")[0] ?? undefined;
@@ -20,7 +22,7 @@ export default async function DashboardPage() {
     error =
       e instanceof Error
         ? e.message
-        : "No se pudo cargar el dashboard.";
+        : t("loadError");
   }
 
   if (error || !payload) {
@@ -32,7 +34,7 @@ export default async function DashboardPage() {
           color: "var(--danger)",
         }}
       >
-        {error ?? "No se pudo cargar el dashboard."}
+        {error ?? t("loadError")}
       </p>
     );
   }

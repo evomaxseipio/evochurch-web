@@ -1,6 +1,9 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { type Locale } from "@/i18n/config";
+import { formatNumber } from "@/lib/i18n/format";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
 const SIZE_OPTIONS = [10, 15, 25, 50] as const;
@@ -24,6 +27,9 @@ export function CrudPagination({
   onPage: (page: number) => void;
   onPageSize: (size: number) => void;
 }) {
+  const t = useTranslations("common");
+  const locale = useLocale() as Locale;
+
   const pageButtons = useMemo(() => {
     const set = new Set([1, totalPages, page, page - 1, page + 1]);
     const list = [...set].filter((n) => n >= 1 && n <= totalPages).sort((a, b) => a - b);
@@ -50,28 +56,22 @@ export function CrudPagination({
     >
       <div className="row" style={{ gap: 12, alignItems: "center" }}>
         <span className="tiny muted">
-          Mostrando{" "}
-          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
-            {total === 0 ? 0 : pageStart + 1}
-          </b>
-          {" – "}
-          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
-            {pageEnd}
-          </b>
-          {" de "}
-          <b style={{ color: "var(--fg)", fontFamily: "var(--font-mono)" }}>
-            {total.toLocaleString("es-DO")}
-          </b>{" "}
-          registros
+          {t("showing", {
+            from: total === 0 ? 0 : pageStart + 1,
+            to: pageEnd,
+            total: formatNumber(total, locale),
+          })}{" "}
+          {t("records")}
         </span>
         <span style={{ width: 1, height: 18, background: "var(--line)" }} />
         <label className="row" style={{ gap: 6, fontSize: 12, color: "var(--muted)" }}>
-          Filas
+          {t("rows")}
           <select
             className="select"
             style={{ padding: "4px 8px", width: "auto", fontSize: 12 }}
             value={pageSize}
             onChange={(e) => onPageSize(Number.parseInt(e.target.value, 10))}
+            aria-label={t("rowsPerPage")}
           >
             {SIZE_OPTIONS.map((n) => (
               <option key={n} value={n}>
@@ -91,7 +91,7 @@ export function CrudPagination({
           <span style={{ display: "inline-block", transform: "rotate(90deg)" }}>
             <Icons.arrowDn width={12} />
           </span>
-          Anterior
+          {t("previous")}
         </button>
         {pageButtons.map((b, i) =>
           b === "…" ? (
@@ -127,7 +127,7 @@ export function CrudPagination({
           disabled={page >= totalPages}
           onClick={() => onPage(page + 1)}
         >
-          Siguiente
+          {t("next")}
           <span style={{ display: "inline-block", transform: "rotate(-90deg)" }}>
             <Icons.arrowDn width={12} />
           </span>

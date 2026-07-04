@@ -671,7 +671,9 @@ body {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .filter-toolbar .select,
-.filter-toolbar input[type="date"].input {
+.filter-toolbar input[type="date"].input,
+.filter-toolbar input[type="month"].input,
+.filter-toolbar input[type="number"].input {
   height: 36px;
   box-sizing: border-box;
   font-size: 13px;
@@ -690,7 +692,8 @@ body {
 .filter-toolbar .select:focus {
   background-color: var(--bg-1);
 }
-.filter-toolbar input[type="date"].input {
+.filter-toolbar input[type="date"].input,
+.filter-toolbar input[type="month"].input {
   padding-top: 7px;
   padding-bottom: 7px;
   color-scheme: light dark;

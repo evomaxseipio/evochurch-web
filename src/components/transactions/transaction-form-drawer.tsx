@@ -17,6 +17,7 @@ import type {
   LedgerMovementType,
   OperationalIncomeType,
 } from "@/lib/ledger/types";
+import { useTranslations } from "next-intl";
 import {
   useActionState,
   useEffect,
@@ -123,6 +124,8 @@ export function TransactionFormDrawer({
   presetFundId?: string | null;
   defaultMovement?: LedgerMovementType;
 }) {
+  const tCommon = useTranslations("common");
+  const tTransactions = useTranslations("transactions");
   const [state, formAction, pending] = useActionState(
     saveLedgerEntryAction,
     initial,
@@ -644,7 +647,7 @@ export function TransactionFormDrawer({
             onClick={onClose}
             disabled={pending}
           >
-            Cancelar
+            {tCommon("cancel")}
           </button>
           <button
             type="button"
@@ -654,12 +657,12 @@ export function TransactionFormDrawer({
           >
             <Icons.check width={14} />{" "}
             {pending
-              ? "Guardando…"
+              ? tCommon("saving")
               : mode === "new"
                 ? isTransfer
-                  ? "Registrar transferencia"
-                  : "Registrar movimiento"
-                : "Guardar cambios"}
+                  ? tTransactions("registerTransfer")
+                  : tTransactions("registerMovement")
+                : tCommon("saveChanges")}
           </button>
         </div>
       </div>

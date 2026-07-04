@@ -1,5 +1,6 @@
 import { fmtRDshort } from "@/lib/format-currency";
 import type { FundDistributionSlice } from "@/lib/contributions/types";
+import { useLocale } from "next-intl";
 
 /** Donut del mockup `screens-3.jsx` — tab Contribuciones */
 export function ContributionsDonutChart({
@@ -9,15 +10,17 @@ export function ContributionsDonutChart({
   slices: FundDistributionSlice[];
   total: number;
 }) {
+  const locale = useLocale() as "es" | "en" | "fr";
   const r = 70;
   const R = 90;
-  let angle = -Math.PI / 2;
 
   const arcs = slices.map((slice, i) => {
+    const startFrac = total
+      ? slices.slice(0, i).reduce((acc, item) => acc + item.amount, 0) / total
+      : 0;
     const sweep = total ? (slice.amount / total) * Math.PI * 2 : 0;
-    const a0 = angle;
-    const a1 = angle + sweep;
-    angle = a1;
+    const a0 = -Math.PI / 2 + startFrac * Math.PI * 2;
+    const a1 = a0 + sweep;
     const large = sweep > Math.PI ? 1 : 0;
     const x0 = 100 + R * Math.cos(a0);
     const y0 = 100 + R * Math.sin(a0);
@@ -63,7 +66,7 @@ export function ContributionsDonutChart({
         fontFamily="var(--font-display)"
         fill="var(--ink)"
       >
-        {fmtRDshort(total)}
+        {fmtRDshort(total, locale)}
       </text>
     </svg>
   );

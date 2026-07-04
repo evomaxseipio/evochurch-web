@@ -1,9 +1,11 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { applyTheme, resolveTheme, type Theme } from "@/lib/theme";
 import { toast } from "@/lib/toast";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -13,8 +15,6 @@ type SettingsTab =
   | "idioma"
   | "notif"
   | "acceso";
-
-type LocaleCode = "es-DO" | "es" | "en" | "ht";
 
 type ProfileForm = {
   fullName: string;
@@ -26,48 +26,36 @@ type ProfileForm = {
 
 const NAV_ITEMS: {
   id: SettingsTab;
-  label: string;
+  labelKey: string;
   icon: keyof typeof Icons;
 }[] = [
-  { id: "perfil", label: "Perfil", icon: "users" },
-  { id: "apariencia", label: "Apariencia", icon: "moon" },
-  { id: "idioma", label: "Idioma", icon: "globe" },
-  { id: "notif", label: "Notificaciones", icon: "bell" },
-  { id: "acceso", label: "Acceso y catálogos", icon: "grid" },
-];
-
-const LANGUAGE_OPTIONS: {
-  code: LocaleCode;
-  label: string;
-  flag: string;
-}[] = [
-  { code: "es-DO", label: "Español (República Dominicana)", flag: "🇩🇴" },
-  { code: "es", label: "Español (Internacional)", flag: "🌎" },
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ht", label: "Kreyòl Ayisyen", flag: "🇭🇹" },
+  { id: "perfil", labelKey: "tabs.profile", icon: "users" },
+  { id: "apariencia", labelKey: "tabs.appearance", icon: "moon" },
+  { id: "idioma", labelKey: "tabs.language", icon: "globe" },
+  { id: "notif", labelKey: "tabs.notifications", icon: "bell" },
+  { id: "acceso", labelKey: "tabs.access", icon: "grid" },
 ];
 
 const NOTIFICATION_ITEMS = [
-  "Nuevos miembros",
-  "Diezmos y ofrendas",
-  "Recordatorios de eventos",
-  "Mensajes directos",
-  "Reportes semanales",
-  "Notificaciones por email",
-  "Notificaciones push (PWA)",
+  "newMembers",
+  "tithesOfferings",
+  "eventReminders",
+  "directMessages",
+  "weeklyReports",
+  "email",
+  "push",
 ] as const;
 
 const NOTIFICATION_DEFAULTS: Record<(typeof NOTIFICATION_ITEMS)[number], boolean> = {
-  "Nuevos miembros": true,
-  "Diezmos y ofrendas": true,
-  "Recordatorios de eventos": true,
-  "Mensajes directos": true,
-  "Reportes semanales": false,
-  "Notificaciones por email": true,
-  "Notificaciones push (PWA)": true,
+  newMembers: true,
+  tithesOfferings: true,
+  eventReminders: true,
+  directMessages: true,
+  weeklyReports: false,
+  email: true,
+  push: true,
 };
 
-const LOCALE_STORAGE_KEY = "evochurch-locale";
 const NOTIF_STORAGE_KEY = "evochurch-notif-prefs";
 
 function initials(label: string) {
@@ -82,15 +70,6 @@ function displayNameParts(fullName: string) {
   const parts = fullName.trim().split(/\s+/);
   if (parts.length <= 1) return { first: fullName, rest: "" };
   return { first: parts[0], rest: parts.slice(1).join(" ") };
-}
-
-function loadLocale(): LocaleCode {
-  if (typeof window === "undefined") return "es-DO";
-  const stored = localStorage.getItem(LOCALE_STORAGE_KEY);
-  if (stored === "es-DO" || stored === "es" || stored === "en" || stored === "ht") {
-    return stored;
-  }
-  return "es-DO";
 }
 
 function loadNotificationPrefs(): Record<(typeof NOTIFICATION_ITEMS)[number], boolean> {
@@ -118,9 +97,10 @@ export function SettingsView({
   churchName: string | null;
   isVerified: boolean;
 }) {
+  const t = useTranslations("settings");
+  const tCommon = useTranslations("common");
   const [tab, setTab] = useState<SettingsTab>("perfil");
   const [theme, setTheme] = useState<Theme>("dark");
-  const [locale, setLocale] = useState<LocaleCode>("es-DO");
   const [notifPrefs, setNotifPrefs] = useState(loadNotificationPrefs);
   const [profile, setProfile] = useState<ProfileForm>(() => ({
     fullName,
@@ -140,7 +120,6 @@ export function SettingsView({
     } else {
       setTheme(resolveTheme());
     }
-    setLocale(loadLocale());
     setNotifPrefs(loadNotificationPrefs());
   }, []);
 
@@ -164,12 +143,6 @@ export function SettingsView({
     applyTheme(next);
   }
 
-  function selectLocale(code: LocaleCode) {
-    setLocale(code);
-    localStorage.setItem(LOCALE_STORAGE_KEY, code);
-    toast.success("Idioma actualizado", "La preferencia se guardó en este dispositivo.");
-  }
-
   function toggleNotification(key: (typeof NOTIFICATION_ITEMS)[number], on: boolean) {
     setNotifPrefs((prev) => {
       const next = { ...prev, [key]: on };
@@ -180,7 +153,7 @@ export function SettingsView({
 
   function saveProfile() {
     setProfileBaseline(profile);
-    toast.success("Perfil actualizado", "Tus cambios fueron guardados.");
+    toast.success(t("toasts.profileUpdated"), t("toasts.profileSaved"));
   }
 
   function resetProfile() {
@@ -200,19 +173,19 @@ export function SettingsView({
               letterSpacing: "-0.025em",
             }}
           >
-            Configuración{" "}
+            {t("title")}{" "}
             <span style={{ color: "var(--ink-3)", fontStyle: "italic" }}>
-              y perfil
+              {t("profileAndSettings")}
             </span>
           </h1>
           <p className="muted" style={{ margin: 0 }}>
-            Personaliza tu perfil, apariencia y preferencias del sistema.
+            {t("subtitle")}
           </p>
         </div>
         {tab === "perfil" ? (
           <div className="row">
             <button type="button" className="btn primary" onClick={saveProfile}>
-              <Icons.check width={16} /> Guardar cambios
+              <Icons.check width={16} /> {tCommon("saveChanges")}
             </button>
           </div>
         ) : null}
@@ -221,7 +194,7 @@ export function SettingsView({
       <div className="grid-12" style={{ marginTop: 24 }}>
         <div className="span-3">
           <div className="card" style={{ padding: 8 }}>
-            {NAV_ITEMS.map(({ id, label, icon }) => {
+            {NAV_ITEMS.map(({ id, labelKey, icon }) => {
               const Icon = Icons[icon];
               const active = tab === id;
               return (
@@ -246,7 +219,7 @@ export function SettingsView({
                   }}
                 >
                   <Icon width={16} />
-                  {label}
+                  {t(labelKey)}
                 </button>
               );
             })}
@@ -291,7 +264,7 @@ export function SettingsView({
                     <div className="row" style={{ gap: 8, marginTop: 12 }}>
                       <span className="chip">{roleLabel}</span>
                       {isVerified ? (
-                        <span className="chip">Verificado</span>
+                        <span className="chip">{tCommon("verified")}</span>
                       ) : null}
                     </div>
                   </div>
@@ -301,7 +274,7 @@ export function SettingsView({
               <div style={{ padding: 28 }}>
                 <div className="grid-12" style={{ gap: 14 }}>
                   <div className="field span-6">
-                    <label>Nombre completo</label>
+                    <label>{t("fullName")}</label>
                     <div className="input-wrap">
                       <input
                         value={profile.fullName}
@@ -312,7 +285,7 @@ export function SettingsView({
                     </div>
                   </div>
                   <div className="field span-6">
-                    <label>Email</label>
+                    <label>{tCommon("email")}</label>
                     <div className="input-wrap">
                       <input
                         value={profile.email}
@@ -323,7 +296,7 @@ export function SettingsView({
                     </div>
                   </div>
                   <div className="field span-6">
-                    <label>Teléfono</label>
+                    <label>{tCommon("phone")}</label>
                     <div className="input-wrap">
                       <input
                         value={profile.phone}
@@ -335,7 +308,7 @@ export function SettingsView({
                     </div>
                   </div>
                   <div className="field span-6">
-                    <label>Cargo</label>
+                    <label>{t("role")}</label>
                     <div className="input-wrap">
                       <input
                         value={profile.jobTitle}
@@ -346,7 +319,7 @@ export function SettingsView({
                     </div>
                   </div>
                   <div className="field span-12">
-                    <label>Biografía</label>
+                    <label>{t("bio")}</label>
                     <div
                       className="input-wrap"
                       style={{ alignItems: "flex-start", padding: "10px 12px" }}
@@ -357,7 +330,7 @@ export function SettingsView({
                         onChange={(e) =>
                           setProfile((p) => ({ ...p, bio: e.target.value }))
                         }
-                        placeholder="Cuéntanos un poco sobre ti…"
+                        placeholder={t("bioPlaceholder")}
                         style={{ resize: "vertical", minHeight: 72 }}
                       />
                     </div>
@@ -368,10 +341,10 @@ export function SettingsView({
                   style={{ marginTop: 20, justifyContent: "flex-end", gap: 10 }}
                 >
                   <button type="button" className="btn outline" onClick={resetProfile}>
-                    Cancelar
+                    {tCommon("cancel")}
                   </button>
                   <button type="button" className="btn primary" onClick={saveProfile}>
-                    <Icons.check width={14} /> Guardar cambios
+                    <Icons.check width={14} /> {tCommon("saveChanges")}
                   </button>
                 </div>
               </div>
@@ -381,24 +354,24 @@ export function SettingsView({
           {tab === "apariencia" ? (
             <div className="col gap-md">
               <div className="card">
-                <div className="eyebrow">Tema</div>
+                <div className="eyebrow">{t("theme")}</div>
                 <div
                   className="display"
                   style={{ fontSize: 22, marginTop: 4, marginBottom: 18 }}
                 >
-                  Modo de visualización
+                  {t("displayMode")}
                 </div>
                 <div className="grid-12" style={{ gap: 12 }}>
                   {(
                     [
                       {
                         value: "light" as const,
-                        label: "Claro",
+                        label: t("light"),
                         icon: "sun" as const,
                       },
                       {
                         value: "dark" as const,
-                        label: "Oscuro",
+                        label: t("dark"),
                         icon: "moon" as const,
                       },
                     ] as const
@@ -441,61 +414,30 @@ export function SettingsView({
 
           {tab === "idioma" ? (
             <div className="card">
-              <div className="eyebrow">Idioma</div>
+              <div className="eyebrow">{t("tabs.language")}</div>
               <div
                 className="display"
                 style={{ fontSize: 22, marginTop: 4, marginBottom: 18 }}
               >
-                Idioma de la aplicación
+                {t("appLanguage")}
               </div>
-              <div className="col" style={{ gap: 8 }}>
-                {LANGUAGE_OPTIONS.map((l) => {
-                  const active = locale === l.code;
-                  return (
-                    <button
-                      key={l.code}
-                      type="button"
-                      className="row between"
-                      onClick={() => selectLocale(l.code)}
-                      style={{
-                        width: "100%",
-                        padding: "14px 18px",
-                        borderRadius: 12,
-                        border: `1px solid ${active ? "var(--primary)" : "var(--hairline)"}`,
-                        background: active ? "var(--primary-50)" : "transparent",
-                        cursor: "pointer",
-                        textAlign: "left",
-                      }}
-                    >
-                      <div className="row" style={{ gap: 12 }}>
-                        <span style={{ fontSize: 22 }}>{l.flag}</span>
-                        <span style={{ fontWeight: 500, color: "var(--fg)" }}>
-                          {l.label}
-                        </span>
-                      </div>
-                      {active ? (
-                        <Icons.check width={18} stroke="var(--primary)" />
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
+              <LocaleSwitcher variant="list" />
             </div>
           ) : null}
 
           {tab === "notif" ? (
             <div className="card">
-              <div className="eyebrow">Preferencias</div>
+              <div className="eyebrow">{t("notificationsEyebrow")}</div>
               <div
                 className="display"
                 style={{ fontSize: 22, marginTop: 4, marginBottom: 18 }}
               >
-                Notificaciones
+                {t("tabs.notifications")}
               </div>
               <div className="col" style={{ gap: 4 }}>
-                {NOTIFICATION_ITEMS.map((label, i) => (
+                {NOTIFICATION_ITEMS.map((key, i) => (
                   <div
-                    key={label}
+                    key={key}
                     className="row between"
                     style={{
                       padding: "12px 4px",
@@ -505,10 +447,10 @@ export function SettingsView({
                           : "0",
                     }}
                   >
-                    <span style={{ fontSize: 14 }}>{label}</span>
+                    <span style={{ fontSize: 14 }}>{t(`notifications.${key}`)}</span>
                     <CrudSwitch
-                      on={notifPrefs[label]}
-                      onChange={(on) => toggleNotification(label, on)}
+                      on={notifPrefs[key]}
+                      onChange={(on) => toggleNotification(key, on)}
                     />
                   </div>
                 ))}
@@ -518,31 +460,31 @@ export function SettingsView({
 
           {tab === "acceso" ? (
             <div className="card">
-              <div className="eyebrow">Administración</div>
+              <div className="eyebrow">{t("access.eyebrow")}</div>
               <div
                 className="display"
                 style={{ fontSize: 22, marginTop: 4, marginBottom: 18 }}
               >
-                Acceso y catálogos
+                {t("tabs.access")}
               </div>
               <div className="col" style={{ gap: 8 }}>
                 {[
                   {
                     href: "/settings/users",
-                    title: "Usuarios del sistema",
-                    desc: "Cuentas con acceso administrativo a EvoChurch.",
+                    title: t("access.systemUsers"),
+                    desc: t("access.systemUsersDesc"),
                     icon: "users" as const,
                   },
                   {
                     href: "/settings/expenses",
-                    title: "Tipos de gasto",
-                    desc: "Categorías para egresos y transacciones.",
+                    title: t("access.expenseTypes"),
+                    desc: t("access.expenseTypesDesc"),
                     icon: "wallet" as const,
                   },
                   {
                     href: "/settings/income-types",
-                    title: "Tipos de ingreso",
-                    desc: "Categorías para ingresos operacionales.",
+                    title: t("access.incomeTypes"),
+                    desc: t("access.incomeTypesDesc"),
                     icon: "trendUp" as const,
                   },
                 ].map((item) => {

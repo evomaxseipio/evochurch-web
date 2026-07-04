@@ -35,7 +35,13 @@ export function canManageAdminUsers(session: AppSession): boolean {
 }
 
 export function canReadMembers(session: AppSession): boolean {
-  return hasPermission(session, "members:read");
+  return canReadMembersWith(session.permissions);
+}
+
+export function canReadMembersWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return permissions.includes("members:read");
 }
 
 export function canWriteMembers(session: AppSession): boolean {

@@ -12,7 +12,7 @@ import { revalidatePath } from "next/cache";
 
 export type FundActionResult =
   | { ok: true }
-  | { ok: false; error: string };
+  | { ok: false; error: string; errorKey?: string };
 
 async function writeSessionContext() {
   const { supabase, session } = await getActionSessionWith("finances:funds:write");
@@ -44,10 +44,10 @@ function parseFundInput(formData: FormData): FundInput {
 }
 
 function validateFundInput(input: FundInput): string | null {
-  if (!input.name) return "El nombre del fondo es obligatorio.";
-  if (!input.startDate) return "La fecha de inicio es obligatoria.";
+  if (!input.name) return "errors.requiredFields";
+  if (!input.startDate) return "errors.requiredFields";
   if (!input.targetAmount || input.targetAmount <= 0) {
-    return "La meta debe ser mayor que cero.";
+    return "finances.invalidAmount";
   }
   return null;
 }
@@ -59,7 +59,8 @@ export async function saveFundAction(
   try {
     const input = parseFundInput(formData);
     const validationError = validateFundInput(input);
-    if (validationError) return { ok: false, error: validationError };
+    if (validationError)
+      return { ok: false, error: validationError, errorKey: validationError };
 
     const { supabase, churchId } = await writeSessionContext();
     await saveFund(supabase, churchId, input);
@@ -69,7 +70,8 @@ export async function saveFundAction(
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "No se pudo guardar el fondo.",
+      error: e instanceof Error ? e.message : "errors.saveFailed",
+      errorKey: "errors.saveFailed",
     };
   }
 }
@@ -80,7 +82,12 @@ export async function deleteFundAction(
 ): Promise<FundActionResult> {
   try {
     const fundId = String(formData.get("fundId") ?? "").trim();
-    if (!fundId) return { ok: false, error: "Fondo no válido." };
+    if (!fundId)
+      return {
+        ok: false,
+        error: "errors.invalidFormat",
+        errorKey: "errors.invalidFormat",
+      };
 
     const { supabase, churchId } = await deleteSessionContext();
     await deleteFund(supabase, churchId, fundId);
@@ -90,7 +97,8 @@ export async function deleteFundAction(
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "No se pudo eliminar el fondo.",
+      error: e instanceof Error ? e.message : "errors.deleteFailed",
+      errorKey: "errors.deleteFailed",
     };
   }
 }
@@ -101,7 +109,12 @@ export async function setPrimaryFundAction(
 ): Promise<FundActionResult> {
   try {
     const fundId = String(formData.get("fundId") ?? "").trim();
-    if (!fundId) return { ok: false, error: "Fondo no válido." };
+    if (!fundId)
+      return {
+        ok: false,
+        error: "errors.invalidFormat",
+        errorKey: "errors.invalidFormat",
+      };
 
     const { supabase, churchId } = await writeSessionContext();
     await setPrimaryFund(supabase, churchId, fundId);
@@ -114,7 +127,8 @@ export async function setPrimaryFundAction(
       error:
         e instanceof Error
           ? e.message
-          : "No se pudo marcar el fondo como primario.",
+          : "errors.saveFailed",
+      errorKey: "errors.saveFailed",
     };
   }
 }

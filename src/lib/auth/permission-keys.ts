@@ -36,6 +36,22 @@ export const PERMISSION_KEYS = [
   "finances:contributions:export",
   "admin_users:manage",
   "roles:manage",
+  "reports:financial_monthly_cead:read",
+  "reports:financial_monthly_cead:export",
+  "reports:financial_monthly_concilio_f001:read",
+  "reports:financial_monthly_concilio_f001:export",
+  "reports:membership_directory:read",
+  "reports:membership_directory:export",
+  "reports:membership_annual_cead:read",
+  "reports:membership_annual_cead:export",
+  "reports:executive_monthly_summary:read",
+  "reports:executive_monthly_summary:export",
+  "reports:financial_income_expense:read",
+  "reports:financial_income_expense:export",
+  "reports:financial_by_fund:read",
+  "reports:financial_by_fund:export",
+  "reports:financial_by_member:read",
+  "reports:financial_by_member:export",
 ] as const;
 
 export type PermissionKey = (typeof PERMISSION_KEYS)[number];

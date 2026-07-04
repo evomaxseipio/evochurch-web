@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { useTranslations } from "next-intl";
 import type { MouseEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -66,6 +67,8 @@ export function RoleCardActionMenu({
   showEdit?: boolean;
   showDeactivate?: boolean;
 }) {
+  const tCommon = useTranslations("common");
+  const tRoles = useTranslations("roles");
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState<{
     top: number | "auto";
@@ -113,8 +116,8 @@ export function RoleCardActionMenu({
         ref={btnRef}
         type="button"
         className="btn ghost icon-only sm roles-card-menu-btn"
-        title="Acciones del rol"
-        aria-label="Acciones del rol"
+        title={tCommon("actions")}
+        aria-label={tCommon("actions")}
         aria-expanded={open}
         onClick={handleToggle}
       >
@@ -149,7 +152,7 @@ export function RoleCardActionMenu({
             {showEdit && onEdit ? (
               <MenuItem
                 icon={<Icons.edit width={15} />}
-                label="Editar"
+                label={tCommon("edit")}
                 onClick={() => {
                   close();
                   onEdit();
@@ -158,7 +161,7 @@ export function RoleCardActionMenu({
             ) : null}
             <MenuItem
               icon={<Icons.users width={15} />}
-              label="Ver usuarios"
+              label={tRoles("viewUsers")}
               onClick={() => {
                 close();
                 onViewUsers();
@@ -175,7 +178,7 @@ export function RoleCardActionMenu({
                 />
                 <MenuItem
                   icon={<Icons.trash width={15} />}
-                  label="Inactivar"
+                  label={tRoles("deactivateRole")}
                   danger
                   onClick={() => {
                     close();

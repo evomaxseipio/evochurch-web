@@ -9,7 +9,11 @@ import {
   isProfileOnlySession,
 } from "@/lib/auth/permissions";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
-import { permissionForPath } from "@/lib/auth/route-permissions";
+import {
+  permissionForPath,
+  requiresReportsHubAccess,
+} from "@/lib/auth/route-permissions";
+import { canAccessReportsHub } from "@/lib/reports/permissions";
 import { redirect } from "next/navigation";
 
 const DENIED_PATH = "/settings?denied=1";
@@ -28,6 +32,12 @@ export async function requirePageAccess(pathname: string): Promise<AppSession> {
   }
 
   const required = permissionForPath(pathname);
+  if (requiresReportsHubAccess(pathname)) {
+    if (!canAccessReportsHub(session)) {
+      redirect(DENIED_PATH);
+    }
+    return session;
+  }
   if (required && !hasPermission(session, required)) {
     redirect(DENIED_PATH);
   }
@@ -50,6 +60,9 @@ export async function getPageAccessOrNull(
   }
 
   const required = permissionForPath(pathname);
+  if (requiresReportsHubAccess(pathname)) {
+    return canAccessReportsHub(session) ? session : null;
+  }
   if (required && !hasPermission(session, required)) return null;
   return session;
 }

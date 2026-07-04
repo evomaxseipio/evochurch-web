@@ -6,6 +6,7 @@ import {
 } from "@/app/(app)/settings/income-types/actions";
 import { CatalogTypesListView } from "@/components/catalog/catalog-types-list-view";
 import type { CatalogStats, IncomeTypeCatalogRow } from "@/lib/catalog/types";
+import { useTranslations } from "next-intl";
 
 const STAT_CARDS = [
   {
@@ -39,23 +40,24 @@ export function IncomeTypesListView({
   canWrite?: boolean;
   canDelete?: boolean;
 }) {
+  const t = useTranslations("catalogs");
   return (
     <CatalogTypesListView
       rows={rows}
       stats={stats}
       canWrite={canWrite}
       canDelete={canDelete}
-      eyebrow="Configuración · Finanzas"
-      title="Tipos de ingreso"
-      titleAccent="de la iglesia"
-      subtitle="Categorías para clasificar las entradas de dinero operacionales."
+      eyebrow={t("configFinances")}
+      title={t("income.title")}
+      titleAccent={t("churchSuffix")}
+      subtitle={t("income.subtitle")}
       statCards={STAT_CARDS}
-      entityLabel="Tipo de ingreso"
-      newLabel="Nuevo tipo de ingreso"
+      entityLabel={t("income.entityLabel")}
+      newLabel={t("income.newLabel")}
       exportPrefix="TiposIngreso"
       saveAction={saveIncomeTypeAction}
       deleteAction={deleteIncomeTypeAction}
-      activeHint="Si está inactivo, no aparecerá al registrar nuevos ingresos operacionales."
+      activeHint={t("income.activeHint")}
     />
   );
 }
