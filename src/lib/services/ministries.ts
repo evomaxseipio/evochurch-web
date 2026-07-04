@@ -12,7 +12,7 @@ async function fetchMinistriesFromDb(churchId: number): Promise<Ministry[]> {
   const { data, error } = await supabase
     .from("church_ministries")
     .select(
-      "id, name, descripcion, is_active, leader_profile_ids, member_profile_ids, color, is_featured, created_at",
+      "id, name, descripcion, is_active, leader_profile_ids, member_profile_ids, color, is_featured, default_fund_id, created_at",
     )
     .eq("church_id", churchId)
     .order("is_featured", { ascending: false })
@@ -28,7 +28,7 @@ export async function fetchMinistries(
 ): Promise<Ministry[]> {
   return unstable_cache(
     () => fetchMinistriesFromDb(churchId),
-    ["catalog:ministries", "v2", String(churchId)],
+    ["catalog:ministries", "v3", String(churchId)],
     { tags: [catalogTags.ministries(churchId)], revalidate: 300 },
   )();
 }

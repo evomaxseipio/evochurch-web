@@ -1,4 +1,11 @@
-import type { Fund, FundsListStats } from "@/lib/funds/types";
+import type { Fund, FundsListStats, FundKind } from "@/lib/funds/types";
+
+const FUND_KINDS = new Set<FundKind>(["operating", "project", "event"]);
+
+function parseFundKind(value: unknown): FundKind {
+  const raw = typeof value === "string" ? value : "";
+  return FUND_KINDS.has(raw as FundKind) ? (raw as FundKind) : "operating";
+}
 
 function asRecord(v: unknown): Record<string, unknown> | null {
   return v && typeof v === "object" && !Array.isArray(v)
@@ -38,6 +45,8 @@ function parseFundRow(row: Record<string, unknown>): Fund {
     totalContributions: asNumber(row.total_contributions),
     isActive: asBool(row.is_active, true),
     isPrimary: asBool(row.is_primary, false),
+    ministryId: row.ministry_id ? asString(row.ministry_id) : null,
+    fundKind: parseFundKind(row.fund_kind),
     createdAt: row.created_at ? asString(row.created_at) : null,
     updatedAt: row.updated_at ? asString(row.updated_at) : null,
   };

@@ -5,12 +5,16 @@ import {
   hasPermission,
   requirePermission,
 } from "@/lib/auth/permissions";
-import { revalidateMinistriesCatalog } from "@/lib/cache/catalog-tags";
+import {
+  revalidateMinistriesCatalog,
+  revalidateFundsCatalog,
+} from "@/lib/cache/catalog-tags";
 import type { MinistryColor, MinistryFormInput } from "@/lib/ministries/types";
 import {
   deleteMinistry,
   saveMinistry,
 } from "@/lib/services/ministries";
+import { setMinistryDefaultFund } from "@/lib/services/funds";
 import { revalidatePath } from "next/cache";
 
 export type MinistryActionResult =
@@ -138,6 +142,35 @@ export async function deleteMinistryAction(
       ok: false,
       error:
         e instanceof Error ? e.message : "No se pudo eliminar el ministerio.",
+    };
+  }
+}
+
+export async function setMinistryDefaultFundAction(
+  _prev: MinistryActionResult | null,
+  formData: FormData,
+): Promise<MinistryActionResult> {
+  try {
+    const ministryId = String(formData.get("ministryId") ?? "").trim();
+    const fundId = String(formData.get("fundId") ?? "").trim();
+    if (!ministryId || !fundId) {
+      return { ok: false, error: "Registro no válido." };
+    }
+
+    const { supabase, churchId } = await assertMinistryAccess(ministryId);
+    await setMinistryDefaultFund(supabase, churchId, ministryId, fundId);
+    revalidateMinistriesCatalog(churchId);
+    revalidateFundsCatalog(churchId);
+    revalidatePath("/ministerios");
+    revalidatePath("/finances/funds");
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : "No se pudo establecer el fondo principal.",
     };
   }
 }

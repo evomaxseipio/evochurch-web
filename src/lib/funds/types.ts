@@ -2,6 +2,10 @@ export type FundStatusFilter = "all" | "active" | "inactive";
 
 export type FundViewMode = "grid" | "list";
 
+export type FundKind = "operating" | "project" | "event";
+
+export type FundMinistryFilter = "all" | "church" | string;
+
 export type Fund = {
   fundId: string;
   churchId: number;
@@ -13,6 +17,8 @@ export type Fund = {
   totalContributions: number;
   isActive: boolean;
   isPrimary: boolean;
+  ministryId: string | null;
+  fundKind: FundKind;
   createdAt: string | null;
   updatedAt: string | null;
 };
@@ -34,4 +40,6 @@ export type FundInput = {
   endDate: string | null;
   isActive: boolean;
   isPrimary: boolean;
+  ministryId?: string | null;
+  fundKind?: FundKind;
 };

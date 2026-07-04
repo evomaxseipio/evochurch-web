@@ -3,6 +3,7 @@ import { computeMinistryStats } from "@/lib/ministries/parse";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { fetchMembersPage } from "@/lib/services/members";
 import { fetchMinistries } from "@/lib/services/ministries";
+import { fetchFunds } from "@/lib/services/funds";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 
@@ -14,9 +15,10 @@ export default async function MinisteriosPage() {
   let error: string | null = null;
   let members: Awaited<ReturnType<typeof fetchMembersPage>>["members"] = [];
   let ministries: Awaited<ReturnType<typeof fetchMinistries>> = [];
+  let funds: Awaited<ReturnType<typeof fetchFunds>> = [];
 
   try {
-    const [membersResult, ministriesResult] = await Promise.all([
+    const [membersResult, ministriesResult, fundsResult] = await Promise.all([
       fetchMembersPage(supabase, {
         churchId: session.churchId,
         page: 1,
@@ -24,9 +26,11 @@ export default async function MinisteriosPage() {
         filter: "all",
       }),
       fetchMinistries(supabase, session.churchId),
+      fetchFunds(supabase, session.churchId),
     ]);
     members = membersResult.members;
     ministries = ministriesResult;
+    funds = fundsResult;
   } catch (e) {
     error =
       e instanceof Error
@@ -53,6 +57,7 @@ export default async function MinisteriosPage() {
       ministries={ministries}
       stats={computeMinistryStats(ministries)}
       members={members}
+      funds={funds}
       permissions={session.permissions}
       profileId={session.profileId}
     />

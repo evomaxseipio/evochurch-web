@@ -489,6 +489,8 @@
     "distributionByFund": "Distribución por fondo",
     "distributionSubtitle": "Participación de cada fondo en el total recaudado",
     "allFunds": "Todos los fondos",
+    "filterChurchFunds": "Fondos de iglesia",
+    "filterByMinistry": "Filtrar por ministerio",
     "fundCount": "{count} fondos",
     "recordsNoun": "fondos",
     "messages": {
@@ -587,7 +589,30 @@
     "noMatches": "No hay ministerios que coincidan con los filtros.",
     "activeSince": "Activo desde",
     "deleteMinistryMessage": "Se quitará de la lista. Esta acción no se puede deshacer.",
-    "deleted": "Ministerio eliminado."
+    "deleted": "Ministerio eliminado.",
+    "viewFunds": "Ver fondos",
+    "funds": {
+      "title": "Fondos del ministerio",
+      "count": "{count, plural, one {# fondo} other {# fondos}}",
+      "empty": "Este ministerio aún no tiene fondos vinculados.",
+      "createOperating": "Fondo operativo",
+      "createProject": "Fondo de proyecto",
+      "defaultFund": "Principal",
+      "defaultUpdated": "Fondo principal actualizado.",
+      "setAsDefault": "Marcar como principal",
+      "recordContribution": "Registrar aporte",
+      "recordToDefault": "Aporte al fondo principal",
+      "defaultFundHint": "Las cuotas y ofrendas internas van al fondo principal.",
+      "goalProgress": "Avance de meta",
+      "fundKind": "Tipo de fondo",
+      "kindOperating": "Operativo",
+      "kindProject": "Proyecto / campaña",
+      "kindEvent": "Evento",
+      "createForMinistry": "Nuevo fondo · {name}",
+      "editForMinistry": "Editar fondo · {name}",
+      "ministryOptional": "Ministerio (opcional)",
+      "churchFund": "Fondo general de iglesia"
+    }
   },
   "settings": {
     "title": "Configuración",

@@ -9,10 +9,13 @@ import {
   canCreateMinistryWith,
   canEditMinistryWith,
   canReadMembersWith,
+  canWriteContributionsWith,
+  canWriteFundsWith,
 } from "@/lib/auth/permissions";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { MinistryCard } from "@/components/ministries/ministry-card";
 import { MinistryFormDrawer } from "@/components/ministries/ministry-form-drawer";
+import { MinistryFundsDialog } from "@/components/ministries/ministry-funds-dialog";
 import { MinistryMembersDialog } from "@/components/ministries/ministry-members-dialog";
 import {
   MemberAvatarStack,
@@ -40,6 +43,7 @@ import type {
   MinistryStatusFilter,
   MinistryViewMode,
 } from "@/lib/ministries/types";
+import type { Fund } from "@/lib/funds/types";
 import type { IconName } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -75,12 +79,14 @@ export function MinistriesListView({
   ministries,
   stats,
   members,
+  funds,
   permissions,
   profileId,
 }: {
   ministries: Ministry[];
   stats: MinistryStats;
   members: Member[];
+  funds: Fund[];
   permissions: PermissionKey[];
   profileId: string;
 }) {
@@ -88,6 +94,8 @@ export function MinistriesListView({
   const tCommon = useTranslations("common");
   const canCreate = canCreateMinistryWith(permissions);
   const canViewProfiles = canReadMembersWith(permissions);
+  const canManageFunds = canWriteFundsWith(permissions);
+  const canRecordContribution = canWriteContributionsWith(permissions);
   const router = useRouter();
   const deleteInitial = null;
   const [deleteState, deleteFormAction, deletePending] = useActionState(
@@ -106,6 +114,9 @@ export function MinistriesListView({
   } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Ministry | null>(null);
   const [membersDialogTarget, setMembersDialogTarget] = useState<Ministry | null>(
+    null,
+  );
+  const [fundsDialogTarget, setFundsDialogTarget] = useState<Ministry | null>(
     null,
   );
 
@@ -159,6 +170,7 @@ export function MinistriesListView({
     return {
       onEdit: editable ? () => setFormState({ mode: "edit", ministry }) : noop,
       onViewMembers: () => setMembersDialogTarget(ministry),
+      onViewFunds: () => setFundsDialogTarget(ministry),
       onAssignLeader: editable ? () => setFormState({ mode: "edit", ministry }) : noop,
       onViewEvents: () => router.push("/eventos"),
       onDelete: editable ? () => setDeleteTarget(ministry) : noop,
@@ -396,6 +408,15 @@ export function MinistriesListView({
         canViewProfiles={canViewProfiles}
         open={membersDialogTarget != null}
         onClose={() => setMembersDialogTarget(null)}
+      />
+
+      <MinistryFundsDialog
+        ministry={fundsDialogTarget}
+        funds={funds}
+        canManageFunds={canManageFunds}
+        canRecordContribution={canRecordContribution}
+        open={fundsDialogTarget != null}
+        onClose={() => setFundsDialogTarget(null)}
       />
     </div>
   );

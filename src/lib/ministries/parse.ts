@@ -65,6 +65,9 @@ export function parseMinistryRow(row: unknown): Ministry | null {
     color,
     isActive: record.is_active !== false,
     isFeatured: record.is_featured === true,
+    defaultFundId: record.default_fund_id
+      ? String(record.default_fund_id).trim()
+      : null,
     createdAt: toDateOnly(record.created_at),
   };
 }

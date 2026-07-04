@@ -18,6 +18,7 @@ export function MinistryCard({
   members,
   onEdit,
   onViewMembers,
+  onViewFunds,
   onAssignLeader,
   onViewEvents,
   onDelete,
@@ -26,6 +27,7 @@ export function MinistryCard({
   members: Member[];
   onEdit: () => void;
   onViewMembers: () => void;
+  onViewFunds: () => void;
   onAssignLeader: () => void;
   onViewEvents: () => void;
   onDelete: () => void;
@@ -69,6 +71,7 @@ export function MinistryCard({
           ministry={ministry}
           onEdit={onEdit}
           onViewMembers={onViewMembers}
+          onViewFunds={onViewFunds}
           onAssignLeader={onAssignLeader}
           onViewEvents={onViewEvents}
           onDelete={onDelete}

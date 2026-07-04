@@ -9,6 +9,7 @@ export type Ministry = {
   color: MinistryColor;
   isActive: boolean;
   isFeatured: boolean;
+  defaultFundId: string | null;
   createdAt: string;
 };
 

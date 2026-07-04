@@ -7,7 +7,8 @@ import {
 import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { useActionToast } from "@/hooks/use-action-toast";
-import type { Fund } from "@/lib/funds/types";
+import type { Fund, FundKind } from "@/lib/funds/types";
+import type { Ministry } from "@/lib/ministries/types";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useState, startTransition } from "react";
 
@@ -22,6 +23,14 @@ type FundFormValues = {
   endDate: string;
   active: boolean;
   primary: boolean;
+  fundKind: FundKind;
+  ministryId: string;
+};
+
+export type FundFormMinistryContext = {
+  ministryId: string;
+  ministryName: string;
+  defaultFundKind?: FundKind;
 };
 
 function MoneyInput({
@@ -75,16 +84,26 @@ function MoneyInput({
   );
 }
 
-function fundToFormValues(fund: Fund | null): FundFormValues {
+function todayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function fundToFormValues(
+  fund: Fund | null,
+  ministryContext?: FundFormMinistryContext,
+): FundFormValues {
   return {
     name: fund?.name ?? "",
     description: fund?.description ?? "",
     goal: fund?.targetAmount ? String(fund.targetAmount) : "",
     balance: fund?.totalContributions ? String(fund.totalContributions) : "",
-    startDate: fund?.startDate ?? "",
+    startDate: fund?.startDate ?? todayIsoDate(),
     endDate: fund?.endDate ?? "",
     active: fund?.isActive ?? true,
     primary: fund?.isPrimary ?? false,
+    fundKind:
+      fund?.fundKind ?? ministryContext?.defaultFundKind ?? ("operating" as FundKind),
+    ministryId: fund?.ministryId ?? ministryContext?.ministryId ?? "",
   };
 }
 
@@ -93,18 +112,28 @@ export function FundFormDrawer({
   fund,
   open,
   onClose,
+  ministryContext,
+  ministries,
 }: {
   mode: "new" | "edit";
   fund: Fund | null;
   open: boolean;
   onClose: () => void;
+  ministryContext?: FundFormMinistryContext;
+  ministries?: Ministry[];
 }) {
   const tCommon = useTranslations("common");
   const tFunds = useTranslations("funds");
+  const tMinFunds = useTranslations("ministerios.funds");
   const locale = useLocale() as "es" | "en" | "fr";
   const [state, formAction, pending] = useActionState(saveFundAction, initial);
-  const [v, setV] = useState<FundFormValues>(() => fundToFormValues(fund));
+  const [v, setV] = useState<FundFormValues>(() =>
+    fundToFormValues(fund, ministryContext),
+  );
   const [errs, setErrs] = useState<Record<string, string>>({});
+
+  const lockedMinistry = ministryContext != null;
+  const goalRequired = v.fundKind !== "operating";
 
   const upd = <K extends keyof FundFormValues>(k: K, val: FundFormValues[K]) =>
     setV((s) => ({ ...s, [k]: val }));
@@ -127,7 +156,7 @@ export function FundFormDrawer({
   function submit() {
     const e: Record<string, string> = {};
     if (!v.name.trim()) e.name = "Obligatorio";
-    if (v.goal === "" || +v.goal <= 0) e.goal = "Meta inválida";
+    if (goalRequired && (v.goal === "" || +v.goal <= 0)) e.goal = "Meta inválida";
     if (!v.startDate) e.startDate = "Obligatorio";
     setErrs(e);
     if (Object.keys(e).length) return;
@@ -136,12 +165,14 @@ export function FundFormDrawer({
     if (fund?.fundId) fd.set("fundId", fund.fundId);
     fd.set("name", v.name.trim());
     fd.set("description", v.description.trim());
-    fd.set("targetAmount", v.goal);
+    fd.set("targetAmount", v.goal || "0");
     fd.set("totalContributions", v.balance || "0");
     fd.set("startDate", v.startDate);
     fd.set("endDate", v.endDate);
     fd.set("isActive", v.active ? "true" : "false");
-    fd.set("isPrimary", v.primary ? "true" : "false");
+    fd.set("isPrimary", lockedMinistry ? "false" : v.primary ? "true" : "false");
+    fd.set("fundKind", v.fundKind);
+    if (v.ministryId) fd.set("ministryId", v.ministryId);
     startTransition(() => {
       formAction(fd);
     });
@@ -157,7 +188,17 @@ export function FundFormDrawer({
               {mode === "new" ? tCommon("newRecord") : tCommon("editRecord")}
             </div>
             <h2 id="fund-form-title" style={{ margin: "4px 0 0", fontSize: 18 }}>
-              {mode === "new" ? tFunds("newFund") : tFunds("editFund")}
+              {lockedMinistry
+                ? mode === "new"
+                  ? tMinFunds("createForMinistry", {
+                      name: ministryContext.ministryName,
+                    })
+                  : tMinFunds("editForMinistry", {
+                      name: ministryContext.ministryName,
+                    })
+                : mode === "new"
+                  ? tFunds("newFund")
+                  : tFunds("editFund")}
             </h2>
           </div>
           <button
@@ -202,10 +243,51 @@ export function FundFormDrawer({
             </div>
           </div>
 
+          {lockedMinistry || mode === "new" ? (
+            <div className="field">
+              <label>{tMinFunds("fundKind")}</label>
+              <div className="input-wrap">
+                <select
+                  value={v.fundKind}
+                  disabled={mode === "edit"}
+                  onChange={(e) => upd("fundKind", e.target.value as FundKind)}
+                >
+                  <option value="operating">{tMinFunds("kindOperating")}</option>
+                  <option value="project">{tMinFunds("kindProject")}</option>
+                  <option value="event">{tMinFunds("kindEvent")}</option>
+                </select>
+              </div>
+            </div>
+          ) : null}
+
+          {!lockedMinistry && ministries && ministries.length > 0 ? (
+            <div className="field">
+              <label>{tMinFunds("ministryOptional")}</label>
+              <div className="input-wrap">
+                <select
+                  value={v.ministryId}
+                  onChange={(e) => upd("ministryId", e.target.value)}
+                >
+                  <option value="">{tMinFunds("churchFund")}</option>
+                  {ministries.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ) : null}
+
           <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
             <div className="field" style={{ flex: "1 1 140px", minWidth: 0 }}>
               <label>
-                {tFunds("goal")} <span style={{ color: "var(--danger)" }}>*</span>
+                {tFunds("goal")}
+                {goalRequired ? (
+                  <span style={{ color: "var(--danger)" }}> *</span>
+                ) : (
+                  <span className="muted tiny"> ({tCommon("optional")})</span>
+                )}
               </label>
               <MoneyInput
                 value={v.goal}
@@ -296,27 +378,25 @@ export function FundFormDrawer({
           >
             <div>
               <div style={{ fontWeight: 500, fontSize: 13 }}>{tFunds("activeFund")}</div>
-              <div className="tiny muted">
-                {tFunds("activeHelp")}
-              </div>
+              <div className="tiny muted">{tFunds("activeHelp")}</div>
             </div>
             <CrudSwitch on={v.active} onChange={(val) => upd("active", val)} />
           </div>
 
-          <div
-            className="row between"
-            style={{ padding: "10px 0", borderTop: "1px solid var(--line)" }}
-          >
-            <div>
-              <div style={{ fontWeight: 500, fontSize: 13 }}>
-                {tFunds("markPrimary")}
+          {!lockedMinistry ? (
+            <div
+              className="row between"
+              style={{ padding: "10px 0", borderTop: "1px solid var(--line)" }}
+            >
+              <div>
+                <div style={{ fontWeight: 500, fontSize: 13 }}>
+                  {tFunds("markPrimary")}
+                </div>
+                <div className="tiny muted">{tFunds("primaryHelp")}</div>
               </div>
-              <div className="tiny muted">
-                {tFunds("primaryHelp")}
-              </div>
+              <CrudSwitch on={v.primary} onChange={(val) => upd("primary", val)} />
             </div>
-            <CrudSwitch on={v.primary} onChange={(val) => upd("primary", val)} />
-          </div>
+          ) : null}
         </div>
 
         <div className="drawer-foot">

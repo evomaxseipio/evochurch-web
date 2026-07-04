@@ -24,10 +24,13 @@ import { useIsDesktop } from "@/hooks/use-is-desktop";
 import { formatFundDate, fundProgressPct, sortFunds } from "@/lib/funds/parse";
 import type {
   Fund,
+  FundMinistryFilter,
   FundStatusFilter,
   FundViewMode,
   FundsListStats,
 } from "@/lib/funds/types";
+import { filterFundsByMinistryScope } from "@/lib/ministries/funds";
+import type { Ministry } from "@/lib/ministries/types";
 import { fmtRD, fmtRDshort } from "@/lib/format-currency";
 import { formatDate } from "@/lib/i18n/format";
 import { toast } from "@/lib/toast";
@@ -60,9 +63,11 @@ const primaryInitial: FundActionResult | null = null;
 export function FundsListView({
   funds,
   stats,
+  ministries = [],
 }: {
   funds: Fund[];
   stats: FundsListStats;
+  ministries?: Ministry[];
 }) {
   const tCommon = useTranslations("common");
   const tFinances = useTranslations("finances");
@@ -78,6 +83,7 @@ export function FundsListView({
   const isDesktop = useIsDesktop();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FundStatusFilter>("all");
+  const [ministryFilter, setMinistryFilter] = useState<FundMinistryFilter>("all");
   const [view, setView] = useState<FundViewMode>("grid");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSize>(10);
@@ -108,14 +114,15 @@ export function FundsListView({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const rows = funds.filter((f) => {
+    const scoped = filterFundsByMinistryScope(funds, ministryFilter);
+    const rows = scoped.filter((f) => {
       if (statusFilter === "active" && !f.isActive) return false;
       if (statusFilter === "inactive" && f.isActive) return false;
       if (q && !f.name.toLowerCase().includes(q)) return false;
       return true;
     });
     return sortFunds(rows);
-  }, [funds, query, statusFilter]);
+  }, [funds, query, statusFilter, ministryFilter]);
 
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -277,6 +284,28 @@ export function FundsListView({
             setStatusFilter(next);
             setPage(1);
           }}
+          middle={
+            ministries.length > 0 ? (
+              <div className="input-wrap" style={{ minWidth: 200 }}>
+                <select
+                  value={ministryFilter}
+                  onChange={(e) => {
+                    setMinistryFilter(e.target.value as FundMinistryFilter);
+                    setPage(1);
+                  }}
+                  aria-label={tFunds("filterByMinistry")}
+                >
+                  <option value="all">{tFunds("allFunds")}</option>
+                  <option value="church">{tFunds("filterChurchFunds")}</option>
+                  {ministries.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null
+          }
           trailing={
             <>
               {isDesktop ? (
@@ -494,6 +523,7 @@ export function FundsListView({
         fund={formState?.fund ?? null}
         open={formState !== null}
         onClose={() => setFormState(null)}
+        ministries={ministries}
       />
     </div>
   );

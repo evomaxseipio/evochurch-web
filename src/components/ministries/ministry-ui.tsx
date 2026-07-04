@@ -221,6 +221,7 @@ type MenuItem = {
 export function MinistryActionMenu({
   onEdit,
   onViewMembers,
+  onViewFunds,
   onAssignLeader,
   onViewEvents,
   onDelete,
@@ -228,6 +229,7 @@ export function MinistryActionMenu({
   ministry: Ministry;
   onEdit: () => void;
   onViewMembers: () => void;
+  onViewFunds: () => void;
   onAssignLeader: () => void;
   onViewEvents: () => void;
   onDelete: () => void;
@@ -258,6 +260,12 @@ export function MinistryActionMenu({
       label: t("viewMembers"),
       icon: <Icons.users size={15} />,
       onClick: onViewMembers,
+    },
+    {
+      id: "funds",
+      label: t("viewFunds"),
+      icon: <Icons.wallet size={15} />,
+      onClick: onViewFunds,
     },
     {
       id: "leader",

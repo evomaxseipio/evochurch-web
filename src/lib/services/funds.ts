@@ -43,6 +43,8 @@ export async function saveFund(
     p_is_active: input.isActive,
     p_is_primary: input.isPrimary,
     p_total_contributions: input.totalContributions,
+    p_ministry_id: input.ministryId ?? null,
+    p_fund_kind: input.fundKind ?? "operating",
   });
 
   if (error) throw error;
@@ -77,4 +79,20 @@ export async function setPrimaryFund(
 
   if (error) throw error;
   assertRpcSuccess(data, "No se pudo marcar el fondo como primario.");
+}
+
+export async function setMinistryDefaultFund(
+  supabase: SupabaseClient,
+  churchId: number,
+  ministryId: string,
+  fundId: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_set_ministry_default_fund", {
+    p_church_id: churchId,
+    p_ministry_id: ministryId,
+    p_fund_id: fundId,
+  });
+
+  if (error) throw error;
+  assertRpcSuccess(data, "No se pudo establecer el fondo principal del ministerio.");
 }

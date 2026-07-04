@@ -1,13 +1,17 @@
 "use server";
 
 import { getActionSessionWith } from "@/lib/auth/permissions-server";
-import type { FundInput } from "@/lib/funds/types";
+import type { FundInput, FundKind } from "@/lib/funds/types";
+import { validateFundInputForKind } from "@/lib/ministries/funds";
 import {
   deleteFund,
   saveFund,
   setPrimaryFund,
 } from "@/lib/services/funds";
-import { revalidateFundsCatalog } from "@/lib/cache/catalog-tags";
+import {
+  revalidateFundsCatalog,
+  revalidateMinistriesCatalog,
+} from "@/lib/cache/catalog-tags";
 import { revalidatePath } from "next/cache";
 
 export type FundActionResult =
@@ -24,11 +28,18 @@ async function deleteSessionContext() {
   return { supabase, churchId: session.churchId };
 }
 
+const FUND_KINDS = new Set<FundKind>(["operating", "project", "event"]);
+
+function parseFundKind(raw: string): FundKind {
+  return FUND_KINDS.has(raw as FundKind) ? (raw as FundKind) : "operating";
+}
+
 function parseFundInput(formData: FormData): FundInput {
   const fundId = String(formData.get("fundId") ?? "").trim();
   const targetRaw = String(formData.get("targetAmount") ?? "").trim();
   const balanceRaw = String(formData.get("totalContributions") ?? "").trim();
   const endDate = String(formData.get("endDate") ?? "").trim();
+  const ministryId = String(formData.get("ministryId") ?? "").trim();
 
   return {
     fundId: fundId || null,
@@ -40,16 +51,18 @@ function parseFundInput(formData: FormData): FundInput {
     endDate: endDate || null,
     isActive: formData.get("isActive") === "true",
     isPrimary: formData.get("isPrimary") === "true",
+    ministryId: ministryId || null,
+    fundKind: parseFundKind(String(formData.get("fundKind") ?? "operating")),
   };
 }
 
 function validateFundInput(input: FundInput): string | null {
-  if (!input.name) return "errors.requiredFields";
-  if (!input.startDate) return "errors.requiredFields";
-  if (!input.targetAmount || input.targetAmount <= 0) {
-    return "finances.invalidAmount";
-  }
-  return null;
+  return validateFundInputForKind({
+    name: input.name,
+    startDate: input.startDate,
+    targetAmount: input.targetAmount,
+    fundKind: input.fundKind,
+  });
 }
 
 export async function saveFundAction(
@@ -65,7 +78,9 @@ export async function saveFundAction(
     const { supabase, churchId } = await writeSessionContext();
     await saveFund(supabase, churchId, input);
     revalidateFundsCatalog(churchId);
+    if (input.ministryId) revalidateMinistriesCatalog(churchId);
     revalidatePath("/finances/funds");
+    revalidatePath("/ministerios");
     return { ok: true };
   } catch (e) {
     return {

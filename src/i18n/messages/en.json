@@ -489,6 +489,8 @@
     "distributionByFund": "Distribution by fund",
     "distributionSubtitle": "Each fund share of total raised",
     "allFunds": "All funds",
+    "filterChurchFunds": "Church funds",
+    "filterByMinistry": "Filter by ministry",
     "fundCount": "{count} funds",
     "recordsNoun": "funds",
     "messages": {
@@ -587,7 +589,30 @@
     "noMatches": "No ministries match the current filters.",
     "activeSince": "Active since",
     "deleteMinistryMessage": "It will be removed from the list. This action cannot be undone.",
-    "deleted": "Ministry deleted."
+    "deleted": "Ministry deleted.",
+    "viewFunds": "View funds",
+    "funds": {
+      "title": "Ministry funds",
+      "count": "{count, plural, one {# fund} other {# funds}}",
+      "empty": "This ministry has no linked funds yet.",
+      "createOperating": "Operating fund",
+      "createProject": "Project fund",
+      "defaultFund": "Primary",
+      "defaultUpdated": "Primary fund updated.",
+      "setAsDefault": "Set as primary",
+      "recordContribution": "Record contribution",
+      "recordToDefault": "Contribute to primary fund",
+      "defaultFundHint": "Dues and internal offerings go to the primary fund.",
+      "goalProgress": "Goal progress",
+      "fundKind": "Fund type",
+      "kindOperating": "Operating",
+      "kindProject": "Project / campaign",
+      "kindEvent": "Event",
+      "createForMinistry": "New fund · {name}",
+      "editForMinistry": "Edit fund · {name}",
+      "ministryOptional": "Ministry (optional)",
+      "churchFund": "Church general fund"
+    }
   },
   "settings": {
     "title": "Settings",

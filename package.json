@@ -11,7 +11,8 @@
     "qa:rbac": "node scripts/qa-rbac.mjs",
     "qa:rbac:seed": "node scripts/seed-rbac-qa-users.mjs --write-env",
     "qa:rbac:e2e": "playwright test e2e/rbac",
-    "qa:rbac:full": "node scripts/qa-rbac-full.mjs --seed"
+    "qa:rbac:full": "node scripts/qa-rbac-full.mjs --seed",
+    "test:unit": "tsx --test src/lib/ministries/funds.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
@@ -36,6 +37,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.20.3",
     "typescript": "^5",
     "ws": "^8.21.0"
   }
