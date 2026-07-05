@@ -41,7 +41,7 @@ export function FundActionMenu({
   onMakePrimary: () => void;
   onViewTx: () => void;
   onViewContrib: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }) {
   const tCommon = useTranslations("common");
   const tFunds = useTranslations("funds");
@@ -108,13 +108,15 @@ export function FundActionMenu({
       icon: <Icons.wallet size={15} />,
       on: onViewContrib,
     },
-    {
-      id: "del",
-      label: tCommon("delete"),
-      icon: <Icons.trash size={15} />,
-      on: onDelete,
-      danger: true,
-    },
+    onDelete
+      ? {
+          id: "del",
+          label: tCommon("delete"),
+          icon: <Icons.trash size={15} />,
+          on: onDelete,
+          danger: true,
+        }
+      : null,
   ].filter(Boolean) as Array<{
     id: string;
     label: string;

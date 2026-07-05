@@ -28,7 +28,7 @@ export function FundCard({
   onMakePrimary: () => void;
   onViewTx: () => void;
   onViewContrib: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }) {
   const tFunds = useTranslations("funds");
   const locale = useLocale();

@@ -17,7 +17,7 @@ export default async function UsersSettingsPage() {
   const adminSession = canManageAdminUsers(session) ? session : null;
   if (!adminSession) {
     return (
-      <div className="card" style={{ padding: 24 }}>
+      <div className="card" style={{ padding: 24 }} data-testid="admin-users-denied">
         <div className="eyebrow">{tAdmin("settingsAccessEyebrow")}</div>
         <h1 className="display" style={{ fontSize: 28, margin: "8px 0 12px" }}>
           {tAdmin("title")}

@@ -95,16 +95,11 @@ export function LocaleSwitcher({
         disabled={pending}
         title={localeLabels[currentLocale].label}
       >
-        <Icons.globe size={18} />
         <span
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-            marginLeft: 2,
-            letterSpacing: "0.04em",
-          }}
+          aria-hidden
+          style={{ fontSize: 18, lineHeight: 1 }}
         >
-          {localeLabels[currentLocale].code}
+          {localeLabels[currentLocale].flag}
         </span>
       </button>
 

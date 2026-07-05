@@ -8,9 +8,12 @@ import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { useActionToast } from "@/hooks/use-action-toast";
 import type { Fund, FundKind } from "@/lib/funds/types";
+import {
+  ministryAllowsOperatingKind,
+} from "@/lib/ministries/funds";
 import type { Ministry } from "@/lib/ministries/types";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useState, startTransition } from "react";
+import { useActionState, useMemo, useState, startTransition } from "react";
 
 const initial: FundActionResult | null = null;
 
@@ -31,7 +34,10 @@ export type FundFormMinistryContext = {
   ministryId: string;
   ministryName: string;
   defaultFundKind?: FundKind;
+  hasOperatingFund: boolean;
 };
+
+const ALL_KINDS: FundKind[] = ["operating", "project", "event"];
 
 function MoneyInput({
   value,
@@ -114,6 +120,7 @@ export function FundFormDrawer({
   onClose,
   ministryContext,
   ministries,
+  funds = [],
 }: {
   mode: "new" | "edit";
   fund: Fund | null;
@@ -121,6 +128,7 @@ export function FundFormDrawer({
   onClose: () => void;
   ministryContext?: FundFormMinistryContext;
   ministries?: Ministry[];
+  funds?: Fund[];
 }) {
   const tCommon = useTranslations("common");
   const tFunds = useTranslations("funds");
@@ -135,8 +143,51 @@ export function FundFormDrawer({
   const lockedMinistry = ministryContext != null;
   const goalRequired = v.fundKind !== "operating";
 
+  const scopedMinistryId = lockedMinistry
+    ? ministryContext.ministryId
+    : v.ministryId;
+
+  const allowedKinds = useMemo((): FundKind[] => {
+    if (mode === "edit" && fund) return [fund.fundKind];
+    if (lockedMinistry && ministryContext) {
+      if (
+        !ministryContext.hasOperatingFund &&
+        ministryContext.defaultFundKind === "operating"
+      ) {
+        return ["operating"];
+      }
+      return ["project", "event"];
+    }
+    if (!scopedMinistryId) return ALL_KINDS;
+    if (!ministryAllowsOperatingKind(funds, scopedMinistryId)) {
+      return ["project", "event"];
+    }
+    return ALL_KINDS;
+  }, [mode, fund, lockedMinistry, ministryContext, scopedMinistryId, funds]);
+
+  const showKindPicker = allowedKinds.length > 1;
+  const isMinistryOperatingCreate =
+    mode === "new" &&
+    scopedMinistryId != null &&
+    allowedKinds.length === 1 &&
+    allowedKinds[0] === "operating";
+
   const upd = <K extends keyof FundFormValues>(k: K, val: FundFormValues[K]) =>
-    setV((s) => ({ ...s, [k]: val }));
+    setV((s) => {
+      const next = { ...s, [k]: val };
+      if (k === "ministryId" && typeof val === "string" && mode === "new") {
+        const allowsOperating = ministryAllowsOperatingKind(funds, val);
+        if (!allowsOperating && next.fundKind === "operating") {
+          next.fundKind = "project";
+        }
+      }
+      if (k === "fundKind" || k === "ministryId") {
+        if (!allowedKinds.includes(next.fundKind)) {
+          next.fundKind = allowedKinds[0] ?? "project";
+        }
+      }
+      return next;
+    });
 
   useActionToast(state, {
     successMessage:
@@ -172,7 +223,7 @@ export function FundFormDrawer({
     fd.set("isActive", v.active ? "true" : "false");
     fd.set("isPrimary", lockedMinistry ? "false" : v.primary ? "true" : "false");
     fd.set("fundKind", v.fundKind);
-    if (v.ministryId) fd.set("ministryId", v.ministryId);
+    if (scopedMinistryId) fd.set("ministryId", scopedMinistryId);
     startTransition(() => {
       formAction(fd);
     });
@@ -243,7 +294,7 @@ export function FundFormDrawer({
             </div>
           </div>
 
-          {lockedMinistry || mode === "new" ? (
+          {showKindPicker ? (
             <div className="field">
               <label>{tMinFunds("fundKind")}</label>
               <div className="input-wrap">
@@ -252,11 +303,29 @@ export function FundFormDrawer({
                   disabled={mode === "edit"}
                   onChange={(e) => upd("fundKind", e.target.value as FundKind)}
                 >
-                  <option value="operating">{tMinFunds("kindOperating")}</option>
-                  <option value="project">{tMinFunds("kindProject")}</option>
-                  <option value="event">{tMinFunds("kindEvent")}</option>
+                  {allowedKinds.includes("operating") ? (
+                    <option value="operating">{tMinFunds("kindOperating")}</option>
+                  ) : null}
+                  {allowedKinds.includes("project") ? (
+                    <option value="project">{tMinFunds("kindProject")}</option>
+                  ) : null}
+                  {allowedKinds.includes("event") ? (
+                    <option value="event">{tMinFunds("kindEvent")}</option>
+                  ) : null}
                 </select>
               </div>
+            </div>
+          ) : isMinistryOperatingCreate ? (
+            <div
+              className="tiny muted"
+              style={{
+                padding: "10px 12px",
+                borderRadius: 10,
+                border: "1px solid var(--line)",
+                background: "color-mix(in oklab, var(--accent) 5%, var(--surface))",
+              }}
+            >
+              {tMinFunds("operatingFundCreateHint")}
             </div>
           ) : null}
 

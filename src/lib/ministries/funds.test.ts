@@ -2,10 +2,15 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  canDeleteFund,
   filterFundsByMinistryScope,
   fundsForMinistry,
   getMinistryDefaultFund,
+  getMinistryOperatingFund,
+  hasMinistryOperatingFund,
   isMinistryDefaultFund,
+  isMinistryOperatingFund,
+  ministryAllowsOperatingKind,
   validateFundInputForKind,
 } from "./funds";
 import type { Fund } from "@/lib/funds/types";
@@ -67,18 +72,36 @@ describe("ministry funds helpers", () => {
     assert.equal(result[0]?.fundId, "fund-op");
   });
 
-  it("getMinistryDefaultFund uses explicit default_fund_id", () => {
+  it("getMinistryOperatingFund returns the single operating fund", () => {
+    assert.equal(getMinistryOperatingFund(allFunds, "min-1")?.fundId, "fund-op");
+    assert.equal(getMinistryOperatingFund(allFunds, "missing"), null);
+  });
+
+  it("hasMinistryOperatingFund and ministryAllowsOperatingKind", () => {
+    assert.equal(hasMinistryOperatingFund(allFunds, "min-1"), true);
+    assert.equal(ministryAllowsOperatingKind(allFunds, "min-1"), false);
+    assert.equal(ministryAllowsOperatingKind(allFunds, "min-2"), true);
+  });
+
+  it("isMinistryOperatingFund and canDeleteFund", () => {
+    assert.equal(isMinistryOperatingFund(operatingFund), true);
+    assert.equal(isMinistryOperatingFund(projectFund), false);
+    assert.equal(canDeleteFund(operatingFund), false);
+    assert.equal(canDeleteFund(projectFund), true);
+  });
+
+  it("getMinistryDefaultFund resolves operating fund", () => {
     const fund = getMinistryDefaultFund(ministry, allFunds);
     assert.equal(fund?.fundId, "fund-op");
   });
 
-  it("getMinistryDefaultFund falls back to first operating fund", () => {
+  it("getMinistryDefaultFund falls back to operating when default_fund_id null", () => {
     const m = { ...ministry, defaultFundId: null };
     const fund = getMinistryDefaultFund(m, allFunds);
     assert.equal(fund?.fundId, "fund-op");
   });
 
-  it("isMinistryDefaultFund matches resolved default", () => {
+  it("isMinistryDefaultFund matches operating fund", () => {
     assert.equal(isMinistryDefaultFund(ministry, operatingFund, allFunds), true);
     assert.equal(isMinistryDefaultFund(ministry, projectFund, allFunds), false);
   });
@@ -115,6 +138,20 @@ describe("ministry funds helpers", () => {
         fundKind: "project",
       }),
       "finances.invalidAmount",
+    );
+  });
+
+  it("validateFundInputForKind blocks second operating fund for ministry", () => {
+    assert.equal(
+      validateFundInputForKind({
+        name: "Otro operativo",
+        startDate: "2026-01-01",
+        targetAmount: 0,
+        fundKind: "operating",
+        ministryId: "min-1",
+        funds: allFunds,
+      }),
+      "ministerios.funds.operatingAlreadyExists",
     );
   });
 });

@@ -12,33 +12,42 @@ export default async function MinisteriosPage() {
   const session = await requirePageAccess("/ministerios");
 
   const supabase = await createClient();
-  let error: string | null = null;
+  const loadErrors: string[] = [];
   let members: Awaited<ReturnType<typeof fetchMembersPage>>["members"] = [];
   let ministries: Awaited<ReturnType<typeof fetchMinistries>> = [];
   let funds: Awaited<ReturnType<typeof fetchFunds>> = [];
 
   try {
-    const [membersResult, ministriesResult, fundsResult] = await Promise.all([
-      fetchMembersPage(supabase, {
-        churchId: session.churchId,
-        page: 1,
-        pageSize: null,
-        filter: "all",
-      }),
-      fetchMinistries(supabase, session.churchId),
-      fetchFunds(supabase, session.churchId),
-    ]);
+    const membersResult = await fetchMembersPage(supabase, {
+      churchId: session.churchId,
+      page: 1,
+      pageSize: null,
+      filter: "all",
+    });
     members = membersResult.members;
-    ministries = ministriesResult;
-    funds = fundsResult;
   } catch (e) {
-    error =
-      e instanceof Error
-        ? e.message
-        : tErrors("loadFailed");
+    loadErrors.push(
+      e instanceof Error ? e.message : tErrors("loadFailed"),
+    );
   }
 
-  if (error) {
+  try {
+    ministries = await fetchMinistries(supabase, session.churchId);
+  } catch (e) {
+    loadErrors.push(
+      e instanceof Error ? e.message : tErrors("loadFailed"),
+    );
+  }
+
+  try {
+    funds = await fetchFunds(supabase, session.churchId);
+  } catch (e) {
+    loadErrors.push(
+      e instanceof Error ? e.message : tErrors("loadFailed"),
+    );
+  }
+
+  if (ministries.length === 0 && loadErrors.length > 0) {
     return (
       <p
         className="rounded-xl px-4 py-3 text-sm"
@@ -47,19 +56,33 @@ export default async function MinisteriosPage() {
           color: "var(--danger)",
         }}
       >
-        {error}
+        {loadErrors.join(" · ")}
       </p>
     );
   }
 
   return (
-    <MinistriesListView
-      ministries={ministries}
-      stats={computeMinistryStats(ministries)}
-      members={members}
-      funds={funds}
-      permissions={session.permissions}
-      profileId={session.profileId}
-    />
+    <>
+      {loadErrors.length > 0 ? (
+        <p
+          className="rounded-xl px-4 py-3 text-sm"
+          style={{
+            marginBottom: 16,
+            background: "var(--danger-bg)",
+            color: "var(--danger)",
+          }}
+        >
+          {loadErrors.join(" · ")}
+        </p>
+      ) : null}
+      <MinistriesListView
+        ministries={ministries}
+        stats={computeMinistryStats(ministries)}
+        members={members}
+        funds={funds}
+        permissions={session.permissions}
+        profileId={session.profileId}
+      />
+    </>
   );
 }

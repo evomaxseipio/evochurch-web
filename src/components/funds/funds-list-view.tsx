@@ -29,7 +29,7 @@ import type {
   FundViewMode,
   FundsListStats,
 } from "@/lib/funds/types";
-import { filterFundsByMinistryScope } from "@/lib/ministries/funds";
+import { filterFundsByMinistryScope, canDeleteFund } from "@/lib/ministries/funds";
 import type { Ministry } from "@/lib/ministries/types";
 import { fmtRD, fmtRDshort } from "@/lib/format-currency";
 import { formatDate } from "@/lib/i18n/format";
@@ -153,7 +153,7 @@ export function FundsListView({
       onViewTx: () => router.push(fundUrl("/finances/transactions", f.fundId)),
       onViewContrib: () =>
         router.push(fundUrl("/finances/contributions", f.fundId)),
-      onDelete: () => setDeleteTarget(f),
+      onDelete: canDeleteFund(f) ? () => setDeleteTarget(f) : undefined,
     };
   }
 
@@ -524,6 +524,7 @@ export function FundsListView({
         open={formState !== null}
         onClose={() => setFormState(null)}
         ministries={ministries}
+        funds={funds}
       />
     </div>
   );

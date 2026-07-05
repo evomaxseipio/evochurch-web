@@ -1,24 +1,19 @@
 "use client";
 
-import { setMinistryDefaultFundAction } from "@/app/(app)/ministerios/actions";
-import { FundFormDrawer } from "@/components/funds/fund-form-drawer";
 import { MinistryIcon } from "@/components/ministries/ministry-ui";
 import { Icons } from "@/components/icons";
-import { useActionToast } from "@/hooks/use-action-toast";
 import { fundProgressPct } from "@/lib/funds/parse";
 import type { Fund, FundKind } from "@/lib/funds/types";
 import { fmtRD } from "@/lib/format-currency";
 import {
   fundsForMinistry,
-  getMinistryDefaultFund,
+  hasMinistryOperatingFund,
   isMinistryDefaultFund,
 } from "@/lib/ministries/funds";
 import type { Ministry } from "@/lib/ministries/types";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useActionState, startTransition, useMemo, useState } from "react";
-
-const defaultInitial = null;
+import { useMemo } from "react";
 
 function FundKindChip({ kind }: { kind: FundKind }) {
   const t = useTranslations("ministerios.funds");
@@ -43,6 +38,8 @@ export function MinistryFundsDialog({
   canRecordContribution,
   open,
   onClose,
+  onCreateFund,
+  onEditFund,
 }: {
   ministry: Ministry | null;
   funds: Fund[];
@@ -50,48 +47,37 @@ export function MinistryFundsDialog({
   canRecordContribution: boolean;
   open: boolean;
   onClose: () => void;
+  onCreateFund: (ministry: Ministry, defaultKind: FundKind) => void;
+  onEditFund: (ministry: Ministry, fund: Fund) => void;
 }) {
   const t = useTranslations("ministerios.funds");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const [formState, setFormState] = useState<{
-    mode: "new" | "edit";
-    fund: Fund | null;
-    defaultKind: FundKind;
-  } | null>(null);
-  const [defaultState, defaultAction, defaultPending] = useActionState(
-    setMinistryDefaultFundAction,
-    defaultInitial,
-  );
 
   const ministryFunds = useMemo(
     () => (ministry ? fundsForMinistry(funds, ministry.id) : []),
     [ministry, funds],
   );
 
-  const defaultFund = useMemo(
-    () => (ministry ? getMinistryDefaultFund(ministry, funds) : null),
+  const hasOperating = useMemo(
+    () => (ministry ? hasMinistryOperatingFund(funds, ministry.id) : false),
     [ministry, funds],
   );
-
-  useActionToast(defaultState, {
-    successMessage: t("defaultUpdated"),
-    onSuccess: () => router.refresh(),
-  });
 
   if (!open || !ministry) return null;
 
   const handleClose = () => {
-    setFormState(null);
     onClose();
   };
 
-  const setDefault = (fundId: string) => {
-    if (defaultPending) return;
-    const fd = new FormData();
-    fd.set("ministryId", ministry.id);
-    fd.set("fundId", fundId);
-    startTransition(() => defaultAction(fd));
+  const openCreateFund = (defaultKind: FundKind) => {
+    onClose();
+    onCreateFund(ministry, defaultKind);
+  };
+
+  const openEditFund = (fund: Fund) => {
+    onClose();
+    onEditFund(ministry, fund);
   };
 
   return (
@@ -153,7 +139,27 @@ export function MinistryFundsDialog({
               >
                 {ministry.name}
               </h3>
-              <div className="muted tiny" style={{ marginTop: 4 }}>
+              {hasOperating ? (
+                <div
+                  className="row"
+                  style={{
+                    gap: 7,
+                    marginTop: 8,
+                    alignItems: "flex-start",
+                    fontSize: 12.5,
+                    lineHeight: 1.45,
+                    color: "var(--accent)",
+                    maxWidth: 360,
+                  }}
+                >
+                  <Icons.shield
+                    size={15}
+                    style={{ flexShrink: 0, marginTop: 1, opacity: 0.9 }}
+                  />
+                  <span>{t("defaultFundHint")}</span>
+                </div>
+              ) : null}
+              <div className="muted tiny" style={{ marginTop: hasOperating ? 6 : 4 }}>
                 {t("count", { count: ministryFunds.length })}
               </div>
             </div>
@@ -178,21 +184,19 @@ export function MinistryFundsDialog({
               flexShrink: 0,
             }}
           >
-            <button
-              type="button"
-              className="btn primary sm"
-              onClick={() =>
-                setFormState({ mode: "new", fund: null, defaultKind: "operating" })
-              }
-            >
-              <Icons.plus size={14} /> {t("createOperating")}
-            </button>
+            {!hasOperating ? (
+              <button
+                type="button"
+                className="btn primary sm"
+                onClick={() => openCreateFund("operating")}
+              >
+                <Icons.plus size={14} /> {t("createOperating")}
+              </button>
+            ) : null}
             <button
               type="button"
               className="btn outline sm"
-              onClick={() =>
-                setFormState({ mode: "new", fund: null, defaultKind: "project" })
-              }
+              onClick={() => openCreateFund("project")}
             >
               <Icons.plus size={14} /> {t("createProject")}
             </button>
@@ -256,7 +260,7 @@ export function MinistryFundsDialog({
                             {fund.name}
                           </span>
                           <FundKindChip kind={fund.fundKind} />
-                          {isDefault ? (
+                          {fund.fundKind === "operating" ? (
                             <span className="chip violet" style={{ fontSize: 11 }}>
                               <Icons.star size={10} /> {t("defaultFund")}
                             </span>
@@ -266,12 +270,6 @@ export function MinistryFundsDialog({
                               {tCommon("inactive")}
                             </span>
                           ) : null}
-                        </div>
-                        <div
-                          className="tnum"
-                          style={{ marginTop: 6, fontWeight: 600, fontSize: 14 }}
-                        >
-                          {fmtRD(fund.totalContributions)}
                         </div>
                         {fund.targetAmount > 0 ? (
                           <div style={{ marginTop: 8 }}>
@@ -313,107 +311,59 @@ export function MinistryFundsDialog({
                     </div>
 
                     <div
-                      className="row"
-                      style={{ gap: 8, marginTop: 10, flexWrap: "wrap" }}
+                      className="row between"
+                      style={{
+                        gap: 12,
+                        marginTop: 10,
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                      }}
                     >
-                      {canRecordContribution && fund.isActive ? (
-                        <button
-                          type="button"
-                          className="btn ghost sm"
-                          onClick={() => {
-                            handleClose();
-                            router.push(
-                              `/finances/contributions?fund=${fund.fundId}`,
-                            );
-                          }}
-                        >
-                          {t("recordContribution")}
-                        </button>
-                      ) : null}
-                      {canManageFunds ? (
-                        <button
-                          type="button"
-                          className="btn ghost sm"
-                          onClick={() =>
-                            setFormState({
-                              mode: "edit",
-                              fund,
-                              defaultKind: fund.fundKind,
-                            })
-                          }
-                        >
-                          {tCommon("edit")}
-                        </button>
-                      ) : null}
-                      {canManageFunds &&
-                      fund.fundKind === "operating" &&
-                      fund.isActive &&
-                      !isDefault ? (
-                        <button
-                          type="button"
-                          className="btn ghost sm"
-                          disabled={defaultPending}
-                          onClick={() => setDefault(fund.fundId)}
-                        >
-                          {t("setAsDefault")}
-                        </button>
-                      ) : null}
+                      <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+                        {canRecordContribution && fund.isActive ? (
+                          <button
+                            type="button"
+                            className="btn outline sm"
+                            onClick={() => {
+                              handleClose();
+                              router.push(
+                                `/finances/contributions?fund=${fund.fundId}`,
+                              );
+                            }}
+                          >
+                            <Icons.wallet size={14} /> {t("recordContribution")}
+                          </button>
+                        ) : null}
+                        {canManageFunds ? (
+                          <button
+                            type="button"
+                            className="btn outline sm"
+                            onClick={() => openEditFund(fund)}
+                          >
+                            <Icons.edit size={14} /> {tCommon("edit")}
+                          </button>
+                        ) : null}
+                      </div>
+                      <span
+                        className="tnum"
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 17,
+                          letterSpacing: "-0.02em",
+                          color: "var(--fg)",
+                          marginLeft: "auto",
+                        }}
+                      >
+                        {fmtRD(fund.totalContributions)}
+                      </span>
                     </div>
                   </li>
                 );
               })}
             </ul>
           )}
-
-          {defaultFund && canRecordContribution ? (
-            <div
-              style={{
-                marginTop: 16,
-                padding: "12px 14px",
-                borderRadius: 10,
-                border: "1px dashed var(--line)",
-                background: "var(--surface-2)",
-              }}
-            >
-              <div className="tiny muted" style={{ marginBottom: 6 }}>
-                {t("defaultFundHint")}
-              </div>
-              <button
-                type="button"
-                className="btn outline sm"
-                onClick={() => {
-                  handleClose();
-                  router.push(
-                    `/finances/contributions?fund=${defaultFund.fundId}`,
-                  );
-                }}
-              >
-                <Icons.plus size={14} /> {t("recordToDefault")}
-              </button>
-            </div>
-          ) : null}
         </div>
       </div>
-
-      <FundFormDrawer
-        key={`${formState?.mode}-${formState?.fund?.fundId ?? formState?.defaultKind ?? "closed"}`}
-        mode={formState?.mode ?? "new"}
-        fund={formState?.fund ?? null}
-        open={formState != null}
-        onClose={() => {
-          setFormState(null);
-          router.refresh();
-        }}
-        ministryContext={
-          ministry
-            ? {
-                ministryId: ministry.id,
-                ministryName: ministry.name,
-                defaultFundKind: formState?.defaultKind ?? "operating",
-              }
-            : undefined
-        }
-      />
     </>
   );
 }

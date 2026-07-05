@@ -1,6 +1,50 @@
 import type { Fund } from "@/lib/funds/types";
 import type { Ministry } from "@/lib/ministries/types";
 
+export function isMinistryOperatingFund(fund: Fund): boolean {
+  return fund.ministryId != null && fund.fundKind === "operating";
+}
+
+export function canDeleteFund(fund: Fund): boolean {
+  return !isMinistryOperatingFund(fund);
+}
+
+export function getMinistryOperatingFund(
+  funds: Fund[],
+  ministryId: string,
+): Fund | null {
+  if (!ministryId) return null;
+  return (
+    funds.find(
+      (fund) =>
+        fund.ministryId === ministryId && fund.fundKind === "operating",
+    ) ?? null
+  );
+}
+
+export function hasMinistryOperatingFund(
+  funds: Fund[],
+  ministryId: string,
+): boolean {
+  return getMinistryOperatingFund(funds, ministryId) != null;
+}
+
+export function ministryAllowsOperatingKind(
+  funds: Fund[],
+  ministryId: string | null | undefined,
+): boolean {
+  if (!ministryId) return true;
+  return !hasMinistryOperatingFund(funds, ministryId);
+}
+
+export function findMinistryById(
+  ministries: Ministry[] | undefined,
+  ministryId: string,
+): Ministry | null {
+  if (!ministryId || !ministries?.length) return null;
+  return ministries.find((m) => m.id === ministryId) ?? null;
+}
+
 export function fundsForMinistry(funds: Fund[], ministryId: string): Fund[] {
   return funds
     .filter((fund) => fund.ministryId === ministryId)
@@ -15,16 +59,19 @@ export function getMinistryDefaultFund(
   ministry: Ministry,
   funds: Fund[],
 ): Fund | null {
+  const operating = getMinistryOperatingFund(funds, ministry.id);
+  if (operating?.isActive) return operating;
+
   if (ministry.defaultFundId) {
-    const explicit = funds.find((fund) => fund.fundId === ministry.defaultFundId);
+    const explicit = funds.find(
+      (fund) =>
+        fund.fundId === ministry.defaultFundId &&
+        fund.ministryId === ministry.id,
+    );
     if (explicit?.isActive) return explicit;
   }
 
-  return (
-    fundsForMinistry(funds, ministry.id).find(
-      (fund) => fund.fundKind === "operating" && fund.isActive,
-    ) ?? null
-  );
+  return operating;
 }
 
 export function isMinistryDefaultFund(
@@ -50,6 +97,9 @@ export function validateFundInputForKind(input: {
   startDate: string;
   targetAmount: number;
   fundKind?: string;
+  ministryId?: string | null;
+  funds?: Fund[];
+  fundId?: string | null;
 }): string | null {
   if (!input.name.trim()) return "errors.requiredFields";
   if (!input.startDate) return "errors.requiredFields";
@@ -57,6 +107,16 @@ export function validateFundInputForKind(input: {
   const kind = input.fundKind ?? "operating";
   if (kind !== "operating" && (!input.targetAmount || input.targetAmount <= 0)) {
     return "finances.invalidAmount";
+  }
+
+  if (
+    kind === "operating" &&
+    input.ministryId &&
+    input.funds &&
+    hasMinistryOperatingFund(input.funds, input.ministryId) &&
+    !input.fundId
+  ) {
+    return "ministerios.funds.operatingAlreadyExists";
   }
 
   return null;

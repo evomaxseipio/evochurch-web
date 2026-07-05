@@ -58,7 +58,8 @@ test.describe("RBAC NAV sidebar", () => {
     await page.goto("/dashboard");
     expect(await sidebarLinkVisible(page, "Miembros")).toBeTruthy();
     expect(await sidebarLinkVisible(page, "Ministerios")).toBeTruthy();
-    expect(await sidebarLinkVisible(page, "Usuarios")).toBeTruthy();
+    await expandNavGroup(page, "Configuración usuarios");
+    expect(await sidebarHrefVisible(page, "/settings/users")).toBeTruthy();
   });
 
   test("NAV-02 U-TESORERO finances without admin users", async ({ page }) => {
@@ -109,14 +110,14 @@ test.describe("RBAC UI actions", () => {
     test.skip(!credsFor("LIDER"), "U-LIDER creds missing");
     await loginAs(page, "LIDER");
     await page.goto("/ministerios");
-    await expect(page.getByRole("button", { name: /Nuevo ministerio/i })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /Agregar ministerio/i })).toHaveCount(0);
   });
 
   test("UI-06 U-ADMIN Nuevo ministerio visible", async ({ page }) => {
     test.skip(!credsFor("ADMIN"), "U-ADMIN creds missing");
     await loginAs(page, "ADMIN");
     await page.goto("/ministerios");
-    await expect(page.getByRole("button", { name: /Nuevo ministerio/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Agregar ministerio/i })).toBeVisible();
   });
 });
 

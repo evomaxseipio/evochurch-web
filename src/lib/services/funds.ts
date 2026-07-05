@@ -47,7 +47,13 @@ export async function saveFund(
     p_fund_kind: input.fundKind ?? "operating",
   });
 
-  if (error) throw error;
+  if (error) {
+    throw new Error(
+      error.message ||
+        error.details ||
+        "No se pudo guardar el fondo (RPC sp_maintance_funds).",
+    );
+  }
   const row = (data as Record<string, unknown>) ?? {};
   assertRpcSuccess(row, "No se pudo guardar el fondo.");
   return String(row.fund_id ?? input.fundId ?? "");

@@ -169,7 +169,7 @@ export function AdminUsersListView({
   }
 
   return (
-    <div>
+    <div data-testid="admin-users-list">
       <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
         <div>
           <div className="eyebrow">{tAdmin("settingsAccessEyebrow")}</div>

@@ -7,16 +7,39 @@ import { unstable_cache } from "next/cache";
 
 const MINISTRY_COLORS = new Set(["violet", "lila", "green"]);
 
+const MINISTRY_COLUMNS_BASE =
+  "id, name, descripcion, is_active, leader_profile_ids, member_profile_ids, color, is_featured, created_at";
+
+function isMissingColumnError(
+  error: { message?: string; code?: string },
+  column: string,
+): boolean {
+  const msg = (error.message ?? "").toLowerCase();
+  return (
+    error.code === "42703" ||
+    (msg.includes(column.toLowerCase()) &&
+      (msg.includes("does not exist") || msg.includes("column")))
+  );
+}
+
 async function fetchMinistriesFromDb(churchId: number): Promise<Ministry[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("church_ministries")
-    .select(
-      "id, name, descripcion, is_active, leader_profile_ids, member_profile_ids, color, is_featured, default_fund_id, created_at",
-    )
-    .eq("church_id", churchId)
-    .order("is_featured", { ascending: false })
-    .order("name");
+
+  const buildQuery = (columns: string) =>
+    supabase
+      .from("church_ministries")
+      .select(columns)
+      .eq("church_id", churchId)
+      .order("is_featured", { ascending: false })
+      .order("name");
+
+  let { data, error } = await buildQuery(
+    `${MINISTRY_COLUMNS_BASE}, default_fund_id`,
+  );
+
+  if (error && isMissingColumnError(error, "default_fund_id")) {
+    ({ data, error } = await buildQuery(MINISTRY_COLUMNS_BASE));
+  }
 
   if (error) throw error;
   return parseMinistryRows(data);
@@ -28,7 +51,7 @@ export async function fetchMinistries(
 ): Promise<Ministry[]> {
   return unstable_cache(
     () => fetchMinistriesFromDb(churchId),
-    ["catalog:ministries", "v3", String(churchId)],
+    ["catalog:ministries", "v4", String(churchId)],
     { tags: [catalogTags.ministries(churchId)], revalidate: 300 },
   )();
 }

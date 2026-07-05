@@ -12,7 +12,7 @@ export const localeLabels: Record<
   Locale,
   { label: string; flag: string; code: string }
 > = {
-  es: { label: "Español", flag: "🇪🇸", code: "ES" },
+  es: { label: "Español", flag: "🇩🇴", code: "ES" },
   en: { label: "English", flag: "🇺🇸", code: "EN" },
   fr: { label: "Français", flag: "🇫🇷", code: "FR" },
 };

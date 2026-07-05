@@ -16,6 +16,9 @@ export function withRpcTiming<T extends SupabaseClient>(client: T): T {
           rpc: String(fn),
           ms: Math.round(performance.now() - started),
           ok: result.error == null,
+          ...(result.error
+            ? { err: result.error.message, code: result.error.code }
+            : {}),
         });
         return result;
       },

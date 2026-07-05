@@ -79,10 +79,7 @@ export function MinistryFormDrawer({
   }, [open, ministry]);
 
   useActionToast(state, {
-    successMessage:
-      mode === "new"
-        ? "Ministerio creado correctamente."
-        : "Ministerio actualizado correctamente.",
+    successMessage: mode === "new" ? t("savedCreate") : t("savedUpdate"),
     onSuccess: () => {
       onClose();
       router.refresh();
@@ -97,9 +94,9 @@ export function MinistryFormDrawer({
 
   const submit = () => {
     const nextErrors: FormErrors = {};
-    if (!values.name.trim()) nextErrors.name = "Obligatorio";
+    if (!values.name.trim()) nextErrors.name = tCommon("required");
     if (values.leaderProfileIds.length === 0) {
-      nextErrors.leaderProfileIds = "Selecciona al menos un líder";
+      nextErrors.leaderProfileIds = t("leaderRequired");
     }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
@@ -123,17 +120,17 @@ export function MinistryFormDrawer({
         <div className="drawer-head">
           <div style={{ flex: 1 }}>
             <div className="eyebrow">
-              {mode === "new" ? "Nuevo registro" : "Edición"}
+              {mode === "new" ? tCommon("newRecord") : tCommon("editRecord")}
             </div>
             <h2 style={{ margin: "4px 0 0", fontSize: 18 }}>
-              {mode === "new" ? "Nuevo ministerio" : "Editar ministerio"}
+              {mode === "new" ? t("addMinistry") : t("editMinistry")}
             </h2>
           </div>
           <button
             type="button"
             className="btn ghost icon-only"
             onClick={onClose}
-            aria-label="Cerrar"
+            aria-label={tCommon("close")}
           >
             <Icons.x size={18} />
           </button>
@@ -142,13 +139,13 @@ export function MinistryFormDrawer({
         <div className="drawer-body col gap-md">
           <div className="field">
             <label>
-              Nombre del ministerio{" "}
+              {t("nameLabel")}{" "}
               <span style={{ color: "var(--danger)" }}>*</span>
             </label>
             <div className={`input-wrap${errors.name ? " error" : ""}`}>
               <input
                 value={values.name}
-                placeholder="Ej. Alabanza y Adoración"
+                placeholder={t("namePlaceholder")}
                 onChange={(event) => update("name", event.target.value)}
               />
             </div>
@@ -156,7 +153,7 @@ export function MinistryFormDrawer({
           </div>
 
           <div className="field">
-            <label>Descripción</label>
+            <label>{t("description")}</label>
             <div
               className="input-wrap"
               style={{ alignItems: "flex-start", padding: "10px 12px" }}
@@ -164,7 +161,7 @@ export function MinistryFormDrawer({
               <textarea
                 rows={3}
                 value={values.description}
-                placeholder="Propósito y alcance del ministerio…"
+                placeholder={t("descriptionPlaceholder")}
                 onChange={(event) => update("description", event.target.value)}
               />
             </div>
@@ -172,15 +169,15 @@ export function MinistryFormDrawer({
 
           <div className="field">
             <label>
-              Líderes <span style={{ color: "var(--danger)" }}>*</span>
+              {t("leaders")} <span style={{ color: "var(--danger)" }}>*</span>
             </label>
             <MemberCombobox
               selectedIds={values.leaderProfileIds}
               members={members}
               onChange={(ids) => update("leaderProfileIds", ids)}
-              placeholderEmpty="Buscar líderes…"
+              placeholderEmpty={t("leadersPlaceholderEmpty")}
               placeholderSelected={(count) =>
-                `${count} líder${count !== 1 ? "es" : ""} · buscar más…`
+                t("leadersPlaceholderSelected", { count })
               }
             />
             {errors.leaderProfileIds ? (
@@ -189,7 +186,7 @@ export function MinistryFormDrawer({
           </div>
 
           <div className="field">
-            <label>Miembros del ministerio</label>
+            <label>{t("ministryMembers")}</label>
             <MemberCombobox
               selectedIds={values.memberProfileIds}
               members={members}

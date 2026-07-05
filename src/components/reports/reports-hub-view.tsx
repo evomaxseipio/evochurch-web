@@ -324,7 +324,7 @@ export function ReportsHubView({
     : null;
 
   return (
-    <div>
+    <div data-testid="reports-hub">
       <PageHeader
         eyebrow={tReports("eyebrow")}
         title={tReports("title")}

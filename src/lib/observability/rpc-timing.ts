@@ -2,6 +2,8 @@ export type RpcTimingLog = {
   rpc: string;
   ms: number;
   ok: boolean;
+  err?: string;
+  code?: string;
 };
 
 export function isRpcTimingEnabled(): boolean {

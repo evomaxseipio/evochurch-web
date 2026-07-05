@@ -1,10 +1,14 @@
 "use server";
 
 import { getActionSessionWith } from "@/lib/auth/permissions-server";
-import type { FundInput, FundKind } from "@/lib/funds/types";
-import { validateFundInputForKind } from "@/lib/ministries/funds";
+import type { Fund, FundInput, FundKind } from "@/lib/funds/types";
+import {
+  canDeleteFund,
+  validateFundInputForKind,
+} from "@/lib/ministries/funds";
 import {
   deleteFund,
+  fetchFunds,
   saveFund,
   setPrimaryFund,
 } from "@/lib/services/funds";
@@ -56,12 +60,18 @@ function parseFundInput(formData: FormData): FundInput {
   };
 }
 
-function validateFundInput(input: FundInput): string | null {
+function validateFundInput(
+  input: FundInput,
+  funds: Fund[],
+): string | null {
   return validateFundInputForKind({
     name: input.name,
     startDate: input.startDate,
     targetAmount: input.targetAmount,
     fundKind: input.fundKind,
+    ministryId: input.ministryId,
+    funds,
+    fundId: input.fundId,
   });
 }
 
@@ -71,11 +81,12 @@ export async function saveFundAction(
 ): Promise<FundActionResult> {
   try {
     const input = parseFundInput(formData);
-    const validationError = validateFundInput(input);
+    const { supabase, churchId } = await writeSessionContext();
+    const funds = await fetchFunds(supabase, churchId);
+    const validationError = validateFundInput(input, funds);
     if (validationError)
       return { ok: false, error: validationError, errorKey: validationError };
 
-    const { supabase, churchId } = await writeSessionContext();
     await saveFund(supabase, churchId, input);
     revalidateFundsCatalog(churchId);
     if (input.ministryId) revalidateMinistriesCatalog(churchId);
@@ -105,6 +116,15 @@ export async function deleteFundAction(
       };
 
     const { supabase, churchId } = await deleteSessionContext();
+    const funds = await fetchFunds(supabase, churchId);
+    const target = funds.find((f) => f.fundId === fundId);
+    if (target && !canDeleteFund(target)) {
+      return {
+        ok: false,
+        error: "ministerios.funds.operatingCannotDelete",
+        errorKey: "ministerios.funds.operatingCannotDelete",
+      };
+    }
     await deleteFund(supabase, churchId, fundId);
     revalidateFundsCatalog(churchId);
     revalidatePath("/finances/funds");

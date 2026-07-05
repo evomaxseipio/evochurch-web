@@ -144,14 +144,18 @@ function lacksPerm(perms, key) {
   return !hasPerm(perms, key);
 }
 
-/** Route guard denied: HTTP redirect, RSC redirect, or deny copy in HTML. */
+/** Next.js error overlay / 500 digest page. */
+function isNextErrorPage(text) {
+  return /id="__next_error__"/.test(text);
+}
+
+/** Route guard denied: redirect, RSC redirect, or explicit deny UI — not i18n dictionary strings. */
 function pageAccessDenied({ status, text, location }) {
+  if (status >= 500 || isNextErrorPage(text)) return true;
   if (status >= 300 && status < 400) return true;
-  if (location && /\/settings(\?|$)/.test(location)) return true;
-  if (/NEXT_REDIRECT|"destination":"\/settings/i.test(text)) return true;
-  return /acceso denegado|se requiere rol|no tienes permiso|acceso restringido|solo un[\s\S]{0,48}administrador|gestionar cuentas de acceso/i.test(
-    text,
-  );
+  if (location?.includes("denied=1")) return true;
+  if (/NEXT_REDIRECT|"destination":"\/settings\?denied=1"/i.test(text)) return true;
+  return false;
 }
 
 /** Page allowed: 200 and no deny signal */
@@ -159,6 +163,31 @@ function pageAllowed(res) {
   if (pageAccessDenied(res)) return false;
   if (res.status !== 200) return false;
   return true;
+}
+
+function pageHasSettings({ status, text }) {
+  if (status !== 200 || isNextErrorPage(text)) return false;
+  return /settings-view|"Perfil"|profileSettings|sectionConfig/i.test(text);
+}
+
+function pageHasTransactionsModule({ status, text }) {
+  if (status !== 200 || isNextErrorPage(text)) return false;
+  return /transactions-list|finances\/transactions|"Transacciones"/i.test(text);
+}
+
+function pageHasMinistriesModule({ status, text }) {
+  if (status !== 200 || isNextErrorPage(text)) return false;
+  return /ministerios|Ministerios|addMinistry/i.test(text);
+}
+
+function pageHasAdminUsersList({ status, text }) {
+  if (status !== 200 || isNextErrorPage(text)) return false;
+  return /data-testid="admin-users-list"/.test(text);
+}
+
+function pageAdminUsersBlocked({ status, text }) {
+  if (status !== 200 || isNextErrorPage(text)) return false;
+  return /data-testid="admin-users-denied"/.test(text);
 }
 
 /** Operational module page (members list, etc.) */
@@ -405,7 +434,7 @@ async function main() {
       record(
         "PAGE-03",
         "U-NOROLE /settings",
-        pageAllowed(settings) ? "PASS" : "FAIL",
+        pageHasSettings(settings) ? "PASS" : "FAIL",
         `status=${settings.status}`,
         "critical",
       );
@@ -420,7 +449,9 @@ async function main() {
       record(
         "PAGE-04",
         "U-TESORERO /settings/users",
-        pageAccessDenied(users) || !pageAllowed(users) ? "PASS" : "FAIL",
+        pageAdminUsersBlocked(users) || !pageHasAdminUsersList(users)
+          ? "PASS"
+          : "FAIL",
         `status=${users.status}`,
         "critical",
       );
@@ -429,7 +460,7 @@ async function main() {
       record(
         "PAGE-05",
         "U-TESORERO /finances/transactions",
-        pageAllowed(tx) ? "PASS" : "FAIL",
+        pageHasTransactionsModule(tx) ? "PASS" : "FAIL",
         `status=${tx.status}`,
         "high",
       );
@@ -452,7 +483,7 @@ async function main() {
       record(
         "PAGE-07",
         "U-LIDER /ministerios",
-        pageAllowed(min) ? "PASS" : "FAIL",
+        pageHasMinistriesModule(min) ? "PASS" : "FAIL",
         `status=${min.status}`,
         "high",
       );

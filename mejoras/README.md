@@ -25,6 +25,20 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 
 ## Prioridad actual
 
+### Cierre MVP consola web (Jul 2026)
+
+| Track | Estado | Pendiente |
+|-------|--------|-----------|
+| Módulos core (auth, miembros, finanzas, ministerios, settings, reportes) | ✅ | Merge rama `feat/ministerios-fondos` + migraciones SQL |
+| Sprint performance 1–3 | ✅ cerrado | — |
+| Sprint performance 4 | ⚙️ | Captura manual baselines (ver abajo) |
+| Sprint RBAC | ⚙️ implementado | QA formal: `npm run qa:rbac:full` *(abortado — re-ejecutar)* |
+| Módulo reportes REP-0…6 | ✅ | Descargas manuales R-04…08; `npm run qa:reports` |
+| i18n es/en/fr | ⚙️ ~95% | Auditoría strings + I18N-QA manual |
+| Placeholders post-MVP | — | `/eventos`, `/comunicacion`, KPIs mock dashboard |
+
+**Orden recomendado restante:** migraciones ministerios-fondos → `npm run build` → `npm run qa:reports` → QA RBAC → I18N-QA → baselines Sprint 4.
+
 **Sprint RBAC:** configuración basada en roles — rama `feat/rbac-sprint`. Ver [AGENT-PROMPT-RBAC-SPRINT.md](./AGENT-PROMPT-RBAC-SPRINT.md).
 
 **Sprint 1:** deduplicación auth — rama `perf/sprint-1-auth-dedup` (mergeado o listo para merge).
@@ -55,6 +69,17 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | RPC Postgres | `scripts/explain-critical-rpcs.sql` en staging | sin seq scans críticos |
 
 | P1-AUTH-5 paralelizar auth users en members | ✅ |
+
+### Baselines Sprint 4 — captura manual (pendiente)
+
+Ejecutar en **staging** con iglesia mediana (~500 miembros, historial 12 meses):
+
+1. **Round-trips dashboard:** `npm run dev` → cargar `/dashboard` → contar líneas `rpc_timing` en consola (objetivo ≤ 4).
+2. **TTFB / LCP:** DevTools → Performance → anotar vs baseline anterior (objetivo −30%).
+3. **Payload dashboard:** Network → document + RSC (objetivo < 50 KB).
+4. **Postgres:** `psql $DATABASE_URL -f scripts/explain-critical-rpcs.sql` — revisar seq scans.
+
+Registrar resultados en PR o comentario de cierre MVP.
 
 ### Cierre Sprint 3 (Jul 2026)
 

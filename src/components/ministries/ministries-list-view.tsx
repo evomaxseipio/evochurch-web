@@ -17,6 +17,7 @@ import { MinistryCard } from "@/components/ministries/ministry-card";
 import { MinistryFormDrawer } from "@/components/ministries/ministry-form-drawer";
 import { MinistryFundsDialog } from "@/components/ministries/ministry-funds-dialog";
 import { MinistryMembersDialog } from "@/components/ministries/ministry-members-dialog";
+import { FundFormDrawer } from "@/components/funds/fund-form-drawer";
 import {
   MemberAvatarStack,
   MinistryActionMenu,
@@ -37,13 +38,14 @@ import {
   formatMinistryDate,
   sortMinistriesForDisplay,
 } from "@/lib/ministries/parse";
+import { hasMinistryOperatingFund } from "@/lib/ministries/funds";
 import type {
   Ministry,
   MinistryStats,
   MinistryStatusFilter,
   MinistryViewMode,
 } from "@/lib/ministries/types";
-import type { Fund } from "@/lib/funds/types";
+import type { Fund, FundKind } from "@/lib/funds/types";
 import type { IconName } from "@/components/icons";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -52,27 +54,18 @@ import { useEffect, useMemo, useState, startTransition, useActionState } from "r
 const PAGE_SIZE_OPTIONS = [10, 15, 25, 50] as const;
 type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
 
-const STATUS_FILTERS: { key: MinistryStatusFilter; label: string }[] = [
-  { key: "all", label: "Todos" },
-  { key: "active", label: "Activos" },
-  { key: "inactive", label: "Inactivos" },
-];
+const STATUS_FILTER_KEYS: MinistryStatusFilter[] = ["all", "active", "inactive"];
 
-const STAT_CARDS: {
+const STAT_CARD_KEYS: {
   key: keyof MinistryStats;
-  label: string;
+  labelKey: "statsTotal" | "statsActive" | "statsLeaders" | "statsMembers";
   color: string;
   icon: IconName;
 }[] = [
-  { key: "total", label: "Ministerios", color: "var(--accent)", icon: "users" },
-  { key: "active", label: "Activos", color: "var(--success)", icon: "check" },
-  { key: "leaders", label: "Líderes", color: "var(--lila)", icon: "pin" },
-  {
-    key: "members",
-    label: "Hermanos en ministerios",
-    color: "var(--accent)",
-    icon: "users",
-  },
+  { key: "total", labelKey: "statsTotal", color: "var(--accent)", icon: "users" },
+  { key: "active", labelKey: "statsActive", color: "var(--success)", icon: "check" },
+  { key: "leaders", labelKey: "statsLeaders", color: "var(--lila)", icon: "pin" },
+  { key: "members", labelKey: "statsMembers", color: "var(--accent)", icon: "users" },
 ];
 
 export function MinistriesListView({
@@ -92,6 +85,20 @@ export function MinistriesListView({
 }) {
   const t = useTranslations("ministerios");
   const tCommon = useTranslations("common");
+
+  const statusFilters = useMemo(
+    () =>
+      STATUS_FILTER_KEYS.map((key) => ({
+        key,
+        label:
+          key === "all"
+            ? tCommon("all")
+            : key === "active"
+              ? tCommon("active")
+              : tCommon("inactive"),
+      })),
+    [tCommon],
+  );
   const canCreate = canCreateMinistryWith(permissions);
   const canViewProfiles = canReadMembersWith(permissions);
   const canManageFunds = canWriteFundsWith(permissions);
@@ -119,6 +126,12 @@ export function MinistriesListView({
   const [fundsDialogTarget, setFundsDialogTarget] = useState<Ministry | null>(
     null,
   );
+  const [ministryFundFormState, setMinistryFundFormState] = useState<{
+    ministry: Ministry;
+    mode: "new" | "edit";
+    fund: Fund | null;
+    defaultKind: FundKind;
+  } | null>(null);
 
   useEffect(() => {
     setPage(1);
@@ -205,10 +218,10 @@ export function MinistriesListView({
       </div>
 
       <div className="grid-12" style={{ marginBottom: 22 }}>
-        {STAT_CARDS.map((card) => (
+        {STAT_CARD_KEYS.map((card) => (
           <div key={card.key} className="span-3">
             <KpiCard
-              label={card.label}
+              label={t(card.labelKey)}
               value={String(stats[card.key])}
               icon={card.icon}
               accent={card.color}
@@ -222,7 +235,7 @@ export function MinistriesListView({
         onQueryChange={setQuery}
         queryPlaceholder={t("searchPlaceholder")}
         searchWidthPercent={40}
-        filters={STATUS_FILTERS}
+        filters={statusFilters}
         activeFilter={statusFilter}
         onFilterChange={setStatusFilter}
         trailing={
@@ -417,7 +430,46 @@ export function MinistriesListView({
         canRecordContribution={canRecordContribution}
         open={fundsDialogTarget != null}
         onClose={() => setFundsDialogTarget(null)}
+        onCreateFund={(ministry, defaultKind) => {
+          setMinistryFundFormState({
+            ministry,
+            mode: "new",
+            fund: null,
+            defaultKind,
+          });
+        }}
+        onEditFund={(ministry, fund) => {
+          setMinistryFundFormState({
+            ministry,
+            mode: "edit",
+            fund,
+            defaultKind: fund.fundKind,
+          });
+        }}
       />
+
+      {ministryFundFormState ? (
+        <FundFormDrawer
+          key={`${ministryFundFormState.mode}-${ministryFundFormState.fund?.fundId ?? ministryFundFormState.defaultKind}`}
+          mode={ministryFundFormState.mode}
+          fund={ministryFundFormState.fund}
+          open
+          onClose={() => {
+            setMinistryFundFormState(null);
+            router.refresh();
+          }}
+          ministryContext={{
+            ministryId: ministryFundFormState.ministry.id,
+            ministryName: ministryFundFormState.ministry.name,
+            defaultFundKind: ministryFundFormState.defaultKind,
+            hasOperatingFund: hasMinistryOperatingFund(
+              funds,
+              ministryFundFormState.ministry.id,
+            ),
+          }}
+          funds={funds}
+        />
+      ) : null}
     </div>
   );
 }
