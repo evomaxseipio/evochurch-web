@@ -1,4 +1,5 @@
 import { WebVitalsReporter } from "@/components/observability/web-vitals-reporter";
+import { DevPerformanceShim } from "@/components/observability/dev-performance-shim";
 import { ThemeInit } from "@/components/theme-init";
 import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
@@ -41,7 +42,15 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider messages={messages}>
+        {process.env.NODE_ENV === "development" ? (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{var p=performance;if(!p||p.__evoMeasureShim)return;var o=p.measure.bind(p);p.measure=function(){try{return o.apply(p,arguments)}catch(e){if(e instanceof TypeError&&String(e.message).indexOf("negative time stamp")>=0)return;throw e}};p.__evoMeasureShim=1}catch(e){}})();`,
+            }}
+          />
+        ) : null}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <DevPerformanceShim />
           <WebVitalsReporter />
           <ThemeInit />
           <Toaster />

@@ -145,6 +145,12 @@
     "updateHeroSubtitle": "to sign in securely.",
     "updateHeroBody": "For your security, you must replace the temporary password before using the console.",
     "noChurchBanner": "Your login account exists but is not linked to a church profile in EvoChurch. Contact your congregation administrator.",
+    "sessionIdle": {
+      "title": "Session expiring",
+      "body": "For your security, your session will close in 1 minute due to inactivity.",
+      "continue": "Continue session",
+      "expiredNotice": "Your session expired due to inactivity. Please sign in again."
+    },
     "errors": {
       "auth": "Could not complete sign in. Please try again.",
       "credentials": "Invalid credentials. Please try again.",
@@ -225,25 +231,117 @@
       "year": "Year"
     },
     "months": {
-      "0": "Ene",
+      "0": "Jan",
       "1": "Feb",
       "2": "Mar",
-      "3": "Abr",
+      "3": "Apr",
       "4": "May",
       "5": "Jun",
       "6": "Jul",
-      "7": "Ago",
+      "7": "Aug",
       "8": "Sep",
       "9": "Oct",
       "10": "Nov",
-      "11": "Dic"
-    }
+      "11": "Dec"
+    },
+    "kpiTotalMembers": "Total members",
+    "kpiTotalCatechumens": "Total catechumens",
+    "kpiFundsBalance": "Fund balance",
+    "kpiContributionsMonth": "Contributions (month)",
+    "kpiUpcomingEvents": "Upcoming events",
+    "kpiNewVisitors": "New visitors",
+    "kpiLedgerIncomeMonth": "Income received (month)",
+    "kpiLedgerExpenseMonth": "Transactions (month)",
+    "deltaActiveMembers": "{count} active",
+    "deltaActiveFunds": "{count, plural, one {# active fund} other {# active funds}}",
+    "deltaUpcomingThisWeek": "{count} this week",
+    "deltaVisitorsVsLastWeek": "+{count} vs last week",
+    "activityRegisteredTithe": "registered tithe",
+    "activityCreatedEvent": "created event",
+    "activityUpdatedProfile": "updated profile",
+    "activityExportedReport": "exported report",
+    "activityRegisteredIncome": "registered income",
+    "activityJoinedMinistry": "joined",
+    "time12Min": "12 min ago",
+    "time1Hour": "1 h ago",
+    "time2Hours": "2 h ago",
+    "time3Hours": "3 h ago",
+    "time5Hours": "5 h ago",
+    "timeYesterday": "yesterday",
+    "pendingFundTransfer": "Fund transfer",
+    "pendingExpenseDefault": "Pending expense"
   },
   "eventos": {
     "title": "Events",
-    "subtitle": "Congregation calendar and activities",
-    "comingSoon": "Próximamente",
-    "description": "Esta pantalla se implementará en la siguiente fase del diseño."
+    "subtitle": "Services, Bible studies, vigils and special activities.",
+    "agendaEyebrow": "Agenda",
+    "searchPlaceholder": "Search event, location or ministry…",
+    "churchEvents": "of the church",
+    "newEvent": "New event",
+    "editEvent": "Edit event",
+    "deleteEvent": "Delete event",
+    "deleteConfirm": "Delete «{title}»? This cannot be undone.",
+    "emptyTitle": "No events in this period",
+    "emptyDescription": "Create the first event or widen the date range.",
+    "viewList": "List",
+    "viewCalendar": "Calendar",
+    "today": "Today",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "moreEvents": "+{count} more",
+    "calendarWeekdays": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    },
+    "upcoming": "Coming up",
+    "featured": "Featured event",
+    "recurring": "Recurring",
+    "allDay": "All day",
+    "featuredLabel": "Feature on agenda",
+    "websiteListedLabel": "Show on website",
+    "websiteListedHint": "Events section (max 10).",
+    "websitePromotedLabel": "Promote in site header",
+    "websitePromotedHint": "Top banner (max 3, includes featured).",
+    "fields": {
+      "title": "Title",
+      "type": "Type",
+      "date": "Date",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "location": "Location",
+      "description": "Description",
+      "ministry": "Ministry",
+      "recurrence": "Repeat",
+      "recurrenceUntil": "Repeat until",
+      "weeklyHint": "Every {weekday} at the same time"
+    },
+    "types": {
+      "culto": "Service",
+      "estudio": "Study",
+      "evento": "Event"
+    },
+    "weekdays": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    },
+    "errors": {
+      "titleRequired": "Title is required.",
+      "dateRequired": "Date is required.",
+      "timeRequired": "Time is required.",
+      "ministryRequired": "Select a ministry."
+    },
+    "saveSuccess": "Event saved.",
+    "deleteSuccess": "Event deleted."
   },
   "comunicacion": {
     "title": "Communication",
@@ -832,6 +930,7 @@
       "eventos": {
         "read": "View events",
         "write": "Create and edit events",
+        "write_own": "Create and edit events for own ministries",
         "delete": "Delete events"
       },
       "comunicacion": {

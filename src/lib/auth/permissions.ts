@@ -101,3 +101,44 @@ export function canEditMinistryWith(
     leaderProfileIds.includes(profileId)
   );
 }
+
+export function canWriteEventsWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return (
+    permissions.includes("eventos:write") ||
+    permissions.includes("eventos:write_own")
+  );
+}
+
+export function canCreateEventWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return canWriteEventsWith(permissions);
+}
+
+export function canEditEventWith(
+  permissions: readonly PermissionKey[],
+  profileId: string,
+  ministryId: string | null,
+  leaderProfileIds: string[],
+): boolean {
+  if (permissions.includes("eventos:write")) return true;
+  if (!ministryId) return false;
+  return (
+    permissions.includes("eventos:write_own") &&
+    leaderProfileIds.includes(profileId)
+  );
+}
+
+export function canDeleteEventsWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return permissions.includes("eventos:delete");
+}
+
+export function canFeatureEventsWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return permissions.includes("eventos:write");
+}

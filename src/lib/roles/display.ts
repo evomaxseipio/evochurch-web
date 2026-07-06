@@ -100,6 +100,7 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "ministerios:write_own": "Editar solo ministerios donde es líder",
   "eventos:read": "Ver eventos",
   "eventos:write": "Crear y editar eventos",
+  "eventos:write_own": "Crear y editar eventos de sus ministerios",
   "eventos:delete": "Eliminar eventos",
   "comunicacion:read": "Ver comunicación",
   "comunicacion:write": "Publicar anuncios y mensajes",
@@ -139,6 +140,7 @@ const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
   "ministerios:write_own": "permissions.ministerios.write_own",
   "eventos:read": "permissions.eventos.read",
   "eventos:write": "permissions.eventos.write",
+  "eventos:write_own": "permissions.eventos.write_own",
   "eventos:delete": "permissions.eventos.delete",
   "comunicacion:read": "permissions.comunicacion.read",
   "comunicacion:write": "permissions.comunicacion.write",
@@ -210,6 +212,12 @@ export const MODULE_ACTION_COLUMN_LABELS: Record<
     write: "Gestionar",
     write_own: "Como líder",
   },
+  eventos: {
+    read: "Ver",
+    write: "Gestionar",
+    write_own: "Como líder",
+    delete: "Eliminar",
+  },
   settings: {
     read: "Ver",
     write: "Editar",
@@ -225,11 +233,6 @@ export const MODULE_ACTION_COLUMN_LABELS: Record<
     read: "Ver",
   },
   members: {
-    read: "Ver",
-    write: "Editar",
-    delete: "Eliminar",
-  },
-  eventos: {
     read: "Ver",
     write: "Editar",
     delete: "Eliminar",

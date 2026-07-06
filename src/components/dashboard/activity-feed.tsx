@@ -1,4 +1,7 @@
+"use client";
+
 import type { Activity } from "@/lib/mock/dashboard-data";
+import { useTranslations } from "next-intl";
 
 function initials(name: string): string {
   return name
@@ -11,6 +14,8 @@ function initials(name: string): string {
 }
 
 export function ActivityFeed({ items }: { items: Activity[] }) {
+  const t = useTranslations("dashboard");
+
   return (
     <div className="col" style={{ gap: 14 }}>
       {items.map((a, i) => (
@@ -20,12 +25,15 @@ export function ActivityFeed({ items }: { items: Activity[] }) {
           </span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 14 }}>
-              <b>{a.who}</b> <span className="muted">{a.what}</span>
+              <b>{a.who}</b>{" "}
+              <span className="muted">
+                {t(a.whatKey as "activityRegisteredTithe")}
+              </span>
               {a.amount !== "—" ? (
                 <span style={{ color: "var(--ink)", fontWeight: 600 }}> · {a.amount}</span>
               ) : null}
             </div>
-            <div className="tiny muted">{a.time}</div>
+            <div className="tiny muted">{t(a.timeKey as "time12Min")}</div>
           </div>
         </div>
       ))}

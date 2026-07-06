@@ -145,6 +145,12 @@
     "updateHeroSubtitle": "para entrar con seguridad.",
     "updateHeroBody": "Por tu seguridad, debes reemplazar la contraseña temporal antes de usar la consola.",
     "noChurchBanner": "Tu cuenta de acceso existe, pero no está vinculada a un perfil de iglesia en EvoChurch. Contacta al administrador de tu congregación.",
+    "sessionIdle": {
+      "title": "Sesión por expirar",
+      "body": "Por tu seguridad, cerraremos la sesión en 1 minuto por inactividad.",
+      "continue": "Continuar sesión",
+      "expiredNotice": "Tu sesión expiró por inactividad. Inicia sesión de nuevo."
+    },
     "errors": {
       "auth": "No se pudo completar el inicio de sesión. Intenta de nuevo.",
       "credentials": "Credenciales inválidas. Intenta de nuevo.",
@@ -237,13 +243,105 @@
       "9": "Oct",
       "10": "Nov",
       "11": "Dic"
-    }
+    },
+    "kpiTotalMembers": "Total de miembros",
+    "kpiTotalCatechumens": "Total catecúmenos",
+    "kpiFundsBalance": "Saldo en fondos",
+    "kpiContributionsMonth": "Contribuciones (mes)",
+    "kpiUpcomingEvents": "Eventos próximos",
+    "kpiNewVisitors": "Nuevos visitantes",
+    "kpiLedgerIncomeMonth": "Ingresos recibidos (mes)",
+    "kpiLedgerExpenseMonth": "Transacciones (mes)",
+    "deltaActiveMembers": "{count} activos",
+    "deltaActiveFunds": "{count, plural, one {# fondo activo} other {# fondos activos}}",
+    "deltaUpcomingThisWeek": "{count} esta semana",
+    "deltaVisitorsVsLastWeek": "+{count} vs sem. pasada",
+    "activityRegisteredTithe": "registró diezmo",
+    "activityCreatedEvent": "creó evento",
+    "activityUpdatedProfile": "actualizó perfil",
+    "activityExportedReport": "exportó reporte",
+    "activityRegisteredIncome": "registró ingreso",
+    "activityJoinedMinistry": "se unió a",
+    "time12Min": "hace 12 min",
+    "time1Hour": "hace 1 h",
+    "time2Hours": "hace 2 h",
+    "time3Hours": "hace 3 h",
+    "time5Hours": "hace 5 h",
+    "timeYesterday": "ayer",
+    "pendingFundTransfer": "Transferencia entre fondos",
+    "pendingExpenseDefault": "Egreso pendiente"
   },
   "eventos": {
     "title": "Eventos",
-    "subtitle": "Calendario y actividades de la congregación",
-    "comingSoon": "Próximamente",
-    "description": "Esta pantalla se implementará en la siguiente fase del diseño."
+    "subtitle": "Cultos, estudios, vigilias y actividades especiales.",
+    "agendaEyebrow": "Agenda",
+    "searchPlaceholder": "Buscar evento, ubicación o ministerio…",
+    "churchEvents": "de la iglesia",
+    "newEvent": "Nuevo evento",
+    "editEvent": "Editar evento",
+    "deleteEvent": "Eliminar evento",
+    "deleteConfirm": "¿Eliminar «{title}»? Esta acción no se puede deshacer.",
+    "emptyTitle": "Sin eventos en este periodo",
+    "emptyDescription": "Crea el primer evento o amplía el rango de fechas.",
+    "viewList": "Lista",
+    "viewCalendar": "Calendario",
+    "today": "Hoy",
+    "prevMonth": "Mes anterior",
+    "nextMonth": "Mes siguiente",
+    "moreEvents": "+{count} más",
+    "calendarWeekdays": {
+      "0": "Dom",
+      "1": "Lun",
+      "2": "Mar",
+      "3": "Mié",
+      "4": "Jue",
+      "5": "Vie",
+      "6": "Sáb"
+    },
+    "upcoming": "Próximamente",
+    "featured": "Evento destacado",
+    "recurring": "Recurrente",
+    "allDay": "Todo el día",
+    "featuredLabel": "Destacar en agenda",
+    "websiteListedLabel": "Mostrar en sitio web",
+    "websiteListedHint": "Sección de eventos (máx. 10).",
+    "websitePromotedLabel": "Promocionar en header del sitio",
+    "websitePromotedHint": "Banner superior (máx. 3, incluye destacados).",
+    "fields": {
+      "title": "Título",
+      "type": "Tipo",
+      "date": "Fecha",
+      "startTime": "Hora inicio",
+      "endTime": "Hora fin",
+      "location": "Ubicación",
+      "description": "Descripción",
+      "ministry": "Ministerio",
+      "recurrence": "Repetir",
+      "recurrenceUntil": "Repetir hasta",
+      "weeklyHint": "Cada {weekday} a la misma hora"
+    },
+    "types": {
+      "culto": "Culto",
+      "estudio": "Estudio",
+      "evento": "Evento"
+    },
+    "weekdays": {
+      "0": "domingo",
+      "1": "lunes",
+      "2": "martes",
+      "3": "miércoles",
+      "4": "jueves",
+      "5": "viernes",
+      "6": "sábado"
+    },
+    "errors": {
+      "titleRequired": "El título es obligatorio.",
+      "dateRequired": "La fecha es obligatoria.",
+      "timeRequired": "La hora es obligatoria.",
+      "ministryRequired": "Selecciona un ministerio."
+    },
+    "saveSuccess": "Evento guardado.",
+    "deleteSuccess": "Evento eliminado."
   },
   "comunicacion": {
     "title": "Comunicación",
@@ -832,6 +930,7 @@
       "eventos": {
         "read": "Ver eventos",
         "write": "Crear y editar eventos",
+        "write_own": "Crear y editar eventos de sus ministerios",
         "delete": "Eliminar eventos"
       },
       "comunicacion": {

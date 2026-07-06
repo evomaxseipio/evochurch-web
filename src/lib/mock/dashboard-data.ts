@@ -6,9 +6,9 @@ export type WeekPoint = { w: string; v: number };
 export type MonthPoint = { m: string; v: number };
 export type Activity = {
   who: string;
-  what: string;
+  whatKey: string;
   amount: string;
-  time: string;
+  timeKey: string;
   kind: string;
 };
 export type ChurchEvent = {
@@ -138,44 +138,44 @@ export const dashboardMock = {
   activities: [
     {
       who: "María Altagracia Peña",
-      what: "registró diezmo",
+      whatKey: "activityRegisteredTithe",
       amount: "RD$ 6,800",
-      time: "hace 12 min",
+      timeKey: "time12Min",
       kind: "give",
     },
     {
       who: "Pastor Roberto",
-      what: "creó evento",
+      whatKey: "activityCreatedEvent",
       amount: "Vigilia de Oración",
-      time: "hace 1 h",
+      timeKey: "time1Hour",
       kind: "event",
     },
     {
       who: "Yokasta Mejía",
-      what: "actualizó perfil",
+      whatKey: "activityUpdatedProfile",
       amount: "—",
-      time: "hace 2 h",
+      timeKey: "time2Hours",
       kind: "edit",
     },
     {
       who: "Sistema",
-      what: "exportó reporte",
+      whatKey: "activityExportedReport",
       amount: "Finanzas Abril.pdf",
-      time: "hace 3 h",
+      timeKey: "time3Hours",
       kind: "report",
     },
     {
       who: "Wilkin Almonte",
-      what: "registró ingreso",
+      whatKey: "activityRegisteredIncome",
       amount: "RD$ 25,000",
-      time: "hace 5 h",
+      timeKey: "time5Hours",
       kind: "give",
     },
     {
       who: "Cristian Ureña",
-      what: "se unió a",
+      whatKey: "activityJoinedMinistry",
       amount: "Servicio Jóvenes",
-      time: "ayer",
+      timeKey: "timeYesterday",
       kind: "event",
     },
   ] satisfies Activity[],

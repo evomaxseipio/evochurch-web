@@ -80,7 +80,7 @@ export const MODULE_MATRIX_RESOURCE_DEFS: Record<
 > = {
   dashboard: [{ key: "dashboard", label: "Dashboard", actions: ["read"] }],
   members: [{ key: "members", label: "Miembros", actions: ["read", "write", "delete"] }],
-  eventos: [{ key: "eventos", label: "Eventos", actions: ["read", "write", "delete"] }],
+  eventos: [{ key: "eventos", label: "Eventos", actions: ["read", "write", "write_own", "delete"] }],
   comunicacion: [
     { key: "comunicacion", label: "Comunicación", actions: ["read", "write", "delete"] },
   ],
@@ -202,7 +202,11 @@ export function applyStandardPermissionRules(
 
   if (crudModules.some((m) => key.startsWith(`${m}:`))) {
     if (checked) {
-      if (key.endsWith(":write") || key.endsWith(":delete")) {
+      if (
+        key.endsWith(":write") ||
+        key.endsWith(":delete") ||
+        (module === "eventos" && key.endsWith(":write_own"))
+      ) {
         draft.add(`${module}:read` as PermissionKey);
       }
       return;
@@ -210,6 +214,9 @@ export function applyStandardPermissionRules(
     if (key.endsWith(":read")) {
       draft.delete(`${module}:write` as PermissionKey);
       draft.delete(`${module}:delete` as PermissionKey);
+      if (module === "eventos") {
+        draft.delete("eventos:write_own" as PermissionKey);
+      }
     }
     return;
   }
@@ -244,7 +251,14 @@ export function sanitizePermissionDraftForSave(
     if (!set.has(readKey)) {
       set.delete(`${module}:write` as PermissionKey);
       set.delete(`${module}:delete` as PermissionKey);
+      if (module === "eventos") {
+        set.delete("eventos:write_own");
+      }
     }
+  }
+
+  if (set.has("eventos:write") || set.has("eventos:write_own")) {
+    set.add("eventos:read");
   }
 
   if (set.has("ministerios:write") || set.has("ministerios:write_own")) {

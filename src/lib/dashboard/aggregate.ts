@@ -134,12 +134,16 @@ export function extractPendingAuthorizations(
 
   return pending.slice(0, limit).map((entry) => {
     const isTransfer = Boolean(entry.isFundTransfer);
+    const description = entry.description || entry.typeName || "";
     return {
       id: entry.entryId,
       kind: isTransfer ? "fund_transfer" : "expense",
-      title: isTransfer
-        ? "Transferencia entre fondos"
-        : entry.description || entry.typeName || "Egreso pendiente",
+      title: isTransfer ? "" : description,
+      titleKey: isTransfer
+        ? "pendingFundTransfer"
+        : !description.trim()
+          ? "pendingExpenseDefault"
+          : undefined,
       subtitle: isTransfer
         ? `${entry.transferSourceFundName ?? entry.fundName} → ${entry.transferDestinationFundName ?? "—"}`
         : `${entry.fundName} · ${entry.createdBy}`,

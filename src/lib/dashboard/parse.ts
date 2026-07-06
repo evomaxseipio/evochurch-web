@@ -48,6 +48,7 @@ function parseChartPoints(raw: unknown): ChartPoint[] {
     .map((row) => ({
       label: asString(row.label),
       value: Math.round(asNumber(row.value)),
+      from: asString(row.from) || undefined,
     }));
 }
 
@@ -60,6 +61,7 @@ function parseLedgerBarPoints(raw: unknown): IncomeExpenseBarPoint[] {
       label: asString(row.label),
       income: Math.round(asNumber(row.income)),
       expense: Math.round(asNumber(row.expense)),
+      from: asString(row.from) || undefined,
     }));
 }
 
@@ -106,16 +108,28 @@ function parsePendingItems(raw: unknown): PendingAuthorizationItem[] {
   return raw
     .map((item) => asRecord(item))
     .filter((item): item is Record<string, unknown> => item !== null)
-    .map((row) => ({
-      id: asString(row.id),
-      kind: (asString(row.kind) === "fund_transfer"
+    .map((row) => {
+      const kind = (asString(row.kind) === "fund_transfer"
         ? "fund_transfer"
-        : "expense") as PendingAuthorizationItem["kind"],
-      title: asString(row.title),
-      subtitle: asString(row.subtitle),
-      amount: Math.round(asNumber(row.amount)),
-      movementDate: asString(row.movement_date ?? row.movementDate),
-    }))
+        : "expense") as PendingAuthorizationItem["kind"];
+      const title = asString(row.title);
+      const titleKey =
+        kind === "fund_transfer"
+          ? ("pendingFundTransfer" as const)
+          : !title.trim() || title === "Egreso pendiente"
+            ? ("pendingExpenseDefault" as const)
+            : undefined;
+
+      return {
+        id: asString(row.id),
+        kind,
+        title,
+        titleKey,
+        subtitle: asString(row.subtitle),
+        amount: Math.round(asNumber(row.amount)),
+        movementDate: asString(row.movement_date ?? row.movementDate),
+      };
+    })
     .filter((item) => item.id.length > 0);
 }
 
@@ -124,6 +138,7 @@ function buildDashboardKpisFromSummary(params: {
   catechumenCount: number;
   fundsSummary: { totalBalance: number; activeCount: number };
   contributionMonthlyTotals: number[];
+  eventsSummary?: { upcomingCount: number; thisWeekCount: number };
   kpiMonth: {
     contributionsThisMonth: number;
     contributionsPrevMonth: number;
@@ -151,13 +166,17 @@ function buildDashboardKpisFromSummary(params: {
 
   const mockEvents = dashboardMock.kpis[3];
   const mockVisitors = dashboardMock.kpis[4];
+  const eventsUpcoming = params.eventsSummary?.upcomingCount ?? 0;
+  const eventsThisWeek = params.eventsSummary?.thisWeekCount ?? 0;
+  const hasRealEvents = params.eventsSummary != null;
 
   return [
     {
       labelKey: "kpiTotalMembers",
       label: "Total de Miembros",
       value: formatNumber(params.memberStats.total, locale),
-      delta: `${formatNumber(params.memberStats.active, locale)} active`,
+      deltaKey: "deltaActiveMembers",
+      deltaValues: { count: params.memberStats.active },
       deltaDir: "up",
       feature: true,
       icon: "users",
@@ -173,8 +192,9 @@ function buildDashboardKpisFromSummary(params: {
     {
       labelKey: "kpiFundsBalance",
       label: "Saldo en fondos",
-      value: fmtRDshort(params.fundsSummary.totalBalance),
-      delta: `${params.fundsSummary.activeCount} fondo${params.fundsSummary.activeCount === 1 ? "" : "s"} activo${params.fundsSummary.activeCount === 1 ? "" : "s"}`,
+      value: fmtRDshort(params.fundsSummary.totalBalance, locale),
+      deltaKey: "deltaActiveFunds",
+      deltaValues: { count: params.fundsSummary.activeCount },
       deltaDir: "up",
       icon: "wallet",
       accent: "var(--d-funds)",
@@ -182,7 +202,7 @@ function buildDashboardKpisFromSummary(params: {
     {
       labelKey: "kpiContributionsMonth",
       label: "Contribuciones (mes)",
-      value: fmtRDshort(params.kpiMonth.contributionsThisMonth),
+      value: fmtRDshort(params.kpiMonth.contributionsThisMonth, locale),
       delta: contributionsDelta.delta,
       deltaDir: contributionsDelta.deltaDir,
       icon: "wallet",
@@ -190,18 +210,24 @@ function buildDashboardKpisFromSummary(params: {
       spark: params.contributionMonthlyTotals,
     },
     {
+      labelKey: "kpiUpcomingEvents",
       label: mockEvents.label,
-      value: mockEvents.value,
-      delta: mockEvents.delta,
+      value: hasRealEvents
+        ? formatNumber(eventsUpcoming, locale)
+        : mockEvents.value,
+      deltaKey: "deltaUpcomingThisWeek",
+      deltaValues: { count: hasRealEvents ? eventsThisWeek : 3 },
       deltaDir: mockEvents.deltaDir,
       icon: mockEvents.icon,
       accent: mockEvents.accent,
-      mock: true,
+      mock: !hasRealEvents,
     },
     {
+      labelKey: "kpiNewVisitors",
       label: mockVisitors.label,
       value: mockVisitors.value,
-      delta: mockVisitors.delta,
+      deltaKey: "deltaVisitorsVsLastWeek",
+      deltaValues: { count: 6 },
       deltaDir: mockVisitors.deltaDir,
       icon: mockVisitors.icon,
       accent: mockVisitors.accent,
@@ -209,16 +235,18 @@ function buildDashboardKpisFromSummary(params: {
       mock: true,
     },
     {
+      labelKey: "kpiLedgerIncomeMonth",
       label: "Ingresos recibidos (mes)",
-      value: fmtRDshort(params.kpiMonth.ledgerIncomeThisMonth),
+      value: fmtRDshort(params.kpiMonth.ledgerIncomeThisMonth, locale),
       delta: incomeDelta.delta,
       deltaDir: incomeDelta.deltaDir,
       icon: "trendUp",
       accent: "var(--success)",
     },
     {
+      labelKey: "kpiLedgerExpenseMonth",
       label: "Transacciones (mes)",
-      value: fmtRDshort(params.kpiMonth.ledgerExpenseThisMonth),
+      value: fmtRDshort(params.kpiMonth.ledgerExpenseThisMonth, locale),
       delta: expenseDelta.delta,
       deltaDir: expenseDelta.deltaDir,
       icon: "arrowDn",
@@ -240,6 +268,7 @@ export function parseDashboardSummaryResponse(
   const memberStatsRaw = asRecord(root.member_stats) ?? {};
   const fundsRaw = asRecord(root.funds_summary) ?? {};
   const kpiMonthRaw = asRecord(root.kpi_month) ?? {};
+  const eventsSummaryRaw = asRecord(root.events_summary);
 
   const memberStats: MembersListStats = {
     total: asNumber(memberStatsRaw.total),
@@ -266,6 +295,12 @@ export function parseDashboardSummaryResponse(
       activeCount: asNumber(fundsRaw.active_count),
     },
     contributionMonthlyTotals,
+    eventsSummary: eventsSummaryRaw
+      ? {
+          upcomingCount: asNumber(eventsSummaryRaw.upcoming_count),
+          thisWeekCount: asNumber(eventsSummaryRaw.this_week_count),
+        }
+      : undefined,
     kpiMonth: {
       contributionsThisMonth: Math.round(
         asNumber(kpiMonthRaw.contributions_this_month),

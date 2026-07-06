@@ -1,38 +1,13 @@
 "use client";
 
+import { fmtRD, fmtRDshort } from "@/lib/format-currency";
 import type { Locale } from "@/i18n/config";
 import type { ChartPoint } from "@/lib/dashboard/types";
 import { buildYAxisTicks, niceChartMax } from "@/lib/dashboard/chart-axis";
-import { formatNumber } from "@/lib/i18n/format";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useId, useMemo, useState } from "react";
 
 type PlotPoint = ChartPoint & { x: number; y: number };
-
-function formatAmount(value: number, locale: Locale): string {
-  return `RD$ ${formatNumber(value, locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })}`;
-}
-
-function formatAmountShort(value: number, locale: Locale): string {
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) {
-    return `RD$ ${formatNumber(value / 1_000_000, locale, {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })}M`;
-  }
-  if (abs >= 1_000) {
-    return `RD$ ${formatNumber(value / 1_000, locale, {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })}K`;
-  }
-
-  return formatAmount(value, locale);
-}
 
 function nearestIndex(clientX: number, rect: DOMRect, points: PlotPoint[]): number {
   if (points.length === 0) return 0;
@@ -148,7 +123,7 @@ export function ContributionsLineChart({
             boxShadow: "0 4px 14px rgba(0,0,0,0.18)",
           }}
         >
-          {active.label}: {formatAmount(active.value, locale)}
+          {active.label}: {fmtRD(active.value, locale)}
         </div>
       ) : null}
 
@@ -186,7 +161,7 @@ export function ContributionsLineChart({
               textAnchor="end"
               style={{ fontFamily: "inherit" }}
             >
-              {formatAmountShort(t.v, locale)}
+              {fmtRDshort(t.v, locale)}
             </text>
           </g>
         ))}

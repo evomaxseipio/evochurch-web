@@ -6,9 +6,9 @@ import { getTranslations } from "next-intl/server";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string; reason?: string }>;
 }) {
-  const { next, error, email } = await searchParams;
+  const { next, error, email, reason } = await searchParams;
   const t = await getTranslations("auth");
 
   return (
@@ -26,6 +26,7 @@ export default async function LoginPage({
           next={next}
           email={email}
           loginError={error}
+          loginReason={reason}
         />
       </div>
 

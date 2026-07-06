@@ -10,6 +10,7 @@ import { LastEventCard } from "@/components/dashboard/last-event-card";
 import { PendingTransactionsList } from "@/components/dashboard/pending-transactions-list";
 import type { Locale } from "@/i18n/config";
 import { formatPeriodDelta } from "@/lib/dashboard/aggregate";
+import { localizeChartPointLabel } from "@/lib/dashboard/chart-labels";
 import type {
   DashboardChartData,
   DashboardChartPeriod,
@@ -18,7 +19,7 @@ import type {
   DashboardLedgerChartData,
   PendingAuthorizationItem,
 } from "@/lib/dashboard/types";
-import { formatNumber } from "@/lib/i18n/format";
+import { fmtRD, fmtRDshort } from "@/lib/format-currency";
 import { dashboardMock } from "@/lib/mock/dashboard-data";
 import { toast } from "@/lib/toast";
 import { useLocale, useTranslations } from "next-intl";
@@ -78,14 +79,29 @@ export function DashboardView({
   const headKpis = kpis.slice(0, 2);
   const restKpis = kpis.slice(2);
 
-  function kpiLabel(kpi: DashboardKpi): string {
-    return kpi.labelKey ? t(kpi.labelKey as "kpiTotalMembers") : kpi.label;
-  }
-  const contributionsTotalFormatted = `RD$ ${formatNumber(
-    contributionsTotal,
-    locale,
-    { minimumFractionDigits: 0, maximumFractionDigits: 0 },
-  )}`;
+  const localizedLedgerChart = useMemo(
+    () =>
+      ledgerChart.map((point) => ({
+        ...point,
+        label: localizeChartPointLabel(point, ledgerPeriod, (month) =>
+          t(`months.${month}` as "months.0"),
+        ),
+      })),
+    [ledgerChart, ledgerPeriod, t],
+  );
+
+  const localizedContributionsChart = useMemo(
+    () =>
+      contributionsChart.map((point) => ({
+        ...point,
+        label: localizeChartPointLabel(point, contributionsPeriod, (month) =>
+          t(`months.${month}` as "months.0"),
+        ),
+      })),
+    [contributionsChart, contributionsPeriod, t],
+  );
+
+  const contributionsTotalFormatted = fmtRD(contributionsTotal, locale);
 
   return (
     <div>
@@ -97,12 +113,12 @@ export function DashboardView({
 
       <div className="grid-12" style={{ marginTop: 24 }}>
         {headKpis.map((kpi, index) => (
-          <div key={kpi.label} className="span-3">
+          <div key={kpi.labelKey ?? kpi.label} className="span-3">
             <KpiCard {...kpi} feature={index === 0} kind="elevated" />
           </div>
         ))}
         {restKpis.map((kpi) => (
-          <div key={kpi.label} className="span-3">
+          <div key={kpi.labelKey ?? kpi.label} className="span-3">
             <KpiCard {...kpi} />
           </div>
         ))}
@@ -152,7 +168,7 @@ export function DashboardView({
               onChange={setLedgerPeriod}
             />
           </div>
-          <IncomeExpenseBarChart data={ledgerChart} />
+          <IncomeExpenseBarChart data={localizedLedgerChart} />
         </div>
 
         <div
@@ -177,7 +193,7 @@ export function DashboardView({
               onChange={setContributionsPeriod}
             />
           </div>
-          <ContributionsLineChart data={contributionsChart} height={180} />
+          <ContributionsLineChart data={localizedContributionsChart} height={180} />
         </div>
       </div>
 

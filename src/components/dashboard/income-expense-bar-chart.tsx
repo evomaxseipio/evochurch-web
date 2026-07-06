@@ -1,33 +1,12 @@
 "use client";
 
+import { fmtRD, fmtRDshort } from "@/lib/format-currency";
 import type { Locale } from "@/i18n/config";
 import type { IncomeExpenseBarPoint } from "@/lib/dashboard/types";
 import { buildYAxisTicks, niceChartMax } from "@/lib/dashboard/chart-axis";
-import { formatNumber } from "@/lib/i18n/format";
 import { useLocale, useTranslations } from "next-intl";
 
 const AXIS_W = 52;
-
-function formatAmountShort(value: number, locale: Locale): string {
-  const abs = Math.abs(value);
-  if (abs >= 1_000_000) {
-    return `RD$ ${formatNumber(value / 1_000_000, locale, {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })}M`;
-  }
-  if (abs >= 1_000) {
-    return `RD$ ${formatNumber(value / 1_000, locale, {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })}K`;
-  }
-
-  return `RD$ ${formatNumber(value, locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })}`;
-}
 
 export function IncomeExpenseBarChart({
   data,
@@ -77,7 +56,7 @@ export function IncomeExpenseBarChart({
                   whiteSpace: "nowrap",
                 }}
               >
-                {formatAmountShort(tick, locale)}
+                {fmtRDshort(tick, locale)}
               </span>
             );
           })}
@@ -148,7 +127,7 @@ export function IncomeExpenseBarChart({
                   }}
                 >
                   <div
-                    title={`${t("income")} ${formatAmountShort(point.income, locale)}`}
+                    title={`${t("income")} ${fmtRD(point.income, locale)}`}
                     style={{
                       width: "42%",
                       height: Math.max(incomeH, point.income > 0 ? 4 : 0),
@@ -158,7 +137,7 @@ export function IncomeExpenseBarChart({
                     }}
                   />
                   <div
-                    title={`${t("expense")} ${formatAmountShort(point.expense, locale)}`}
+                    title={`${t("expense")} ${fmtRD(point.expense, locale)}`}
                     style={{
                       width: "42%",
                       height: Math.max(expenseH, point.expense > 0 ? 4 : 0),

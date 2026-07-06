@@ -2,9 +2,10 @@
 
 import { login, type LoginState } from "@/app/(auth)/login/actions";
 import { Icons } from "@/components/icons";
+import { clearSessionIdleActivity } from "@/lib/auth/session-idle";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 const initial: LoginState = {};
 
@@ -14,16 +15,22 @@ export function LoginForm({
   next,
   email,
   loginError,
+  loginReason,
 }: {
   next?: string;
   email?: string;
   loginError?: string;
+  loginReason?: string;
 }) {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("auth.errors");
   const [state, formAction, pending] = useActionState(login, initial);
   const [showPw, setShowPw] = useState(false);
+
+  useEffect(() => {
+    clearSessionIdleActivity();
+  }, []);
 
   const bannerError =
     (loginError && ERROR_KEYS.includes(loginError as (typeof ERROR_KEYS)[number])
@@ -33,6 +40,8 @@ export function LoginForm({
       ? tErrors(state.errorKey.replace("auth.errors.", "") as (typeof ERROR_KEYS)[number])
       : undefined) ??
     state.error;
+
+  const idleNotice = loginReason === "idle" ? t("sessionIdle.expiredNotice") : null;
 
   return (
     <div className="inner">
@@ -53,6 +62,22 @@ export function LoginForm({
           {t("loginSubtitle")}
         </p>
       </div>
+
+      {idleNotice ? (
+        <p
+          className="help"
+          role="status"
+          style={{
+            marginBottom: 12,
+            padding: "10px 12px",
+            borderRadius: 8,
+            background: "color-mix(in oklab, var(--accent) 12%, transparent)",
+            color: "var(--ink)",
+          }}
+        >
+          {idleNotice}
+        </p>
+      ) : null}
 
       {bannerError ? (
         <p

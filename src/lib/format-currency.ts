@@ -8,23 +8,38 @@ function trimCurrencyDecimals(value: string): string {
     .trim();
 }
 
+/** Full DOP amount with locale-aware grouping (e.g. RD$898,100 or RD$898.100). */
 export function fmtRD(n: number, locale: Locale = "es"): string {
   return trimCurrencyDecimals(formatCurrency(Math.abs(n), locale, "DOP"));
 }
 
+function fmtRDShortSuffix(
+  value: number,
+  locale: Locale,
+  suffix: "K" | "M",
+): string {
+  const formatted = formatNumber(value, locale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  });
+  return `RD$ ${formatted}${suffix}`;
+}
+
+/** Compact KPI / chart axis amounts (K/M suffix when large). */
 export function fmtRDshort(n: number, locale: Locale = "es"): string {
   const abs = Math.abs(n);
-  const suffix = abs >= 1_000_000 ? "M" : abs >= 1_000 ? "K" : "";
-  const value =
-    abs >= 1_000_000
-      ? n / 1_000_000
-      : abs >= 1_000
-        ? n / 1_000
-        : n;
-  const rounded = abs >= 1_000 ? Number(value.toFixed(1)) : Math.round(value);
-  const formatted = formatNumber(rounded, locale, {
-    minimumFractionDigits: abs >= 1_000 ? 1 : 0,
-    maximumFractionDigits: abs >= 1_000 ? 1 : 0,
-  });
-  return `RD$ ${formatted}${suffix}`.trim();
+  const sign = n < 0 ? "−" : "";
+
+  if (abs >= 1_000_000) {
+    return `${sign}${fmtRDShortSuffix(abs / 1_000_000, locale, "M")}`;
+  }
+  if (abs >= 1_000) {
+    return `${sign}${fmtRDShortSuffix(abs / 1_000, locale, "K")}`;
+  }
+  return fmtRD(n, locale);
+}
+
+/** Chart tooltips and list rows — exact amount, no compact suffix. */
+export function fmtRDChartTooltip(n: number, locale: Locale = "es"): string {
+  return fmtRD(n, locale);
 }

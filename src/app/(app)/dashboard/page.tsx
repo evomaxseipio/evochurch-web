@@ -1,5 +1,7 @@
 import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
+import { resolveDashboardKpiLabels } from "@/lib/dashboard/resolve-kpi";
+import type { Locale } from "@/i18n/config";
 import { fetchDashboardPayload } from "@/lib/services/dashboard";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -17,7 +19,7 @@ export default async function DashboardPage() {
 
   try {
     const supabase = await createClient();
-    payload = await fetchDashboardPayload(supabase, session.churchId);
+    payload = await fetchDashboardPayload(supabase, session.churchId, locale as Locale);
   } catch (e) {
     error =
       e instanceof Error
@@ -44,7 +46,11 @@ export default async function DashboardPage() {
       pastorName={pastorName}
       churchName={churchName}
       hero={payload.hero}
-      kpis={payload.kpis}
+      kpis={resolveDashboardKpiLabels(
+        payload.kpis,
+        (key, values) => t(key as "kpiTotalMembers", values),
+        locale as Locale,
+      )}
       contributionCharts={payload.contributionCharts}
       ledgerCharts={payload.ledgerCharts}
       contributionPeriodTotals={payload.contributionPeriodTotals}

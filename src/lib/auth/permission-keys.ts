@@ -17,6 +17,7 @@ export const PERMISSION_KEYS = [
   "ministerios:write_own",
   "eventos:read",
   "eventos:write",
+  "eventos:write_own",
   "eventos:delete",
   "comunicacion:read",
   "comunicacion:write",

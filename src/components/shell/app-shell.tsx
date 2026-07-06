@@ -1,9 +1,11 @@
 "use client";
 
+import { SessionIdleGuard } from "@/components/auth/session-idle-guard";
 import { AppTopbar } from "@/components/shell/app-topbar";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { Sidebar } from "@/components/shell/sidebar";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import { SESSION_IDLE_ENABLED } from "@/lib/auth/session-idle";
 import { useCallback, useState } from "react";
 
 const SIDEBAR_KEY = "evochurch-sidebar-collapsed";
@@ -65,6 +67,7 @@ export function AppShell({
       </main>
 
       <BottomNav permissions={permissions} />
+      {SESSION_IDLE_ENABLED ? <SessionIdleGuard /> : null}
     </div>
   );
 }

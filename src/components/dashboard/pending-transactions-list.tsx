@@ -3,16 +3,15 @@
 import { Icons } from "@/components/icons";
 import type { Locale } from "@/i18n/config";
 import type { PendingAuthorizationItem } from "@/lib/dashboard/types";
+import { resolvePendingItemTitle } from "@/lib/dashboard/pending-labels";
+import { fmtRD } from "@/lib/format-currency";
 import { formatDate, formatNumber } from "@/lib/i18n/format";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 function formatAmount(value: number, locale: Locale): string {
-  return `RD$ ${formatNumber(Math.abs(value), locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })}`;
+  return fmtRD(value, locale);
 }
 
 function itemMeta(item: PendingAuthorizationItem, locale: Locale): string {
@@ -36,6 +35,7 @@ function PendingRow({
   const t = useTranslations("dashboard");
   const [hover, setHover] = useState(false);
   const isTransfer = item.kind === "fund_transfer";
+  const title = resolvePendingItemTitle(item, t);
 
   return (
     <Link
@@ -92,7 +92,7 @@ function PendingRow({
             color: "var(--ink)",
           }}
         >
-          {item.title}
+          {title}
         </div>
         <div
           className="row"

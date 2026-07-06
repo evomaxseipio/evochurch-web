@@ -12,12 +12,14 @@ export type PeriodBucket = {
 export type ChartPoint = {
   label: string;
   value: number;
+  from?: string;
 };
 
 export type IncomeExpenseBarPoint = {
   label: string;
   income: number;
   expense: number;
+  from?: string;
 };
 
 export type DashboardKpi = {
@@ -25,6 +27,8 @@ export type DashboardKpi = {
   labelKey?: string;
   value: string;
   delta?: string;
+  deltaKey?: string;
+  deltaValues?: Record<string, string | number>;
   deltaDir?: "up" | "down";
   feature?: boolean;
   spark?: number[];
@@ -48,6 +52,7 @@ export type PendingAuthorizationItem = {
   id: string;
   kind: "expense" | "fund_transfer";
   title: string;
+  titleKey?: "pendingFundTransfer" | "pendingExpenseDefault";
   subtitle: string;
   amount: number;
   movementDate: string;
