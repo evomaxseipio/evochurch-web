@@ -19,6 +19,7 @@ import { fmtRDshort } from "@/lib/format-currency";
 import type { Locale } from "@/i18n/config";
 import { formatNumber } from "@/lib/i18n/format";
 import type { MembersListStats } from "@/lib/members/types";
+import { parseDashboardRecentAudit } from "@/lib/services/audit-log";
 import { dashboardMock } from "@/lib/mock/dashboard-data";
 
 function asRecord(v: unknown): Record<string, unknown> | null {
@@ -328,6 +329,7 @@ export function parseDashboardSummaryResponse(
     hero,
     kpis,
     pendingItems: parsePendingItems(root.pending_authorizations),
+    recentAudit: parseDashboardRecentAudit(root.recent_audit),
     contributionCharts,
     ledgerCharts,
     contributionPeriodTotals: periodTotalsFromCharts(contributionCharts),

@@ -8,7 +8,7 @@ function installDevPerformanceShim() {
   if (perf.__evoMeasureShim) return;
 
   const original = perf.measure.bind(perf);
-  perf.measure = (...args: Parameters<Performance["measure"]>) => {
+  perf.measure = ((...args: Parameters<Performance["measure"]>) => {
     try {
       return original(...args);
     } catch (error) {
@@ -20,7 +20,7 @@ function installDevPerformanceShim() {
       }
       throw error;
     }
-  };
+  }) as Performance["measure"];
   perf.__evoMeasureShim = true;
 }
 

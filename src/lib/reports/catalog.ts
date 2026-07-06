@@ -95,6 +95,16 @@ export const REPORT_CATALOG: ReportCatalogEntry[] = [
     periodKind: "month",
     rolesHint: "Tesorero, Admin",
   },
+  {
+    id: "audit-activity-log",
+    title: "Bitácora de acciones",
+    description:
+      "Registro de actividad administrativa de la iglesia con filtros y exportación.",
+    category: "executive",
+    formats: ["pdf", "xlsx"],
+    periodKind: "none",
+    rolesHint: "Pastor, Admin",
+  },
 ];
 
 export const REPORT_CATEGORY_LABELS: Record<ReportCategory, string> = {

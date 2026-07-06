@@ -1,7 +1,18 @@
 import type { PermissionKey } from "@/lib/auth/permission-keys";
-import { hasAnyPermission, hasPermission } from "@/lib/auth/permissions";
+import {
+  canExportAuditLog,
+  canReadAuditLog,
+  hasAnyPermission,
+  hasPermission,
+} from "@/lib/auth/permissions";
 import type { AppSession } from "@/lib/auth/app-session";
 import type { ReportId } from "@/lib/reports/types";
+
+const AUDIT_ACTIVITY_LOG_REPORT_ID = "audit-activity-log" as const;
+
+function isAuditActivityLogReport(reportId: ReportId): boolean {
+  return reportId === AUDIT_ACTIVITY_LOG_REPORT_ID;
+}
 
 /** Recursos en BD (snake_case) — una fila por reporte en la matriz de permisos. */
 export const REPORT_RESOURCE_DEFS = [
@@ -95,13 +106,19 @@ export const ALL_REPORT_PERMISSIONS = [
 ] as const;
 
 export function canAccessReportsHub(session: AppSession): boolean {
-  return hasAnyPermission(session, [...REPORT_READ_PERMISSIONS]);
+  return (
+    hasAnyPermission(session, [...REPORT_READ_PERMISSIONS]) ||
+    canReadAuditLog(session)
+  );
 }
 
 export function canReadReport(
   session: AppSession,
   reportId: ReportId,
 ): boolean {
+  if (isAuditActivityLogReport(reportId)) {
+    return canReadAuditLog(session);
+  }
   return hasPermission(session, reportReadPermission(reportId));
 }
 
@@ -109,6 +126,9 @@ export function canExportReport(
   session: AppSession,
   reportId: ReportId,
 ): boolean {
+  if (isAuditActivityLogReport(reportId)) {
+    return canExportAuditLog(session);
+  }
   return hasPermission(session, reportExportPermission(reportId));
 }
 

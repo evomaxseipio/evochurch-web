@@ -1,3 +1,4 @@
+import type { AuditLogEntry } from "@/lib/audit/types";
 import type { IconName } from "@/components/icons";
 
 export type DashboardChartPeriod = "week" | "month" | "quarter" | "year";
@@ -68,6 +69,7 @@ export type DashboardPayload = {
   hero: DashboardHeroData;
   kpis: DashboardKpi[];
   pendingItems: PendingAuthorizationItem[];
+  recentAudit: AuditLogEntry[];
   contributionCharts: DashboardChartData;
   ledgerCharts: DashboardLedgerChartData;
   contributionPeriodTotals: Record<

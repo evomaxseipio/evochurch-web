@@ -220,6 +220,7 @@
     "recentActivity": "Actividad reciente",
     "whatsHappening": "Lo que está pasando",
     "activityLogSoon": "Log de acciones — próximamente",
+    "activityRestricted": "La bitácora de acciones está disponible para administradores y pastores.",
     "agenda": "Agenda",
     "lastEvent": "Último evento",
     "noEventsScheduled": "Sin eventos programados",
@@ -878,6 +879,7 @@
       "settings": "Configuración personal y catálogos del sistema",
       "admin_users": "Usuarios con acceso a la consola web",
       "roles": "Matriz de roles y permisos por iglesia",
+      "audit": "Bitácora de acciones administrativas",
       "reports": "Informes financieros, membresía y ejecutivos"
     },
     "financeResources": {
@@ -959,6 +961,10 @@
       },
       "roles": {
         "manage": "Editar roles y permisos por iglesia"
+      },
+      "audit": {
+        "read": "Ver bitácora de acciones",
+        "export": "Exportar bitácora"
       }
     },
     "notes": {
@@ -978,6 +984,102 @@
       "manage": "Gestionar",
       "publish": "Publicar",
       "leader": "Como líder"
+    }
+  },
+  "audit": {
+    "title": "Bitácora de acciones",
+    "subtitle": "Registro de actividad administrativa de la iglesia",
+    "unknownActor": "Usuario",
+    "empty": "No hay acciones registradas en este período.",
+    "exportFilename": "bitacora-acciones",
+    "modules": {
+      "members": "Miembros",
+      "finances": "Finanzas",
+      "eventos": "Eventos",
+      "settings": "Configuración",
+      "admin_users": "Usuarios sistema",
+      "roles": "Roles",
+      "auth": "Autenticación"
+    },
+    "actions": {
+      "create": "Creó",
+      "update": "Editó",
+      "delete": "Eliminó",
+      "authorize": "Autorizó",
+      "reject": "Rechazó",
+      "login": "Inició sesión",
+      "logout": "Cerró sesión",
+      "members": {
+        "create": "Creó miembro {name}",
+        "update": "Editó miembro {name}"
+      },
+      "finances": {
+        "transaction": {
+          "create": "Registró egreso por {amount}",
+          "authorize": "Autorizó egreso por {amount}",
+          "reject": "Rechazó egreso por {amount}"
+        },
+        "fund_transfer": {
+          "authorize": "Autorizó transferencia por {amount}"
+        }
+      },
+      "eventos": {
+        "create": "Creó evento: {title}",
+        "update": "Editó evento: {title}",
+        "delete": "Eliminó evento: {title}"
+      },
+      "admin_users": {
+        "create": "Registró usuario: {email}",
+        "update": "Actualizó usuario: {email}"
+      },
+      "roles": {
+        "create": "Creó rol: {name}",
+        "update": "Editó rol: {name}",
+        "delete": "Inactivó rol: {name}"
+      },
+      "settings": {
+        "income_type": {
+          "create": "Creó tipo de ingreso: {name}",
+          "update": "Editó tipo de ingreso: {name}",
+          "delete": "Eliminó tipo de ingreso: {name}"
+        },
+        "expense_type": {
+          "create": "Creó tipo de gasto: {name}",
+          "update": "Editó tipo de gasto: {name}",
+          "delete": "Eliminó tipo de gasto: {name}"
+        }
+      }
+    },
+    "filters": {
+      "from": "Desde",
+      "to": "Hasta",
+      "module": "Módulo",
+      "action": "Acción",
+      "actor": "Usuario",
+      "search": "Buscar",
+      "searchPlaceholder": "Resumen, actor o ID…",
+      "all": "Todos",
+      "apply": "Aplicar",
+      "applyHint": "Pulsa Cargar para ver las acciones registradas.",
+      "load": "Cargar"
+    },
+    "columns": {
+      "date": "Fecha",
+      "actor": "Actor",
+      "module": "Módulo",
+      "action": "Acción",
+      "summary": "Resumen",
+      "entityId": "ID entidad"
+    },
+    "kpi": {
+      "today": "Acciones hoy",
+      "thisWeek": "Esta semana",
+      "topModule": "Módulo principal"
+    },
+    "pagination": {
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "showing": "{from}–{to} de {total}"
     }
   },
   "reports": {
@@ -1053,6 +1155,11 @@
         "title": "Contribuciones por miembro",
         "description": "Desglose confidencial por miembro. Requiere permisos de finanzas.",
         "rolesHint": "Tesorero, Admin"
+      },
+      "audit-activity-log": {
+        "title": "Bitácora de acciones",
+        "description": "Registro de actividad administrativa de la iglesia con filtros y exportación.",
+        "rolesHint": "Pastor, Admin"
       }
     },
     "xlsx": {

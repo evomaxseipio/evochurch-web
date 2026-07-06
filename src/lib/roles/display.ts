@@ -22,6 +22,7 @@ export const MATRIX_MODULES = [
   "settings",
   "admin_users",
   "roles",
+  "audit",
   "reports",
 ] as const;
 
@@ -35,6 +36,7 @@ export const MODULE_UI_DESCRIPTIONS: Record<string, string> = {
   settings: "Configuración personal y catálogos del sistema",
   admin_users: "Usuarios con acceso a la consola web",
   roles: "Matriz de roles y permisos por iglesia",
+  audit: "Bitácora de acciones administrativas",
   reports: "Informes financieros, membresía y ejecutivos",
 };
 
@@ -48,6 +50,7 @@ const MODULE_UI_DESCRIPTION_KEYS: Record<string, string> = {
   settings: "modules.settings",
   admin_users: "modules.admin_users",
   roles: "modules.roles",
+  audit: "modules.audit",
   reports: "modules.reports",
 };
 
@@ -115,6 +118,8 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "settings:income_types:delete": "Eliminar tipos de ingreso",
   "admin_users:manage": "Gestionar usuarios del sistema",
   "roles:manage": "Editar roles y permisos por iglesia",
+  "audit:read": "Ver bitácora de acciones",
+  "audit:export": "Exportar bitácora",
   ...REPORT_PERMISSION_UI_LABELS,
 };
 
@@ -155,6 +160,8 @@ const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
   "settings:income_types:delete": "permissions.settings.income_types.delete",
   "admin_users:manage": "permissions.admin_users.manage",
   "roles:manage": "permissions.roles.manage",
+  "audit:read": "permissions.audit.read",
+  "audit:export": "permissions.audit.export",
 };
 
 export const MATRIX_PERMISSION_ORDER: Record<string, string[]> = {
@@ -167,6 +174,7 @@ export const MATRIX_PERMISSION_ORDER: Record<string, string[]> = {
   settings: [],
   admin_users: [],
   roles: [],
+  audit: [],
   reports: [],
 };
 

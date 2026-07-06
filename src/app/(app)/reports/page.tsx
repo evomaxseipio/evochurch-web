@@ -13,7 +13,7 @@ function parseReportParam(value: string | undefined): ReportId | null {
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ report?: string }>;
+  searchParams: Promise<{ report?: string; open?: string }>;
 }) {
   const session = await requirePageAccess("/reports");
   const locale = await getLocale();
@@ -28,8 +28,9 @@ export default async function ReportsPage({
   const exportableReportIds = localizedCatalog
     .filter((entry) => canExportReport(session, entry.id))
     .map((entry) => entry.id);
-  const { report } = await searchParams;
+  const { report, open } = await searchParams;
   const initialReportId = parseReportParam(report);
+  const autoOpenReport = open === "1" || open === "true";
 
   return (
     <ReportsHubView
@@ -43,6 +44,7 @@ export default async function ReportsPage({
           ? initialReportId
           : null
       }
+      autoOpenReport={autoOpenReport && initialReportId != null}
     />
   );
 }

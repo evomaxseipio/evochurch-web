@@ -1,5 +1,6 @@
 import { DashboardView } from "@/components/dashboard/dashboard-view";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
+import { canReadAuditLog } from "@/lib/auth/permissions";
 import { resolveDashboardKpiLabels } from "@/lib/dashboard/resolve-kpi";
 import type { Locale } from "@/i18n/config";
 import { fetchDashboardPayload } from "@/lib/services/dashboard";
@@ -19,7 +20,12 @@ export default async function DashboardPage() {
 
   try {
     const supabase = await createClient();
-    payload = await fetchDashboardPayload(supabase, session.churchId, locale as Locale);
+    payload = await fetchDashboardPayload(
+      supabase,
+      session.churchId,
+      locale as Locale,
+      { includeAuditLog: canReadAuditLog(session) },
+    );
   } catch (e) {
     error =
       e instanceof Error
@@ -55,6 +61,8 @@ export default async function DashboardPage() {
       ledgerCharts={payload.ledgerCharts}
       contributionPeriodTotals={payload.contributionPeriodTotals}
       pendingItems={payload.pendingItems}
+      recentAudit={payload.recentAudit}
+      canViewAuditLog={canReadAuditLog(session)}
     />
   );
 }

@@ -50,6 +50,7 @@ type PreviewContext = {
   financialMonthlyPayload?: FinancialMonthlyPayload;
   concilioF001Payload?: ConcilioF001ReportPayload;
   treasurerName?: string | null;
+  auditLogInteractive?: boolean;
 };
 
 function filterCatalogByQuery(
@@ -73,12 +74,14 @@ export function ReportsHubView({
   churchName,
   locale,
   initialReportId,
+  autoOpenReport = false,
 }: {
   catalog: ReportCatalogEntry[];
   exportableReportIds: ReportId[];
   churchName?: string | null;
   locale: string;
   initialReportId?: ReportId | null;
+  autoOpenReport?: boolean;
 }) {
   const tCommon = useTranslations("common");
   const tReports = useTranslations("reports");
@@ -101,6 +104,10 @@ export function ReportsHubView({
     null,
   );
   const highlightRef = useRef<HTMLDivElement | null>(null);
+  const autoOpenedRef = useRef(false);
+  const handlePreviewRef = useRef<(entry: ReportCatalogEntry) => Promise<void>>(
+    async () => {},
+  );
 
   useEffect(() => {
     if (!initialReportId || !highlightRef.current) return;
@@ -235,6 +242,19 @@ export function ReportsHubView({
         return;
       }
 
+      if (entry.id === "audit-activity-log") {
+        revokeBlobUrl(previewContext?.blobUrl);
+        setPreviewContext({
+          entry,
+          filename: "",
+          mimeType: "text/html",
+          blobUrl: "",
+          base64: "",
+          auditLogInteractive: true,
+        });
+        return;
+      }
+
       const result = await previewReportAction(entry.id, period, filterArg, locale);
 
       if (!result.ok) {
@@ -259,6 +279,18 @@ export function ReportsHubView({
       setPreviewingId(null);
     }
   }
+
+  useEffect(() => {
+    handlePreviewRef.current = handlePreview;
+  });
+
+  useEffect(() => {
+    if (!autoOpenReport || !initialReportId || autoOpenedRef.current) return;
+    const entry = catalog.find((item) => item.id === initialReportId);
+    if (!entry) return;
+    autoOpenedRef.current = true;
+    void handlePreviewRef.current(entry);
+  }, [autoOpenReport, catalog, initialReportId]);
 
   function rowActions(entry: ReportCatalogEntry) {
     const canExport = exportableSet.has(entry.id);
@@ -450,6 +482,8 @@ export function ReportsHubView({
         financialMonthlyPayload={previewContext?.financialMonthlyPayload}
         concilioF001Payload={previewContext?.concilioF001Payload}
         treasurerName={previewContext?.treasurerName}
+        auditLogInteractive={previewContext?.auditLogInteractive}
+        churchName={churchName}
         canExport={
           previewContext ? exportableSet.has(previewContext.entry.id) : false
         }

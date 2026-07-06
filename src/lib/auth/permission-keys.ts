@@ -37,6 +37,8 @@ export const PERMISSION_KEYS = [
   "finances:contributions:export",
   "admin_users:manage",
   "roles:manage",
+  "audit:read",
+  "audit:export",
   "reports:financial_monthly_cead:read",
   "reports:financial_monthly_cead:export",
   "reports:financial_monthly_concilio_f001:read",

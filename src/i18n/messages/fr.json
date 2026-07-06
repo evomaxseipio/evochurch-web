@@ -220,6 +220,7 @@
     "recentActivity": "Activité récente",
     "whatsHappening": "What's happening",
     "activityLogSoon": "Action log — coming soon",
+    "activityRestricted": "Le journal d'activité est réservé aux administrateurs et pasteurs.",
     "agenda": "Agenda",
     "lastEvent": "Last event",
     "noEventsScheduled": "No events scheduled",
@@ -878,6 +879,7 @@
       "settings": "Configuración personal y catálogos del sistema",
       "admin_users": "Usuarios con acceso a la consola web",
       "roles": "Matriz de roles y permisos por iglesia",
+      "audit": "Journal d'activité administrative",
       "reports": "Informes financieros, membresía y ejecutivos"
     },
     "financeResources": {
@@ -959,6 +961,10 @@
       },
       "roles": {
         "manage": "Modifier les rôles et permissions de l'église"
+      },
+      "audit": {
+        "read": "Voir le journal d'activité",
+        "export": "Exporter le journal"
       }
     },
     "notes": {
@@ -978,6 +984,102 @@
       "manage": "Gestionar",
       "publish": "Publicar",
       "leader": "Como líder"
+    }
+  },
+  "audit": {
+    "title": "Journal d'activité",
+    "subtitle": "Registre d'activité administrative de l'église",
+    "unknownActor": "Utilisateur",
+    "empty": "Aucune action enregistrée sur cette période.",
+    "exportFilename": "journal-activite",
+    "modules": {
+      "members": "Membres",
+      "finances": "Finances",
+      "eventos": "Événements",
+      "settings": "Configuration",
+      "admin_users": "Utilisateurs système",
+      "roles": "Rôles",
+      "auth": "Authentification"
+    },
+    "actions": {
+      "create": "A créé",
+      "update": "A modifié",
+      "delete": "A supprimé",
+      "authorize": "A autorisé",
+      "reject": "A rejeté",
+      "login": "S'est connecté",
+      "logout": "S'est déconnecté",
+      "members": {
+        "create": "A créé le membre {name}",
+        "update": "A modifié le membre {name}"
+      },
+      "finances": {
+        "transaction": {
+          "create": "A enregistré une dépense de {amount}",
+          "authorize": "A autorisé une dépense de {amount}",
+          "reject": "A rejeté une dépense de {amount}"
+        },
+        "fund_transfer": {
+          "authorize": "A autorisé un transfert de {amount}"
+        }
+      },
+      "eventos": {
+        "create": "A créé l'événement : {title}",
+        "update": "A modifié l'événement : {title}",
+        "delete": "A supprimé l'événement : {title}"
+      },
+      "admin_users": {
+        "create": "A enregistré l'utilisateur : {email}",
+        "update": "A mis à jour l'utilisateur : {email}"
+      },
+      "roles": {
+        "create": "A créé le rôle : {name}",
+        "update": "A modifié le rôle : {name}",
+        "delete": "A désactivé le rôle : {name}"
+      },
+      "settings": {
+        "income_type": {
+          "create": "A créé le type de revenu : {name}",
+          "update": "A modifié le type de revenu : {name}",
+          "delete": "A supprimé le type de revenu : {name}"
+        },
+        "expense_type": {
+          "create": "A créé le type de dépense : {name}",
+          "update": "A modifié le type de dépense : {name}",
+          "delete": "A supprimé le type de dépense : {name}"
+        }
+      }
+    },
+    "filters": {
+      "from": "Du",
+      "to": "Au",
+      "module": "Module",
+      "action": "Action",
+      "actor": "Utilisateur",
+      "search": "Rechercher",
+      "searchPlaceholder": "Résumé, acteur ou ID…",
+      "all": "Tous",
+      "apply": "Appliquer",
+      "applyHint": "Cliquez sur Charger pour voir les actions enregistrées.",
+      "load": "Charger"
+    },
+    "columns": {
+      "date": "Date",
+      "actor": "Acteur",
+      "module": "Module",
+      "action": "Action",
+      "summary": "Résumé",
+      "entityId": "ID entité"
+    },
+    "kpi": {
+      "today": "Actions aujourd'hui",
+      "thisWeek": "Cette semaine",
+      "topModule": "Module principal"
+    },
+    "pagination": {
+      "prev": "Précédent",
+      "next": "Suivant",
+      "showing": "{from}–{to} sur {total}"
     }
   },
   "reports": {
@@ -1053,6 +1155,11 @@
         "title": "Contributions par membre",
         "description": "Détail confidentiel par membre. Permissions finance requises.",
         "rolesHint": "Trésorier, Admin"
+      },
+      "audit-activity-log": {
+        "title": "Journal d'activité",
+        "description": "Journal d'activité administrative avec filtres et export.",
+        "rolesHint": "Pasteur, Admin"
       }
     },
     "xlsx": {

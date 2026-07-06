@@ -142,3 +142,13 @@ export function canFeatureEventsWith(
 ): boolean {
   return permissions.includes("eventos:write");
 }
+
+export function canReadAuditLog(session: AppSession): boolean {
+  if (session.appRoleId === 1) return true;
+  return hasPermission(session, "audit:read");
+}
+
+export function canExportAuditLog(session: AppSession): boolean {
+  if (session.appRoleId === 1) return true;
+  return hasPermission(session, "audit:export");
+}

@@ -2,6 +2,7 @@
 
 import { CeadFinancialMonthlyPreview } from "@/components/reports/cead-financial-monthly-preview";
 import { ConcilioF001Preview } from "@/components/reports/concilio-f001-preview";
+import { AuditLogReportView } from "@/components/reports/audit-log-report-view";
 import "./cead-financial-monthly-preview.css";
 import "./concilio-f001-preview.css";
 import { Icons } from "@/components/icons";
@@ -27,6 +28,8 @@ export function ReportPreviewDialog({
   financialMonthlyPayload,
   concilioF001Payload,
   treasurerName,
+  auditLogInteractive,
+  churchName,
   onClose,
   onDownloadPdf,
   onDownloadExcel,
@@ -44,6 +47,8 @@ export function ReportPreviewDialog({
   financialMonthlyPayload?: FinancialMonthlyPayload | null;
   concilioF001Payload?: ConcilioF001ReportPayload | null;
   treasurerName?: string | null;
+  auditLogInteractive?: boolean;
+  churchName?: string | null;
   onClose: () => void;
   onDownloadPdf?: () => void;
   onDownloadExcel: () => void;
@@ -53,7 +58,9 @@ export function ReportPreviewDialog({
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const printRef = useRef<HTMLDivElement | null>(null);
   const isHtmlPreview =
-    financialMonthlyPayload != null || concilioF001Payload != null;
+    financialMonthlyPayload != null ||
+    concilioF001Payload != null ||
+    auditLogInteractive === true;
 
   useEffect(() => {
     if (!open) return;
@@ -152,7 +159,9 @@ export function ReportPreviewDialog({
         >
           {isHtmlPreview ? (
             <div className="cead-dash-wrap">
-              {concilioF001Payload ? (
+              {auditLogInteractive ? (
+                <AuditLogReportView churchName={churchName} />
+              ) : concilioF001Payload ? (
                 <ConcilioF001Preview
                   payload={concilioF001Payload}
                   treasurerName={treasurerName}

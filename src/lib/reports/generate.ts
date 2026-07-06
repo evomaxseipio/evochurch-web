@@ -26,8 +26,10 @@ import {
   generateConcilioF001Xlsx,
 } from "@/lib/reports/generators/financial-monthly-concilio-f001";
 import {
-  generateMembershipAnnualCeadPdf,
-} from "@/lib/reports/generators/membership-annual-cead";
+  generateAuditActivityLogPdf,
+  generateAuditActivityLogXlsx,
+  type AuditActivityLogPayload,
+} from "@/lib/reports/generators/audit-activity-log";
 import {
   generateMembershipDirectoryPdf,
   generateMembershipDirectoryXlsx,
@@ -42,6 +44,10 @@ import {
   type ReportId,
   type ReportPeriod,
 } from "@/lib/reports/types";
+import {
+  generateMembershipAnnualCeadPdf,
+} from "@/lib/reports/generators/membership-annual-cead";
+import { fetchAuditLogPage } from "@/lib/services/audit-log";
 import {
   fetchExecutiveMonthlyPayload,
   fetchFinancialByFundPayload,
@@ -245,6 +251,26 @@ export async function generateReport(
           : await generateFinancialByMemberPdf(payload, locale);
       filenameBase = "contribuciones-por-miembro";
       resolvedPeriod = month;
+      break;
+    }
+    case "audit-activity-log": {
+      const auditPage = await fetchAuditLogPage(supabase, churchId, {
+        limit: 2000,
+        offset: 0,
+      });
+      const auditPayload: AuditActivityLogPayload = {
+        churchName: meta.churchName,
+        generatedAt: new Date().toISOString(),
+        filters: {},
+        items: auditPage.items,
+        total: auditPage.total,
+      };
+      data =
+        format === "xlsx"
+          ? await generateAuditActivityLogXlsx(auditPayload, locale)
+          : await generateAuditActivityLogPdf(auditPayload, locale);
+      filenameBase = "bitacora-acciones";
+      resolvedPeriod = undefined;
       break;
     }
     default:

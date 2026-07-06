@@ -9,6 +9,7 @@ import { KpiCard } from "@/components/dashboard/kpi-card";
 import { LastEventCard } from "@/components/dashboard/last-event-card";
 import { PendingTransactionsList } from "@/components/dashboard/pending-transactions-list";
 import type { Locale } from "@/i18n/config";
+import type { AuditLogEntry } from "@/lib/audit/types";
 import { formatPeriodDelta } from "@/lib/dashboard/aggregate";
 import { localizeChartPointLabel } from "@/lib/dashboard/chart-labels";
 import type {
@@ -19,9 +20,9 @@ import type {
   DashboardLedgerChartData,
   PendingAuthorizationItem,
 } from "@/lib/dashboard/types";
-import { fmtRD, fmtRDshort } from "@/lib/format-currency";
+import { fmtRD } from "@/lib/format-currency";
 import { dashboardMock } from "@/lib/mock/dashboard-data";
-import { toast } from "@/lib/toast";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
@@ -34,6 +35,8 @@ export function DashboardView({
   ledgerCharts,
   contributionPeriodTotals,
   pendingItems,
+  recentAudit = [],
+  canViewAuditLog = false,
 }: {
   pastorName?: string;
   churchName?: string | null;
@@ -46,6 +49,8 @@ export function DashboardView({
     { current: number; previous: number }
   >;
   pendingItems: PendingAuthorizationItem[];
+  recentAudit?: AuditLogEntry[];
+  canViewAuditLog?: boolean;
 }) {
   const t = useTranslations("dashboard");
   const locale = useLocale() as Locale;
@@ -208,24 +213,25 @@ export function DashboardView({
                 {t("whatsHappening")}
               </div>
             </div>
-            <button
-              type="button"
+            <Link
+              href="/reports?report=audit-activity-log&open=1"
               className="tiny"
               style={{
                 color: "var(--primary)",
                 fontWeight: 600,
-                background: "none",
-                border: 0,
-                cursor: "pointer",
+                textDecoration: "none",
               }}
-              onClick={() =>
-                toast.info(t("recentActivity"), t("activityLogSoon"))
-              }
             >
               {t("viewAll")}
-            </button>
+            </Link>
           </div>
-          <ActivityFeed items={dashboardMock.activities} />
+          {canViewAuditLog ? (
+            <ActivityFeed items={recentAudit} />
+          ) : (
+            <p className="tiny muted" style={{ margin: 0 }}>
+              {t("activityRestricted")}
+            </p>
+          )}
         </div>
 
         <LastEventCard events={dashboardMock.events} />

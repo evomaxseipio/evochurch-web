@@ -11,6 +11,7 @@ import {
   canReadReport,
   reportExportPermission,
 } from "@/lib/reports/permissions";
+import { canExportAuditLog } from "@/lib/auth/permissions";
 import type { MemberFilterKey } from "@/lib/members/types";
 import {
   isReportFormat,
@@ -60,7 +61,14 @@ async function runReportGeneration(
     if (!canExportReport(session, reportId)) {
       return { ok: false, error: tReports("errors.noExportPermission") };
     }
-    requirePermission(session, reportExportPermission(reportId));
+    if (reportId === "audit-activity-log") {
+      if (!canExportAuditLog(session)) {
+        return { ok: false, error: tReports("errors.noExportPermission") };
+      }
+      requirePermission(session, "audit:export");
+    } else {
+      requirePermission(session, reportExportPermission(reportId));
+    }
   }
 
   const resolvedPeriod = resolvePeriod(reportId, period);

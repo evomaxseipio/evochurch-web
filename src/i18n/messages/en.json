@@ -220,6 +220,7 @@
     "recentActivity": "Recent activity",
     "whatsHappening": "What's happening",
     "activityLogSoon": "Action log — coming soon",
+    "activityRestricted": "The activity log is available to administrators and pastors.",
     "agenda": "Agenda",
     "lastEvent": "Last event",
     "noEventsScheduled": "No events scheduled",
@@ -878,6 +879,7 @@
       "settings": "Configuración personal y catálogos del sistema",
       "admin_users": "Usuarios con acceso a la consola web",
       "roles": "Matriz de roles y permisos por iglesia",
+      "audit": "Administrative activity log",
       "reports": "Informes financieros, membresía y ejecutivos"
     },
     "financeResources": {
@@ -959,6 +961,10 @@
       },
       "roles": {
         "manage": "Edit church roles and permissions"
+      },
+      "audit": {
+        "read": "View activity log",
+        "export": "Export activity log"
       }
     },
     "notes": {
@@ -978,6 +984,102 @@
       "manage": "Gestionar",
       "publish": "Publicar",
       "leader": "Como líder"
+    }
+  },
+  "audit": {
+    "title": "Activity log",
+    "subtitle": "Administrative activity record for the church",
+    "unknownActor": "User",
+    "empty": "No actions recorded in this period.",
+    "exportFilename": "activity-log",
+    "modules": {
+      "members": "Members",
+      "finances": "Finances",
+      "eventos": "Events",
+      "settings": "Settings",
+      "admin_users": "System users",
+      "roles": "Roles",
+      "auth": "Authentication"
+    },
+    "actions": {
+      "create": "Created",
+      "update": "Updated",
+      "delete": "Deleted",
+      "authorize": "Authorized",
+      "reject": "Rejected",
+      "login": "Signed in",
+      "logout": "Signed out",
+      "members": {
+        "create": "Created member {name}",
+        "update": "Updated member {name}"
+      },
+      "finances": {
+        "transaction": {
+          "create": "Recorded expense for {amount}",
+          "authorize": "Authorized expense for {amount}",
+          "reject": "Rejected expense for {amount}"
+        },
+        "fund_transfer": {
+          "authorize": "Authorized transfer for {amount}"
+        }
+      },
+      "eventos": {
+        "create": "Created event: {title}",
+        "update": "Updated event: {title}",
+        "delete": "Deleted event: {title}"
+      },
+      "admin_users": {
+        "create": "Registered user: {email}",
+        "update": "Updated user: {email}"
+      },
+      "roles": {
+        "create": "Created role: {name}",
+        "update": "Updated role: {name}",
+        "delete": "Deactivated role: {name}"
+      },
+      "settings": {
+        "income_type": {
+          "create": "Created income type: {name}",
+          "update": "Updated income type: {name}",
+          "delete": "Deleted income type: {name}"
+        },
+        "expense_type": {
+          "create": "Created expense type: {name}",
+          "update": "Updated expense type: {name}",
+          "delete": "Deleted expense type: {name}"
+        }
+      }
+    },
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "module": "Module",
+      "action": "Action",
+      "actor": "User",
+      "search": "Search",
+      "searchPlaceholder": "Summary, actor, or ID…",
+      "all": "All",
+      "apply": "Apply",
+      "applyHint": "Click Load to view recorded actions.",
+      "load": "Load"
+    },
+    "columns": {
+      "date": "Date",
+      "actor": "Actor",
+      "module": "Module",
+      "action": "Action",
+      "summary": "Summary",
+      "entityId": "Entity ID"
+    },
+    "kpi": {
+      "today": "Actions today",
+      "thisWeek": "This week",
+      "topModule": "Top module"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "showing": "{from}–{to} of {total}"
     }
   },
   "reports": {
@@ -1053,6 +1155,11 @@
         "title": "Contributions by member",
         "description": "Confidential per-member breakdown. Requires finance permissions.",
         "rolesHint": "Treasurer, Admin"
+      },
+      "audit-activity-log": {
+        "title": "Activity log",
+        "description": "Administrative activity log with filters and export.",
+        "rolesHint": "Pastor, Admin"
       }
     },
     "xlsx": {
