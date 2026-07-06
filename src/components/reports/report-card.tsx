@@ -27,7 +27,6 @@ export function ReportCard({
   exportingKey,
   memberFilter,
   onMemberFilterChange,
-  highlighted,
   onPreview,
   onExport,
 }: {
@@ -39,7 +38,6 @@ export function ReportCard({
   exportingKey: string | null;
   memberFilter?: MemberFilterKey;
   onMemberFilterChange?: (filter: MemberFilterKey) => void;
-  highlighted?: boolean;
   onPreview: () => void;
   onExport: (
     reportId: ReportCatalogEntry["id"],
@@ -61,7 +59,6 @@ export function ReportCard({
         flexDirection: "column",
         gap: 12,
         height: "100%",
-        outline: highlighted ? "2px solid var(--accent)" : undefined,
       }}
     >
       <div>

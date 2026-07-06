@@ -1,10 +1,10 @@
 "use client";
 
 import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewReportAction } from "@/app/(app)/reports/actions";
+import { ReportActionMenu } from "@/components/reports/report-action-menu";
 import { ReportCard } from "@/components/reports/report-card";
 import { ReportPeriodFilter } from "@/components/reports/report-period-filter";
 import { ReportPreviewDialog } from "@/components/reports/report-preview-dialog";
-import { Icons } from "@/components/icons";
 import { DataTable } from "@/components/ui/data-table";
 import { FilterToolbar } from "@/components/ui/filter-toolbar";
 import { PageHeader } from "@/components/ui/page-header";
@@ -35,11 +35,6 @@ import type { ConcilioF001ReportPayload, FinancialMonthlyPayload } from "@/lib/s
 import { toast } from "@/lib/toast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-
-const FORMAT_LABELS: Record<ReportFormat, string> = {
-  pdf: "PDF",
-  xlsx: "Excel",
-};
 
 type PreviewContext = {
   entry: ReportCatalogEntry;
@@ -103,16 +98,10 @@ export function ReportsHubView({
   const [previewContext, setPreviewContext] = useState<PreviewContext | null>(
     null,
   );
-  const highlightRef = useRef<HTMLDivElement | null>(null);
   const autoOpenedRef = useRef(false);
   const handlePreviewRef = useRef<(entry: ReportCatalogEntry) => Promise<void>>(
     async () => {},
   );
-
-  useEffect(() => {
-    if (!initialReportId || !highlightRef.current) return;
-    highlightRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, [initialReportId]);
 
   useEffect(() => {
     return () => revokeBlobUrl(previewContext?.blobUrl);
@@ -293,52 +282,16 @@ export function ReportsHubView({
   }, [autoOpenReport, catalog, initialReportId]);
 
   function rowActions(entry: ReportCatalogEntry) {
-    const canExport = exportableSet.has(entry.id);
-    const previewLoading = previewingId === entry.id;
-    const busy = previewLoading || exportingKey != null;
-
     return (
-      <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
-        <button
-          type="button"
-          className="btn primary sm"
-          disabled={busy && !previewLoading}
-          onClick={() => handlePreview(entry)}
-          aria-busy={previewLoading}
-        >
-          {previewLoading ? (
-            tReports("generating")
-          ) : (
-            <>
-              <Icons.eye size={14} />
-              {tCommon("preview")}
-            </>
-          )}
-        </button>
-        {entry.formats.map((format) => {
-          const key = exportKey(entry.id, format);
-          const loading = exportingKey === key;
-          return (
-            <button
-              key={format}
-              type="button"
-              className={`btn ${format === "pdf" ? "outline" : "outline"} sm`}
-              disabled={!canExport || (exportingKey != null && !loading)}
-              onClick={() => handleExport(entry.id, format)}
-              aria-busy={loading}
-            >
-              {loading ? (
-                "…"
-              ) : (
-                <>
-                  <Icons.download size={14} />
-                  {FORMAT_LABELS[format]}
-                </>
-              )}
-            </button>
-          );
-        })}
-      </div>
+      <ReportActionMenu
+        reportId={entry.id}
+        formats={entry.formats}
+        canExport={exportableSet.has(entry.id)}
+        previewLoading={previewingId === entry.id}
+        exportingKey={exportingKey}
+        onPreview={() => handlePreview(entry)}
+        onExport={(format) => handleExport(entry.id, format)}
+      />
     );
   }
 
@@ -397,14 +350,8 @@ export function ReportsHubView({
         </div>
       ) : listView === "grid" ? (
         <div className="grid-12">
-          {filteredEntries.map((entry) => {
-            const highlighted = initialReportId === entry.id;
-            return (
-              <div
-                key={entry.id}
-                ref={highlighted ? highlightRef : undefined}
-                className="span-4"
-              >
+          {filteredEntries.map((entry) => (
+              <div key={entry.id} className="span-4">
                 <ReportCard
                   entry={entry}
                   monthPeriod={monthPeriod}
@@ -414,13 +361,11 @@ export function ReportsHubView({
                   exportingKey={exportingKey}
                   memberFilter={memberFilter}
                   onMemberFilterChange={setMemberFilter}
-                  highlighted={highlighted}
                   onPreview={() => handlePreview(entry)}
                   onExport={handleExport}
                 />
               </div>
-            );
-          })}
+            ))}
         </div>
       ) : (
         <DataTable
@@ -460,13 +405,9 @@ export function ReportsHubView({
           ]}
           rows={filteredEntries}
           rowKey={(entry) => entry.id}
-          rowStyle={(entry) =>
-            initialReportId === entry.id
-              ? { outline: "2px solid var(--accent)" }
-              : undefined
-          }
           actions={rowActions}
           actionsLabel={tCommon("actions")}
+          actionsPosition="start"
           empty={<div className="muted">{emptyMessage}</div>}
         />
       )}
