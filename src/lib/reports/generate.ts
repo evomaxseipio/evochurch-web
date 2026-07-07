@@ -49,6 +49,7 @@ import {
 } from "@/lib/reports/generators/membership-annual-cead";
 import { fetchAuditLogPage } from "@/lib/services/audit-log";
 import {
+  fetchChurchReportMeta,
   fetchExecutiveMonthlyPayload,
   fetchFinancialByFundPayload,
   fetchFinancialByMemberPayload,
@@ -60,11 +61,14 @@ import {
 } from "@/lib/services/reports";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-function churchMeta(session: AppSession) {
-  return {
+async function churchMeta(
+  supabase: SupabaseClient,
+  session: AppSession,
+) {
+  return fetchChurchReportMeta(supabase, session.churchId, {
     churchName: session.churchName ?? undefined,
     pastorName: session.fullName ?? undefined,
-  };
+  });
 }
 
 function assertMonthPeriod(
@@ -122,7 +126,7 @@ export async function generateReport(
   }
   assertFormatSupported(reportId, format);
   const churchId = session.churchId;
-  const meta = churchMeta(session);
+  const meta = await churchMeta(supabase, session);
 
   let data: Uint8Array;
   let filenameBase: string;

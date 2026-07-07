@@ -26,12 +26,18 @@ import {
   fetchMembersPage,
   fetchMembership,
 } from "@/lib/services/members";
+import {
+  churchProfileToReportMeta,
+  fetchChurchProfile,
+} from "@/lib/services/church-profile";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ReportChurchMeta = {
   churchName?: string;
   pastorName?: string;
   presbyterio?: string;
+  churchCode?: string;
+  address?: string;
   treasurerName?: string;
 };
 
@@ -117,6 +123,19 @@ const MEMBERSHIP_FETCH_CHUNK = 40;
 
 function isoNow(): string {
   return new Date().toISOString();
+}
+
+export async function fetchChurchReportMeta(
+  supabase: SupabaseClient,
+  churchId: number,
+  overrides: ReportChurchMeta = {},
+): Promise<ReportChurchMeta> {
+  try {
+    const profile = await fetchChurchProfile(supabase, churchId);
+    return { ...churchProfileToReportMeta(profile), ...overrides };
+  } catch {
+    return overrides;
+  }
 }
 
 async function fetchContributionsForPeriod(
@@ -458,16 +477,19 @@ export async function fetchFinancialByMemberPayload(
 
 /** v1: mock estático — fase 2 conectará contribuciones/transacciones. */
 export async function fetchConcilioF001Payload(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
   period: MonthPeriod,
   meta: ReportChurchMeta = {},
 ): Promise<ConcilioF001ReportPayload> {
+  const profileMeta = await fetchChurchReportMeta(supabase, churchId, meta);
   return buildConcilioF001MockPayload(churchId, period, {
-    churchName: meta.churchName,
+    churchName: profileMeta.churchName,
     pastorName: meta.pastorName,
-    presbyterio: meta.presbyterio,
+    presbyterio: profileMeta.presbyterio,
     treasurerName: meta.treasurerName,
+    churchCode: profileMeta.churchCode,
+    address: profileMeta.address,
   });
 }
 

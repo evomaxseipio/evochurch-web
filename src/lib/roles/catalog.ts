@@ -71,6 +71,11 @@ export const SETTINGS_RESOURCE_DEFS = [
     label: "Configuración y perfil",
     actions: ["read"],
   },
+  {
+    key: "church",
+    label: "Perfil de iglesia",
+    actions: ["read", "write"],
+  },
 ] as const;
 
 /** Módulos con una fila y acciones en columnas (como finanzas). */
@@ -167,7 +172,7 @@ export function applyStandardPermissionRules(
 ): void {
   const module = key.split(":")[0];
   const crudModules = ["members", "eventos", "comunicacion"];
-  const settingsCatalogResources = ["expense_types", "income_types"] as const;
+  const settingsCatalogResources = ["expense_types", "income_types", "church"] as const;
 
   if (key.startsWith("reports:")) {
     const resource = key.split(":")[1];
@@ -224,7 +229,7 @@ export function applyStandardPermissionRules(
 
 const CRUD_MODULES = ["members", "eventos", "comunicacion"] as const;
 
-const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types"] as const;
+const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types", "church"] as const;
 
 const FINANCE_RESOURCES = ["funds", "transactions", "contributions"] as const;
 

@@ -6,6 +6,15 @@ import { parsePermissionKeys, type PermissionKey } from "@/lib/auth/permission-k
 import { cache } from "react";
 
 export type { PermissionKey };
+
+export type ChurchBranding = {
+  shortName: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+};
+
 export type AppSession = {
   authUserId: string;
   profileId: string;
@@ -13,6 +22,7 @@ export type AppSession = {
   churchId: number;
   fullName: string | null;
   churchName: string | null;
+  churchBranding: ChurchBranding | null;
   appRoleId: number | null;
   appRoleName: string | null;
   membershipRole: string | null;
@@ -40,7 +50,41 @@ type SessionContextRow = {
   is_temp_password?: boolean;
   preferred_locale?: string;
   permissions?: unknown;
+  church_branding?: {
+    short_name?: string | null;
+    logo_url?: string | null;
+    primary_color?: string;
+    secondary_color?: string;
+    accent_color?: string;
+  } | null;
 };
+
+function parseChurchBranding(raw: SessionContextRow["church_branding"]): ChurchBranding | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  return {
+    shortName:
+      typeof raw.short_name === "string" && raw.short_name.length > 0
+        ? raw.short_name
+        : null,
+    logoUrl:
+      typeof raw.logo_url === "string" && raw.logo_url.length > 0
+        ? raw.logo_url
+        : null,
+    primaryColor:
+      typeof raw.primary_color === "string" && raw.primary_color.length > 0
+        ? raw.primary_color
+        : "#5B21B6",
+    secondaryColor:
+      typeof raw.secondary_color === "string" && raw.secondary_color.length > 0
+        ? raw.secondary_color
+        : "#4C1D95",
+    accentColor:
+      typeof raw.accent_color === "string" && raw.accent_color.length > 0
+        ? raw.accent_color
+        : "#1E0A4C",
+  };
+}
 
 function parseChurchId(raw: unknown): number | null {
   if (raw == null || raw === "") return null;
@@ -77,6 +121,7 @@ export function parseAppSession(data: unknown): AppSession | null {
       typeof row.church_name === "string" && row.church_name.length > 0
         ? row.church_name
         : null,
+    churchBranding: parseChurchBranding(row.church_branding),
     appRoleId:
       row.app_role_id == null
         ? null

@@ -18,6 +18,7 @@ function readSidebarCollapsed(): boolean {
 export function AppShell({
   churchName,
   churchShort,
+  churchLogoUrl,
   userLabel,
   userEmail,
   userRole,
@@ -26,6 +27,7 @@ export function AppShell({
 }: {
   churchName: string | null;
   churchShort?: string | null;
+  churchLogoUrl?: string | null;
   userLabel: string;
   userEmail?: string | null;
   userRole?: string;
@@ -49,6 +51,7 @@ export function AppShell({
       <Sidebar
         churchName={churchName}
         churchShort={churchShort}
+        churchLogoUrl={churchLogoUrl}
         userLabel={userLabel}
         userRole={userRole}
         permissions={permissions}

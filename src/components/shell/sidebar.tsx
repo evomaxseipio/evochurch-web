@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons, NavIcon } from "@/components/icons";
+import { ChurchLogo } from "@/components/brand/church-logo";
 import { signOut } from "@/app/(auth)/login/actions";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
@@ -126,6 +127,7 @@ function NavLink({
 export function Sidebar({
   churchName,
   churchShort,
+  churchLogoUrl,
   userLabel,
   userRole,
   permissions = [],
@@ -135,6 +137,7 @@ export function Sidebar({
 }: {
   churchName: string | null;
   churchShort?: string | null;
+  churchLogoUrl?: string | null;
   userLabel: string;
   userRole?: string;
   permissions?: PermissionKey[];
@@ -166,16 +169,17 @@ export function Sidebar({
   return (
     <aside className={`sidebar${collapsed ? " is-collapsed" : ""} ${className}`.trim()}>
       <div className="sidebar-logo">
-        <div className="mark">
-          <Icons.cross size={20} stroke="#fff" />
+        <div className="mark" style={{ background: "transparent", boxShadow: "none" }}>
+          <ChurchLogo logoUrl={churchLogoUrl} size={28} surface="dark" />
         </div>
         {!collapsed ? (
           <div>
             <div className="name">
-              Evo<em>Church</em>
+              {churchShort ?? churchName ?? "Evo"}
+              <em>Church</em>
             </div>
             <div className="sub">
-              {churchShort ?? churchName ?? "Renacer"} · ICCR
+              {churchName ?? "Consola web"}
             </div>
           </div>
         ) : null}

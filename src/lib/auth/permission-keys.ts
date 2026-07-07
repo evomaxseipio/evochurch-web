@@ -8,6 +8,8 @@ export const PERMISSION_KEYS = [
   "settings:income_types:read",
   "settings:income_types:write",
   "settings:income_types:delete",
+  "settings:church:read",
+  "settings:church:write",
   "dashboard:read",
   "members:read",
   "members:write",

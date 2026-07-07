@@ -121,6 +121,13 @@ export const CONFIG_NAV: NavEntry[] = [
         icon: "trendUp",
         permission: "settings:income_types:read",
       },
+      {
+        id: "iglesia",
+        href: "/settings/church",
+        labelKey: "churchProfile",
+        icon: "pin",
+        permission: "settings:church:read",
+      },
     ],
   },
   {
@@ -233,6 +240,7 @@ export const BREADCRUMB_KEYS: Record<string, [string, string]> = {
   comunicacion: ["crumbConnection", "comunicacion"],
   gastos: ["crumbConfigSystem", "expenseTypes"],
   "ingresos-tipos": ["crumbConfigSystem", "incomeTypes"],
+  iglesia: ["crumbConfigSystem", "churchProfile"],
   usuarios: ["crumbConfigUsers", "adminUsers"],
   roles: ["crumbConfigUsers", "roles"],
   settings: ["crumbConfigUsers", "settings"],
@@ -253,6 +261,7 @@ export function navIdFromPath(pathname: string): string {
   if (pathname.startsWith("/settings/users")) return "usuarios";
   if (pathname.startsWith("/settings/expenses")) return "gastos";
   if (pathname.startsWith("/settings/income-types")) return "ingresos-tipos";
+  if (pathname.startsWith("/settings/church")) return "iglesia";
   if (pathname.startsWith("/settings/roles")) return "roles";
   if (pathname.startsWith("/settings")) return "settings";
   return "dashboard";

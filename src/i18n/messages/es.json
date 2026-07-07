@@ -98,6 +98,7 @@
     "configUsers": "Configuración usuarios",
     "expenseTypes": "Tipos de gasto",
     "incomeTypes": "Tipos de ingreso",
+    "churchProfile": "Perfil de iglesia",
     "adminUsers": "Usuarios sistema",
     "roles": "Roles y permisos",
     "settings": "Configuración y perfil",
@@ -773,6 +774,46 @@
     "toasts": {
       "profileUpdated": "Perfil actualizado",
       "profileSaved": "Tus cambios fueron guardados."
+    },
+    "church": {
+      "eyebrow": "Configuración",
+      "title": "Perfil de iglesia",
+      "subtitle": "Identidad, contacto, colores y datos oficiales de tu congregación.",
+      "readOnlyHint": "Tienes acceso de solo lectura. Un administrador puede editar este perfil.",
+      "logoTitle": "Logo de la iglesia",
+      "logoHint": "PNG, JPG, WebP o SVG. Máximo 2 MB.",
+      "uploadLogo": "Subir logo",
+      "saved": "Perfil de iglesia guardado correctamente.",
+      "sections": {
+        "identity": "Identidad",
+        "identityHint": "Nombre público y slug para el sitio web de la iglesia.",
+        "contact": "Contacto",
+        "branding": "Colores de marca",
+        "official": "Datos oficiales y operación"
+      },
+      "fields": {
+        "name": "Nombre de la iglesia",
+        "shortName": "Nombre corto",
+        "legalName": "Nombre legal",
+        "slug": "Slug público",
+        "slugHint": "Solo minúsculas, números y guiones. Ej: fuente-inagotable",
+        "addressLine1": "Dirección línea 1",
+        "addressLine2": "Dirección línea 2",
+        "city": "Ciudad",
+        "stateProvince": "Provincia / estado",
+        "countryCode": "País (ISO)",
+        "postalCode": "Código postal",
+        "phone": "Teléfono",
+        "email": "Correo institucional",
+        "websiteUrl": "Sitio web",
+        "primaryColor": "Color primario",
+        "secondaryColor": "Color secundario",
+        "accentColor": "Color de acento",
+        "externalCode": "Código externo (F.001)",
+        "presbyteryName": "Presbiterio / distrito",
+        "timezone": "Zona horaria (IANA)",
+        "defaultLocale": "Idioma predeterminado"
+      }
     }
   },
   "adminUsers": {
@@ -954,6 +995,10 @@
           "read": "Ver tipos de ingreso",
           "write": "Editar tipos de ingreso",
           "delete": "Eliminar tipos de ingreso"
+        },
+        "church": {
+          "read": "Ver perfil de iglesia",
+          "write": "Editar perfil de iglesia"
         }
       },
       "admin_users": {

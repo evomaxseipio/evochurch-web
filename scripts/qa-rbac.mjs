@@ -286,7 +286,13 @@ async function main() {
   const admin = await testSessionPermissions("ADMIN", "U-ADMIN", {
     ctxId: "CTX-02",
     ctxTitle: "U-ADMIN permisos",
-    mustHave: ["admin_users:manage", "finances:transactions:authorize", "roles:manage"],
+    mustHave: [
+      "admin_users:manage",
+      "finances:transactions:authorize",
+      "roles:manage",
+      "settings:church:read",
+      "settings:church:write",
+    ],
   }, true);
 
   const tesorero = await testSessionPermissions("TESORERO", "U-TESORERO", {
@@ -315,7 +321,12 @@ async function main() {
     const pastor = await testSessionPermissions("PASTOR", "U-PASTOR", {
       ctxId: "CTX-06",
       ctxTitle: "U-PASTOR permisos",
-      mustHave: ["finances:transactions:authorize", "finances:transactions:write"],
+      mustHave: [
+        "finances:transactions:authorize",
+        "finances:transactions:write",
+        "settings:church:read",
+        "settings:church:write",
+      ],
       mustLack: ["admin_users:manage", "roles:manage"],
     });
     if (pastor?.ctx) {
