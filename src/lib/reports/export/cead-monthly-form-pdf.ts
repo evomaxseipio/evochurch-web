@@ -1,6 +1,6 @@
 /**
  * PDF CEAD mensual — replica `CeadFinancialMonthlyFormPrint` (header, KPIs,
- * ingresos | egresos | gráfico, concilio 5 cols, notas, footer).
+ * ingresos | egresos | gráfico, concilio 4 cols, notas, footer).
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -16,8 +16,6 @@ import {
 import {
   CEAD_CHART_SCALE,
   CEAD_COUNCIL_PERCENT,
-  councilCalculationBaseAmount,
-  councilCalculationBaseLabel,
   councilFormulaDetail,
   translateCeadLineLabel,
 } from "@/lib/reports/templates/cead/form-helpers";
@@ -68,12 +66,11 @@ function row3ColumnWidths(doc: InstanceType<typeof PDFDocument>): [number, numbe
 
 function councilColumnWidths(doc: InstanceType<typeof PDFDocument>): number[] {
   const total = contentWidth(doc);
-  const destino = Math.floor(total * 0.22);
-  const porcentaje = Math.floor(total * 0.1);
-  const base = Math.floor(total * 0.22);
-  const monto = Math.floor(total * 0.14);
-  const formula = total - destino - porcentaje - base - monto;
-  return [destino, porcentaje, base, monto, formula];
+  const destino = Math.floor(total * 0.26);
+  const porcentaje = Math.floor(total * 0.14);
+  const monto = Math.floor(total * 0.17);
+  const formula = total - destino - porcentaje - monto;
+  return [destino, porcentaje, formula, monto];
 }
 
 function chartTickLabel(value: number, locale: Locale): string {
@@ -81,8 +78,28 @@ function chartTickLabel(value: number, locale: Locale): string {
   return formatNumber(value, locale, { maximumFractionDigits: 0 });
 }
 
-function measureLedgerCardHeight(lineCount: number): number {
-  return 22 + 16 + lineCount * 17 + 22;
+function ledgerRowHeight(
+  doc: InstanceType<typeof PDFDocument>,
+  cardWidth: number,
+  label: string,
+): number {
+  doc.font("Helvetica").fontSize(9);
+  const labelHeight = doc.heightOfString(sanitizePdfText(label), {
+    width: cardWidth * 0.62 - 10,
+  });
+  return Math.max(17, labelHeight + 8);
+}
+
+function measureLedgerCardHeight(
+  doc: InstanceType<typeof PDFDocument>,
+  cardWidth: number,
+  labels: string[],
+): number {
+  const rowsHeight = labels.reduce(
+    (sum, label) => sum + ledgerRowHeight(doc, cardWidth, label),
+    0,
+  );
+  return 22 + 16 + rowsHeight + 22;
 }
 
 function drawCeadHeader(
@@ -227,7 +244,6 @@ function drawLedgerCard(
   const padH = 10;
   const headerH = 22;
   const theadH = 14;
-  const rowH = 17;
   const footerH = 22;
 
   doc.save().rect(x, y, width, height).stroke(BORDER).restore();
@@ -253,9 +269,10 @@ function drawLedgerCard(
   });
   cy += theadH;
 
-  doc.font("Helvetica").fontSize(9).fillColor(TEXT);
   for (const line of options.lines) {
+    const rowH = ledgerRowHeight(doc, width, line.label);
     doc.save().moveTo(x, cy + rowH).lineTo(x + width, cy + rowH).stroke("#eef0f3").restore();
+    doc.font("Helvetica").fontSize(9).fillColor(TEXT);
     doc.text(sanitizePdfText(line.label), x + padH, cy + 4, { width: width * 0.62 - padH });
     doc.text(sanitizePdfText(line.amount), x + width * 0.62, cy + 4, {
       width: width * 0.38 - padH,
@@ -392,26 +409,20 @@ function drawCouncilSection(
     [
       { text: t("preview.ceadMonthly.destination"), style: "header" },
       { text: t("preview.ceadMonthly.percentage"), style: "header" },
-      { text: t("preview.ceadMonthly.calculationBase"), style: "header" },
-      { text: t("preview.ceadMonthly.amountRd"), style: "header" },
       { text: t("preview.ceadMonthly.formula"), style: "header" },
+      { text: t("preview.ceadMonthly.amountRd"), style: "header" },
     ],
     ...payload.cead.councilLines.map((line) => [
       { text: translateCeadLineLabel(line.label, t) },
       {
         text: CEAD_COUNCIL_PERCENT[line.label as keyof typeof CEAD_COUNCIL_PERCENT] ?? "-",
-        style: "amount",
       },
-      {
-        text: `${councilCalculationBaseLabel(line, payload, t)}\n${formatCurrency(councilCalculationBaseAmount(line, payload), locale)}`,
-      },
-      { text: formatCurrency(line.amount, locale), style: "amount" },
       { text: councilFormulaDetail(line, payload, locale, t) },
+      { text: formatCurrency(line.amount, locale), style: "amount" },
     ] satisfies PdfFormTableRow),
     [
       { text: t("preview.ceadMonthly.totalCouncilSends"), colSpan: 3, style: "total" },
       { text: formatCurrency(councilTotal, locale), style: "totalAmount" },
-      { text: "" },
     ],
   ];
 
@@ -529,9 +540,15 @@ export function renderCeadMonthlyFormPdf(
   const [wIncome, wExpense, wChart] = row3ColumnWidths(doc);
   const gap = 12;
   const left = doc.page.margins.left;
+  const incomeLabels = cead.incomeLines.map((line) =>
+    translateCeadLineLabel(line.label, t),
+  );
+  const expenseLabels = cead.expenseLines.map((line) =>
+    translateCeadLineLabel(line.label, t),
+  );
   const rowH = Math.max(
-    measureLedgerCardHeight(cead.incomeLines.length),
-    measureLedgerCardHeight(cead.expenseLines.length),
+    measureLedgerCardHeight(doc, wIncome, incomeLabels),
+    measureLedgerCardHeight(doc, wExpense, expenseLabels),
     180,
   );
   const yRow = ensureSpace(doc, doc.y, rowH);

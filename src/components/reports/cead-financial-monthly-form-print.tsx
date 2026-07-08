@@ -3,8 +3,6 @@
 import { CeadFinancialMonthlyChart } from "@/components/reports/cead-financial-monthly-chart";
 import {
   COUNCIL_PERCENT,
-  councilCalculationBaseAmount,
-  councilCalculationBaseLabel,
   councilFormulaDetail,
   translateCeadLineLabel,
 } from "@/components/reports/cead-financial-monthly-helpers";
@@ -153,9 +151,8 @@ export function CeadFinancialMonthlyFormPrint({
             <tr>
               <th>{t("preview.ceadMonthly.destination")}</th>
               <th>{t("preview.ceadMonthly.percentage")}</th>
-              <th>{t("preview.ceadMonthly.calculationBase")}</th>
-              <th>{t("preview.ceadMonthly.amountRd")}</th>
               <th>{t("preview.ceadMonthly.formula")}</th>
+              <th>{t("preview.ceadMonthly.amountRd")}</th>
             </tr>
           </thead>
           <tbody>
@@ -163,18 +160,10 @@ export function CeadFinancialMonthlyFormPrint({
               <tr key={line.label}>
                 <td>{translateCeadLineLabel(line.label, t)}</td>
                 <td className="mono">{COUNCIL_PERCENT[line.label] ?? "—"}</td>
-                <td>
-                  <span className="cead-form-base-label">
-                    {councilCalculationBaseLabel(line, payload, t)}
-                  </span>
-                  <span className="mono cead-form-base-value">
-                    {fmtRD(councilCalculationBaseAmount(line, payload), locale)}
-                  </span>
-                </td>
-                <td className="mono">{fmtRD(line.amount, locale)}</td>
                 <td className="cead-form-formula">
                   {councilFormulaDetail(line, payload, locale, t)}
                 </td>
+                <td className="mono">{fmtRD(line.amount, locale)}</td>
               </tr>
             ))}
           </tbody>
@@ -182,7 +171,6 @@ export function CeadFinancialMonthlyFormPrint({
             <tr>
               <td colSpan={3}>{t("preview.ceadMonthly.totalCouncilSends")}</td>
               <td className="mono">{fmtRD(councilTotal, locale)}</td>
-              <td />
             </tr>
           </tfoot>
         </table>

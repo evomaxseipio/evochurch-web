@@ -10,8 +10,6 @@ import {
 } from "@/lib/reports/export/xlsx";
 import {
   CEAD_COUNCIL_PERCENT,
-  councilCalculationBaseAmount,
-  councilCalculationBaseLabel,
   councilFormulaDetail,
   translateCeadLineLabel,
 } from "@/lib/reports/templates/cead/form-helpers";
@@ -73,24 +71,23 @@ export async function generateFinancialMonthlyCeadXlsx(
   const workbook = await createWorkbook();
   const sheet = workbook.addWorksheet(tReports("xlsx.financialCeadSheet"));
 
-  sheet.getColumn(1).width = 28;
+  sheet.getColumn(1).width = 30;
   sheet.getColumn(2).width = 12;
-  sheet.getColumn(3).width = 28;
-  sheet.getColumn(4).width = 12;
-  sheet.getColumn(5).width = 28;
+  sheet.getColumn(3).width = 36;
+  sheet.getColumn(4).width = 14;
 
   let r = 1;
-  mergeRow(sheet, r, 1, 5);
+  mergeRow(sheet, r, 1, 4);
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.title"), true);
   r += 1;
-  mergeRow(sheet, r, 1, 5);
+  mergeRow(sheet, r, 1, 4);
   setCell(sheet, r, 1, churchDisplay, true);
   r += 1;
   setCell(sheet, r, 1, cead.periodLabel);
   setCell(sheet, r, 3, `${tReports("preview.ceadMonthly.pastor")}: ${payload.pastorName ?? "-"}`);
-  setCell(sheet, r, 5, `${tReports("preview.ceadMonthly.generatedAt")}: ${generatedLabel}`);
   r += 1;
-  setCell(sheet, r, 5, `${tReports("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`);
+  setCell(sheet, r, 1, `${tReports("preview.ceadMonthly.generatedAt")}: ${generatedLabel}`);
+  setCell(sheet, r, 3, `${tReports("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`);
   r += 2;
 
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.kpiTotalIncome"), true);
@@ -135,27 +132,20 @@ export async function generateFinancialMonthlyCeadXlsx(
   setCell(sheet, r, 4, cead.totalExpense, true);
   r += 2;
 
-  mergeRow(sheet, r, 1, 5);
+  mergeRow(sheet, r, 1, 4);
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.sectionCouncil"), true);
   r += 1;
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.destination"), true);
   setCell(sheet, r, 2, tReports("preview.ceadMonthly.percentage"), true);
-  setCell(sheet, r, 3, tReports("preview.ceadMonthly.calculationBase"), true);
+  setCell(sheet, r, 3, tReports("preview.ceadMonthly.formula"), true);
   setCell(sheet, r, 4, tReports("preview.ceadMonthly.amountRd"), true);
-  setCell(sheet, r, 5, tReports("preview.ceadMonthly.formula"), true);
   r += 1;
 
   for (const line of cead.councilLines) {
     setCell(sheet, r, 1, translateCeadLineLabel(line.label, tReports));
     setCell(sheet, r, 2, CEAD_COUNCIL_PERCENT[line.label as keyof typeof CEAD_COUNCIL_PERCENT] ?? "");
-    setCell(
-      sheet,
-      r,
-      3,
-      `${councilCalculationBaseLabel(line, payload, tReports)}: ${formatCurrency(councilCalculationBaseAmount(line, payload), locale)}`,
-    );
+    setCell(sheet, r, 3, councilFormulaDetail(line, payload, locale, tReports));
     setCell(sheet, r, 4, line.amount);
-    setCell(sheet, r, 5, councilFormulaDetail(line, payload, locale, tReports));
     r += 1;
   }
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.totalCouncilSends"), true);
@@ -163,21 +153,20 @@ export async function generateFinancialMonthlyCeadXlsx(
   setCell(sheet, r, 4, councilTotal, true);
   r += 2;
 
-  mergeRow(sheet, r, 1, 5);
+  mergeRow(sheet, r, 1, 4);
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.importantNotes"), true);
   r += 1;
-  mergeRow(sheet, r, 1, 5);
+  mergeRow(sheet, r, 1, 4);
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.notesBodyLine1"));
   r += 1;
-  mergeRow(sheet, r, 1, 5);
+  mergeRow(sheet, r, 1, 4);
   setCell(sheet, r, 1, tReports("preview.ceadMonthly.notesBodyLine2"));
   r += 2;
 
   mergeRow(sheet, r, 1, 2);
   setCell(sheet, r, 1, `${tReports("preview.ceadMonthly.generatedAt")}: ${generatedLabel}`);
-  setCell(sheet, r, 3, tReports("preview.ceadMonthly.pageOf", { page: 1, total: 1 }));
-  mergeRow(sheet, r, 4, 5);
-  setCell(sheet, r, 4, `${tReports("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`);
+  mergeRow(sheet, r, 3, 4);
+  setCell(sheet, r, 3, `${tReports("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`);
 
   sheet.getColumn(2).numFmt = "#,##0.00";
   sheet.getColumn(4).numFmt = "#,##0.00";
