@@ -41,7 +41,12 @@ export default async function FundsPage() {
           {error}
         </p>
       ) : (
-        <FundsListView funds={funds} stats={stats} ministries={ministries} />
+        <FundsListView
+          funds={funds}
+          stats={stats}
+          ministries={ministries}
+          permissions={session.permissions}
+        />
       )}
     </>
   );

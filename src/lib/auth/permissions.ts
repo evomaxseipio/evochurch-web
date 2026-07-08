@@ -56,6 +56,18 @@ export function canWriteContributionsWith(
   return permissions.includes("finances:contributions:write");
 }
 
+export function canReadTransactionsWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return permissions.includes("finances:transactions:read");
+}
+
+export function canReadContributionsWith(
+  permissions: readonly PermissionKey[],
+): boolean {
+  return permissions.includes("finances:contributions:read");
+}
+
 export function canWriteMembers(session: AppSession): boolean {
   return hasPermission(session, "members:write");
 }

@@ -3,28 +3,22 @@ import {
 } from "@/lib/catalog/parse";
 import type { CatalogItemInput, ExpenseTypeRow } from "@/lib/catalog/types";
 import { catalogTags } from "@/lib/cache/catalog-tags";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
-async function fetchAllExpenseTypesFromDb(
-  churchId: number,
-): Promise<ExpenseTypeRow[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("spgetexpensestypes", {
-    p_church_id: churchId,
-  });
-
-  if (error) throw error;
-  return parseExpenseTypesAdmin(data);
-}
-
 export async function fetchAllExpenseTypes(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
 ): Promise<ExpenseTypeRow[]> {
   return unstable_cache(
-    () => fetchAllExpenseTypesFromDb(churchId),
+    async () => {
+      const { data, error } = await supabase.rpc("spgetexpensestypes", {
+        p_church_id: churchId,
+      });
+
+      if (error) throw error;
+      return parseExpenseTypesAdmin(data);
+    },
     ["catalog:expense-types", String(churchId)],
     { tags: [catalogTags.expenseTypes(churchId)], revalidate: 300 },
   )();

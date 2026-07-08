@@ -20,6 +20,7 @@ import {
   dateRangeExportSlug,
 } from "@/components/finance/date-range-filter";
 import { FinPageHeader } from "@/components/finances/fin-page-header";
+import { FundFilterSummary } from "@/components/finances/fund-filter-summary";
 import { Icons } from "@/components/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DataTable } from "@/components/ui/data-table";
@@ -45,6 +46,7 @@ import type {
   LedgerStatusFilter,
   OperationalIncomeType,
 } from "@/lib/ledger/types";
+import { fmtRD } from "@/lib/format-currency";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -213,6 +215,14 @@ export function TransactionsListView({
     [filtered, dateRange, statusFilter, fundFilterId],
   );
 
+  const filteredFund = useMemo(
+    () =>
+      fundFilterId
+        ? funds.find((f) => f.fundId === fundFilterId) ?? null
+        : null,
+    [funds, fundFilterId],
+  );
+
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
@@ -307,8 +317,56 @@ export function TransactionsListView({
 
   const emptyMessage =
     totalCount === 0
-      ? tTransactions("empty")
+      ? fundFilterId && filteredFund && filteredFund.totalContributions > 0
+        ? tTransactions("emptyFundWithBalance", {
+            amount: fmtRD(filteredFund.totalContributions, locale),
+          })
+        : fundFilterId
+          ? tTransactions("emptyFund")
+          : tTransactions("empty")
       : tTransactions("emptyFiltered");
+
+  function renderEmptyState() {
+    return (
+      <div style={{ padding: 48, textAlign: "center" }}>
+        <span
+          style={{
+            display: "inline-grid",
+            opacity: 0.35,
+            marginBottom: 12,
+            color: "var(--ink-4)",
+          }}
+        >
+          <Icons.wallet size={40} />
+        </span>
+        <div className="muted">{emptyMessage}</div>
+        {fundFilterId && totalCount === 0 ? (
+          <>
+            <p className="tiny muted" style={{ marginTop: 10, maxWidth: 420, marginInline: "auto" }}>
+              {tTransactions("emptyFundHint")}
+            </p>
+            <Link
+              href={`/finances/contributions?fund=${encodeURIComponent(fundFilterId)}`}
+              className="btn outline sm"
+              style={{ marginTop: 14, display: "inline-flex" }}
+            >
+              <Icons.wallet size={14} /> {tTransactions("viewContributionsForFund")}
+            </Link>
+          </>
+        ) : null}
+        {totalCount === 0 && !fundFilterId ? (
+          <button
+            type="button"
+            className="btn primary"
+            style={{ marginTop: 16 }}
+            onClick={openNew}
+          >
+            <Icons.plus size={14} /> {tTransactions("registerMovement")}
+          </button>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -347,6 +405,15 @@ export function TransactionsListView({
         >
           {tTransactions("viewAll")}
         </Link>
+      ) : null}
+
+      {filteredFund ? (
+        <FundFilterSummary
+          fund={filteredFund}
+          movementsInPeriod={periodStats.movements}
+          locale={locale}
+          contributionsHref={`/finances/contributions?fund=${encodeURIComponent(filteredFund.fundId)}`}
+        />
       ) : null}
 
       <TransactionsKpi stats={periodStats} visuals={kpiVisuals} />
@@ -400,58 +467,12 @@ export function TransactionsListView({
               onDelete={() => setDeleteTarget(entry)}
             />
           )}
-          empty={
-            <div style={{ padding: 48, textAlign: "center" }}>
-              <span
-                style={{
-                  display: "inline-grid",
-                  opacity: 0.35,
-                  marginBottom: 12,
-                  color: "var(--ink-4)",
-                }}
-              >
-                <Icons.wallet size={40} />
-              </span>
-              <div className="muted">{emptyMessage}</div>
-              {totalCount === 0 ? (
-                <button
-                  type="button"
-                  className="btn primary"
-                  style={{ marginTop: 16 }}
-                  onClick={openNew}
-                >
-                  <Icons.plus size={14} /> {tTransactions("registerMovement")}
-                </button>
-              ) : null}
-            </div>
-          }
+          empty={renderEmptyState()}
         />
       ) : (
         <div className="col" style={{ gap: 10 }}>
           {pageRows.length === 0 ? (
-            <div className="card" style={{ padding: 40, textAlign: "center" }}>
-              <span
-                style={{
-                  display: "inline-grid",
-                  opacity: 0.35,
-                  marginBottom: 12,
-                  color: "var(--ink-4)",
-                }}
-              >
-                <Icons.wallet size={40} />
-              </span>
-              <div className="muted">{emptyMessage}</div>
-              {totalCount === 0 ? (
-                <button
-                  type="button"
-                  className="btn primary"
-                  style={{ marginTop: 16 }}
-                  onClick={openNew}
-                >
-                  <Icons.plus size={14} /> {tTransactions("registerMovement")}
-                </button>
-              ) : null}
-            </div>
+            <div className="card">{renderEmptyState()}</div>
           ) : (
             pageRows.map((entry) => (
               <TransactionCard

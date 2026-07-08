@@ -7,6 +7,7 @@ import { shiftYearMonth } from "@/lib/finance/month-period";
 import { computeLedgerStats } from "@/lib/ledger/parse";
 import type { LedgerEntry } from "@/lib/ledger/types";
 import { memberFullName } from "@/lib/members/parse";
+import { filterMembers, memberStats } from "@/lib/members/filters";
 import type { MemberFilterKey, MembersListStats } from "@/lib/members/types";
 import { CATECHUMEN_ROLE_CODE, findMemberRoleByCode } from "@/lib/members/roles";
 import { monthBounds, formatReportPeriodLabel, type MonthPeriod } from "@/lib/reports/period";
@@ -258,19 +259,28 @@ export async function fetchMembershipDirectoryPayload(
   filter: MemberFilterKey = "all",
   meta: ReportChurchMeta = {},
 ): Promise<MembershipDirectoryPayload> {
+  // pageSize null pide el listado completo; spgetprofiles omite p_filter en ese modo.
+  // Filtramos en cliente para que el reporte respete visitas/miembros/activos/etc.
   const page = await fetchMembersPage(supabase, {
     churchId,
-    filter,
+    filter: "all",
     page: 1,
     pageSize: null,
   });
 
+  const members =
+    filter === "all"
+      ? page.members
+      : filterMembers(page.members, filter, "");
+
   return {
     churchId,
     filter,
-    stats: page.stats,
-    members: page.members,
+    stats: memberStats(members),
+    members,
     churchName: meta.churchName,
+    pastorName: meta.pastorName,
+    presbyterio: meta.presbyterio,
     generatedAt: isoNow(),
   };
 }

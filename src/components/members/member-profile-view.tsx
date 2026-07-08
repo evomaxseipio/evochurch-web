@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  deleteMemberAction,
   saveMembershipAction,
   updateMemberAction,
 } from "@/app/(app)/members/actions";
@@ -52,11 +53,11 @@ const PROFILE_TABS: {
 ];
 
 const COUNTRY_OPTIONS = [
-  "República Dominicana",
-  "Estados Unidos",
-  "España",
-  "Puerto Rico",
-  "Otro",
+  { value: "República Dominicana", labelKey: "countryDominicanRepublic" },
+  { value: "Estados Unidos", labelKey: "countryUnitedStates" },
+  { value: "España", labelKey: "countrySpain" },
+  { value: "Puerto Rico", labelKey: "countryPuertoRico" },
+  { value: "Otro", labelKey: "countryOther" },
 ] as const;
 
 export function MemberProfileView({
@@ -71,6 +72,7 @@ export function MemberProfileView({
   canWriteMembers,
   canDeleteMembers,
   canReadMemberFinances,
+  canWriteContributions,
 }: {
   member: Member;
   roles: MemberRoleCatalog[];
@@ -83,8 +85,10 @@ export function MemberProfileView({
   canWriteMembers: boolean;
   canDeleteMembers: boolean;
   canReadMemberFinances: boolean;
+  canWriteContributions: boolean;
 }) {
   const t = useTranslations("members");
+  const tCommon = useTranslations("common");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
   const [membershipPending, setMembershipPending] = useState(false);
@@ -229,7 +233,7 @@ export function MemberProfileView({
                   type="button"
                   className="btn ghost icon-only"
                   onClick={() => setMobileNavOpen(false)}
-                  aria-label="Cerrar"
+                  aria-label={tCommon("close")}
                 >
                   <Icons.x size={18} />
                 </button>
@@ -277,8 +281,9 @@ export function MemberProfileView({
           ) : null}
           {tab === "finances" ? (
             <MemberFinancesTab
-              memberId={member.memberId}
+              member={member}
               initialFinances={finances}
+              canWriteContributions={canWriteContributions}
             />
           ) : null}
           {tab === "delete" ? <DeleteTab member={member} /> : null}
@@ -455,7 +460,10 @@ function ProfileTab({
             label={t("country")}
             name="country"
             type="select"
-            options={COUNTRY_OPTIONS.map((o) => ({ value: o, label: o }))}
+            options={COUNTRY_OPTIONS.map((o) => ({
+              value: o.value,
+              label: t(o.labelKey),
+            }))}
             defaultValue={member.address.country || "República Dominicana"}
             span={2}
           />
@@ -635,10 +643,29 @@ function MembershipTab({
 
 function DeleteTab({ member }: { member: Member }) {
   const t = useTranslations("members");
+  const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
+  const tValidation = useTranslations("validation");
+  const router = useRouter();
   const [confirm, setConfirm] = useState("");
-  const target = "ELIMINAR";
-  const canDelete = confirm.trim().toUpperCase() === target;
+  const [state, formAction] = useActionState(deleteMemberAction, null);
+  const target = t("deleteConfirmWord");
+  const canDelete = confirm.trim().toUpperCase() === target.trim().toUpperCase();
   const name = memberFullName(member);
+
+  useActionToast(state, {
+    successMessage: t("deleteSuccess"),
+    resolveError: (errorKey) => {
+      if (!errorKey) return tErrors("serverError");
+      if (errorKey.startsWith("validation.")) return tValidation(errorKey.slice(11));
+      if (errorKey.startsWith("errors.")) return tErrors(errorKey.slice(7));
+      return tErrors("serverError");
+    },
+    onSuccess: () => {
+      router.push("/members");
+      router.refresh();
+    },
+  });
 
   return (
     <>
@@ -647,7 +674,9 @@ function DeleteTab({ member }: { member: Member }) {
         title={t("deleteAccount")}
         sub={t("deleteWarning")}
       >
-        <div
+        <form
+          action={formAction}
+          className="col"
           style={{
             border: "1px solid color-mix(in oklab, var(--danger) 36%, transparent)",
             background: "color-mix(in oklab, var(--danger) 8%, transparent)",
@@ -655,6 +684,8 @@ function DeleteTab({ member }: { member: Member }) {
             padding: 16,
           }}
         >
+          <input type="hidden" name="profileId" value={member.memberId} />
+
           <div className="row" style={{ gap: 12, alignItems: "flex-start" }}>
             <span
               style={{
@@ -672,11 +703,10 @@ function DeleteTab({ member }: { member: Member }) {
             </span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 600, color: "var(--danger)" }}>
-                Eliminar a {name}
+                {t("deleteMemberTitle", { name })}
               </div>
               <div className="tiny muted" style={{ marginTop: 4, maxWidth: 540 }}>
-                Se conservarán los registros financieros históricos, pero la
-                cuenta del miembro quedará archivada.
+                {t("deleteMemberBody")}
               </div>
             </div>
           </div>
@@ -692,10 +722,10 @@ function DeleteTab({ member }: { member: Member }) {
             }}
           >
             {[
-              "Se removerá del listado activo de miembros",
-              "Se quitará de los ministerios donde participa",
-              "Se cancelarán mensajes pendientes y recordatorios",
-              "El historial financiero permanecerá en los reportes",
+              t("deleteChecklistRemoveFromActive"),
+              t("deleteChecklistRemoveFromMinistries"),
+              t("deleteChecklistCancelMessages"),
+              t("deleteChecklistFinanceHistory"),
             ].map((text) => (
               <li
                 key={text}
@@ -725,7 +755,7 @@ function DeleteTab({ member }: { member: Member }) {
           >
             <div className="field">
               <label style={{ color: "var(--fg-dim)" }}>
-                Para confirmar, escribe{" "}
+                {t("deleteConfirmLabel")}{" "}
                 <span
                   className="mono"
                   style={{
@@ -737,8 +767,7 @@ function DeleteTab({ member }: { member: Member }) {
                   }}
                 >
                   {target}
-                </span>{" "}
-                en mayúsculas
+                </span>
               </label>
               <div
                 className="input-wrap"
@@ -749,17 +778,17 @@ function DeleteTab({ member }: { member: Member }) {
                 <input
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="ELIMINAR"
+                  placeholder={t("deleteConfirmPlaceholder")}
                   autoCapitalize="characters"
                 />
               </div>
             </div>
             <div className="row" style={{ gap: 8, marginTop: 14 }}>
               <Link href="/members" className="btn outline">
-                Cancelar
+                {tCommon("cancel")}
               </Link>
               <button
-                type="button"
+                type="submit"
                 className="btn"
                 disabled={!canDelete}
                 style={{
@@ -771,17 +800,17 @@ function DeleteTab({ member }: { member: Member }) {
                   cursor: canDelete ? "pointer" : "not-allowed",
                 }}
               >
-                <Icons.trash size={14} /> Eliminar cuenta permanentemente
+                <Icons.trash size={14} /> {t("deleteMemberSubmit")}
               </button>
             </div>
           </div>
-        </div>
+        </form>
       </ProfileSectionCard>
 
       <ProfileSectionCard
-        eyebrow="Alternativa"
-        title="¿Solo quieres archivar?"
-        sub="Marcar al miembro como inactivo lo oculta de las vistas activas pero conserva toda la información."
+        eyebrow={t("archiveEyebrow")}
+        title={t("archiveTitle")}
+        sub={t("archiveBody")}
       >
         <div
           className="row between"
@@ -789,12 +818,11 @@ function DeleteTab({ member }: { member: Member }) {
         >
           <div style={{ maxWidth: 520 }}>
             <div className="tiny muted">
-              Recomendado cuando un miembro se muda, se traslada a otra iglesia
-              o pausa su actividad temporalmente.
+              {t("archiveHint")}
             </div>
           </div>
           <button type="button" className="btn outline" disabled>
-            Archivar miembro
+            {t("archiveCta")}
           </button>
         </div>
       </ProfileSectionCard>

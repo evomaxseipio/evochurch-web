@@ -2,14 +2,17 @@
 
 import { CeadFinancialMonthlyPreview } from "@/components/reports/cead-financial-monthly-preview";
 import { ConcilioF001Preview } from "@/components/reports/concilio-f001-preview";
+import { MembershipDirectoryPreview } from "@/components/reports/membership-directory-preview";
 import { AuditLogReportView } from "@/components/reports/audit-log-report-view";
 import "./cead-financial-monthly-preview.css";
 import "./concilio-f001-preview.css";
+import "./membership-directory-preview.css";
 import { Icons } from "@/components/icons";
 import { downloadBase64File } from "@/lib/reports/download";
 import type {
   ConcilioF001ReportPayload,
   FinancialMonthlyPayload,
+  MembershipDirectoryPayload,
 } from "@/lib/services/reports";
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
@@ -27,7 +30,9 @@ export function ReportPreviewDialog({
   downloadingExcel,
   financialMonthlyPayload,
   concilioF001Payload,
+  membershipDirectoryPayload,
   treasurerName,
+  generatedByName,
   auditLogInteractive,
   churchName,
   onClose,
@@ -49,7 +54,9 @@ export function ReportPreviewDialog({
   downloadingExcel: boolean;
   financialMonthlyPayload?: FinancialMonthlyPayload | null;
   concilioF001Payload?: ConcilioF001ReportPayload | null;
+  membershipDirectoryPayload?: MembershipDirectoryPayload | null;
   treasurerName?: string | null;
+  generatedByName?: string | null;
   auditLogInteractive?: boolean;
   churchName?: string | null;
   onClose: () => void;
@@ -66,6 +73,7 @@ export function ReportPreviewDialog({
   const isHtmlPreview =
     financialMonthlyPayload != null ||
     concilioF001Payload != null ||
+    membershipDirectoryPayload != null ||
     auditLogInteractive === true;
 
   useEffect(() => {
@@ -177,6 +185,12 @@ export function ReportPreviewDialog({
                 <CeadFinancialMonthlyPreview
                   payload={financialMonthlyPayload}
                   treasurerName={treasurerName}
+                  printRef={printRef}
+                />
+              ) : membershipDirectoryPayload ? (
+                <MembershipDirectoryPreview
+                  payload={membershipDirectoryPayload}
+                  generatedByName={generatedByName}
                   printRef={printRef}
                 />
               ) : null}

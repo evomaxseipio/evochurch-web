@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Miembros</title>
+<style>
+  :root{
+    --bg:#f3f5f8; --paper:#ffffff;
+    --border:#e5e8ee; --text:#1a1d29; --text-2:#5b6072; --text-muted:#9198a8;
+    --navy:#1e2a5e; --blue:#2563eb; --blue-bg:#eaf1ff;
+    --green:#15803d; --green-bg:#e9f7ee; --green-icon:#1c9a52;
+    --red:#c0281c; --red-bg:#fdecea; --red-icon:#dc2626;
+    --orange:#c2660a; --orange-bg:#fff2e2; --orange-icon:#f5901f;
+    --purple:#5b3fb0; --purple-bg:#f0ecfc;
+    --radius:12px;
+    --shadow:0 1px 2px rgba(20,22,26,.04), 0 4px 16px rgba(20,22,26,.05);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); font-family:'Segoe UI',Arial,sans-serif; color:var(--text); font-size:14px; padding:24px 16px;}
+  .mono{font-variant-numeric:tabular-nums;}
+  .page{max-width:1120px; margin:0 auto;}
+
+  /* header */
+  .head{display:flex; align-items:flex-start; justify-content:space-between; gap:20px; background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); padding:20px 24px; margin-bottom:16px; box-shadow:var(--shadow); flex-wrap:wrap;}
+  .head-left{display:flex; align-items:flex-start; gap:14px;}
+  .head-logo{width:54px; height:54px; flex-shrink:0;}
+  .head-logo img{width:100%; height:100%; object-fit:contain;}
+  h1{margin:0 0 2px; font-size:24px; font-weight:800; color:var(--navy); letter-spacing:-.01em;}
+  .head-sub{margin:0 0 8px; font-size:16px; font-weight:700; color:var(--purple);}
+  .head-meta{display:flex; align-items:center; gap:18px; font-size:13px; color:var(--text-2); flex-wrap:wrap;}
+  .head-meta span{display:inline-flex; align-items:center; gap:6px;}
+  .head-meta svg{color:var(--navy); flex-shrink:0;}
+
+  .head-info{background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 16px; font-size:12.5px; color:var(--text-2); min-width:240px;}
+  .head-info div{display:flex; align-items:center; gap:7px; margin:3px 0;}
+  .head-info svg{color:var(--navy); flex-shrink:0;}
+  .head-info b{color:var(--text);}
+
+  /* filter bar */
+  .filterbar{display:flex; align-items:center; gap:10px; background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); padding:10px 16px; margin-bottom:16px; box-shadow:var(--shadow); flex-wrap:wrap;}
+  .filterbar-label{font-size:12px; font-weight:700; letter-spacing:.03em; color:var(--text-muted); display:inline-flex; align-items:center; gap:6px;}
+  .chip{border:1px solid var(--border); background:var(--bg); border-radius:999px; padding:5px 14px; font-size:12.5px; font-weight:600; color:var(--text-2); cursor:pointer;}
+  .chip.active{background:var(--purple); border-color:var(--purple); color:#fff;}
+  .filterbar .spacer{flex:1;}
+  .search{display:inline-flex; align-items:center; gap:7px; border:1px solid var(--border); border-radius:9px; padding:6px 12px; background:var(--bg); color:var(--text-muted); font-size:12.5px; min-width:200px;}
+
+  /* KPIs */
+  .kpis{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:16px;}
+  .kpi{background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; display:flex; align-items:center; gap:14px; box-shadow:var(--shadow);}
+  .kpi-icon{width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff;}
+  .kpi-label{font-size:11px; font-weight:700; letter-spacing:.03em; margin:0 0 3px;}
+  .kpi-value{font-size:20px; font-weight:800; margin:0; color:var(--text);}
+  .kpi-sub{font-size:11.5px; color:var(--text-muted); margin:2px 0 0;}
+
+  /* generic card + section header */
+  .card{background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:16px;}
+  .card-head{display:flex; align-items:center; gap:9px; padding:14px 18px; border-bottom:1px solid var(--border);}
+  .card-head .sicon{width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0;}
+  .card-head span{font-size:12.5px; font-weight:800; letter-spacing:.03em;}
+  .card-head .count{margin-left:auto; font-size:12px; font-weight:700; color:var(--text-muted); letter-spacing:0;}
+
+  /* members table */
+  table{width:100%; border-collapse:collapse;}
+  .members thead td{padding:11px 14px; font-size:10.5px; font-weight:700; color:var(--text-muted); letter-spacing:.04em; border-bottom:1px solid var(--border); background:var(--bg); white-space:nowrap;}
+  .members tbody td{padding:10px 14px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  .members tbody tr:nth-child(even){background:#fafbfd;}
+  .members tbody tr:hover{background:var(--blue-bg);}
+  .members td.idx{color:var(--text-muted); font-size:12px; width:36px; text-align:right;}
+  .members td.name{font-weight:700; color:var(--text); white-space:nowrap;}
+  .members td.name small{display:block; font-weight:500; color:var(--text-muted); font-size:11px;}
+  .members td.role{white-space:nowrap;}
+  .members td.contact{white-space:nowrap; color:var(--text-2);}
+  .members td.email{color:var(--text-2);}
+  .members td.city{white-space:nowrap; color:var(--text-2);}
+  .members td.flag{text-align:center; white-space:nowrap;}
+
+  .role-pill{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; background:var(--bg); border:1px solid var(--border); color:var(--text-2);}
+  .role-pill.lead{background:var(--purple-bg); border-color:#ddd3f5; color:var(--purple);}
+
+  .badge{display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700;}
+  .badge .dot{width:7px; height:7px; border-radius:50%;}
+  .badge.yes{background:var(--green-bg); color:var(--green);}
+  .badge.yes .dot{background:var(--green-icon);}
+  .badge.no{background:var(--bg); color:var(--text-muted); border:1px solid var(--border);}
+  .badge.no .dot{background:var(--text-muted);}
+  .badge.off{background:var(--red-bg); color:var(--red);}
+  .badge.off .dot{background:var(--red-icon);}
+
+  .table-foot{display:flex; align-items:center; justify-content:space-between; padding:12px 18px; font-size:12px; color:var(--text-muted); flex-wrap:wrap; gap:8px;}
+  .table-foot b{color:var(--text-2);}
+
+  /* bottom row: resumen + nota */
+  .row2{display:grid; grid-template-columns:1.15fr 1fr; gap:14px; margin-bottom:16px; align-items:stretch;}
+  .row2 .card{margin-bottom:0;}
+  .dist-body{padding:16px 18px;}
+  .dist-row{margin-bottom:14px;}
+  .dist-row:last-child{margin-bottom:0;}
+  .dist-top{display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; margin-bottom:5px;}
+  .dist-top span:last-child{color:var(--text-2); font-weight:600;}
+  .dist-track{height:9px; border-radius:999px; background:var(--bg); overflow:hidden;}
+  .dist-fill{height:100%; border-radius:999px;}
+
+  .notes-body{padding:14px 18px 16px; font-size:12.5px; color:#7a4a12; line-height:1.55;}
+  .notes-body p{margin:0 0 10px;}
+  .notes-body p:last-child{margin-bottom:0;}
+
+  /* footer */
+  .footer{display:flex; gap:10px; flex-wrap:wrap;}
+  .btn{flex:1; min-width:150px; border:none; border-radius:9px; padding:13px 18px; font-size:14px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; font-family:inherit;}
+  .btn-print{background:var(--blue); color:#fff;}
+  .btn-pdf{background:var(--red-icon); color:#fff;}
+  .btn-xls{background:var(--green-icon); color:#fff;}
+  .btn-close{background:var(--paper); color:var(--text-2); border:1px solid var(--border);}
+  .btn:hover{filter:brightness(0.95);}
+
+  @media (max-width:920px){
+    .kpis{grid-template-columns:repeat(2,1fr);}
+    .row2{grid-template-columns:1fr;}
+    .head{flex-direction:column;}
+    .members td.email{max-width:140px; overflow:hidden; text-overflow:ellipsis;}
+  }
+  @media print{
+    body{background:#fff; padding:0;}
+    .filterbar, .footer, .search{display:none !important;}
+    .card, .head, .kpi{box-shadow:none;}
+    .members tbody tr:hover{background:transparent;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="head">
+    <div class="head-left">
+      <div class="head-logo"><img src="../../public/brand/fuente-inagotable/logo-on-white.png" alt="Logo iglesia"></div>
+      <div>
+        <h1>REPORTE DE MIEMBROS</h1>
+        <p class="head-sub">Iglesia Fuente Inagotable</p>
+        <div class="head-meta">
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Pastor: <b style="color:var(--text)">Pr. Juan Méndez</b></span>
+          <span style="color:var(--border)">|</span>
+          <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-6h6v6"/></svg>Concilio: <b style="color:var(--text)">Asamblea de Dios</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="head-info">
+      <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Generado el: <b>07 Jul 2026 · 10:52 PM</b></div>
+      <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Generado por: <b>María Santana — Secretaría</b></div>
+      <div><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>Filtro aplicado: <b>Todos los registros</b></div>
+    </div>
+  </div>
+
+  <div class="filterbar">
+    <span class="filterbar-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54z"/></svg>FILTRAR:</span>
+    <button class="chip active">Todos</button>
+    <button class="chip">Miembros</button>
+    <button class="chip">Visitantes</button>
+    <button class="chip">Activos</button>
+    <button class="chip">Inactivos</button>
+    <span class="spacer"></span>
+    <span class="search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Buscar por nombre, teléfono o email…</span>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--blue);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div><p class="kpi-label" style="color:var(--blue);">TOTAL REGISTROS</p><p class="kpi-value mono">148</p><p class="kpi-sub">En el directorio</p></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--purple);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/><path d="m16.5 3.5 1 1 2-2"/></svg></div>
+      <div><p class="kpi-label" style="color:var(--purple);">MIEMBROS</p><p class="kpi-value mono">112</p><p class="kpi-sub">75.7% del total</p></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--orange-icon);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/><path d="M19 8h4M21 6v4"/></svg></div>
+      <div><p class="kpi-label" style="color:var(--orange);">VISITANTES</p><p class="kpi-value mono">36</p><p class="kpi-sub">24.3% del total</p></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--green-icon);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
+      <div><p class="kpi-label" style="color:var(--green);">ACTIVOS</p><p class="kpi-value mono">129</p><p class="kpi-sub">87.2% del total</p></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon" style="background:var(--red-icon);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg></div>
+      <div><p class="kpi-label" style="color:var(--red);">INACTIVOS</p><p class="kpi-value mono">19</p><p class="kpi-sub">12.8% del total</p></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="sicon" style="background:var(--purple);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <span style="color:var(--purple);">DIRECTORIO DE MIEMBROS</span>
+      <span class="count">148 registros</span>
+    </div>
+    <table class="members">
+      <thead>
+        <tr>
+          <td class="idx">#</td>
+          <td>NOMBRE COMPLETO</td>
+          <td>ROL</td>
+          <td>TELÉFONO</td>
+          <td>EMAIL</td>
+          <td>CIUDAD</td>
+          <td style="text-align:center;">MIEMBRO</td>
+          <td style="text-align:center;">ACTIVO</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="idx">1</td>
+          <td class="name">Juan Méndez Rosario</td>
+          <td class="role"><span class="role-pill lead">Pastor</span></td>
+          <td class="contact mono">(809) 555-0134</td>
+          <td class="email">juan.mendez@fuenteinagotable.org</td>
+          <td class="city">Santo Domingo Este</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">2</td>
+          <td class="name">Carmen Peña de Méndez</td>
+          <td class="role"><span class="role-pill lead">Pastora</span></td>
+          <td class="contact mono">(809) 555-0187</td>
+          <td class="email">carmen.pena@fuenteinagotable.org</td>
+          <td class="city">Santo Domingo Este</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">3</td>
+          <td class="name">Pedro Rodríguez Almonte</td>
+          <td class="role"><span class="role-pill lead">Tesorero</span></td>
+          <td class="contact mono">(829) 555-0245</td>
+          <td class="email">pedro.rodriguez@gmail.com</td>
+          <td class="city">Los Alcarrizos</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">4</td>
+          <td class="name">María Santana García</td>
+          <td class="role"><span class="role-pill lead">Secretaria</span></td>
+          <td class="contact mono">(809) 555-0362</td>
+          <td class="email">maria.santana@hotmail.com</td>
+          <td class="city">Santo Domingo Norte</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">5</td>
+          <td class="name">Ramón Castillo Núñez</td>
+          <td class="role"><span class="role-pill lead">Diácono</span></td>
+          <td class="contact mono">(849) 555-0418</td>
+          <td class="email">r.castillo84@gmail.com</td>
+          <td class="city">Villa Mella</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">6</td>
+          <td class="name">Altagracia Féliz Medina</td>
+          <td class="role"><span class="role-pill lead">Diaconisa</span></td>
+          <td class="contact mono">(809) 555-0529</td>
+          <td class="email">alta.feliz@gmail.com</td>
+          <td class="city">Boca Chica</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">7</td>
+          <td class="name">José Miguel Taveras</td>
+          <td class="role"><span class="role-pill lead">Líder de Jóvenes</span></td>
+          <td class="contact mono">(829) 555-0673</td>
+          <td class="email">josemtaveras@outlook.com</td>
+          <td class="city">Santo Domingo Este</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">8</td>
+          <td class="name">Yolanda Reyes Contreras</td>
+          <td class="role"><span class="role-pill">Maestra EBD</span></td>
+          <td class="contact mono">(809) 555-0781</td>
+          <td class="email">yolanda.reyes@gmail.com</td>
+          <td class="city">San Cristóbal</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">9</td>
+          <td class="name">Francisco Javier de la Cruz</td>
+          <td class="role"><span class="role-pill">Ujier</span></td>
+          <td class="contact mono">(849) 555-0846</td>
+          <td class="email">fjdelacruz@gmail.com</td>
+          <td class="city">Los Alcarrizos</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge off"><span class="dot"></span>No</span></td>
+        </tr>
+        <tr>
+          <td class="idx">10</td>
+          <td class="name">Rosa Elena Martínez</td>
+          <td class="role"><span class="role-pill">Miembro</span></td>
+          <td class="contact mono">(809) 555-0917</td>
+          <td class="email">rosaelena.mtz@hotmail.com</td>
+          <td class="city">Santo Domingo Norte</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">11</td>
+          <td class="name">Luis Alberto Guzmán</td>
+          <td class="role"><span class="role-pill">Miembro</span></td>
+          <td class="contact mono">(829) 555-1038</td>
+          <td class="email">—</td>
+          <td class="city">Villa Mella</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge off"><span class="dot"></span>No</span></td>
+        </tr>
+        <tr>
+          <td class="idx">12</td>
+          <td class="name">Wanda Jiménez Polanco</td>
+          <td class="role"><span class="role-pill">Visitante</span></td>
+          <td class="contact mono">(809) 555-1152</td>
+          <td class="email">wandajp@gmail.com</td>
+          <td class="city">Boca Chica</td>
+          <td class="flag"><span class="badge no"><span class="dot"></span>No</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">13</td>
+          <td class="name">Ángel David Paredes</td>
+          <td class="role"><span class="role-pill">Visitante</span></td>
+          <td class="contact mono">—</td>
+          <td class="email">—</td>
+          <td class="city">Santo Domingo Este</td>
+          <td class="flag"><span class="badge no"><span class="dot"></span>No</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+        <tr>
+          <td class="idx">14</td>
+          <td class="name">Miguelina Vargas Herrera</td>
+          <td class="role"><span class="role-pill">Miembro</span></td>
+          <td class="contact mono">(849) 555-1267</td>
+          <td class="email">miguelina.vh@gmail.com</td>
+          <td class="city">San Cristóbal</td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+          <td class="flag"><span class="badge yes"><span class="dot"></span>Sí</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="table-foot">
+      <span>Mostrando <b>1–14</b> de <b>148</b> registros</span>
+      <span>Ordenado por: <b>Nombre completo (A–Z)</b></span>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-head"><div class="sicon" style="background:var(--blue);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></div><span style="color:var(--navy);">RESUMEN DE MEMBRESÍA</span></div>
+      <div class="dist-body">
+        <div class="dist-row">
+          <div class="dist-top"><span style="color:var(--purple);">Miembros</span><span>112 · 75.7%</span></div>
+          <div class="dist-track"><div class="dist-fill" style="width:75.7%; background:var(--purple);"></div></div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-top"><span style="color:var(--orange);">Visitantes</span><span>36 · 24.3%</span></div>
+          <div class="dist-track"><div class="dist-fill" style="width:24.3%; background:var(--orange-icon);"></div></div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-top"><span style="color:var(--green);">Activos</span><span>129 · 87.2%</span></div>
+          <div class="dist-track"><div class="dist-fill" style="width:87.2%; background:var(--green-icon);"></div></div>
+        </div>
+        <div class="dist-row">
+          <div class="dist-top"><span style="color:var(--red);">Inactivos</span><span>19 · 12.8%</span></div>
+          <div class="dist-track"><div class="dist-fill" style="width:12.8%; background:var(--red-icon);"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c2660a" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg><span style="color:var(--orange);">NOTAS IMPORTANTES</span></div>
+      <div class="notes-body">
+        <p>Este reporte contiene datos personales de contacto. Su distribución debe limitarse al personal autorizado de la iglesia (secretaría, pastorado y liderazgo).</p>
+        <p>Los registros marcados como «Visitante» aún no han completado el proceso de membresía. Los registros inactivos se conservan para fines históricos y de seguimiento pastoral.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="btn btn-print"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><rect x="4" y="9" width="16" height="8" rx="1"/><path d="M6 17v5h12v-5"/></svg>Imprimir</button>
+    <button class="btn btn-pdf"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Descargar PDF</button>
+    <button class="btn btn-xls"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Descargar Excel</button>
+    <button class="btn btn-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>Cerrar</button>
+  </div>
+
+</div>
+</body>
+</html>

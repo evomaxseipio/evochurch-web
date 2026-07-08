@@ -2,26 +2,22 @@ import { parseFundsResponse } from "@/lib/funds/parse";
 import type { Fund, FundInput } from "@/lib/funds/types";
 import { catalogTags } from "@/lib/cache/catalog-tags";
 import { assertRpcSuccess } from "@/lib/supabase/rpc-result";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
-async function fetchFundsFromDb(churchId: number): Promise<Fund[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("spgetfunds", {
-    p_church_id: churchId,
-  });
-
-  if (error) throw error;
-  return parseFundsResponse(data);
-}
-
 export async function fetchFunds(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
 ): Promise<Fund[]> {
   return unstable_cache(
-    () => fetchFundsFromDb(churchId),
+    async () => {
+      const { data, error } = await supabase.rpc("spgetfunds", {
+        p_church_id: churchId,
+      });
+
+      if (error) throw error;
+      return parseFundsResponse(data);
+    },
     ["catalog:funds", String(churchId)],
     { tags: [catalogTags.funds(churchId)], revalidate: 300 },
   )();

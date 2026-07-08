@@ -1,18 +1,26 @@
 "use client";
 
 import { fetchAuditLogPageAction } from "@/app/(app)/reports/audit-log-actions";
+import { DateRangeFilter } from "@/components/finance/date-range-filter";
+import { FundsKpi } from "@/components/funds/funds-kpi";
 import { Icons } from "@/components/icons";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { FilterToolbar } from "@/components/ui/filter-toolbar";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import type { AuditLogEntry } from "@/lib/audit/types";
 import {
   auditActionLabel,
   auditModuleLabel,
   resolveAuditSummary,
 } from "@/lib/audit/labels";
-import { useLocale, useTranslations } from "next-intl";
+import {
+  defaultLastSevenDaysRange,
+  type DateRange,
+} from "@/lib/finance/date-range";
+import { FINANCE_PAGE_SIZE_OPTIONS } from "@/lib/finance/pagination";
 import type { Locale } from "@/i18n/config";
-import { useMemo, useState } from "react";
-
-const PAGE_SIZE = 50;
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 const MODULE_OPTIONS = [
   "members",
@@ -31,6 +39,9 @@ const ACTION_OPTIONS = [
   "reject",
 ] as const;
 
+const DEFAULT_DATE_RANGE = defaultLastSevenDaysRange();
+const KPI_KIND = "elevated" as const;
+
 function formatDateTime(iso: string, locale: Locale): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
@@ -38,6 +49,14 @@ function formatDateTime(iso: string, locale: Locale): string {
     dateStyle: "short",
     timeStyle: "short",
   });
+}
+
+function toApiFrom(date: string): string {
+  return `${date}T00:00:00.000Z`;
+}
+
+function toApiTo(date: string): string {
+  return `${date}T23:59:59.999Z`;
 }
 
 function startOfTodayIso(): string {
@@ -55,40 +74,70 @@ function startOfWeekIso(): string {
   return d.toISOString();
 }
 
+function AuditFilterSelect({
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
+}) {
+  return (
+    <label className="row" style={{ gap: 6, alignItems: "center" }}>
+      <span className="tiny muted" style={{ fontWeight: 600 }}>
+        {label}
+      </span>
+      <select
+        className="select"
+        style={{ width: 148, minWidth: 148, padding: "6px 10px", fontSize: 13 }}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
+
 export function AuditLogReportView({
   churchName,
 }: {
   churchName?: string | null;
 }) {
   const tAudit = useTranslations("audit");
+  const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
 
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange>(DEFAULT_DATE_RANGE);
   const [moduleFilter, setModuleFilter] = useState("");
   const [actionFilter, setActionFilter] = useState("");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [items, setItems] = useState<AuditLogEntry[]>([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loadedOnce, setLoadedOnce] = useState(false);
+  const requestIdRef = useRef(0);
 
-  async function fetchPage(nextPage: number) {
+  async function fetchPage(nextPage: number, nextPageSize = pageSize) {
+    const requestId = ++requestIdRef.current;
     setLoading(true);
     setError(null);
     const result = await fetchAuditLogPageAction({
-      from: from || null,
-      to: to || null,
+      from: toApiFrom(dateRange.from),
+      to: toApiTo(dateRange.to),
       module: moduleFilter || null,
       action: actionFilter || null,
       search: search.trim() || null,
-      limit: PAGE_SIZE,
-      offset: nextPage * PAGE_SIZE,
+      limit: nextPageSize,
+      offset: (nextPage - 1) * nextPageSize,
     });
+    if (requestId !== requestIdRef.current) return;
     setLoading(false);
-    setLoadedOnce(true);
     if (!result.ok) {
       setError(result.error);
       setItems([]);
@@ -96,9 +145,16 @@ export function AuditLogReportView({
       return;
     }
     setPage(nextPage);
+    setPageSize(nextPageSize);
     setItems(result.items);
     setTotal(result.total);
   }
+
+  useEffect(() => {
+    void fetchPage(1);
+    // Carga inicial con el rango por defecto de 7 días.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const kpis = useMemo(() => {
     const todayStart = startOfTodayIso();
@@ -109,7 +165,9 @@ export function AuditLogReportView({
       acc[e.module] = (acc[e.module] ?? 0) + 1;
       return acc;
     }, {});
-    const topModule = Object.entries(moduleCounts).sort((a, b) => b[1] - a[1])[0];
+    const topModule = Object.entries(moduleCounts).sort(
+      (a, b) => b[1] - a[1],
+    )[0];
     return {
       todayCount,
       weekCount,
@@ -117,240 +175,191 @@ export function AuditLogReportView({
     };
   }, [items]);
 
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const pageStart = total === 0 ? 0 : (safePage - 1) * pageSize;
+  const pageEnd = Math.min(pageStart + items.length, total);
+
+  const columns = useMemo<DataTableColumn<AuditLogEntry>[]>(
+    () => [
+      {
+        key: "date",
+        label: tAudit("columns.date"),
+        className: "tiny",
+        render: (entry) => formatDateTime(entry.createdAt, locale),
+      },
+      {
+        key: "actor",
+        label: tAudit("columns.actor"),
+        render: (entry) => entry.actorDisplayName || tAudit("unknownActor"),
+      },
+      {
+        key: "module",
+        label: tAudit("columns.module"),
+        render: (entry) =>
+          auditModuleLabel(entry.module, (key, values) =>
+            tAudit(key as "modules.members", values),
+          ),
+      },
+      {
+        key: "action",
+        label: tAudit("columns.action"),
+        render: (entry) =>
+          auditActionLabel(entry.action, (key, values) =>
+            tAudit(key as "actions.create", values),
+          ),
+      },
+      {
+        key: "summary",
+        label: tAudit("columns.summary"),
+        render: (entry) =>
+          resolveAuditSummary(entry, (key, values) =>
+            tAudit(key as "actions.create", values),
+          ),
+      },
+    ],
+    [locale, tAudit],
+  );
 
   return (
-    <div className="col" style={{ gap: 16 }}>
-      <div>
-        <div className="eyebrow">{tAudit("title")}</div>
-        <div className="display" style={{ fontSize: 22, marginTop: 4 }}>
-          {churchName ?? tAudit("subtitle")}
+    <div>
+      <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
+        <div>
+          <div className="eyebrow">{tAudit("title")}</div>
+          <h2
+            className="display"
+            style={{ fontSize: 28, margin: "4px 0 6px", letterSpacing: "-0.02em" }}
+          >
+            {churchName ?? tAudit("subtitle")}
+          </h2>
         </div>
       </div>
 
-      <div className="grid-12">
-        <div className="card span-4" style={{ padding: 14 }}>
-          <div className="tiny muted">{tAudit("kpi.today")}</div>
-          <div className="display" style={{ fontSize: 24 }}>{kpis.todayCount}</div>
+      <div className="grid-12" style={{ marginTop: 22, marginBottom: 28 }}>
+        <div className="span-4">
+          <FundsKpi
+            kind={KPI_KIND}
+            label={tAudit("kpi.today")}
+            value={String(kpis.todayCount)}
+            icon={<Icons.bell size={16} />}
+            tone="d-system"
+          />
         </div>
-        <div className="card span-4" style={{ padding: 14 }}>
-          <div className="tiny muted">{tAudit("kpi.thisWeek")}</div>
-          <div className="display" style={{ fontSize: 24 }}>{kpis.weekCount}</div>
+        <div className="span-4">
+          <FundsKpi
+            kind={KPI_KIND}
+            label={tAudit("kpi.thisWeek")}
+            value={String(kpis.weekCount)}
+            icon={<Icons.cal size={16} />}
+            tone="d-funds"
+          />
         </div>
-        <div className="card span-4" style={{ padding: 14 }}>
-          <div className="tiny muted">{tAudit("kpi.topModule")}</div>
-          <div className="display" style={{ fontSize: 24 }}>
-            {kpis.topModule
-              ? auditModuleLabel(kpis.topModule, (key, values) =>
-                  tAudit(key as "modules.members", values),
-                )
-              : "—"}
+        <div className="span-4">
+          <FundsKpi
+            kind={KPI_KIND}
+            label={tAudit("kpi.topModule")}
+            value={
+              kpis.topModule
+                ? auditModuleLabel(kpis.topModule, (key, values) =>
+                    tAudit(key as "modules.members", values),
+                  )
+                : "—"
+            }
+            icon={<Icons.settings size={16} />}
+            tone="d-income"
+          />
+        </div>
+      </div>
+
+      <FilterToolbar
+        query={search}
+        onQueryChange={setSearch}
+        queryPlaceholder={tAudit("filters.searchPlaceholder")}
+        maxSearchWidth={340}
+        compactSearch
+        middle={
+          <div
+            className="row"
+            style={{ gap: 8, flexWrap: "wrap", alignItems: "center" }}
+          >
+            <DateRangeFilter
+              value={dateRange}
+              onChange={setDateRange}
+              defaultRange={DEFAULT_DATE_RANGE}
+            />
+            <AuditFilterSelect
+              label={tAudit("filters.module")}
+              value={moduleFilter}
+              onChange={setModuleFilter}
+            >
+              <option value="">{tAudit("filters.all")}</option>
+              {MODULE_OPTIONS.map((mod) => (
+                <option key={mod} value={mod}>
+                  {auditModuleLabel(mod, (key, values) =>
+                    tAudit(key as "modules.members", values),
+                  )}
+                </option>
+              ))}
+            </AuditFilterSelect>
+            <AuditFilterSelect
+              label={tAudit("filters.action")}
+              value={actionFilter}
+              onChange={setActionFilter}
+            >
+              <option value="">{tAudit("filters.all")}</option>
+              {ACTION_OPTIONS.map((act) => (
+                <option key={act} value={act}>
+                  {auditActionLabel(act, (key, values) =>
+                    tAudit(key as "actions.create", values),
+                  )}
+                </option>
+              ))}
+            </AuditFilterSelect>
           </div>
-        </div>
-      </div>
-
-      <div
-        className="card row"
-        style={{ gap: 10, flexWrap: "wrap", padding: 14, alignItems: "flex-end" }}
-      >
-        <label className="col" style={{ gap: 4, minWidth: 140 }}>
-          <span className="tiny muted">{tAudit("filters.from")}</span>
-          <input
-            type="date"
-            className="input"
-            value={from ? from.slice(0, 10) : ""}
-            onChange={(e) => {
-              setPage(0);
-              setFrom(e.target.value ? `${e.target.value}T00:00:00.000Z` : "");
-            }}
-          />
-        </label>
-        <label className="col" style={{ gap: 4, minWidth: 140 }}>
-          <span className="tiny muted">{tAudit("filters.to")}</span>
-          <input
-            type="date"
-            className="input"
-            value={to ? to.slice(0, 10) : ""}
-            onChange={(e) => {
-              setPage(0);
-              setTo(e.target.value ? `${e.target.value}T23:59:59.999Z` : "");
-            }}
-          />
-        </label>
-        <label className="col" style={{ gap: 4, minWidth: 140 }}>
-          <span className="tiny muted">{tAudit("filters.module")}</span>
-          <select
-            className="input"
-            value={moduleFilter}
-            onChange={(e) => {
-              setPage(0);
-              setModuleFilter(e.target.value);
-            }}
-          >
-            <option value="">{tAudit("filters.all")}</option>
-            {MODULE_OPTIONS.map((mod) => (
-              <option key={mod} value={mod}>
-                {auditModuleLabel(mod, (key, values) =>
-                  tAudit(key as "modules.members", values),
-                )}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="col" style={{ gap: 4, minWidth: 140 }}>
-          <span className="tiny muted">{tAudit("filters.action")}</span>
-          <select
-            className="input"
-            value={actionFilter}
-            onChange={(e) => {
-              setPage(0);
-              setActionFilter(e.target.value);
-            }}
-          >
-            <option value="">{tAudit("filters.all")}</option>
-            {ACTION_OPTIONS.map((act) => (
-              <option key={act} value={act}>
-                {auditActionLabel(act, (key, values) =>
-                  tAudit(key as "actions.create", values),
-                )}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="col" style={{ gap: 4, flex: 1, minWidth: 180 }}>
-          <span className="tiny muted">{tAudit("filters.search")}</span>
-          <input
-            type="search"
-            className="input"
-            value={search}
-            placeholder={tAudit("filters.searchPlaceholder")}
-            onChange={(e) => {
-              setPage(0);
-              setSearch(e.target.value);
-            }}
-          />
-        </label>
-        <button
-          type="button"
-          className="btn outline sm"
-          onClick={() => void fetchPage(0)}
-          disabled={loading}
-        >
-          <Icons.refresh size={14} />
-          {tAudit("filters.apply")}
-        </button>
-      </div>
-
-      {!loadedOnce ? (
-        <div className="card" style={{ padding: 24, textAlign: "center" }}>
-          <p className="muted" style={{ margin: "0 0 12px" }}>
-            {tAudit("filters.applyHint")}
-          </p>
+        }
+        trailing={
           <button
             type="button"
-            className="btn primary sm"
-            onClick={() => void fetchPage(0)}
+            className="btn primary"
+            onClick={() => void fetchPage(1)}
             disabled={loading}
           >
-            {tAudit("filters.load")}
+            <Icons.refresh size={14} />
+            {tAudit("filters.apply")}
           </button>
-        </div>
-      ) : null}
+        }
+      />
 
       {error ? (
-        <p className="tiny" style={{ color: "var(--danger)", margin: 0 }}>
+        <p className="tiny" style={{ color: "var(--danger)", margin: "0 0 14px" }}>
           {error}
         </p>
       ) : null}
 
-      {loadedOnce ? (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ overflowX: "auto" }}>
-            <table className="data-table" style={{ width: "100%" }}>
-              <thead>
-                <tr>
-                  <th>{tAudit("columns.date")}</th>
-                  <th>{tAudit("columns.actor")}</th>
-                  <th>{tAudit("columns.module")}</th>
-                  <th>{tAudit("columns.action")}</th>
-                  <th>{tAudit("columns.summary")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td colSpan={5} className="muted" style={{ padding: 24 }}>
-                      …
-                    </td>
-                  </tr>
-                ) : items.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="muted" style={{ padding: 24 }}>
-                      {tAudit("empty")}
-                    </td>
-                  </tr>
-                ) : (
-                  items.map((entry) => (
-                    <tr key={entry.id}>
-                      <td className="tiny">
-                        {formatDateTime(entry.createdAt, locale)}
-                      </td>
-                      <td>{entry.actorDisplayName || tAudit("unknownActor")}</td>
-                      <td>
-                        {auditModuleLabel(entry.module, (key, values) =>
-                          tAudit(key as "modules.members", values),
-                        )}
-                      </td>
-                      <td>
-                        {auditActionLabel(entry.action, (key, values) =>
-                          tAudit(key as "actions.create", values),
-                        )}
-                      </td>
-                      <td>
-                        {resolveAuditSummary(entry, (key, values) =>
-                          tAudit(key as "actions.create", values),
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      <DataTable
+        style={{ marginTop: 0, opacity: loading && items.length > 0 ? 0.6 : 1 }}
+        columns={columns}
+        rows={loading && items.length === 0 ? [] : items}
+        rowKey={(entry) => entry.id}
+        empty={
+          <div className="muted">
+            {loading ? tCommon("loading") : tAudit("empty")}
           </div>
-        </div>
-      ) : null}
+        }
+      />
 
-      {loadedOnce ? (
-        <div className="row between" style={{ flexWrap: "wrap", gap: 10 }}>
-          <span className="tiny muted">
-            {tAudit("pagination.showing", {
-              from: total === 0 ? 0 : page * PAGE_SIZE + 1,
-              to: Math.min((page + 1) * PAGE_SIZE, total),
-              total,
-            })}
-          </span>
-          <div className="row" style={{ gap: 8 }}>
-            <button
-              type="button"
-              className="btn outline sm"
-              disabled={page <= 0 || loading}
-              onClick={() => void fetchPage(page - 1)}
-            >
-              {tAudit("pagination.prev")}
-            </button>
-            <span className="tiny muted">
-              {page + 1} / {totalPages}
-            </span>
-            <button
-              type="button"
-              className="btn outline sm"
-              disabled={page >= totalPages - 1 || loading}
-              onClick={() => void fetchPage(page + 1)}
-            >
-              {tAudit("pagination.next")}
-            </button>
-          </div>
-        </div>
+      {total > 0 ? (
+        <PaginationBar
+          page={safePage}
+          totalPages={totalPages}
+          total={total}
+          pageStart={pageStart}
+          pageEnd={pageEnd}
+          pageSize={pageSize}
+          onPage={(next) => void fetchPage(next)}
+          onPageSize={(next) => void fetchPage(1, next)}
+          sizeOptions={FINANCE_PAGE_SIZE_OPTIONS}
+        />
       ) : null}
     </div>
   );

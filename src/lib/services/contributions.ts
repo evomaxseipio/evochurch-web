@@ -8,7 +8,6 @@ import type {
   IncomeType,
 } from "@/lib/contributions/types";
 import { catalogTags } from "@/lib/cache/catalog-tags";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
@@ -88,30 +87,27 @@ export async function fetchIncomeEntries(
 }
 
 export async function fetchIncomeTypes(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
 ): Promise<IncomeType[]> {
   return unstable_cache(
-    () => fetchIncomeTypesFromDb(churchId),
+    async () => {
+      const { data, error } = await supabase
+        .from("income_type_catalog")
+        .select("id, type_name, category")
+        .eq("church_id", churchId)
+        .eq("is_operational", false)
+        .order("id");
+
+      if (error) throw error;
+
+      return (data ?? [])
+        .map((row) => parseIncomeTypeRow(row as Record<string, unknown>))
+        .filter((t): t is IncomeType => t !== null);
+    },
     ["catalog:income-types", String(churchId)],
     { tags: [catalogTags.incomeTypes(churchId)], revalidate: 300 },
   )();
-}
-
-async function fetchIncomeTypesFromDb(churchId: number): Promise<IncomeType[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("income_type_catalog")
-    .select("id, type_name, category")
-    .eq("church_id", churchId)
-    .eq("is_operational", false)
-    .order("id");
-
-  if (error) throw error;
-
-  return (data ?? [])
-    .map((row) => parseIncomeTypeRow(row as Record<string, unknown>))
-    .filter((t): t is IncomeType => t !== null);
 }
 
 async function findOrCreateContributor(

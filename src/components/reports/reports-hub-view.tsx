@@ -1,6 +1,6 @@
 "use client";
 
-import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewReportAction, submitConcilioReportAction } from "@/app/(app)/reports/actions";
+import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewMembershipDirectoryAction, previewReportAction, submitConcilioReportAction } from "@/app/(app)/reports/actions";
 import { ReportActionMenu } from "@/components/reports/report-action-menu";
 import { ReportCard } from "@/components/reports/report-card";
 import { ReportPeriodFilter } from "@/components/reports/report-period-filter";
@@ -31,7 +31,7 @@ import {
 } from "@/lib/reports/period";
 import type { MonthPeriod, YearPeriod } from "@/lib/reports/period";
 import type { ReportFormat, ReportId } from "@/lib/reports/types";
-import type { ConcilioF001ReportPayload, FinancialMonthlyPayload } from "@/lib/services/reports";
+import type { ConcilioF001ReportPayload, FinancialMonthlyPayload, MembershipDirectoryPayload } from "@/lib/services/reports";
 import { toast } from "@/lib/toast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
@@ -44,7 +44,9 @@ type PreviewContext = {
   base64: string;
   financialMonthlyPayload?: FinancialMonthlyPayload;
   concilioF001Payload?: ConcilioF001ReportPayload;
+  membershipDirectoryPayload?: MembershipDirectoryPayload;
   treasurerName?: string | null;
+  generatedByName?: string | null;
   auditLogInteractive?: boolean;
 };
 
@@ -243,6 +245,27 @@ export function ReportsHubView({
           blobUrl: "",
           base64: "",
           auditLogInteractive: true,
+        });
+        return;
+      }
+
+      if (entry.id === "membership-directory") {
+        const result = await previewMembershipDirectoryAction(filterArg, locale);
+
+        if (!result.ok) {
+          toast.error(tReports("errors.previewFailed"), result.error);
+          return;
+        }
+
+        revokeBlobUrl(previewContext?.blobUrl);
+        setPreviewContext({
+          entry,
+          filename: "",
+          mimeType: "application/pdf",
+          blobUrl: "",
+          base64: "",
+          membershipDirectoryPayload: result.payload,
+          generatedByName: result.generatedByName,
         });
         return;
       }
@@ -451,7 +474,9 @@ export function ReportsHubView({
         mimeType={previewContext?.mimeType ?? "application/pdf"}
         financialMonthlyPayload={previewContext?.financialMonthlyPayload}
         concilioF001Payload={previewContext?.concilioF001Payload}
+        membershipDirectoryPayload={previewContext?.membershipDirectoryPayload}
         treasurerName={previewContext?.treasurerName}
+        generatedByName={previewContext?.generatedByName}
         auditLogInteractive={previewContext?.auditLogInteractive}
         churchName={churchName}
         canExport={
@@ -465,7 +490,8 @@ export function ReportsHubView({
         onClose={closePreview}
         onDownloadPdf={
           previewContext?.financialMonthlyPayload ||
-          previewContext?.concilioF001Payload
+          previewContext?.concilioF001Payload ||
+          previewContext?.membershipDirectoryPayload
             ? () => {
                 if (!previewContext) return;
                 void handleExport(previewContext.entry.id, "pdf");

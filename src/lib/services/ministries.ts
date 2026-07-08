@@ -1,7 +1,6 @@
 import { catalogTags } from "@/lib/cache/catalog-tags";
 import { parseMinistryRows } from "@/lib/ministries/parse";
 import type { Ministry, MinistryFormInput } from "@/lib/ministries/types";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
@@ -22,35 +21,31 @@ function isMissingColumnError(
   );
 }
 
-async function fetchMinistriesFromDb(churchId: number): Promise<Ministry[]> {
-  const supabase = await createClient();
-
-  const buildQuery = (columns: string) =>
-    supabase
-      .from("church_ministries")
-      .select(columns)
-      .eq("church_id", churchId)
-      .order("is_featured", { ascending: false })
-      .order("name");
-
-  let { data, error } = await buildQuery(
-    `${MINISTRY_COLUMNS_BASE}, default_fund_id`,
-  );
-
-  if (error && isMissingColumnError(error, "default_fund_id")) {
-    ({ data, error } = await buildQuery(MINISTRY_COLUMNS_BASE));
-  }
-
-  if (error) throw error;
-  return parseMinistryRows(data);
-}
-
 export async function fetchMinistries(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
 ): Promise<Ministry[]> {
   return unstable_cache(
-    () => fetchMinistriesFromDb(churchId),
+    async () => {
+      const buildQuery = (columns: string) =>
+        supabase
+          .from("church_ministries")
+          .select(columns)
+          .eq("church_id", churchId)
+          .order("is_featured", { ascending: false })
+          .order("name");
+
+      let { data, error } = await buildQuery(
+        `${MINISTRY_COLUMNS_BASE}, default_fund_id`,
+      );
+
+      if (error && isMissingColumnError(error, "default_fund_id")) {
+        ({ data, error } = await buildQuery(MINISTRY_COLUMNS_BASE));
+      }
+
+      if (error) throw error;
+      return parseMinistryRows(data);
+    },
     ["catalog:ministries", "v4", String(churchId)],
     { tags: [catalogTags.ministries(churchId)], revalidate: 300 },
   )();

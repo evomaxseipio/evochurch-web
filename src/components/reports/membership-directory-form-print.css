@@ -1,0 +1,383 @@
+/* Directorio de miembros — layout de impresión / exportación PDF */
+
+.members-dir-form-print {
+  display: none;
+}
+
+.members-dir-form-print .mono {
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm 14mm;
+  }
+
+  .members-dir-dash .members-dir-screen {
+    display: none !important;
+  }
+
+  .members-dir-form-print {
+    display: block !important;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    color: #161821;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10px;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .members-dir-form-sheet:not(:last-child) {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .members-dir-form-sheet:last-child {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .members-dir-form-print .members-dir-form-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #b8863b;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .members-dir-form-print .members-dir-form-head-main {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .members-dir-form-print .members-dir-form-logo {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .members-dir-form-print .members-dir-form-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .members-dir-form-print h1 {
+    margin: 0 0 2px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #1c2b4a;
+    line-height: 1.2;
+  }
+
+  .members-dir-form-print .members-dir-form-church {
+    margin: 0 0 3px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #5b3fb0;
+  }
+
+  .members-dir-form-print .members-dir-form-meta {
+    margin: 0;
+    font-size: 9px;
+    color: #565b68;
+    line-height: 1.4;
+  }
+
+  .members-dir-form-print .members-dir-form-head-info {
+    background: #f3f5f8;
+    border: 1px solid #e2e4e9;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 8px;
+    color: #565b68;
+    flex-shrink: 0;
+    line-height: 1.45;
+    min-width: 180px;
+  }
+
+  .members-dir-form-print .members-dir-form-head-info div {
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .members-dir-form-print .members-dir-form-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1px;
+    background: #e2e4e9;
+    border: 1px solid #e2e4e9;
+    margin-bottom: 10px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .members-dir-form-print .members-dir-form-kpi {
+    background: #fff;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .members-dir-form-print .members-dir-form-kpi-label {
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #8b909c;
+  }
+
+  .members-dir-form-print .members-dir-form-kpi-value {
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .members-dir-form-print .members-dir-form-kpi.blue .members-dir-form-kpi-value { color: #2563eb; }
+  .members-dir-form-print .members-dir-form-kpi.purple .members-dir-form-kpi-value { color: #5b3fb0; }
+  .members-dir-form-print .members-dir-form-kpi.orange .members-dir-form-kpi-value { color: #c2660a; }
+  .members-dir-form-print .members-dir-form-kpi.green .members-dir-form-kpi-value { color: #0f7a4a; }
+  .members-dir-form-print .members-dir-form-kpi.red .members-dir-form-kpi-value { color: #b3401f; }
+
+  .members-dir-form-print .members-dir-form-table-wrap {
+    margin-bottom: 10px;
+    border: 1px solid #e2e4e9;
+    border-radius: 6px;
+    overflow: visible;
+  }
+
+  .members-dir-form-print .members-dir-form-table-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 10px;
+    background: #fafbfc;
+    border-bottom: 1px solid #e2e4e9;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .members-dir-form-print .members-dir-form-table-head h2 {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5b3fb0;
+  }
+
+  .members-dir-form-print .members-dir-form-table-head span {
+    font-size: 8px;
+    color: #8b909c;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .members-dir-form-print .members-dir-form-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead {
+    display: table-header-group;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th {
+    padding: 5px 6px;
+    font-size: 7px;
+    font-weight: 700;
+    color: #8b909c;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: #f3f5f8;
+    border-bottom: 1px solid #cfd3db;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th.col-idx {
+    width: 3%;
+    text-align: right;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th.col-name {
+    width: 20%;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th.col-role {
+    width: 13%;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th.col-phone {
+    width: 9%;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th.col-email {
+    width: 20%;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th.col-city {
+    width: 18%;
+  }
+
+  .members-dir-form-print .members-dir-form-table thead th.col-flag {
+    width: 8%;
+    text-align: center;
+  }
+
+  .members-dir-form-print .members-dir-form-table tbody td {
+    padding: 4px 6px;
+    font-size: 8.5px;
+    border-bottom: 1px solid #eef0f3;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .members-dir-form-print .members-dir-form-table tbody tr:nth-child(even) {
+    background: #fafbfd;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.idx {
+    text-align: right;
+    color: #8b909c;
+    font-size: 8px;
+    white-space: nowrap;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.name {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.role,
+  .members-dir-form-print .members-dir-form-table td.contact,
+  .members-dir-form-print .members-dir-form-table td.city {
+    font-size: 8.5px;
+    color: #565b68;
+    white-space: nowrap;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.email {
+    font-size: 8px;
+    color: #565b68;
+    white-space: nowrap;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.flag {
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.flag-yes {
+    color: #0f7a4a;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.flag-no {
+    color: #8b909c;
+  }
+
+  .members-dir-form-print .members-dir-form-table td.flag-off {
+    color: #b3401f;
+  }
+
+  .members-dir-form-print .members-dir-form-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .members-dir-form-print .members-dir-form-summary,
+  .members-dir-form-print .members-dir-form-notes {
+    border: 1px solid #e2e4e9;
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+
+  .members-dir-form-print .members-dir-form-notes {
+    background: #fdf1de;
+    border-color: #f3dca8;
+  }
+
+  .members-dir-form-print .members-dir-form-summary h2,
+  .members-dir-form-print .members-dir-form-notes h2 {
+    margin: 0 0 6px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 8px;
+    font-weight: 800;
+    color: #1c2b4a;
+  }
+
+  .members-dir-form-print .members-dir-form-notes h2 {
+    color: #8a5a12;
+  }
+
+  .members-dir-form-print .members-dir-form-notes p {
+    margin: 0 0 4px;
+    font-size: 8px;
+    color: #8a5a12;
+    line-height: 1.4;
+  }
+
+  .members-dir-form-print .members-dir-form-dist-row {
+    margin-bottom: 6px;
+  }
+
+  .members-dir-form-print .members-dir-form-dist-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .members-dir-form-print .members-dir-form-dist-track {
+    height: 4px;
+    border-radius: 999px;
+    background: #f3f5f8;
+    overflow: hidden;
+  }
+
+  .members-dir-form-print .members-dir-form-dist-track .fill {
+    height: 100%;
+    border-radius: 999px;
+  }
+
+  .members-dir-form-print .members-dir-form-dist-track .fill.members { background: #5b3fb0; }
+  .members-dir-form-print .members-dir-form-dist-track .fill.visits { background: #f5901f; }
+  .members-dir-form-print .members-dir-form-dist-track .fill.active { background: #1c9a52; }
+  .members-dir-form-print .members-dir-form-dist-track .fill.inactive { background: #dc2626; }
+
+  .members-dir-form-print .members-dir-form-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 6px;
+    margin-top: 4px;
+    font-size: 8px;
+    color: #8b909c;
+  }
+}

@@ -14,6 +14,8 @@ import {
 } from "@/lib/services/ledger";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
+import TransactionsLoading from "./loading";
 
 export default async function TransactionsPage({
   searchParams,
@@ -87,23 +89,27 @@ export default async function TransactionsPage({
           {error}
         </p>
       ) : pageResult ? (
-        <TransactionsListView
-          entries={pageResult.entries}
-          totalCount={pageResult.totalCount}
-          periodStats={pageResult.periodStats}
-          funds={funds}
-          expenseTypes={expenseTypes}
-          incomeTypes={incomeTypes}
-          fundFilterId={fundId}
-          fundFilterName={fundFilterName}
-          canAuthorizeFinances={session.canAuthorizeFinances}
-          page={page}
-          pageSize={pageSize}
-          dateFrom={dateFrom}
-          dateTo={dateTo}
-          statusFilter={status}
-        />
-      ) : null}
+        <Suspense fallback={<TransactionsLoading />}>
+          <TransactionsListView
+            entries={pageResult.entries}
+            totalCount={pageResult.totalCount}
+            periodStats={pageResult.periodStats}
+            funds={funds}
+            expenseTypes={expenseTypes}
+            incomeTypes={incomeTypes}
+            fundFilterId={fundId}
+            fundFilterName={fundFilterName}
+            canAuthorizeFinances={session.canAuthorizeFinances}
+            page={page}
+            pageSize={pageSize}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            statusFilter={status}
+          />
+        </Suspense>
+      ) : (
+        <TransactionsLoading />
+      )}
     </>
   );
 }

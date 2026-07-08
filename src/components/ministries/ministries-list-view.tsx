@@ -419,6 +419,20 @@ export function MinistriesListView({
         ministry={membersDialogTarget}
         members={members}
         canViewProfiles={canViewProfiles}
+        canAddMembers={
+          membersDialogTarget != null &&
+          canEditMinistryWith(
+            permissions,
+            profileId,
+            membersDialogTarget.leaderProfileIds,
+          )
+        }
+        onAddMember={() => {
+          if (!membersDialogTarget) return;
+          const ministry = membersDialogTarget;
+          setMembersDialogTarget(null);
+          setFormState({ mode: "edit", ministry });
+        }}
         open={membersDialogTarget != null}
         onClose={() => setMembersDialogTarget(null)}
       />

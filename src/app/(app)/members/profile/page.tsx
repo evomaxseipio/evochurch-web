@@ -9,7 +9,7 @@ import {
 } from "@/lib/services/members";
 import { fetchMemberFinancePayload } from "@/lib/services/member-finances";
 import { getAppSession } from "@/lib/auth/app-session";
-import { hasPermission, canWriteMembers, canDeleteMembers } from "@/lib/auth/permissions";
+import { hasPermission, canWriteMembers, canDeleteMembers, canWriteContributions } from "@/lib/auth/permissions";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
@@ -92,6 +92,7 @@ export default async function MemberProfilePage({
     session,
     "finances:contributions:read",
   );
+  const canWriteContributionsFlag = canWriteContributions(session);
 
   if (data.kind === "missing-id") {
     return (
@@ -141,6 +142,7 @@ export default async function MemberProfilePage({
         canWriteMembers={canWriteMembersFlag}
         canDeleteMembers={canDeleteMembersFlag}
         canReadMemberFinances={canReadMemberFinances}
+        canWriteContributions={canWriteContributionsFlag}
       />
     </Suspense>
   );

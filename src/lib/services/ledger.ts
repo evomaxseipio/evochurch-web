@@ -14,7 +14,6 @@ import type {
   OperationalIncomeInput,
   OperationalIncomeType,
 } from "@/lib/ledger/types";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
@@ -85,50 +84,42 @@ export async function fetchFinanceLedger(
 }
 
 export async function fetchExpenseTypes(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
 ): Promise<ExpenseType[]> {
   return unstable_cache(
-    () => fetchExpenseTypesFromDb(churchId),
+    async () => {
+      const { data, error } = await supabase.rpc("spgetexpensestypes", {
+        p_church_id: churchId,
+      });
+
+      if (error) throw error;
+      return parseExpenseTypesResponse(data);
+    },
     ["catalog:expense-types-ledger", String(churchId)],
     { tags: [catalogTags.expenseTypes(churchId)], revalidate: 300 },
   )();
 }
 
-async function fetchExpenseTypesFromDb(churchId: number): Promise<ExpenseType[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("spgetexpensestypes", {
-    p_church_id: churchId,
-  });
-
-  if (error) throw error;
-  return parseExpenseTypesResponse(data);
-}
-
 export async function fetchOperationalIncomeTypes(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
 ): Promise<OperationalIncomeType[]> {
   return unstable_cache(
-    () => fetchOperationalIncomeTypesFromDb(churchId),
+    async () => {
+      const { data, error } = await supabase
+        .from("income_type_catalog")
+        .select("id, type_name, description, is_active")
+        .eq("church_id", churchId)
+        .eq("is_operational", true)
+        .order("id");
+
+      if (error) throw error;
+      return parseOperationalIncomeTypes(data);
+    },
     ["catalog:income-types-operational-ledger", String(churchId)],
     { tags: [catalogTags.incomeTypesOperational(churchId)], revalidate: 300 },
   )();
-}
-
-async function fetchOperationalIncomeTypesFromDb(
-  churchId: number,
-): Promise<OperationalIncomeType[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("income_type_catalog")
-    .select("id, type_name, description, is_active")
-    .eq("church_id", churchId)
-    .eq("is_operational", true)
-    .order("id");
-
-  if (error) throw error;
-  return parseOperationalIncomeTypes(data);
 }
 
 const DESCRIPTION_MAX_LENGTH = 250;

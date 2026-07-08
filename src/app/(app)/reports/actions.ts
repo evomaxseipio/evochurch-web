@@ -21,10 +21,13 @@ import {
   type ReportPeriod,
 } from "@/lib/reports/types";
 import {
+  fetchChurchReportMeta,
   fetchFinancialMonthlyPayload,
   fetchConcilioF001Payload,
+  fetchMembershipDirectoryPayload,
   type FinancialMonthlyPayload,
   type ConcilioF001ReportPayload,
+  type MembershipDirectoryPayload,
 } from "@/lib/services/reports";
 import { submitConcilioReport } from "@/lib/services/org-portal";
 import type { MonthPeriod } from "@/lib/reports/period";
@@ -40,6 +43,10 @@ export type PreviewFinancialMonthlyCeadResult =
 
 export type PreviewConcilioF001Result =
   | { ok: true; payload: ConcilioF001ReportPayload; treasurerName: string | null }
+  | { ok: false; error: string };
+
+export type PreviewMembershipDirectoryResult =
+  | { ok: true; payload: MembershipDirectoryPayload; generatedByName: string | null }
   | { ok: false; error: string };
 
 async function runReportGeneration(
@@ -232,6 +239,51 @@ export async function previewConcilioF001Action(
       ok: true,
       payload,
       treasurerName: session.fullName,
+    };
+  } catch (e) {
+    const tReports = await getTranslations({ locale, namespace: "reports" });
+    return {
+      ok: false,
+      error:
+        e instanceof Error ? e.message : tReports("errors.previewFailedGeneric"),
+    };
+  }
+}
+
+export async function previewMembershipDirectoryAction(
+  memberFilter?: MemberFilterKey,
+  localeArg?: string,
+): Promise<PreviewMembershipDirectoryResult> {
+  const requestedLocale = localeArg ?? "";
+  const locale: Locale = isLocale(requestedLocale)
+    ? requestedLocale
+    : defaultLocale;
+  try {
+    const tReports = await getTranslations({ locale, namespace: "reports" });
+    const tErrors = await getTranslations({ locale, namespace: "errors" });
+    const { supabase, session } = await getActionSession();
+    if (!session.churchId) {
+      return { ok: false, error: tErrors("noChurch") };
+    }
+    if (!canReadReport(session, "membership-directory")) {
+      return { ok: false, error: tReports("errors.noReadPermission") };
+    }
+
+    const meta = await fetchChurchReportMeta(supabase, session.churchId, {
+      churchName: session.churchName ?? undefined,
+    });
+
+    const payload = await fetchMembershipDirectoryPayload(
+      supabase,
+      session.churchId,
+      memberFilter ?? "all",
+      meta,
+    );
+
+    return {
+      ok: true,
+      payload,
+      generatedByName: session.fullName,
     };
   } catch (e) {
     const tReports = await getTranslations({ locale, namespace: "reports" });

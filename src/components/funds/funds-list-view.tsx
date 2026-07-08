@@ -21,15 +21,19 @@ import { FilterToolbar } from "@/components/ui/filter-toolbar";
 import { PaginationBar } from "@/components/ui/pagination-bar";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useIsDesktop } from "@/hooks/use-is-desktop";
+import type { PermissionKey } from "@/lib/auth/permission-keys";
+import {
+  canReadContributionsWith,
+  canReadTransactionsWith,
+} from "@/lib/auth/permissions";
 import { formatFundDate, fundProgressPct, sortFunds } from "@/lib/funds/parse";
 import type {
   Fund,
-  FundMinistryFilter,
   FundStatusFilter,
   FundViewMode,
   FundsListStats,
 } from "@/lib/funds/types";
-import { filterFundsByMinistryScope, canDeleteFund } from "@/lib/ministries/funds";
+import { canDeleteFund } from "@/lib/ministries/funds";
 import type { Ministry } from "@/lib/ministries/types";
 import { fmtRD, fmtRDshort } from "@/lib/format-currency";
 import { formatDate } from "@/lib/i18n/format";
@@ -64,10 +68,12 @@ export function FundsListView({
   funds,
   stats,
   ministries = [],
+  permissions = [],
 }: {
   funds: Fund[];
   stats: FundsListStats;
   ministries?: Ministry[];
+  permissions?: PermissionKey[];
 }) {
   const tCommon = useTranslations("common");
   const tFinances = useTranslations("finances");
@@ -81,9 +87,10 @@ export function FundsListView({
   ];
 
   const isDesktop = useIsDesktop();
+  const canViewTransactions = canReadTransactionsWith(permissions);
+  const canViewContributions = canReadContributionsWith(permissions);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<FundStatusFilter>("all");
-  const [ministryFilter, setMinistryFilter] = useState<FundMinistryFilter>("all");
   const [view, setView] = useState<FundViewMode>("grid");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSize>(10);
@@ -114,15 +121,14 @@ export function FundsListView({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const scoped = filterFundsByMinistryScope(funds, ministryFilter);
-    const rows = scoped.filter((f) => {
+    const rows = funds.filter((f) => {
       if (statusFilter === "active" && !f.isActive) return false;
       if (statusFilter === "inactive" && f.isActive) return false;
       if (q && !f.name.toLowerCase().includes(q)) return false;
       return true;
     });
     return sortFunds(rows);
-  }, [funds, query, statusFilter, ministryFilter]);
+  }, [funds, query, statusFilter]);
 
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -154,6 +160,8 @@ export function FundsListView({
       onViewContrib: () =>
         router.push(fundUrl("/finances/contributions", f.fundId)),
       onDelete: canDeleteFund(f) ? () => setDeleteTarget(f) : undefined,
+      canViewTransactions,
+      canViewContributions,
     };
   }
 
@@ -277,35 +285,14 @@ export function FundsListView({
             setPage(1);
           }}
           queryPlaceholder={tFunds("searchPlaceholder")}
-          maxSearchWidth={9999}
+          maxSearchWidth={340}
+          compactSearch
           filters={STATUS_FILTERS}
           activeFilter={statusFilter}
           onFilterChange={(next) => {
             setStatusFilter(next);
             setPage(1);
           }}
-          middle={
-            ministries.length > 0 ? (
-              <div className="input-wrap" style={{ minWidth: 200 }}>
-                <select
-                  value={ministryFilter}
-                  onChange={(e) => {
-                    setMinistryFilter(e.target.value as FundMinistryFilter);
-                    setPage(1);
-                  }}
-                  aria-label={tFunds("filterByMinistry")}
-                >
-                  <option value="all">{tFunds("allFunds")}</option>
-                  <option value="church">{tFunds("filterChurchFunds")}</option>
-                  {ministries.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : null
-          }
           trailing={
             <>
               {isDesktop ? (
