@@ -160,8 +160,19 @@ function drawCeadHeader(
   doc.font("Helvetica").fontSize(8.5).fillColor("#5b6072").text(
     genLine,
     boxX + 10,
+<<<<<<< HEAD
     y0 + 9,
     { width: boxW - 20, lineGap: 0 },
+=======
+    y0 + 10,
+    { width: boxW - 20, lineGap: 1 },
+  );
+  doc.text(
+    sanitizePdfText(`${t("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`),
+    boxX + 10,
+    y0 + 28,
+    { width: boxW - 20 },
+>>>>>>> origin/main
   );
   doc.text(treLine, boxX + 10, y0 + 24, { width: boxW - 20, lineGap: 0 });
 
