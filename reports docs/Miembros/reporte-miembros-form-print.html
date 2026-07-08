@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte de Miembros — Impresión / PDF</title>
+<style>
+  :root{
+    --bg:#eef0f3; --paper:#ffffff;
+    --border:#e2e4e9; --border-strong:#cfd3db;
+    --text:#161821; --text-2:#565b68; --text-muted:#8b909c;
+    --navy:#1c2b4a; --navy-2:#2f4270;
+    --purple:#5b3fb0; --purple-bg:#f0ecfc;
+    --green:#0f7a4a; --green-bg:#e7f6ee;
+    --red:#b3401f; --red-bg:#fdece5;
+    --orange:#c2660a; --orange-bg:#fff2e2;
+    --blue:#2563eb; --blue-bg:#eaf1ff;
+    --warn:#8a5a12; --warn-bg:#fdf1de; --warn-border:#f3dca8;
+    --gold:#b8863b;
+    --shadow:0 1px 2px rgba(20,22,26,.05), 0 6px 24px rgba(20,22,26,.06);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); font-family:'Segoe UI',Arial,sans-serif; color:var(--text); font-size:11px; padding:32px 16px;}
+  .mono{font-variant-numeric:tabular-nums;}
+
+  /* Simula hoja A4 apaisada (mejor para 8 columnas) */
+  .sheet{
+    max-width:1050px; margin:0 auto 32px;
+    background:var(--paper);
+    border-radius:4px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    position:relative;
+  }
+  .page-label{
+    position:absolute; top:8px; right:12px;
+    font-size:9px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--text-muted);
+    background:var(--bg); border:1px solid var(--border);
+    padding:3px 8px; border-radius:4px;
+  }
+
+  /* ── Encabezado ── */
+  .head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+    padding:18px 24px 14px;
+    border-bottom:2px solid var(--gold);
+    break-inside:avoid;
+  }
+  .head-main{display:flex; gap:12px; align-items:flex-start; flex:1; min-width:0;}
+  .head-logo{width:48px; height:48px; flex-shrink:0;}
+  .head-logo img{width:100%; height:100%; object-fit:contain;}
+  .head h1{margin:0 0 2px; font-size:13px; font-weight:800; color:var(--navy); letter-spacing:-.01em; line-height:1.2;}
+  .head-church{margin:0 0 3px; font-size:11.5px; font-weight:700; color:var(--purple);}
+  .head-meta{margin:0; font-size:10px; color:var(--text-2); line-height:1.4;}
+  .head-meta b{color:var(--navy); font-weight:600;}
+
+  .head-info{
+    background:var(--bg); border:1px solid var(--border);
+    border-radius:6px; padding:7px 10px;
+    font-size:9px; color:var(--text-2); flex-shrink:0;
+    line-height:1.45; min-width:200px;
+  }
+  .head-info div{margin:1px 0; white-space:nowrap;}
+  .head-info b{color:var(--text); font-weight:700;}
+
+  /* ── KPIs compactos ── */
+  .kpis{
+    display:grid; grid-template-columns:repeat(5,1fr);
+    gap:1px; background:var(--border);
+    border-bottom:1px solid var(--border);
+    break-inside:avoid;
+  }
+  .kpi{background:var(--paper); padding:9px 12px; display:flex; flex-direction:column; gap:3px;}
+  .kpi-label{font-size:8px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted);}
+  .kpi-value{font-size:13px; font-weight:800; color:var(--text);}
+  .kpi.total .kpi-value{color:var(--blue);}
+  .kpi.members .kpi-value{color:var(--purple);}
+  .kpi.visits .kpi-value{color:var(--orange);}
+  .kpi.active .kpi-value{color:var(--green);}
+  .kpi.inactive .kpi-value{color:var(--red);}
+
+  /* ── Tabla directorio ── */
+  .table-section{padding:0;}
+  .table-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 16px;
+    background:#fafbfc; border-bottom:1px solid var(--border);
+    break-inside:avoid;
+  }
+  .table-head h2{margin:0; font-size:9.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--purple);}
+  .table-head span{font-size:9px; color:var(--text-muted); font-weight:600;}
+
+  table{width:100%; border-collapse:collapse;}
+  .members thead th{
+    padding:6px 8px; font-size:8px; font-weight:700;
+    letter-spacing:.04em; text-transform:uppercase;
+    color:var(--text-muted); background:#f3f5f8;
+    border-bottom:1px solid var(--border-strong);
+    white-space:nowrap; text-align:left;
+  }
+  .members thead th.col-idx{width:24px; text-align:right;}
+  .members thead th.col-flag{text-align:center;}
+  .members tbody td{
+    padding:5px 8px; font-size:10px;
+    border-bottom:1px solid #eef0f3;
+    vertical-align:middle; color:var(--text);
+  }
+  .members tbody tr:nth-child(even){background:#fafbfd;}
+  .members td.idx{text-align:right; color:var(--text-muted); font-size:9px;}
+  .members td.name{font-weight:600; white-space:nowrap;}
+  .members td.role{font-size:9.5px; color:var(--text-2); white-space:nowrap;}
+  .members td.contact{font-size:9.5px; color:var(--text-2); white-space:nowrap;}
+  .members td.email{font-size:9px; color:var(--text-2); max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .members td.city{font-size:9.5px; color:var(--text-2); white-space:nowrap;}
+  .members td.flag{text-align:center; font-size:9px; font-weight:700; white-space:nowrap;}
+
+  .flag-yes{color:var(--green);}
+  .flag-no{color:var(--text-muted);}
+  .flag-off{color:var(--red);}
+
+  /* ── Resumen + notas (solo última página) ── */
+  .bottom-row{
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:1px; background:var(--border);
+    border-top:1px solid var(--border);
+    break-inside:avoid;
+  }
+  .summary-col, .notes-col{background:var(--paper); padding:12px 16px;}
+  .bottom-row h3{margin:0 0 8px; font-size:9px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--navy);}
+  .dist-row{margin-bottom:7px;}
+  .dist-row:last-child{margin-bottom:0;}
+  .dist-top{display:flex; justify-content:space-between; font-size:9.5px; font-weight:600; margin-bottom:3px;}
+  .dist-track{height:6px; border-radius:999px; background:var(--bg); overflow:hidden;}
+  .dist-fill{height:100%; border-radius:999px;}
+
+  .notes-col{background:var(--warn-bg); border-left:1px solid var(--warn-border);}
+  .notes-col h3{color:var(--warn);}
+  .notes-col p{margin:0 0 6px; font-size:9.5px; color:var(--warn); line-height:1.45;}
+  .notes-col p:last-child{margin-bottom:0;}
+
+  /* ── Pie de página ── */
+  .page-foot{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 16px; border-top:1px solid var(--border);
+    font-size:8.5px; color:var(--text-muted);
+    break-inside:avoid;
+  }
+  .page-foot b{color:var(--text-2);}
+
+  /* ── Separador entre páginas (solo en pantalla) ── */
+  .page-break{
+    max-width:1050px; margin:0 auto 16px;
+    text-align:center; font-size:10px; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase;
+    color:var(--text-muted); padding:4px 0;
+    border-top:2px dashed var(--border-strong);
+    border-bottom:2px dashed var(--border-strong);
+  }
+
+  /* ── Barra de acciones (solo pantalla, no imprime) ── */
+  .screen-bar{
+    max-width:1050px; margin:0 auto 20px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:var(--paper); border:1px solid var(--border);
+    border-radius:8px; padding:10px 16px; box-shadow:var(--shadow);
+  }
+  .screen-bar p{margin:0; font-size:12px; color:var(--text-2);}
+  .screen-bar p b{color:var(--navy);}
+  .screen-bar .btns{display:flex; gap:8px;}
+  .btn{border:none; border-radius:7px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px;}
+  .btn-print{background:var(--blue); color:#fff;}
+  .btn-back{background:var(--paper); color:var(--text-2); border:1px solid var(--border);}
+  .btn:hover{filter:brightness(.95);}
+
+  @media print{
+    body{background:#fff; padding:0;}
+    .screen-bar, .page-break, .page-label{display:none !important;}
+    .sheet{box-shadow:none; border-radius:0; margin:0; max-width:none; page-break-after:always;}
+    .sheet:last-child{page-break-after:auto;}
+    @page{size:A4 landscape; margin:12mm 14mm;}
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-bar">
+  <p><b>Vista de impresión / PDF</b> — Formato A4 apaisado, sin filtros ni botones interactivos. Así se verá al imprimir o descargar el PDF.</p>
+  <div class="btns">
+    <button class="btn btn-back" onclick="location.href='reporte-miembros-dashboard.html'">← Vista previa</button>
+    <button class="btn btn-print" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+</div>
+
+<!-- ══════════════ PÁGINA 1 ══════════════ -->
+<div class="sheet">
+  <span class="page-label">Página 1 de 2</span>
+
+  <header class="head">
+    <div class="head-main">
+      <div class="head-logo"><img src="../../public/brand/fuente-inagotable/logo-on-white.png" alt="Logo"></div>
+      <div>
+        <h1>REPORTE DE MIEMBROS</h1>
+        <p class="head-church">Iglesia Fuente Inagotable</p>
+        <p class="head-meta">
+          Pastor: <b>Pr. Juan Méndez</b> &nbsp;·&nbsp; Concilio: <b>Asamblea de Dios</b>
+        </p>
+      </div>
+    </div>
+    <div class="head-info">
+      <div>Generado el: <b>07 Jul 2026 · 10:52 PM</b></div>
+      <div>Generado por: <b>María Santana</b></div>
+      <div>Filtro: <b>Todos los registros</b></div>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi total"><span class="kpi-label">Total registros</span><span class="kpi-value mono">148</span></div>
+    <div class="kpi members"><span class="kpi-label">Miembros</span><span class="kpi-value mono">112</span></div>
+    <div class="kpi visits"><span class="kpi-label">Visitantes</span><span class="kpi-value mono">36</span></div>
+    <div class="kpi active"><span class="kpi-label">Activos</span><span class="kpi-value mono">129</span></div>
+    <div class="kpi inactive"><span class="kpi-label">Inactivos</span><span class="kpi-value mono">19</span></div>
+  </div>
+
+  <div class="table-section">
+    <div class="table-head">
+      <h2>Directorio de miembros</h2>
+      <span>Ordenado por nombre (A–Z)</span>
+    </div>
+    <table class="members">
+      <thead>
+        <tr>
+          <th class="col-idx">#</th>
+          <th>Nombre completo</th>
+          <th>Rol</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Ciudad</th>
+          <th class="col-flag">Miembro</th>
+          <th class="col-flag">Activo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="idx">1</td><td class="name">Juan Méndez Rosario</td><td class="role">Pastor</td><td class="contact mono">(809) 555-0134</td><td class="email">juan.mendez@fuenteinagotable.org</td><td class="city">Santo Domingo Este</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">2</td><td class="name">Carmen Peña de Méndez</td><td class="role">Pastora</td><td class="contact mono">(809) 555-0187</td><td class="email">carmen.pena@fuenteinagotable.org</td><td class="city">Santo Domingo Este</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">3</td><td class="name">Pedro Rodríguez Almonte</td><td class="role">Tesorero</td><td class="contact mono">(829) 555-0245</td><td class="email">pedro.rodriguez@gmail.com</td><td class="city">Los Alcarrizos</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">4</td><td class="name">María Santana García</td><td class="role">Secretaria</td><td class="contact mono">(809) 555-0362</td><td class="email">maria.santana@hotmail.com</td><td class="city">Santo Domingo Norte</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">5</td><td class="name">Ramón Castillo Núñez</td><td class="role">Diácono</td><td class="contact mono">(849) 555-0418</td><td class="email">r.castillo84@gmail.com</td><td class="city">Villa Mella</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">6</td><td class="name">Altagracia Féliz Medina</td><td class="role">Diaconisa</td><td class="contact mono">(809) 555-0529</td><td class="email">alta.feliz@gmail.com</td><td class="city">Boca Chica</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">7</td><td class="name">José Miguel Taveras</td><td class="role">Líder de Jóvenes</td><td class="contact mono">(829) 555-0673</td><td class="email">josemtaveras@outlook.com</td><td class="city">Santo Domingo Este</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">8</td><td class="name">Yolanda Reyes Contreras</td><td class="role">Maestra EBD</td><td class="contact mono">(809) 555-0781</td><td class="email">yolanda.reyes@gmail.com</td><td class="city">San Cristóbal</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">9</td><td class="name">Francisco Javier de la Cruz</td><td class="role">Ujier</td><td class="contact mono">(849) 555-0846</td><td class="email">fjdelacruz@gmail.com</td><td class="city">Los Alcarrizos</td><td class="flag flag-yes">Sí</td><td class="flag flag-off">No</td></tr>
+        <tr><td class="idx">10</td><td class="name">Rosa Elena Martínez</td><td class="role">Miembro</td><td class="contact mono">(809) 555-0917</td><td class="email">rosaelena.mtz@hotmail.com</td><td class="city">Santo Domingo Norte</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">11</td><td class="name">Luis Alberto Guzmán</td><td class="role">Miembro</td><td class="contact mono">(829) 555-1038</td><td class="email">—</td><td class="city">Villa Mella</td><td class="flag flag-yes">Sí</td><td class="flag flag-off">No</td></tr>
+        <tr><td class="idx">12</td><td class="name">Wanda Jiménez Polanco</td><td class="role">Visitante</td><td class="contact mono">(809) 555-1152</td><td class="email">wandajp@gmail.com</td><td class="city">Boca Chica</td><td class="flag flag-no">No</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">13</td><td class="name">Ángel David Paredes</td><td class="role">Visitante</td><td class="contact mono">—</td><td class="email">—</td><td class="city">Santo Domingo Este</td><td class="flag flag-no">No</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">14</td><td class="name">Miguelina Vargas Herrera</td><td class="role">Miembro</td><td class="contact mono">(849) 555-1267</td><td class="email">miguelina.vh@gmail.com</td><td class="city">San Cristóbal</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">15</td><td class="name">Elena María Báez</td><td class="role">Miembro</td><td class="contact mono">(809) 555-1384</td><td class="email">elenambaez@yahoo.com</td><td class="city">Santo Domingo Este</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">16</td><td class="name">Carlos Alberto Peña</td><td class="role">Miembro</td><td class="contact mono">(829) 555-1491</td><td class="email">carlospena@gmail.com</td><td class="city">Los Alcarrizos</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">17</td><td class="name">Doris Esperanza López</td><td class="role">Miembro</td><td class="contact mono">(849) 555-1508</td><td class="email">dorislopez@hotmail.com</td><td class="city">Villa Mella</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">18</td><td class="name">Héctor Manuel Sosa</td><td class="role">Miembro</td><td class="contact mono">(809) 555-1623</td><td class="email">—</td><td class="city">Boca Chica</td><td class="flag flag-yes">Sí</td><td class="flag flag-off">No</td></tr>
+        <tr><td class="idx">19</td><td class="name">Irma del Carmen Ruiz</td><td class="role">Miembro</td><td class="contact mono">(829) 555-1737</td><td class="email">irmaruiz@gmail.com</td><td class="city">San Cristóbal</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">20</td><td class="name">Jacinto Antonio Mejía</td><td class="role">Visitante</td><td class="contact mono">(809) 555-1842</td><td class="email">jmejia@outlook.com</td><td class="city">Santo Domingo Norte</td><td class="flag flag-no">No</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">21</td><td class="name">Karina Isabel Montero</td><td class="role">Miembro</td><td class="contact mono">(849) 555-1956</td><td class="email">kmontero@gmail.com</td><td class="city">Santo Domingo Este</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">22</td><td class="name">Lorenzo Enrique Díaz</td><td class="role">Miembro</td><td class="contact mono">(809) 555-2061</td><td class="email">lorenzodiaz@hotmail.com</td><td class="city">Los Alcarrizos</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">23</td><td class="name">Martha Lucía Hernández</td><td class="role">Miembro</td><td class="contact mono">(829) 555-2178</td><td class="email">mlhernandez@gmail.com</td><td class="city">Villa Mella</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">24</td><td class="name">Nelson Rafael Aquino</td><td class="role">Miembro</td><td class="contact mono">(849) 555-2289</td><td class="email">—</td><td class="city">Boca Chica</td><td class="flag flag-yes">Sí</td><td class="flag flag-off">No</td></tr>
+        <tr><td class="idx">25</td><td class="name">Olga Patricia Cedeño</td><td class="role">Miembro</td><td class="contact mono">(809) 555-2394</td><td class="email">olgacedeno@gmail.com</td><td class="city">San Cristóbal</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">26</td><td class="name">Pablo Emilio Núñez</td><td class="role">Visitante</td><td class="contact mono">(829) 555-2407</td><td class="email">pnunez@gmail.com</td><td class="city">Santo Domingo Norte</td><td class="flag flag-no">No</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">27</td><td class="name">Quisqueya Altagracia Reyes</td><td class="role">Miembro</td><td class="contact mono">(809) 555-2513</td><td class="email">quisreyes@hotmail.com</td><td class="city">Santo Domingo Este</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">28</td><td class="name">Rafael Antonio Guerrero</td><td class="role">Miembro</td><td class="contact mono">(849) 555-2628</td><td class="email">rguerrero@gmail.com</td><td class="city">Los Alcarrizos</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="page-foot">
+    <span>Iglesia Fuente Inagotable — Reporte de Miembros</span>
+    <span>Página <b>1</b> de <b>2</b></span>
+  </footer>
+</div>
+
+<div class="page-break">— Salto de página —</div>
+
+<!-- ══════════════ PÁGINA 2 ══════════════ -->
+<div class="sheet">
+  <span class="page-label">Página 2 de 2</span>
+
+  <header class="head">
+    <div class="head-main">
+      <div class="head-logo"><img src="../../public/brand/fuente-inagotable/logo-on-white.png" alt="Logo"></div>
+      <div>
+        <h1>REPORTE DE MIEMBROS</h1>
+        <p class="head-church">Iglesia Fuente Inagotable</p>
+        <p class="head-meta">
+          Pastor: <b>Pr. Juan Méndez</b> &nbsp;·&nbsp; Concilio: <b>Asamblea de Dios</b>
+        </p>
+      </div>
+    </div>
+    <div class="head-info">
+      <div>Generado el: <b>07 Jul 2026 · 10:52 PM</b></div>
+      <div>Generado por: <b>María Santana</b></div>
+      <div>Filtro: <b>Todos los registros</b></div>
+    </div>
+  </header>
+
+  <div class="table-section">
+    <div class="table-head">
+      <h2>Directorio de miembros (continuación)</h2>
+      <span>Registros 29–148</span>
+    </div>
+    <table class="members">
+      <thead>
+        <tr>
+          <th class="col-idx">#</th>
+          <th>Nombre completo</th>
+          <th>Rol</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Ciudad</th>
+          <th class="col-flag">Miembro</th>
+          <th class="col-flag">Activo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="idx">29</td><td class="name">Sandra Milagros Ortiz</td><td class="role">Miembro</td><td class="contact mono">(809) 555-2736</td><td class="email">sortiz@gmail.com</td><td class="city">Villa Mella</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">30</td><td class="name">Tomás Eduardo Valdez</td><td class="role">Miembro</td><td class="contact mono">(829) 555-2841</td><td class="email">tvaldez@hotmail.com</td><td class="city">Boca Chica</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">31</td><td class="name">Úrsula Beatriz Campos</td><td class="role">Visitante</td><td class="contact mono">(849) 555-2957</td><td class="email">—</td><td class="city">San Cristóbal</td><td class="flag flag-no">No</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">32</td><td class="name">Víctor Manuel Encarnación</td><td class="role">Miembro</td><td class="contact mono">(809) 555-3062</td><td class="email">vencarnacion@gmail.com</td><td class="city">Santo Domingo Norte</td><td class="flag flag-yes">Sí</td><td class="flag flag-off">No</td></tr>
+        <tr><td class="idx">33</td><td class="name">Wilma Josefina Peña</td><td class="role">Miembro</td><td class="contact mono">(829) 555-3178</td><td class="email">wpena@outlook.com</td><td class="city">Santo Domingo Este</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">34</td><td class="name">Xiomara del Carmen Liriano</td><td class="role">Miembro</td><td class="contact mono">(849) 555-3283</td><td class="email">xliriano@gmail.com</td><td class="city">Los Alcarrizos</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">35</td><td class="name">Yahaira Esperanza Mota</td><td class="role">Miembro</td><td class="contact mono">(809) 555-3397</td><td class="email">ymota@hotmail.com</td><td class="city">Villa Mella</td><td class="flag flag-yes">Sí</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td class="idx">36</td><td class="name">Zacarías Emilio Brito</td><td class="role">Visitante</td><td class="contact mono">(829) 555-3402</td><td class="email">zbrito@gmail.com</td><td class="city">Boca Chica</td><td class="flag flag-no">No</td><td class="flag flag-yes">Sí</td></tr>
+        <tr><td colspan="8" style="padding:10px 8px; font-size:9px; color:var(--text-muted); text-align:center; font-style:italic; background:#f9fafb;">… 112 registros adicionales …</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bottom-row">
+    <div class="summary-col">
+      <h3>Resumen de membresía</h3>
+      <div class="dist-row">
+        <div class="dist-top"><span style="color:var(--purple)">Miembros</span><span class="mono">112 · 75.7%</span></div>
+        <div class="dist-track"><div class="dist-fill" style="width:75.7%;background:var(--purple)"></div></div>
+      </div>
+      <div class="dist-row">
+        <div class="dist-top"><span style="color:var(--orange)">Visitantes</span><span class="mono">36 · 24.3%</span></div>
+        <div class="dist-track"><div class="dist-fill" style="width:24.3%;background:var(--orange)"></div></div>
+      </div>
+      <div class="dist-row">
+        <div class="dist-top"><span style="color:var(--green)">Activos</span><span class="mono">129 · 87.2%</span></div>
+        <div class="dist-track"><div class="dist-fill" style="width:87.2%;background:var(--green)"></div></div>
+      </div>
+      <div class="dist-row">
+        <div class="dist-top"><span style="color:var(--red)">Inactivos</span><span class="mono">19 · 12.8%</span></div>
+        <div class="dist-track"><div class="dist-fill" style="width:12.8%;background:var(--red)"></div></div>
+      </div>
+    </div>
+    <div class="notes-col">
+      <h3>Notas importantes</h3>
+      <p>Este reporte contiene datos personales de contacto. Su distribución debe limitarse al personal autorizado de la iglesia.</p>
+      <p>Los registros marcados como «Visitante» aún no han completado el proceso de membresía. Los inactivos se conservan para fines históricos y de seguimiento pastoral.</p>
+    </div>
+  </div>
+
+  <footer class="page-foot">
+    <span>Total: <b>148 registros</b> · Generado por EvoChurch</span>
+    <span>Página <b>2</b> de <b>2</b></span>
+  </footer>
+</div>
+
+</body>
+</html>
