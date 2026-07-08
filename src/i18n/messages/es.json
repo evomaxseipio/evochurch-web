@@ -817,6 +817,53 @@
       }
     }
   },
+  "org": {
+    "eyebrow": "Concilio",
+    "nav": {
+      "portalLabel": "Portal de auditoría",
+      "dashboard": "Dashboard",
+      "churches": "Iglesias",
+      "reports": "Reportes"
+    },
+    "login": {
+      "title": "Portal del concilio",
+      "subtitle": "Acceso para auditores y administración denominacional.",
+      "churchHint": "¿Eres usuario de una iglesia? Usa el portal principal de EvoChurch.",
+      "noOrgAccess": "Tu cuenta no tiene membresía activa en un concilio. Contacta al administrador."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Resumen de iglesias afiliadas y reportes recibidos.",
+      "churchCount": "Iglesias afiliadas",
+      "reportCount": "Reportes recibidos",
+      "recentReports": "Últimos envíos",
+      "noReports": "Aún no hay reportes enviados por las iglesias."
+    },
+    "churches": {
+      "title": "Directorio",
+      "subtitle": "Iglesias bajo esta organización (solo lectura).",
+      "empty": "No hay iglesias vinculadas a este concilio.",
+      "table": {
+        "name": "Iglesia",
+        "city": "Ciudad",
+        "unit": "Distrito",
+        "code": "Código",
+        "kind": "Tipo"
+      }
+    },
+    "reports": {
+      "title": "Reportes",
+      "subtitle": "Bandeja de F.001 y reportes enviados por iglesias.",
+      "empty": "No hay reportes para el período seleccionado.",
+      "table": {
+        "church": "Iglesia",
+        "code": "Código",
+        "period": "Período",
+        "kind": "Tipo",
+        "submitted": "Enviado"
+      }
+    }
+  },
   "network": {
     "eyebrow": "Operación",
     "title": "Red de iglesias",
@@ -1140,6 +1187,10 @@
           "create": "Creó tipo de gasto: {name}",
           "update": "Editó tipo de gasto: {name}",
           "delete": "Eliminó tipo de gasto: {name}"
+        },
+        "church_profile": {
+          "update": "Actualizó perfil de iglesia: {name}",
+          "logo": "Actualizó logo de iglesia"
         }
       }
     },

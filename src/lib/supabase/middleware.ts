@@ -2,6 +2,11 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { resolveSessionRequiresPasswordChange } from "@/lib/auth/fetch-session-password-gate";
 import { UPDATE_PASSWORD_PATH } from "@/lib/auth/temp-password-flow";
+import {
+  isOrgAppPath,
+  isOrgPortalHost,
+  ORG_ROUTE_PREFIX,
+} from "@/lib/org/host";
 import { getSupabaseEnv, supabaseClientOptions } from "./config";
 
 function hasSupabaseSessionCookie(request: NextRequest): boolean {
@@ -12,9 +17,39 @@ function hasSupabaseSessionCookie(request: NextRequest): boolean {
 
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const orgHost = isOrgPortalHost(request.headers.get("host"));
+  const orgPath = isOrgAppPath(pathname);
+
+  if (orgHost && !orgPath && !pathname.startsWith("/auth")) {
+    const url = request.nextUrl.clone();
+    if (pathname === "/" || pathname === "/login" || pathname.startsWith("/login/")) {
+      url.pathname =
+        pathname === "/" || pathname === "/login"
+          ? `${ORG_ROUTE_PREFIX}/dashboard`
+          : `${ORG_ROUTE_PREFIX}${pathname}`;
+      return NextResponse.redirect(url);
+    }
+    if (
+      pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/members") ||
+      pathname.startsWith("/finances") ||
+      pathname.startsWith("/settings")
+    ) {
+      const url = request.nextUrl.clone();
+      url.pathname = `${ORG_ROUTE_PREFIX}/dashboard`;
+      return NextResponse.redirect(url);
+    }
+  }
+
+  if (!orgHost && orgPath && pathname !== `${ORG_ROUTE_PREFIX}/login`) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
 
   // Visitantes anónimos al login: sin round-trip a Supabase Auth.
-  if (pathname.startsWith("/login") && !hasSupabaseSessionCookie(request)) {
+  const loginPath = orgPath ? `${ORG_ROUTE_PREFIX}/login` : "/login";
+  if (pathname.startsWith(loginPath) && !hasSupabaseSessionCookie(request)) {
     return NextResponse.next({ request });
   }
 
@@ -46,6 +81,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute =
     pathname === "/login" ||
     pathname.startsWith("/login/") ||
+    pathname === `${ORG_ROUTE_PREFIX}/login` ||
     pathname.startsWith("/auth");
 
   const isUpdatePasswordRoute = pathname === UPDATE_PASSWORD_PATH;
@@ -57,11 +93,14 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/finances") ||
     pathname.startsWith("/eventos") ||
     pathname.startsWith("/comunicacion") ||
-    pathname.startsWith("/settings");
+    pathname.startsWith("/settings") ||
+    pathname.startsWith("/network") ||
+    pathname.startsWith("/reports") ||
+    (orgPath && pathname !== `${ORG_ROUTE_PREFIX}/login`);
 
   if (!user && isProtected) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = orgPath ? `${ORG_ROUTE_PREFIX}/login` : "/login";
     url.searchParams.set("next", pathname);
     return NextResponse.redirect(url);
   }
@@ -88,14 +127,20 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && isAuthRoute && !isUpdatePasswordRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    if (pathname !== `${ORG_ROUTE_PREFIX}/login`) {
+      const url = request.nextUrl.clone();
+      url.pathname = orgPath || orgHost ? `${ORG_ROUTE_PREFIX}/dashboard` : "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   if (pathname === "/") {
     const url = request.nextUrl.clone();
-    url.pathname = user ? "/dashboard" : "/login";
+    if (orgHost) {
+      url.pathname = `${ORG_ROUTE_PREFIX}/dashboard`;
+    } else {
+      url.pathname = user ? "/dashboard" : "/login";
+    }
     return NextResponse.redirect(url);
   }
 
