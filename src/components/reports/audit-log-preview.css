@@ -1,0 +1,108 @@
+/* Bitácora — siempre estilo documento claro (como directorio de miembros) */
+.audit-log-dash {
+  --al-bg: #f3f5f8;
+  --al-paper: #ffffff;
+  --al-border: #e5e8ee;
+  --al-text: #1a1d29;
+  --al-text-2: #5b6072;
+  --al-text-muted: #9198a8;
+  --al-navy: #1e2a5e;
+  --al-shadow: 0 1px 2px rgba(20, 22, 26, 0.04), 0 4px 16px rgba(20, 22, 26, 0.05);
+
+  color: var(--al-text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.audit-log-dash .eyebrow {
+  color: var(--al-text-muted);
+}
+
+.audit-log-dash .display {
+  color: var(--al-navy);
+}
+
+.audit-log-dash .muted,
+.audit-log-dash .tiny.muted {
+  color: var(--al-text-muted);
+}
+
+.audit-log-dash .kpi {
+  background: var(--al-paper);
+  border-color: var(--al-border);
+  box-shadow: var(--al-shadow);
+}
+
+.audit-log-dash .kpi .label {
+  color: var(--al-text-muted);
+}
+
+.audit-log-dash .kpi .val {
+  color: var(--al-text);
+}
+
+.audit-log-dash .filter-toolbar,
+.audit-log-dash .card.flat {
+  background: var(--al-paper) !important;
+  border: 1px solid var(--al-border);
+  box-shadow: var(--al-shadow);
+}
+
+.audit-log-dash .search {
+  background: var(--al-bg);
+  border: 1px solid var(--al-border);
+}
+
+.audit-log-dash .search input {
+  color: var(--al-text);
+}
+
+.audit-log-dash .search input::placeholder {
+  color: var(--al-text-muted);
+}
+
+.audit-log-dash .input,
+.audit-log-dash .select {
+  background: var(--al-paper);
+  border-color: var(--al-border);
+  color: var(--al-text);
+  color-scheme: light;
+}
+
+.audit-log-dash .table-wrap {
+  background: var(--al-paper);
+  border: 1px solid var(--al-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--al-shadow);
+  overflow: hidden;
+}
+
+.audit-log-dash .table thead th {
+  background: var(--al-bg);
+  color: var(--al-text-muted);
+  border-bottom-color: var(--al-border);
+}
+
+.audit-log-dash .table tbody td {
+  border-bottom-color: var(--al-border);
+  color: var(--al-text);
+}
+
+.audit-log-dash .table tbody tr:hover {
+  background: var(--al-bg);
+}
+
+.audit-log-dash .btn.outline {
+  background: var(--al-paper);
+  border-color: var(--al-border);
+  color: var(--al-text-2);
+}
+
+.audit-log-dash .btn.outline:hover {
+  background: var(--al-bg);
+  color: var(--al-text);
+}
+
+.audit-log-dash label .tiny.muted {
+  color: var(--al-text-muted);
+}

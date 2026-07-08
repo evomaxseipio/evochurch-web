@@ -702,6 +702,35 @@ body {
 .field .help { font-size: 11.5px; color: var(--muted); }
 .field .help.error { color: var(--danger); }
 
+/* Login / auth — texto legible y autofill en dark y light */
+.login .field label {
+  color: var(--fg-dim);
+}
+.login .field input,
+.login .field textarea {
+  color: var(--fg);
+  caret-color: var(--fg);
+}
+.login .field input::placeholder {
+  color: var(--dim);
+  opacity: 1;
+}
+.login .field input:-webkit-autofill,
+.login .field input:-webkit-autofill:hover,
+.login .field input:-webkit-autofill:focus,
+.login .field input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--fg) !important;
+  caret-color: var(--fg);
+  box-shadow: 0 0 0 1000px var(--bg-2) inset !important;
+  transition: background-color 99999s ease-out 0s;
+}
+
+/* Report preview — reportes HTML siempre estilo documento claro (#f3f5f8) */
+.report-preview-body--paper {
+  background: #f3f5f8;
+  color: #1a1d29;
+}
+
 .mf-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1073,7 +1102,7 @@ body {
   background: var(--bg);
 }
 @media (max-width: 900px) { .login { grid-template-columns: 1fr; } .login .visual { display: none; } }
-.login .formside { position: relative; display: flex; flex-direction: column; padding: 30px 34px; background: var(--bg); }
+.login .formside { position: relative; display: flex; flex-direction: column; padding: 30px 34px; background: var(--bg); color: var(--fg); }
 .login .formside .inner { width: 100%; max-width: 380px; margin: auto; }
 
 /* Marca arriba-izquierda */

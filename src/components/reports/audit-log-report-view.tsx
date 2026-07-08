@@ -21,6 +21,7 @@ import { FINANCE_PAGE_SIZE_OPTIONS } from "@/lib/finance/pagination";
 import type { Locale } from "@/i18n/config";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import "./audit-log-preview.css";
 
 const MODULE_OPTIONS = [
   "members",
@@ -222,7 +223,7 @@ export function AuditLogReportView({
   );
 
   return (
-    <div>
+    <div className="audit-log-dash">
       <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
         <div>
           <div className="eyebrow">{tAudit("title")}</div>

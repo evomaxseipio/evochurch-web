@@ -70,11 +70,11 @@ export function ReportPreviewDialog({
   const tReports = useTranslations("reports");
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const printRef = useRef<HTMLDivElement | null>(null);
-  const isHtmlPreview =
+  const isLightPaperPreview =
     financialMonthlyPayload != null ||
     concilioF001Payload != null ||
-    membershipDirectoryPayload != null ||
-    auditLogInteractive === true;
+    membershipDirectoryPayload != null;
+  const isHtmlPreview = isLightPaperPreview || auditLogInteractive === true;
 
   useEffect(() => {
     if (!open) return;
@@ -162,12 +162,11 @@ export function ReportPreviewDialog({
         </div>
 
         <div
-          className="report-preview-body"
+          className={`report-preview-body${isHtmlPreview ? " report-preview-body--paper" : ""}`}
           style={{
             flex: 1,
             minHeight: 0,
             padding: isHtmlPreview ? "24px 16px" : 16,
-            background: isHtmlPreview ? "#f3f5f8" : "var(--surface-2)",
             overflow: isHtmlPreview ? "auto" : undefined,
           }}
         >
