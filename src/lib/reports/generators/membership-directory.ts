@@ -1,43 +1,41 @@
-import { memberFullName } from "@/lib/members/parse";
 import type { Locale } from "@/i18n/config";
-import { buildPdfTablePaginated } from "@/lib/reports/export/pdf";
+import { collectPdfBuffer } from "@/lib/reports/export/pdf";
+import {
+  createMembershipDirectoryPdfDocument,
+  renderMembershipDirectoryFormPdf,
+} from "@/lib/reports/export/membership-directory-form-pdf";
 import {
   createWorkbook,
   workbookToBuffer,
 } from "@/lib/reports/export/xlsx";
+import {
+  DIRECTORY_COLUMN_KEYS,
+  memberDirectoryRow,
+  sortMembersByName,
+} from "@/lib/reports/templates/membership/directory-helpers";
 import type { MembershipDirectoryPayload } from "@/lib/services/reports";
 import { getTranslations } from "next-intl/server";
+import type ExcelJS from "exceljs";
 
-const DIRECTORY_COLUMN_KEYS = [
-  "fullName",
-  "nickname",
-  "role",
-  "phone",
-  "email",
-  "city",
-  "member",
-  "active",
-] as const;
-
-const PDF_ROWS_PER_PAGE = 32;
-
-function memberPhone(member: MembershipDirectoryPayload["members"][number]): string {
-  return member.contact.mobilePhone || member.contact.phone || "";
+function setCell(
+  sheet: ExcelJS.Worksheet,
+  row: number,
+  col: number,
+  value: string | number | null | undefined,
+  bold = false,
+) {
+  const cell = sheet.getCell(row, col);
+  cell.value = value ?? "";
+  if (bold) cell.font = { bold: true };
 }
 
-function memberExportRow(
-  member: MembershipDirectoryPayload["members"][number],
-): string[] {
-  return [
-    memberFullName(member),
-    member.nickName || "",
-    member.membershipRole || "",
-    memberPhone(member),
-    member.contact.email || "",
-    member.address.cityState || "",
-    member.isMember ? "Sí" : "No",
-    member.isActive ? "Sí" : "No",
-  ];
+function mergeRow(
+  sheet: ExcelJS.Worksheet,
+  row: number,
+  fromCol: number,
+  toCol: number,
+) {
+  sheet.mergeCells(row, fromCol, row, toCol);
 }
 
 export async function generateMembershipDirectoryXlsx(
@@ -46,6 +44,8 @@ export async function generateMembershipDirectoryXlsx(
 ): Promise<Uint8Array> {
   const tCommon = await getTranslations({ locale, namespace: "common" });
   const tReports = await getTranslations({ locale, namespace: "reports" });
+  const yesLabel = tReports("preview.membershipDirectory.yes");
+  const noLabel = tReports("preview.membershipDirectory.no");
   const workbook = await createWorkbook();
   const memberFilterLabel = tReports(`memberFilters.${payload.filter}`);
   const meta = workbook.addWorksheet(tReports("xlsx.metaSheet"));
@@ -64,8 +64,8 @@ export async function generateMembershipDirectoryXlsx(
     ),
   );
   sheet.getRow(1).font = { bold: true };
-  for (const member of payload.members) {
-    sheet.addRow(memberExportRow(member));
+  for (const member of sortMembersByName(payload.members)) {
+    sheet.addRow(memberDirectoryRow(member, yesLabel, noLabel));
   }
 
   return workbookToBuffer(workbook);
@@ -74,28 +74,15 @@ export async function generateMembershipDirectoryXlsx(
 export async function generateMembershipDirectoryPdf(
   payload: MembershipDirectoryPayload,
   locale: Locale,
+  generatedByName?: string | null,
 ): Promise<Uint8Array> {
   const tReports = await getTranslations({ locale, namespace: "reports" });
-  const memberFilterLabel = tReports(`memberFilters.${payload.filter}`);
-  const subtitle = [
-    payload.churchName,
-    `${tReports("xlsx.filter")}: ${memberFilterLabel}`,
-    tReports("exports.membershipDirectory.records", {
-      count: payload.members.length.toLocaleString(locale),
-    }),
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const doc = createMembershipDirectoryPdfDocument();
+  const bufferPromise = collectPdfBuffer(doc);
 
-  const rows = payload.members.map(memberExportRow);
-  return buildPdfTablePaginated(
-    tReports("catalog.membership-directory.title"),
-    DIRECTORY_COLUMN_KEYS.map((key) => ({
-      header: tReports(`exports.membershipDirectory.columns.${key}`),
-      width: 62,
-    })),
-    rows,
-    subtitle,
-    PDF_ROWS_PER_PAGE,
-  );
+  renderMembershipDirectoryFormPdf(doc, payload, locale, tReports, generatedByName);
+
+  doc.end();
+  const buffer = await bufferPromise;
+  return new Uint8Array(buffer);
 }

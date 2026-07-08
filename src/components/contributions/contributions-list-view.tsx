@@ -170,6 +170,14 @@ export function ContributionsListView({
     );
   }, [entries, query]);
 
+  const filteredFund = useMemo(
+    () =>
+      fundFilterId
+        ? funds.find((f) => f.fundId === fundFilterId) ?? null
+        : null,
+    [funds, fundFilterId],
+  );
+
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
@@ -250,7 +258,13 @@ export function ContributionsListView({
 
   const emptyMessage =
     totalCount === 0
-      ? tContributions("empty")
+      ? fundFilterId && filteredFund && filteredFund.totalContributions > 0
+        ? tContributions("emptyFundWithBalance", {
+            amount: fmtRD(filteredFund.totalContributions, locale),
+          })
+        : fundFilterId
+          ? tContributions("emptyFund")
+          : tContributions("empty")
       : tContributions("emptyFiltered");
 
   return (

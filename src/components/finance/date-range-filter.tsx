@@ -9,12 +9,14 @@ import { useTranslations } from "next-intl";
 export function DateRangeFilter({
   value,
   onChange,
+  defaultRange,
 }: {
   value: DateRange;
   onChange: (next: DateRange) => void;
+  defaultRange?: DateRange;
 }) {
   const t = useTranslations("finances");
-  const defaults = defaultYearToDateRange();
+  const defaults = defaultRange ?? defaultYearToDateRange();
   const isDefault = value.from === defaults.from && value.to === defaults.to;
 
   return (
@@ -54,7 +56,7 @@ export function DateRangeFilter({
         <button
           type="button"
           className="btn outline sm"
-          onClick={() => onChange(defaultYearToDateRange())}
+          onClick={() => onChange(defaults)}
         >
           {t("resetDateRange")}
         </button>

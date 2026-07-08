@@ -291,3 +291,34 @@ export async function saveMembershipAction(
     };
   }
 }
+
+export async function deleteMemberAction(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    const { supabase, session } = await getActionSessionWith("members:delete");
+    const profileId = String(formData.get("profileId") ?? "").trim();
+    if (!profileId) {
+      return { ok: false, errorKey: "validation.invalidProfileId" };
+    }
+
+    const before = await fetchMemberById(supabase, session.churchId, profileId);
+    if (!before) {
+      return { ok: false, errorKey: "errors.memberNotFound" };
+    }
+
+    const profileInput = memberToProfileInput(before, {
+      isActive: false,
+      isMember: false,
+    });
+
+    await updateMember(supabase, profileId, profileInput);
+
+    revalidatePath("/members", "page");
+    revalidatePath("/members/profile", "page");
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, errorKey: toErrorKey(e, "errors.deleteFailed") };
+  }
+}

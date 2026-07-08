@@ -15,7 +15,6 @@ import type {
 } from "@/lib/members/types";
 import { catalogTags } from "@/lib/cache/catalog-tags";
 import { assertRpcSuccess } from "@/lib/supabase/rpc-result";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
@@ -87,31 +86,28 @@ export async function fetchMemberById(
 }
 
 export async function fetchMemberRoles(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
 ): Promise<MemberRoleCatalog[]> {
   return unstable_cache(
-    fetchMemberRolesFromDb,
+    async () => {
+      const { data, error } = await supabase
+        .from("member_roles")
+        .select("id, role_name, role_code")
+        .order("role_name", { ascending: true });
+
+      if (error) throw error;
+
+      return ((data as { id: string; role_name: string; role_code: string }[]) ?? [])
+        .map((r) => ({
+          id: r.id,
+          roleName: r.role_name?.trim() ?? "",
+          roleCode: r.role_code?.trim() ?? "",
+        }))
+        .filter((r) => r.id && r.roleName);
+    },
     ["catalog:member-roles"],
     { tags: [catalogTags.memberRoles()], revalidate: 3600 },
   )();
-}
-
-async function fetchMemberRolesFromDb(): Promise<MemberRoleCatalog[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("member_roles")
-    .select("id, role_name, role_code")
-    .order("role_name", { ascending: true });
-
-  if (error) throw error;
-
-  return ((data as { id: string; role_name: string; role_code: string }[]) ?? [])
-    .map((r) => ({
-      id: r.id,
-      roleName: r.role_name?.trim() ?? "",
-      roleCode: r.role_code?.trim() ?? "",
-    }))
-    .filter((r) => r.id && r.roleName);
 }
 
 export async function insertMember(

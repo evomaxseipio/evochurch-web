@@ -200,6 +200,14 @@ export const Icons = {
       <path d="m12 2 3.1 6.3L20 9.3l-5 4.9 1.2 6.9L12 17.8l-6.2 3.3 1.2-6.9-5-4.9 4.9-1L12 2z" />
     </svg>
   ),
+  crown: (p: IconProps) => (
+    <svg viewBox="0 0 24 24" {...base(p)}>
+      <path d="M4 18h16M6 14l2.2-7.4L12 11l3.8-4.4L18 14" />
+      <circle cx="6" cy="6" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="4" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="18" cy="6" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  ),
   shield: (p: IconProps) => (
     <svg viewBox="0 0 24 24" {...base(p)}>
       <path d="M12 2.5L4.5 5.5v5.8c0 4.6 3.2 8.9 7.5 9.7 4.3-.8 7.5-5.1 7.5-9.7V5.5L12 2.5z" />

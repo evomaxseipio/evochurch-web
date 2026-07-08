@@ -4,31 +4,25 @@ import type {
   IncomeTypeCatalogRow,
 } from "@/lib/catalog/types";
 import { catalogTags } from "@/lib/cache/catalog-tags";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
-async function fetchOperationalIncomeTypeCatalogFromDb(
-  churchId: number,
-): Promise<IncomeTypeCatalogRow[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("income_type_catalog")
-    .select("id, type_name, description, is_active")
-    .eq("church_id", churchId)
-    .eq("is_operational", true)
-    .order("id");
-
-  if (error) throw error;
-  return parseIncomeTypeCatalogRows(data);
-}
-
 export async function fetchOperationalIncomeTypeCatalog(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
 ): Promise<IncomeTypeCatalogRow[]> {
   return unstable_cache(
-    () => fetchOperationalIncomeTypeCatalogFromDb(churchId),
+    async () => {
+      const { data, error } = await supabase
+        .from("income_type_catalog")
+        .select("id, type_name, description, is_active")
+        .eq("church_id", churchId)
+        .eq("is_operational", true)
+        .order("id");
+
+      if (error) throw error;
+      return parseIncomeTypeCatalogRows(data);
+    },
     ["catalog:income-types-operational", String(churchId)],
     { tags: [catalogTags.incomeTypesOperational(churchId)], revalidate: 300 },
   )();

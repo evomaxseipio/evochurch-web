@@ -175,7 +175,7 @@ export async function generateReport(
       data =
         format === "xlsx"
           ? await generateMembershipDirectoryXlsx(payload, locale)
-          : await generateMembershipDirectoryPdf(payload, locale);
+          : await generateMembershipDirectoryPdf(payload, locale, session.fullName);
       filenameBase = "directorio-miembros";
       resolvedPeriod = undefined;
       break;

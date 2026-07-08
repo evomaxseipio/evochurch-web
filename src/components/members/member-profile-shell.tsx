@@ -24,6 +24,7 @@ export function MemberProfileShell({
   canWriteMembers,
   canDeleteMembers,
   canReadMemberFinances,
+  canWriteContributions,
 }: {
   member: Member;
   roles: MemberRoleCatalog[];
@@ -32,6 +33,7 @@ export function MemberProfileShell({
   canWriteMembers: boolean;
   canDeleteMembers: boolean;
   canReadMemberFinances: boolean;
+  canWriteContributions: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -84,6 +86,7 @@ export function MemberProfileShell({
         canWriteMembers={canWriteMembers}
         canDeleteMembers={canDeleteMembers}
         canReadMemberFinances={canReadMemberFinances}
+        canWriteContributions={canWriteContributions}
       />
     </div>
   );

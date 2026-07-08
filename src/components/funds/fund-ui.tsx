@@ -34,6 +34,8 @@ export function FundActionMenu({
   onViewTx,
   onViewContrib,
   onDelete,
+  canViewTransactions = true,
+  canViewContributions = true,
 }: {
   fund: Fund;
   onEdit: () => void;
@@ -42,6 +44,8 @@ export function FundActionMenu({
   onViewTx: () => void;
   onViewContrib: () => void;
   onDelete?: () => void;
+  canViewTransactions?: boolean;
+  canViewContributions?: boolean;
 }) {
   const tCommon = useTranslations("common");
   const tFunds = useTranslations("funds");
@@ -81,12 +85,14 @@ export function FundActionMenu({
       icon: <Icons.edit size={15} />,
       on: onEdit,
     },
-    {
-      id: "add-tx",
-      label: tFunds("addTransaction"),
-      icon: <Icons.plus size={15} />,
-      on: onAddTx,
-    },
+    canViewTransactions
+      ? {
+          id: "add-tx",
+          label: tFunds("addTransaction"),
+          icon: <Icons.plus size={15} />,
+          on: onAddTx,
+        }
+      : null,
     !fund.isPrimary
       ? {
           id: "primary",
@@ -96,18 +102,22 @@ export function FundActionMenu({
           accent: true,
         }
       : null,
-    {
-      id: "tx",
-      label: tFunds("viewTransactions"),
-      icon: <Icons.list size={15} />,
-      on: onViewTx,
-    },
-    {
-      id: "contrib",
-      label: tFunds("viewContributions"),
-      icon: <Icons.wallet size={15} />,
-      on: onViewContrib,
-    },
+    canViewContributions
+      ? {
+          id: "contrib",
+          label: tFunds("viewContributions"),
+          icon: <Icons.wallet size={15} />,
+          on: onViewContrib,
+        }
+      : null,
+    canViewTransactions
+      ? {
+          id: "tx",
+          label: tFunds("viewTransactions"),
+          icon: <Icons.list size={15} />,
+          on: onViewTx,
+        }
+      : null,
     onDelete
       ? {
           id: "del",

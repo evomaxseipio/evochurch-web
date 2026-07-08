@@ -1,16 +1,34 @@
 "use client";
 
+import { fetchContributionCatalogAction } from "@/app/(app)/members/actions";
+import type { PresetContributor } from "@/components/contributions/contribution-form-drawer";
 import { SectionCard } from "@/components/members/member-ui";
 import { FundsKpi } from "@/components/funds/funds-kpi";
 import { Icons } from "@/components/icons";
+import type { IncomeType } from "@/lib/contributions/types";
+import type { Fund } from "@/lib/funds/types";
 import { fmtRD } from "@/lib/format-currency";
+import { memberFullName } from "@/lib/members/parse";
+import type { Member } from "@/lib/members/types";
 import { emptyMemberFinanceData } from "@/lib/services/member-finances";
 import type {
   MemberCollectionRow,
   MemberFinanceChartPoint,
   MemberFinanceData,
 } from "@/lib/members/types";
+import { toast } from "@/lib/toast";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
+
+const ContributionFormDrawer = dynamic(
+  () =>
+    import("@/components/contributions/contribution-form-drawer").then(
+      (m) => m.ContributionFormDrawer,
+    ),
+  { ssr: false },
+);
 
 const PAGE_SIZE = 5;
 
@@ -46,12 +64,15 @@ function typeStyle(collectionType: number) {
 }
 
 export function MemberFinancesTab({
-  memberId,
+  member,
   initialFinances = null,
+  canWriteContributions = false,
 }: {
-  memberId: string;
+  member: Member;
   initialFinances?: MemberFinanceData | null;
+  canWriteContributions?: boolean;
 }) {
+  const memberId = member.memberId;
   const [finances, setFinances] = useState<MemberFinanceData | null>(
     initialFinances,
   );
@@ -102,12 +123,76 @@ export function MemberFinancesTab({
     );
   }
 
-  return <MemberFinancesContent finances={finances} />;
+  return (
+    <MemberFinancesContent
+      member={member}
+      finances={finances}
+      canWriteContributions={canWriteContributions}
+    />
+  );
 }
 
-function MemberFinancesContent({ finances }: { finances: MemberFinanceData }) {
+function memberPresetContributor(member: Member): PresetContributor {
+  return {
+    profileId: member.memberId,
+    profileName: memberFullName(member),
+    donorKind: member.isMember ? "member" : "visitor",
+  };
+}
+
+function MemberFinancesContent({
+  member,
+  finances,
+  canWriteContributions,
+}: {
+  member: Member;
+  finances: MemberFinanceData;
+  canWriteContributions: boolean;
+}) {
+  const router = useRouter();
+  const t = useTranslations("members");
   const { summary, chartData, collections, statusCode, message } = finances;
   const isEmpty = statusCode === 204 || collections.length === 0;
+  const [contributionOpen, setContributionOpen] = useState(false);
+  const [contributionCatalogs, setContributionCatalogs] = useState<{
+    funds: Fund[];
+    incomeTypes: IncomeType[];
+  }>({ funds: [], incomeTypes: [] });
+  const [contributionCatalogsLoading, setContributionCatalogsLoading] =
+    useState(false);
+
+  async function openContributionDrawer() {
+    if (!canWriteContributions) return;
+
+    setContributionOpen(true);
+
+    if (
+      contributionCatalogs.funds.length > 0 &&
+      contributionCatalogs.incomeTypes.length > 0
+    ) {
+      return;
+    }
+
+    setContributionCatalogsLoading(true);
+    try {
+      const result = await fetchContributionCatalogAction();
+      if (!result.ok) {
+        toast.error("Contribuciones", "No se pudieron cargar los catálogos.");
+        setContributionOpen(false);
+        return;
+      }
+      setContributionCatalogs({
+        funds: result.funds,
+        incomeTypes: result.incomeTypes,
+      });
+    } finally {
+      setContributionCatalogsLoading(false);
+    }
+  }
+
+  function handleContributionClose() {
+    setContributionOpen(false);
+  }
 
   return (
     <div className="space-y-4">
@@ -169,6 +254,21 @@ function MemberFinancesContent({ finances }: { finances: MemberFinanceData }) {
         collections={collections}
         emptyMessage={message}
         isEmpty={isEmpty}
+        canWriteContributions={canWriteContributions}
+        addContributionLabel={t("addContribution")}
+        onAddContribution={() => void openContributionDrawer()}
+      />
+
+      <ContributionFormDrawer
+        key={member.memberId}
+        mode="new"
+        entry={null}
+        open={contributionOpen && !contributionCatalogsLoading}
+        onClose={handleContributionClose}
+        onSaved={() => router.refresh()}
+        funds={contributionCatalogs.funds}
+        incomeTypes={contributionCatalogs.incomeTypes}
+        presetContributor={memberPresetContributor(member)}
       />
     </div>
   );
@@ -345,10 +445,16 @@ function ContributionsTable({
   collections,
   emptyMessage,
   isEmpty,
+  canWriteContributions,
+  addContributionLabel,
+  onAddContribution,
 }: {
   collections: MemberCollectionRow[];
   emptyMessage: string;
   isEmpty: boolean;
+  canWriteContributions: boolean;
+  addContributionLabel: string;
+  onAddContribution: () => void;
 }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -390,24 +496,16 @@ function ContributionsTable({
             <DownloadIcon />
             Exportar
           </button>
-          <button
-            type="button"
-            disabled
-            title="Próximamente"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted opacity-60"
-          >
-            <PlusIcon />
-            Diezmo
-          </button>
-          <button
-            type="button"
-            disabled
-            title="Próximamente"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary/50 px-3 py-1.5 text-xs font-semibold text-white opacity-60"
-          >
-            <PlusIcon />
-            Ofrenda
-          </button>
+          {canWriteContributions ? (
+            <button
+              type="button"
+              onClick={onAddContribution}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-primary/90"
+            >
+              <PlusIcon />
+              {addContributionLabel}
+            </button>
+          ) : null}
         </div>
       }
     >

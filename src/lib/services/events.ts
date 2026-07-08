@@ -7,7 +7,6 @@ import type {
   RecurrenceRule,
 } from "@/lib/events/types";
 import { EVENT_TYPES } from "@/lib/events/types";
-import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
@@ -34,29 +33,8 @@ function defaultRange(): { from: string; to: string } {
   return { from: toIsoDate(from), to: toIsoDate(to) };
 }
 
-async function fetchEventsFromDb(
-  churchId: number,
-  from: string,
-  to: string,
-  ministryId?: string | null,
-): Promise<EventsPayload> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("sp_get_events", {
-    p_church_id: churchId,
-    p_from: from,
-    p_to: to,
-    p_ministry_id: ministryId ?? null,
-  });
-  if (error) throw error;
-  const parsed = parseEventsResponse(data);
-  if (data && typeof data === "object" && (data as { success?: boolean }).success === false) {
-    throw new Error(rpcMessage(data));
-  }
-  return parsed;
-}
-
 export async function fetchEvents(
-  _supabase: SupabaseClient,
+  supabase: SupabaseClient,
   churchId: number,
   options?: {
     from?: string;
@@ -69,7 +47,20 @@ export async function fetchEvents(
   const to = options?.to ?? range.to;
   const ministryId = options?.ministryId ?? null;
   return unstable_cache(
-    () => fetchEventsFromDb(churchId, from, to, ministryId),
+    async () => {
+      const { data, error } = await supabase.rpc("sp_get_events", {
+        p_church_id: churchId,
+        p_from: from,
+        p_to: to,
+        p_ministry_id: ministryId ?? null,
+      });
+      if (error) throw error;
+      const parsed = parseEventsResponse(data);
+      if (data && typeof data === "object" && (data as { success?: boolean }).success === false) {
+        throw new Error(rpcMessage(data));
+      }
+      return parsed;
+    },
     ["catalog:events", "v1", String(churchId), from, to, ministryId ?? "all"],
     { tags: [catalogTags.events(churchId)], revalidate: 120 },
   )();

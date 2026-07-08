@@ -80,13 +80,16 @@ function defaultFormValues(
   incomeTypes: IncomeType[],
   presetFundId?: string | null,
   presetContributor?: PresetContributor | null,
+  presetCategory: ContributionCategory = "tithe",
 ): FormValues {
   const today = new Date().toISOString().slice(0, 10);
   const primaryFund = funds.find((f) => f.isPrimary) ?? funds[0];
-  const titheType = incomeTypes.find((t) => t.category === "tithe");
+  const categoryType =
+    incomeTypes.find((t) => t.category === presetCategory) ??
+    incomeTypes.find((t) => t.category === "tithe");
 
   return {
-    incomeTypeId: titheType ? String(titheType.id) : "",
+    incomeTypeId: categoryType ? String(categoryType.id) : "",
     fundId: presetFundId || primaryFund?.fundId || "",
     collectionMode: "individual",
     donorKind: presetContributor?.donorKind ?? "member",
@@ -195,19 +198,23 @@ export function ContributionFormDrawer({
   entry,
   open,
   onClose,
+  onSaved,
   funds,
   incomeTypes,
   presetFundId,
   presetContributor = null,
+  presetCategory = "tithe",
 }: {
   mode: "new" | "edit";
   entry: Contribution | null;
   open: boolean;
   onClose: () => void;
+  onSaved?: () => void;
   funds: Fund[];
   incomeTypes: IncomeType[];
   presetFundId?: string | null;
   presetContributor?: PresetContributor | null;
+  presetCategory?: ContributionCategory;
 }) {
   const tCommon = useTranslations("common");
   const tContributions = useTranslations("contributions");
@@ -217,7 +224,13 @@ export function ContributionFormDrawer({
   const [v, setV] = useState<FormValues>(() =>
     mode === "edit" && entry
       ? contributionToFormValues(entry)
-      : defaultFormValues(funds, incomeTypes, presetFundId, presetContributor),
+      : defaultFormValues(
+          funds,
+          incomeTypes,
+          presetFundId,
+          presetContributor,
+          presetCategory,
+        ),
   );
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [amountFocused, setAmountFocused] = useState(false);
@@ -240,8 +253,35 @@ export function ContributionFormDrawer({
   useActionToast(state, {
     successMessage:
       mode === "new" ? tContributions("messages.saved") : tCommon("saveChanges"),
-    onSuccess: onClose,
+    onSuccess: () => {
+      onSaved?.();
+      onClose();
+    },
   });
+
+  useEffect(() => {
+    if (!open) return;
+    setV(
+      mode === "edit" && entry
+        ? contributionToFormValues(entry)
+        : defaultFormValues(
+            funds,
+            incomeTypes,
+            presetFundId,
+            presetContributor,
+            presetCategory,
+          ),
+    );
+    setErrs({});
+    setMemberQuery(
+      presetContributor?.profileName ??
+        (mode === "edit" && entry ? entry.contributorLabel : ""),
+    );
+    setMemberResults([]);
+    setAmountFocused(false);
+    // Reset only when the drawer opens; catalogs and preset are ready at that point.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: avoid wiping user input while open
+  }, [open]);
 
   useEffect(() => {
     if (!open || lockedContributor || v.collectionMode !== "individual") return;
@@ -417,18 +457,27 @@ export function ContributionFormDrawer({
           <div className="field">
             <label>Contribuyente</label>
             {lockedContributor ? (
-              <div className="card flat" style={{ padding: 14 }}>
-                <div className="row" style={{ gap: 10 }}>
-                  <span className="chip">
-                    <span className="pip" />{" "}
-                    {presetContributor?.donorKind === "visitor" ? "Visitante" : "Miembro"}
-                  </span>
-                  <span style={{ fontWeight: 600 }}>{presetContributor?.profileName}</span>
+              <>
+                <div className="card flat" style={{ padding: 14 }}>
+                  <div className="row" style={{ gap: 10 }}>
+                    <span className="chip">
+                      <span className="pip" />{" "}
+                      {presetContributor?.donorKind === "visitor"
+                        ? "Visitante"
+                        : "Miembro"}
+                    </span>
+                    <span style={{ fontWeight: 600 }}>
+                      {presetContributor?.profileName}
+                    </span>
+                  </div>
+                  <div className="help" style={{ marginTop: 6 }}>
+                    Contribuyente fijado desde el perfil del miembro.
+                  </div>
                 </div>
-                <div className="help" style={{ marginTop: 6 }}>
-                  Contribuyente fijado desde el perfil del miembro.
-                </div>
-              </div>
+                {errs.profileId && (
+                  <div className="help error">{errs.profileId}</div>
+                )}
+              </>
             ) : isCollective ? (
               <div className="card flat" style={{ padding: 14 }}>
                 <div className="row" style={{ gap: 10 }}>

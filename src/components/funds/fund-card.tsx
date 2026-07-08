@@ -21,6 +21,8 @@ export function FundCard({
   onViewTx,
   onViewContrib,
   onDelete,
+  canViewTransactions = true,
+  canViewContributions = true,
 }: {
   fund: Fund;
   onEdit: () => void;
@@ -29,6 +31,8 @@ export function FundCard({
   onViewTx: () => void;
   onViewContrib: () => void;
   onDelete?: () => void;
+  canViewTransactions?: boolean;
+  canViewContributions?: boolean;
 }) {
   const tFunds = useTranslations("funds");
   const locale = useLocale();
@@ -68,6 +72,8 @@ export function FundCard({
           onViewTx={onViewTx}
           onViewContrib={onViewContrib}
           onDelete={onDelete}
+          canViewTransactions={canViewTransactions}
+          canViewContributions={canViewContributions}
         />
       </div>
       <div
