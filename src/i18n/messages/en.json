@@ -98,6 +98,8 @@
     "configUsers": "User settings",
     "expenseTypes": "Expense types",
     "incomeTypes": "Income types",
+    "churchProfile": "Church profile",
+    "network": "Church network",
     "adminUsers": "System users",
     "roles": "Roles & permissions",
     "settings": "Settings & profile",
@@ -773,6 +775,87 @@
     "toasts": {
       "profileUpdated": "Profile updated",
       "profileSaved": "Your changes were saved."
+    },
+    "church": {
+      "eyebrow": "Settings",
+      "title": "Church profile",
+      "subtitle": "Identity, contact, brand colors, and official congregation data.",
+      "readOnlyHint": "You have read-only access. An administrator can edit this profile.",
+      "logoTitle": "Church logo",
+      "logoHint": "PNG, JPG, WebP, or SVG. Max 2 MB.",
+      "uploadLogo": "Upload logo",
+      "saved": "Church profile saved successfully.",
+      "sections": {
+        "identity": "Identity",
+        "identityHint": "Public name and slug for the church website.",
+        "contact": "Contact",
+        "branding": "Brand colors",
+        "official": "Official and operational data"
+      },
+      "fields": {
+        "name": "Church name",
+        "shortName": "Short name",
+        "legalName": "Legal name",
+        "slug": "Public slug",
+        "slugHint": "Lowercase letters, numbers, and hyphens only. E.g. fuente-inagotable",
+        "addressLine1": "Address line 1",
+        "addressLine2": "Address line 2",
+        "city": "City",
+        "stateProvince": "State / province",
+        "countryCode": "Country (ISO)",
+        "postalCode": "Postal code",
+        "phone": "Phone",
+        "email": "Institutional email",
+        "websiteUrl": "Website",
+        "primaryColor": "Primary color",
+        "secondaryColor": "Secondary color",
+        "accentColor": "Accent color",
+        "externalCode": "External code (F.001)",
+        "presbyteryName": "Presbytery / district",
+        "timezone": "Timezone (IANA)",
+        "defaultLocale": "Default locale"
+      }
+    }
+  },
+  "network": {
+    "eyebrow": "Operations",
+    "title": "Church network",
+    "subtitle": "Consolidated view of branch campuses. Data is read-only.",
+    "notHeadquarters": "This view is only available for headquarters churches.",
+    "readOnlyBadge": "Read only",
+    "kpis": {
+      "campuses": "Campuses",
+      "totalMembers": "Network members",
+      "totalBalance": "Fund balance (network)",
+      "totalIncome": "Month income (network)",
+      "hqMembers": "HQ members",
+      "hqBalance": "HQ fund balance",
+      "hqIncome": "HQ month income"
+    },
+    "sections": {
+      "totals": "Network totals",
+      "headquarters": "Headquarters",
+      "campuses": "Campuses"
+    },
+    "table": {
+      "name": "Church",
+      "city": "City",
+      "members": "Members",
+      "balance": "Fund balance",
+      "monthIncome": "Month income",
+      "actions": "Detail"
+    },
+    "empty": "No campuses are linked to this headquarters.",
+    "viewDetail": "View detail",
+    "detail": {
+      "title": "Campus detail",
+      "close": "Close",
+      "loading": "Loading detail…",
+      "contact": "Contact",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "code": "External code"
     }
   },
   "adminUsers": {
@@ -871,6 +954,7 @@
     "userCount": "{count, plural, one {# user} other {# users}}",
     "modules": {
       "dashboard": "Panel principal e indicadores de la iglesia",
+      "network": "Headquarters church network and campuses (read-only)",
       "finances": "Ingresos, egresos, transferencias y reportes",
       "members": "Gestión de miembros y asistentes",
       "ministerios": "Ver y gestionar equipos de servicio (ABAC para líderes)",
@@ -954,6 +1038,15 @@
           "read": "View income types",
           "write": "Edit income types",
           "delete": "Delete income types"
+        },
+        "church": {
+          "read": "View church profile",
+          "write": "Edit church profile"
+        }
+      },
+      "network": {
+        "churches": {
+          "read": "View campus network"
         }
       },
       "admin_users": {

@@ -179,7 +179,6 @@ function buildDashboardKpisFromSummary(params: {
       deltaKey: "deltaActiveMembers",
       deltaValues: { count: params.memberStats.active },
       deltaDir: "up",
-      feature: true,
       icon: "users",
       accent: "var(--d-people)",
     },

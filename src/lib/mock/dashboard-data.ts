@@ -57,7 +57,6 @@ export const dashboardMock = {
       value: "1,247",
       delta: "+24 este mes",
       deltaDir: "up",
-      feature: true,
       icon: "users",
       accent: "var(--d-people)",
       spark: [1180, 1192, 1201, 1215, 1218, 1230, 1240, 1247],

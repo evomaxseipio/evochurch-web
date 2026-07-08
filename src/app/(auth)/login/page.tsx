@@ -1,7 +1,6 @@
 import { LoginForm } from "@/components/auth/login-form";
 import { LoginPreview } from "@/components/auth/login-preview";
 import { Icons } from "@/components/icons";
-import { getTranslations } from "next-intl/server";
 
 export default async function LoginPage({
   searchParams,
@@ -9,7 +8,6 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string; error?: string; email?: string; reason?: string }>;
 }) {
   const { next, error, email, reason } = await searchParams;
-  const t = await getTranslations("auth");
 
   return (
     <div className="login">
@@ -34,8 +32,10 @@ export default async function LoginPage({
         <span className="orb orb-1" />
         <span className="orb orb-2" />
         <div className="promo">
-          <h1>{t("promoTitle")}</h1>
-          <p className="sub">{t("promoSubtitle")}</p>
+          <h1>Una sola plataforma para tu ministerio.</h1>
+          <p className="sub">
+            Miembros, finanzas, eventos y comunicación, diseñada para iglesias que crecen.
+          </p>
         </div>
         <LoginPreview />
       </div>

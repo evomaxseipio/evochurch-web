@@ -229,7 +229,6 @@ export function buildDashboardKpis(params: {
       value: params.memberStats.total.toLocaleString("es-DO"),
       delta: `${params.memberStats.active.toLocaleString("es-DO")} activos`,
       deltaDir: "up",
-      feature: true,
       icon: "users",
       accent: "var(--d-people)",
     },

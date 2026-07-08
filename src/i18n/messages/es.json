@@ -98,6 +98,8 @@
     "configUsers": "Configuración usuarios",
     "expenseTypes": "Tipos de gasto",
     "incomeTypes": "Tipos de ingreso",
+    "churchProfile": "Perfil de iglesia",
+    "network": "Red de iglesias",
     "adminUsers": "Usuarios sistema",
     "roles": "Roles y permisos",
     "settings": "Configuración y perfil",
@@ -773,6 +775,87 @@
     "toasts": {
       "profileUpdated": "Perfil actualizado",
       "profileSaved": "Tus cambios fueron guardados."
+    },
+    "church": {
+      "eyebrow": "Configuración",
+      "title": "Perfil de iglesia",
+      "subtitle": "Identidad, contacto, colores y datos oficiales de tu congregación.",
+      "readOnlyHint": "Tienes acceso de solo lectura. Un administrador puede editar este perfil.",
+      "logoTitle": "Logo de la iglesia",
+      "logoHint": "PNG, JPG, WebP o SVG. Máximo 2 MB.",
+      "uploadLogo": "Subir logo",
+      "saved": "Perfil de iglesia guardado correctamente.",
+      "sections": {
+        "identity": "Identidad",
+        "identityHint": "Nombre público y slug para el sitio web de la iglesia.",
+        "contact": "Contacto",
+        "branding": "Colores de marca",
+        "official": "Datos oficiales y operación"
+      },
+      "fields": {
+        "name": "Nombre de la iglesia",
+        "shortName": "Nombre corto",
+        "legalName": "Nombre legal",
+        "slug": "Slug público",
+        "slugHint": "Solo minúsculas, números y guiones. Ej: fuente-inagotable",
+        "addressLine1": "Dirección línea 1",
+        "addressLine2": "Dirección línea 2",
+        "city": "Ciudad",
+        "stateProvince": "Provincia / estado",
+        "countryCode": "País (ISO)",
+        "postalCode": "Código postal",
+        "phone": "Teléfono",
+        "email": "Correo institucional",
+        "websiteUrl": "Sitio web",
+        "primaryColor": "Color primario",
+        "secondaryColor": "Color secundario",
+        "accentColor": "Color de acento",
+        "externalCode": "Código externo (F.001)",
+        "presbyteryName": "Presbiterio / distrito",
+        "timezone": "Zona horaria (IANA)",
+        "defaultLocale": "Idioma predeterminado"
+      }
+    }
+  },
+  "network": {
+    "eyebrow": "Operación",
+    "title": "Red de iglesias",
+    "subtitle": "Vista consolidada de sucursales. Los datos son de solo lectura.",
+    "notHeadquarters": "Esta vista solo está disponible para iglesias sede.",
+    "readOnlyBadge": "Solo lectura",
+    "kpis": {
+      "campuses": "Sucursales",
+      "totalMembers": "Miembros en red",
+      "totalBalance": "Saldo fondos (red)",
+      "totalIncome": "Ingresos del mes (red)",
+      "hqMembers": "Miembros sede",
+      "hqBalance": "Saldo fondos sede",
+      "hqIncome": "Ingresos mes sede"
+    },
+    "sections": {
+      "totals": "Consolidado de red",
+      "headquarters": "Sede principal",
+      "campuses": "Sucursales"
+    },
+    "table": {
+      "name": "Iglesia",
+      "city": "Ciudad",
+      "members": "Miembros",
+      "balance": "Saldo fondos",
+      "monthIncome": "Ingresos mes",
+      "actions": "Detalle"
+    },
+    "empty": "No hay sucursales vinculadas a esta sede.",
+    "viewDetail": "Ver detalle",
+    "detail": {
+      "title": "Detalle de sucursal",
+      "close": "Cerrar",
+      "loading": "Cargando detalle…",
+      "contact": "Contacto",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "address": "Dirección",
+      "code": "Código externo"
     }
   },
   "adminUsers": {
@@ -871,6 +954,7 @@
     "userCount": "{count, plural, one {# usuario} other {# usuarios}}",
     "modules": {
       "dashboard": "Panel principal e indicadores de la iglesia",
+      "network": "Red de iglesias sede y sucursales (solo lectura)",
       "finances": "Ingresos, egresos, transferencias y reportes",
       "members": "Gestión de miembros y asistentes",
       "ministerios": "Ver y gestionar equipos de servicio (ABAC para líderes)",
@@ -954,6 +1038,15 @@
           "read": "Ver tipos de ingreso",
           "write": "Editar tipos de ingreso",
           "delete": "Eliminar tipos de ingreso"
+        },
+        "church": {
+          "read": "Ver perfil de iglesia",
+          "write": "Editar perfil de iglesia"
+        }
+      },
+      "network": {
+        "churches": {
+          "read": "Ver red de sucursales"
         }
       },
       "admin_users": {

@@ -1,3 +1,7 @@
+import {
+  CHURCH_BRAND_DEFAULTS,
+  normalizeChurchHexColor,
+} from "@/lib/brand/church-defaults";
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUser } from "@/lib/supabase/session";
 import { sessionRequiresPasswordChange } from "@/lib/auth/temp-password-flow";
@@ -6,6 +10,23 @@ import { parsePermissionKeys, type PermissionKey } from "@/lib/auth/permission-k
 import { cache } from "react";
 
 export type { PermissionKey };
+
+export type ChurchBranding = {
+  shortName: string | null;
+  logoUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+};
+
+export type ChurchKind = "standalone" | "headquarters" | "campus";
+
+export type ChurchNetworkContext = {
+  churchKind: ChurchKind;
+  parentChurchId: number | null;
+  campusCount: number;
+};
+
 export type AppSession = {
   authUserId: string;
   profileId: string;
@@ -13,6 +34,10 @@ export type AppSession = {
   churchId: number;
   fullName: string | null;
   churchName: string | null;
+  churchKind: ChurchKind;
+  parentChurchId: number | null;
+  churchNetwork: ChurchNetworkContext;
+  churchBranding: ChurchBranding | null;
   appRoleId: number | null;
   appRoleName: string | null;
   membershipRole: string | null;
@@ -40,7 +65,76 @@ type SessionContextRow = {
   is_temp_password?: boolean;
   preferred_locale?: string;
   permissions?: unknown;
+  church_branding?: {
+    short_name?: string | null;
+    logo_url?: string | null;
+    primary_color?: string;
+    secondary_color?: string;
+    accent_color?: string;
+  } | null;
+  church_kind?: string;
+  parent_church_id?: number | string | null;
+  church_network?: {
+    church_kind?: string;
+    parent_church_id?: number | string | null;
+    campus_count?: number;
+  } | null;
 };
+
+function parseChurchKind(raw: unknown): ChurchKind {
+  if (raw === "headquarters" || raw === "campus" || raw === "standalone") {
+    return raw;
+  }
+  return "standalone";
+}
+
+function parseChurchNetwork(
+  row: SessionContextRow,
+): ChurchNetworkContext {
+  const network = row.church_network;
+  const kind = parseChurchKind(network?.church_kind ?? row.church_kind);
+  const parentRaw = network?.parent_church_id ?? row.parent_church_id;
+  const parentId =
+    parentRaw == null || parentRaw === ""
+      ? null
+      : Number.parseInt(String(parentRaw), 10) || null;
+
+  return {
+    churchKind: kind,
+    parentChurchId: parentId,
+    campusCount:
+      network?.campus_count == null
+        ? 0
+        : Number.parseInt(String(network.campus_count), 10) || 0,
+  };
+}
+
+function parseChurchBranding(raw: SessionContextRow["church_branding"]): ChurchBranding | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  return {
+    shortName:
+      typeof raw.short_name === "string" && raw.short_name.length > 0
+        ? raw.short_name
+        : null,
+    logoUrl:
+      typeof raw.logo_url === "string" && raw.logo_url.length > 0
+        ? raw.logo_url
+        : null,
+    primaryColor: normalizeChurchHexColor(
+      raw.primary_color,
+      CHURCH_BRAND_DEFAULTS.primaryColor,
+    ),
+    secondaryColor: normalizeChurchHexColor(
+      raw.secondary_color,
+      CHURCH_BRAND_DEFAULTS.secondaryColor,
+    ),
+    accentColor: normalizeChurchHexColor(
+      raw.accent_color,
+      CHURCH_BRAND_DEFAULTS.accentColor,
+    ),
+  };
+}
 
 function parseChurchId(raw: unknown): number | null {
   if (raw == null || raw === "") return null;
@@ -64,6 +158,8 @@ export function parseAppSession(data: unknown): AppSession | null {
 
   if (churchId == null || !profileId || !authUserId) return null;
 
+  const churchNetwork = parseChurchNetwork(row);
+
   return {
     authUserId,
     profileId,
@@ -77,6 +173,10 @@ export function parseAppSession(data: unknown): AppSession | null {
       typeof row.church_name === "string" && row.church_name.length > 0
         ? row.church_name
         : null,
+    churchKind: churchNetwork.churchKind,
+    parentChurchId: churchNetwork.parentChurchId,
+    churchNetwork,
+    churchBranding: parseChurchBranding(row.church_branding),
     appRoleId:
       row.app_role_id == null
         ? null

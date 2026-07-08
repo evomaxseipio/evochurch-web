@@ -1,8 +1,10 @@
 "use client";
 
 import { Icons, NavIcon } from "@/components/icons";
+import { ChurchLogo } from "@/components/brand/church-logo";
 import { signOut } from "@/app/(auth)/login/actions";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import type { ChurchKind } from "@/lib/auth/app-session";
 import {
   CONFIG_NAV,
   filterNavByPermissions,
@@ -126,6 +128,8 @@ function NavLink({
 export function Sidebar({
   churchName,
   churchShort,
+  churchLogoUrl,
+  churchKind = "standalone",
   userLabel,
   userRole,
   permissions = [],
@@ -135,6 +139,8 @@ export function Sidebar({
 }: {
   churchName: string | null;
   churchShort?: string | null;
+  churchLogoUrl?: string | null;
+  churchKind?: ChurchKind;
   userLabel: string;
   userRole?: string;
   permissions?: PermissionKey[];
@@ -149,33 +155,34 @@ export function Sidebar({
   const mainNav = useMemo(
     () =>
       resolveNavEntryLabels(
-        filterNavByPermissions(MAIN_NAV, permissions),
+        filterNavByPermissions(MAIN_NAV, permissions, churchKind),
         (k) => tNav(k),
       ),
-    [permissions, tNav],
+    [permissions, churchKind, tNav],
   );
   const configNav = useMemo(
     () =>
       resolveNavEntryLabels(
-        filterNavByPermissions(CONFIG_NAV, permissions),
+        filterNavByPermissions(CONFIG_NAV, permissions, churchKind),
         (k) => tNav(k),
       ),
-    [permissions, tNav],
+    [permissions, churchKind, tNav],
   );
 
   return (
     <aside className={`sidebar${collapsed ? " is-collapsed" : ""} ${className}`.trim()}>
       <div className="sidebar-logo">
-        <div className="mark">
-          <Icons.cross size={20} stroke="#fff" />
+        <div className="mark" style={{ background: "transparent", boxShadow: "none" }}>
+          <ChurchLogo logoUrl={churchLogoUrl} size={28} surface="dark" />
         </div>
         {!collapsed ? (
           <div>
             <div className="name">
-              Evo<em>Church</em>
+              {churchShort ?? churchName ?? "Evo"}
+              <em>Church</em>
             </div>
             <div className="sub">
-              {churchShort ?? churchName ?? "Renacer"} · ICCR
+              {churchName ?? "Consola web"}
             </div>
           </div>
         ) : null}

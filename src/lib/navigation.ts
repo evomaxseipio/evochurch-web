@@ -1,4 +1,5 @@
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import type { ChurchKind } from "@/lib/auth/app-session";
 import { REPORT_READ_PERMISSIONS } from "@/lib/reports/permissions";
 
 export type NavItem = {
@@ -10,6 +11,8 @@ export type NavItem = {
   permission?: PermissionKey;
   /** Visible si el usuario tiene al menos uno de estos permisos. */
   permissionAny?: readonly PermissionKey[];
+  /** Solo visible para iglesias con este church_kind (Fase 2 red). */
+  requiresChurchKind?: ChurchKind;
 };
 
 export type NavGroup = {
@@ -99,6 +102,14 @@ export const MAIN_NAV: NavEntry[] = [
     icon: "download",
     permissionAny: REPORT_READ_PERMISSIONS,
   },
+  {
+    id: "red",
+    href: "/network",
+    labelKey: "network",
+    icon: "grid",
+    permission: "network:churches:read",
+    requiresChurchKind: "headquarters",
+  },
 ];
 
 export const CONFIG_NAV: NavEntry[] = [
@@ -120,6 +131,13 @@ export const CONFIG_NAV: NavEntry[] = [
         labelKey: "incomeTypes",
         icon: "trendUp",
         permission: "settings:income_types:read",
+      },
+      {
+        id: "iglesia",
+        href: "/settings/church",
+        labelKey: "churchProfile",
+        icon: "pin",
+        permission: "settings:church:read",
       },
     ],
   },
@@ -185,7 +203,12 @@ function canSeeItem(
   permission: PermissionKey | undefined,
   permissionAny: readonly PermissionKey[] | undefined,
   permissions: PermissionKey[],
+  requiresChurchKind: ChurchKind | undefined,
+  churchKind: ChurchKind | undefined,
 ): boolean {
+  if (requiresChurchKind && churchKind !== requiresChurchKind) {
+    return false;
+  }
   if (permissionAny?.length) {
     return permissionAny.some((key) => permissions.includes(key));
   }
@@ -196,26 +219,46 @@ function canSeeItem(
 export function filterNavItemsByPermissions(
   items: NavItem[],
   permissions: PermissionKey[],
+  churchKind?: ChurchKind,
 ): NavItem[] {
   return items.filter((item) =>
-    canSeeItem(item.permission, item.permissionAny, permissions),
+    canSeeItem(
+      item.permission,
+      item.permissionAny,
+      permissions,
+      item.requiresChurchKind,
+      churchKind,
+    ),
   );
 }
 
 export function filterNavByPermissions(
   entries: NavEntry[],
   permissions: PermissionKey[],
+  churchKind?: ChurchKind,
 ): NavEntry[] {
   return entries
     .map((entry) => {
       if (isNavGroup(entry)) {
         const children = entry.children.filter((c) =>
-          canSeeItem(c.permission, c.permissionAny, permissions),
+          canSeeItem(
+            c.permission,
+            c.permissionAny,
+            permissions,
+            c.requiresChurchKind,
+            churchKind,
+          ),
         );
         if (children.length === 0) return null;
         return { ...entry, children };
       }
-      return canSeeItem(entry.permission, entry.permissionAny, permissions)
+      return canSeeItem(
+        entry.permission,
+        entry.permissionAny,
+        permissions,
+        entry.requiresChurchKind,
+        churchKind,
+      )
         ? entry
         : null;
     })
@@ -233,10 +276,12 @@ export const BREADCRUMB_KEYS: Record<string, [string, string]> = {
   comunicacion: ["crumbConnection", "comunicacion"],
   gastos: ["crumbConfigSystem", "expenseTypes"],
   "ingresos-tipos": ["crumbConfigSystem", "incomeTypes"],
+  iglesia: ["crumbConfigSystem", "churchProfile"],
   usuarios: ["crumbConfigUsers", "adminUsers"],
   roles: ["crumbConfigUsers", "roles"],
   settings: ["crumbConfigUsers", "settings"],
   reportes: ["crumbOperation", "reports"],
+  red: ["crumbOperation", "network"],
 };
 
 export function navIdFromPath(pathname: string): string {
@@ -250,9 +295,11 @@ export function navIdFromPath(pathname: string): string {
   if (pathname.startsWith("/eventos")) return "eventos";
   if (pathname.startsWith("/comunicacion")) return "comunicacion";
   if (pathname.startsWith("/reports")) return "reportes";
+  if (pathname.startsWith("/network")) return "red";
   if (pathname.startsWith("/settings/users")) return "usuarios";
   if (pathname.startsWith("/settings/expenses")) return "gastos";
   if (pathname.startsWith("/settings/income-types")) return "ingresos-tipos";
+  if (pathname.startsWith("/settings/church")) return "iglesia";
   if (pathname.startsWith("/settings/roles")) return "roles";
   if (pathname.startsWith("/settings")) return "settings";
   return "dashboard";

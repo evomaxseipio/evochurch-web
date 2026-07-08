@@ -37,6 +37,8 @@ export function buildConcilioF001MockPayload(
     pastorName?: string;
     presbyterio?: string;
     treasurerName?: string;
+    churchCode?: string;
+    address?: string;
   },
 ): ConcilioF001Payload {
   const generalAmounts = [485_000, 125_400, 45_500, 0, 25_000, 0, 5_000];
@@ -61,12 +63,14 @@ export function buildConcilioF001MockPayload(
   const churchName = meta?.churchName?.trim() || "Iglesia Fuente Inagotable";
   const pastorName = meta?.pastorName?.trim() || "Pr. Juan Méndez";
   const treasurerName = meta?.treasurerName?.trim() || "Pedro Rodríguez";
+  const presbyterio = meta?.presbyterio?.trim() || "Distrito Santo Domingo Este";
+  const churchCode = meta?.churchCode?.trim() || "IF-042";
 
   return {
     churchId,
     churchName,
     pastorName,
-    presbyterio: meta?.presbyterio?.trim() || "Distrito Santo Domingo Este",
+    presbyterio,
     generatedAt: new Date().toISOString(),
     period,
     periodLabel: formatReportPeriodLabel(period),
@@ -74,12 +78,12 @@ export function buildConcilioF001MockPayload(
       formCode: "F.001",
       councilHeader:
         "Concilio Evangélico Asambleas de Dios — Autopista Duarte Km. 12 1/2, Santo Domingo Oeste",
-      presbyterio: meta?.presbyterio?.trim() || "Distrito Santo Domingo Este",
+      presbyterio,
       presbyterName: "Pr. Carlos Rodríguez",
       pastorName,
       pastorCredential: "AD-12845",
       churchName,
-      churchCode: "IF-042",
+      churchCode,
       spouseName: "Sra. María Méndez",
       spouseCredential: "AD-12846",
       treasurerName,

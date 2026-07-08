@@ -82,6 +82,7 @@ function PendingRow({
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
+          className="pending-item-title"
           style={{
             fontSize: 14,
             fontWeight: 600,
@@ -95,7 +96,7 @@ function PendingRow({
           {title}
         </div>
         <div
-          className="row"
+          className="row pending-item-meta"
           style={{ gap: 8, marginTop: 5, flexWrap: "wrap", alignItems: "center" }}
         >
           <span className="tiny muted">{itemMeta(item, locale)}</span>
@@ -106,7 +107,7 @@ function PendingRow({
         </div>
       </div>
 
-      <div style={{ textAlign: "right", flexShrink: 0, minWidth: 88 }}>
+      <div className="pending-item-amount" style={{ textAlign: "right", flexShrink: 0, minWidth: 88 }}>
         <div
           className="tnum mono"
           style={{
@@ -138,7 +139,7 @@ export function PendingTransactionsList({
   const visible = items.slice(0, 5);
 
   return (
-    <div className="card span-4" style={{ display: "flex", flexDirection: "column" }}>
+    <div className="card span-4 dashboard-pending-card" style={{ display: "flex", flexDirection: "column" }}>
       <div className="row between" style={{ marginBottom: 16, gap: 10 }}>
         <div>
           <div className="eyebrow">{t("pendingTransactions")}</div>

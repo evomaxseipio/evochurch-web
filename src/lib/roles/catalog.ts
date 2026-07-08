@@ -54,6 +54,15 @@ export const REPORT_MATRIX_RESOURCE_DEFS = REPORT_RESOURCE_DEFS.map((def) => ({
   actions: ["read", "export"] as const,
 }));
 
+/** Red sede — consulta read-only de sucursales. */
+export const NETWORK_RESOURCE_DEFS = [
+  {
+    key: "churches",
+    label: "Red de iglesias",
+    actions: ["read"],
+  },
+] as const;
+
 /** Catálogos de configuración — una fila por recurso (como finanzas). */
 export const SETTINGS_RESOURCE_DEFS = [
   {
@@ -70,6 +79,11 @@ export const SETTINGS_RESOURCE_DEFS = [
     key: "profile",
     label: "Configuración y perfil",
     actions: ["read"],
+  },
+  {
+    key: "church",
+    label: "Perfil de iglesia",
+    actions: ["read", "write"],
   },
 ] as const;
 
@@ -105,6 +119,7 @@ export type MatrixModuleGroup = {
 
 export const MODULE_LABELS: Record<string, string> = {
   dashboard: "Dashboard",
+  network: "Red de iglesias",
   finances: "Finanzas",
   members: "Miembros",
   ministerios: "Ministerios",
@@ -118,6 +133,7 @@ export const MODULE_LABELS: Record<string, string> = {
 
 export const MODULE_ICONS: Record<string, keyof typeof Icons> = {
   dashboard: "home",
+  network: "grid",
   finances: "wallet",
   members: "users",
   ministerios: "pin",
@@ -131,6 +147,7 @@ export const MODULE_ICONS: Record<string, keyof typeof Icons> = {
 
 export const MODULE_COLORS: Record<string, string> = {
   dashboard: "#7C3AED",
+  network: "#0D9488",
   finances: "#059669",
   members: "#2563EB",
   ministerios: "#9333EA",
@@ -167,7 +184,7 @@ export function applyStandardPermissionRules(
 ): void {
   const module = key.split(":")[0];
   const crudModules = ["members", "eventos", "comunicacion"];
-  const settingsCatalogResources = ["expense_types", "income_types"] as const;
+  const settingsCatalogResources = ["expense_types", "income_types", "church"] as const;
 
   if (key.startsWith("reports:")) {
     const resource = key.split(":")[1];
@@ -224,7 +241,7 @@ export function applyStandardPermissionRules(
 
 const CRUD_MODULES = ["members", "eventos", "comunicacion"] as const;
 
-const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types"] as const;
+const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types", "church"] as const;
 
 const FINANCE_RESOURCES = ["funds", "transactions", "contributions"] as const;
 
@@ -325,6 +342,13 @@ export function financePermissionKey(
 
 export function ministeriosPermissionKey(action: string): PermissionKey {
   return `ministerios:${action}` as PermissionKey;
+}
+
+export function networkPermissionKey(
+  resource: string,
+  action: string,
+): PermissionKey {
+  return `network:${resource}:${action}` as PermissionKey;
 }
 
 export function settingsPermissionKey(
@@ -433,6 +457,24 @@ export function groupMatrixCatalog(catalog: AppPermissionRow[]): MatrixModuleGro
             def,
             byKey,
             (action) => settingsPermissionKey(def.key, action),
+          ),
+      );
+      const permissions = resources.flatMap((r) =>
+        Object.values(r.permissionsByAction).filter(
+          (row): row is AppPermissionRow => row != null,
+        ),
+      );
+      return { module, permissions, resources };
+    }
+
+    if (module === "network") {
+      const resources: MatrixResourceGroup[] = NETWORK_RESOURCE_DEFS.map(
+        (def) =>
+          buildResourceGroup(
+            "network",
+            def,
+            byKey,
+            (action) => networkPermissionKey(def.key, action),
           ),
       );
       const permissions = resources.flatMap((r) =>

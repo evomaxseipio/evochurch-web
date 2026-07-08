@@ -40,7 +40,7 @@ export function DashboardHero({
             <span style={{ marginLeft: 10, opacity: 0.85 }}>· {churchName}</span>
           ) : null}
         </div>
-        <h2>
+        <h2 suppressHydrationWarning>
           {greeting}, {t("pastor")} <em>{pastor}</em>.
           <br />
           <span style={{ color: "var(--fg-dim)", fontSize: 26 }}>

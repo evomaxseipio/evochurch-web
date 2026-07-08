@@ -15,7 +15,7 @@ export type PdfDocumentOptions = {
   margin?: number;
 };
 
-function collectPdfBuffer(doc: InstanceType<typeof PDFDocument>): Promise<Buffer> {
+export function collectPdfBuffer(doc: InstanceType<typeof PDFDocument>): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
