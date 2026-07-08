@@ -14,6 +14,7 @@ export {
 /** Módulos visibles en la matriz (como el mock). */
 export const MATRIX_MODULES = [
   "dashboard",
+  "network",
   "members",
   "ministerios",
   "eventos",
@@ -28,6 +29,7 @@ export const MATRIX_MODULES = [
 
 export const MODULE_UI_DESCRIPTIONS: Record<string, string> = {
   dashboard: "Panel principal e indicadores de la iglesia",
+  network: "Red de iglesias sede y sucursales (solo lectura)",
   finances: "Ingresos, egresos, transferencias y reportes",
   members: "Gestión de miembros y asistentes",
   ministerios: "Ver y gestionar equipos de servicio (ABAC para líderes)",
@@ -42,6 +44,7 @@ export const MODULE_UI_DESCRIPTIONS: Record<string, string> = {
 
 const MODULE_UI_DESCRIPTION_KEYS: Record<string, string> = {
   dashboard: "modules.dashboard",
+  network: "modules.network",
   finances: "modules.finances",
   members: "modules.members",
   ministerios: "modules.ministerios",
@@ -118,6 +121,7 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "settings:income_types:delete": "Eliminar tipos de ingreso",
   "settings:church:read": "Ver perfil de iglesia",
   "settings:church:write": "Editar perfil de iglesia",
+  "network:churches:read": "Ver red de sucursales",
   "admin_users:manage": "Gestionar usuarios del sistema",
   "roles:manage": "Editar roles y permisos por iglesia",
   "audit:read": "Ver bitácora de acciones",
@@ -162,6 +166,7 @@ const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
   "settings:income_types:delete": "permissions.settings.income_types.delete",
   "settings:church:read": "permissions.settings.church.read",
   "settings:church:write": "permissions.settings.church.write",
+  "network:churches:read": "permissions.network.churches.read",
   "admin_users:manage": "permissions.admin_users.manage",
   "roles:manage": "permissions.roles.manage",
   "audit:read": "permissions.audit.read",
@@ -170,6 +175,7 @@ const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
 
 export const MATRIX_PERMISSION_ORDER: Record<string, string[]> = {
   dashboard: [],
+  network: [],
   finances: [],
   members: [],
   ministerios: [],

@@ -99,6 +99,7 @@
     "expenseTypes": "Tipos de gasto",
     "incomeTypes": "Tipos de ingreso",
     "churchProfile": "Perfil de iglesia",
+    "network": "Red de iglesias",
     "adminUsers": "Usuarios sistema",
     "roles": "Roles y permisos",
     "settings": "Configuración y perfil",
@@ -816,6 +817,47 @@
       }
     }
   },
+  "network": {
+    "eyebrow": "Operación",
+    "title": "Red de iglesias",
+    "subtitle": "Vista consolidada de sucursales. Los datos son de solo lectura.",
+    "notHeadquarters": "Esta vista solo está disponible para iglesias sede.",
+    "readOnlyBadge": "Solo lectura",
+    "kpis": {
+      "campuses": "Sucursales",
+      "totalMembers": "Miembros en red",
+      "totalBalance": "Saldo fondos (red)",
+      "totalIncome": "Ingresos del mes (red)",
+      "hqMembers": "Miembros sede",
+      "hqBalance": "Saldo fondos sede",
+      "hqIncome": "Ingresos mes sede"
+    },
+    "sections": {
+      "totals": "Consolidado de red",
+      "headquarters": "Sede principal",
+      "campuses": "Sucursales"
+    },
+    "table": {
+      "name": "Iglesia",
+      "city": "Ciudad",
+      "members": "Miembros",
+      "balance": "Saldo fondos",
+      "monthIncome": "Ingresos mes",
+      "actions": "Detalle"
+    },
+    "empty": "No hay sucursales vinculadas a esta sede.",
+    "viewDetail": "Ver detalle",
+    "detail": {
+      "title": "Detalle de sucursal",
+      "close": "Cerrar",
+      "loading": "Cargando detalle…",
+      "contact": "Contacto",
+      "phone": "Teléfono",
+      "email": "Correo",
+      "address": "Dirección",
+      "code": "Código externo"
+    }
+  },
   "adminUsers": {
     "title": "Usuarios del sistema",
     "total": "Total",
@@ -912,6 +954,7 @@
     "userCount": "{count, plural, one {# usuario} other {# usuarios}}",
     "modules": {
       "dashboard": "Panel principal e indicadores de la iglesia",
+      "network": "Red de iglesias sede y sucursales (solo lectura)",
       "finances": "Ingresos, egresos, transferencias y reportes",
       "members": "Gestión de miembros y asistentes",
       "ministerios": "Ver y gestionar equipos de servicio (ABAC para líderes)",
@@ -999,6 +1042,11 @@
         "church": {
           "read": "Ver perfil de iglesia",
           "write": "Editar perfil de iglesia"
+        }
+      },
+      "network": {
+        "churches": {
+          "read": "Ver red de sucursales"
         }
       },
       "admin_users": {

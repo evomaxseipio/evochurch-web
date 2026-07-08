@@ -99,6 +99,7 @@
     "expenseTypes": "Expense types",
     "incomeTypes": "Income types",
     "churchProfile": "Church profile",
+    "network": "Church network",
     "adminUsers": "System users",
     "roles": "Roles & permissions",
     "settings": "Settings & profile",
@@ -816,6 +817,47 @@
       }
     }
   },
+  "network": {
+    "eyebrow": "Operations",
+    "title": "Church network",
+    "subtitle": "Consolidated view of branch campuses. Data is read-only.",
+    "notHeadquarters": "This view is only available for headquarters churches.",
+    "readOnlyBadge": "Read only",
+    "kpis": {
+      "campuses": "Campuses",
+      "totalMembers": "Network members",
+      "totalBalance": "Fund balance (network)",
+      "totalIncome": "Month income (network)",
+      "hqMembers": "HQ members",
+      "hqBalance": "HQ fund balance",
+      "hqIncome": "HQ month income"
+    },
+    "sections": {
+      "totals": "Network totals",
+      "headquarters": "Headquarters",
+      "campuses": "Campuses"
+    },
+    "table": {
+      "name": "Church",
+      "city": "City",
+      "members": "Members",
+      "balance": "Fund balance",
+      "monthIncome": "Month income",
+      "actions": "Detail"
+    },
+    "empty": "No campuses are linked to this headquarters.",
+    "viewDetail": "View detail",
+    "detail": {
+      "title": "Campus detail",
+      "close": "Close",
+      "loading": "Loading detail…",
+      "contact": "Contact",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "code": "External code"
+    }
+  },
   "adminUsers": {
     "title": "Usuarios del sistema",
     "total": "Total",
@@ -912,6 +954,7 @@
     "userCount": "{count, plural, one {# user} other {# users}}",
     "modules": {
       "dashboard": "Panel principal e indicadores de la iglesia",
+      "network": "Headquarters church network and campuses (read-only)",
       "finances": "Ingresos, egresos, transferencias y reportes",
       "members": "Gestión de miembros y asistentes",
       "ministerios": "Ver y gestionar equipos de servicio (ABAC para líderes)",
@@ -999,6 +1042,11 @@
         "church": {
           "read": "View church profile",
           "write": "Edit church profile"
+        }
+      },
+      "network": {
+        "churches": {
+          "read": "View campus network"
         }
       },
       "admin_users": {

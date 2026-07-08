@@ -10,6 +10,7 @@ export const PERMISSION_KEYS = [
   "settings:income_types:delete",
   "settings:church:read",
   "settings:church:write",
+  "network:churches:read",
   "dashboard:read",
   "members:read",
   "members:write",

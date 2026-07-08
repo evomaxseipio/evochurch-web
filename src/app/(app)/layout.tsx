@@ -71,6 +71,7 @@ export default async function AppLayout({
         churchName={session.churchName}
         churchShort={session.churchBranding?.shortName}
         churchLogoUrl={churchLogoUrl}
+        churchKind={session.churchKind}
         userLabel={userLabel}
         userEmail={session.email}
         userRole={getSessionDisplayRole(session)}

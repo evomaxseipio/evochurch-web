@@ -4,6 +4,7 @@ import { Icons, NavIcon } from "@/components/icons";
 import { ChurchLogo } from "@/components/brand/church-logo";
 import { signOut } from "@/app/(auth)/login/actions";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import type { ChurchKind } from "@/lib/auth/app-session";
 import {
   CONFIG_NAV,
   filterNavByPermissions,
@@ -128,6 +129,7 @@ export function Sidebar({
   churchName,
   churchShort,
   churchLogoUrl,
+  churchKind = "standalone",
   userLabel,
   userRole,
   permissions = [],
@@ -138,6 +140,7 @@ export function Sidebar({
   churchName: string | null;
   churchShort?: string | null;
   churchLogoUrl?: string | null;
+  churchKind?: ChurchKind;
   userLabel: string;
   userRole?: string;
   permissions?: PermissionKey[];
@@ -152,18 +155,18 @@ export function Sidebar({
   const mainNav = useMemo(
     () =>
       resolveNavEntryLabels(
-        filterNavByPermissions(MAIN_NAV, permissions),
+        filterNavByPermissions(MAIN_NAV, permissions, churchKind),
         (k) => tNav(k),
       ),
-    [permissions, tNav],
+    [permissions, churchKind, tNav],
   );
   const configNav = useMemo(
     () =>
       resolveNavEntryLabels(
-        filterNavByPermissions(CONFIG_NAV, permissions),
+        filterNavByPermissions(CONFIG_NAV, permissions, churchKind),
         (k) => tNav(k),
       ),
-    [permissions, tNav],
+    [permissions, churchKind, tNav],
   );
 
   return (

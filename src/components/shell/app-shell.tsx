@@ -5,6 +5,7 @@ import { AppTopbar } from "@/components/shell/app-topbar";
 import { BottomNav } from "@/components/shell/bottom-nav";
 import { Sidebar } from "@/components/shell/sidebar";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import type { ChurchKind } from "@/lib/auth/app-session";
 import { SESSION_IDLE_ENABLED } from "@/lib/auth/session-idle";
 import { useCallback, useState } from "react";
 
@@ -19,6 +20,7 @@ export function AppShell({
   churchName,
   churchShort,
   churchLogoUrl,
+  churchKind = "standalone",
   userLabel,
   userEmail,
   userRole,
@@ -28,6 +30,7 @@ export function AppShell({
   churchName: string | null;
   churchShort?: string | null;
   churchLogoUrl?: string | null;
+  churchKind?: ChurchKind;
   userLabel: string;
   userEmail?: string | null;
   userRole?: string;
@@ -52,6 +55,7 @@ export function AppShell({
         churchName={churchName}
         churchShort={churchShort}
         churchLogoUrl={churchLogoUrl}
+        churchKind={churchKind}
         userLabel={userLabel}
         userRole={userRole}
         permissions={permissions}
