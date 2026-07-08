@@ -1,4 +1,5 @@
 import { OrgChurchesView } from "@/components/org/org-churches-view";
+import { orgHasPermission } from "@/lib/auth/org-session";
 import { requireOrgPageAccess } from "@/lib/auth/require-org-page-access";
 import { fetchOrgChurches } from "@/lib/services/org-portal";
 import { createClient } from "@/lib/supabase/server";
@@ -37,6 +38,7 @@ export default async function OrgChurchesPage() {
     <OrgChurchesView
       organizationName={session.organizationName}
       churches={churches}
+      canProvision={orgHasPermission(session, "org:churches:provision")}
     />
   );
 }

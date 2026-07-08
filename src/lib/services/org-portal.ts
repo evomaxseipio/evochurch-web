@@ -217,3 +217,42 @@ export async function submitConcilioReport(
   assertRpcSuccess(envelope, "No se pudo enviar el reporte al concilio.");
   return String(envelope.report_id ?? "");
 }
+
+export async function provisionChurchUnderOrg(
+  supabase: SupabaseClient,
+  organizationId: number,
+  input: {
+    name: string;
+    slug: string;
+    shortName?: string;
+    city?: string;
+    externalCode?: string;
+    presbyteryName?: string;
+    orgUnitId?: number | null;
+    churchKind?: string;
+  },
+): Promise<number> {
+  const { data, error } = await supabase.rpc("sp_provision_church_under_org", {
+    p_org_id: organizationId,
+    p_payload: {
+      name: input.name,
+      slug: input.slug,
+      short_name: input.shortName ?? "",
+      city: input.city ?? "",
+      external_code: input.externalCode ?? "",
+      presbytery_name: input.presbyteryName ?? "",
+      org_unit_id: input.orgUnitId ?? null,
+      church_kind: input.churchKind ?? "standalone",
+    },
+  });
+  if (error) throw new Error(error.message);
+
+  const envelope = data as RpcEnvelope<{ church_id?: number }>;
+  assertRpcSuccess(envelope, "No se pudo dar de alta la iglesia.");
+
+  const churchId = Number(envelope.church_id);
+  if (!Number.isFinite(churchId)) {
+    throw new Error("No se recibió el ID de la iglesia creada.");
+  }
+  return churchId;
+}

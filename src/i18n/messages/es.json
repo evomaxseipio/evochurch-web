@@ -849,6 +849,20 @@
         "unit": "Distrito",
         "code": "Código",
         "kind": "Tipo"
+      },
+      "provision": {
+        "add": "Dar de alta iglesia",
+        "title": "Nueva iglesia afiliada",
+        "name": "Nombre",
+        "slug": "Slug público",
+        "shortName": "Nombre corto",
+        "city": "Ciudad",
+        "presbytery": "Presbiterio",
+        "save": "Crear iglesia",
+        "saving": "Creando…",
+        "cancel": "Cancelar",
+        "success": "Iglesia creada correctamente.",
+        "error": "No se pudo crear la iglesia"
       }
     },
     "reports": {

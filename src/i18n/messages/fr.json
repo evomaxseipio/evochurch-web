@@ -849,6 +849,20 @@
         "unit": "District",
         "code": "Code",
         "kind": "Type"
+      },
+      "provision": {
+        "add": "Ajouter une église",
+        "title": "Nouvelle église affiliée",
+        "name": "Nom",
+        "slug": "Slug public",
+        "shortName": "Nom court",
+        "city": "Ville",
+        "presbytery": "Presbytère",
+        "save": "Créer l'église",
+        "saving": "Création…",
+        "cancel": "Annuler",
+        "success": "Église créée avec succès.",
+        "error": "Impossible de créer l'église"
       }
     },
     "reports": {

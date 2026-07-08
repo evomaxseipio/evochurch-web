@@ -310,7 +310,7 @@ export function ReportsHubView({
       monthPeriod,
       yearPeriod,
     );
-    if (period.kind !== "month") return;
+    if (!period || period.kind !== "month") return;
 
     setSubmittingToCouncil(true);
     try {

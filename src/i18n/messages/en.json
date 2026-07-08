@@ -849,6 +849,20 @@
         "unit": "District",
         "code": "Code",
         "kind": "Kind"
+      },
+      "provision": {
+        "add": "Add church",
+        "title": "New affiliated church",
+        "name": "Name",
+        "slug": "Public slug",
+        "shortName": "Short name",
+        "city": "City",
+        "presbytery": "Presbytery",
+        "save": "Create church",
+        "saving": "Creating…",
+        "cancel": "Cancel",
+        "success": "Church created successfully.",
+        "error": "Could not create church"
       }
     },
     "reports": {
