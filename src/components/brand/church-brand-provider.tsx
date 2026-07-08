@@ -1,53 +1,36 @@
 "use client";
 
 import type { ChurchBranding } from "@/lib/auth/app-session";
-import {
-  CHURCH_BRAND_DEFAULTS,
-  normalizeChurchHexColor,
-} from "@/lib/brand/church-defaults";
-import { useEffect } from "react";
+import { resolveChurchBrandCssVars } from "@/lib/brand/church-defaults";
+import { useLayoutEffect, useMemo } from "react";
 
-function applyBrandVariables(branding: ChurchBranding | null | undefined) {
+const BRAND_VAR_KEYS = [
+  "--brand-primary",
+  "--brand-secondary",
+  "--brand-accent",
+  "--accent",
+  "--accent-strong",
+  "--accent-soft",
+  "--accent-ink",
+  "--primary",
+  "--primary-500",
+  "--primary-600",
+  "--primary-50",
+  "--primary-100",
+  "--sb-brand",
+  "--sb-bg",
+] as const;
+
+function applyBrandVariables(cssVars: Record<string, string>) {
   const root = document.documentElement;
-  const primary = normalizeChurchHexColor(
-    branding?.primaryColor,
-    CHURCH_BRAND_DEFAULTS.primaryColor,
-  );
-  const secondary = normalizeChurchHexColor(
-    branding?.secondaryColor,
-    CHURCH_BRAND_DEFAULTS.secondaryColor,
-  );
-  const accent = normalizeChurchHexColor(
-    branding?.accentColor,
-    CHURCH_BRAND_DEFAULTS.accentColor,
-  );
-
-  root.style.setProperty("--brand-primary", primary);
-  root.style.setProperty("--brand-secondary", secondary);
-  root.style.setProperty("--brand-accent", accent);
-  root.style.setProperty("--accent", primary);
-  root.style.setProperty("--accent-strong", secondary);
-  root.style.setProperty(
-    "--accent-soft",
-    `color-mix(in oklab, ${primary} 16%, transparent)`,
-  );
-  /* Sidebar y superficies de marca usan el color primario (#5B21B6 por defecto). */
-  root.style.setProperty("--sb-brand", primary);
-  root.style.setProperty("--sb-bg", primary);
+  for (const [key, value] of Object.entries(cssVars)) {
+    root.style.setProperty(key, value);
+  }
 }
 
 function clearBrandVariables() {
   const root = document.documentElement;
-  for (const key of [
-    "--brand-primary",
-    "--brand-secondary",
-    "--brand-accent",
-    "--accent",
-    "--accent-strong",
-    "--accent-soft",
-    "--sb-brand",
-    "--sb-bg",
-  ]) {
+  for (const key of BRAND_VAR_KEYS) {
     root.style.removeProperty(key);
   }
 }
@@ -59,10 +42,22 @@ export function ChurchBrandProvider({
   branding?: ChurchBranding | null;
   children: React.ReactNode;
 }) {
-  useEffect(() => {
-    applyBrandVariables(branding);
-    return () => clearBrandVariables();
-  }, [branding]);
+  const cssVars = useMemo(
+    () => resolveChurchBrandCssVars(branding),
+    [branding],
+  );
 
-  return children;
+  useLayoutEffect(() => {
+    applyBrandVariables(cssVars);
+    return () => clearBrandVariables();
+  }, [cssVars]);
+
+  return (
+    <div
+      className="church-brand-scope flex min-h-full min-w-0 flex-1 flex-col"
+      style={cssVars as React.CSSProperties}
+    >
+      {children}
+    </div>
+  );
 }

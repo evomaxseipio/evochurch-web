@@ -31,10 +31,10 @@
   --muted:     #828ca0;
   --dim:       #5a6478;
 
-  /* Marca — morado */
-  --accent:        #a78bfa;
-  --accent-strong: #7c5cf5;
-  --accent-ink:    #0b0d12;
+  /* Marca — morado (misma base que modo claro / perfil de iglesia) */
+  --accent:        #5B21B6;
+  --accent-strong: #4C1D95;
+  --accent-ink:    #ffffff;
   --accent-soft:   color-mix(in oklab, var(--accent) 16%, transparent);
 
   /* Marca — lila / lavanda (tonos suaves, chips, fondos) */
@@ -64,7 +64,7 @@
   /* Dominio (color por área del producto) */
   --d-people:   #c4b5fd;   /* lila para personas */
   --d-income:   #34d399;   /* verde para ingresos / ofrendas */
-  --d-funds:    #a78bfa;   /* morado para fondos / diezmos */
+  --d-funds:    #5B21B6;   /* morado para fondos / diezmos */
   --d-system:   #94a3b8;   /* gris para configuración */
   --d-tithe:    var(--d-funds);
   --d-offering: var(--d-income);
