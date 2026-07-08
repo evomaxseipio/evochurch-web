@@ -1600,8 +1600,13 @@
       "noExportPermission": "Vous n'avez pas la permission d'exporter ce rapport.",
       "unknownReport": "Rapport non reconnu.",
       "generateFailedGeneric": "Impossible de générer le rapport.",
-      "previewFailedGeneric": "Impossible de générer l'aperçu."
+      "previewFailedGeneric": "Impossible de générer l'aperçu.",
+      "submitCouncilFailed": "Impossible d'envoyer le rapport au concile.",
+      "noChurchAffiliation": "Votre église n'est pas affiliée à un concile."
     },
+    "submitToCouncil": "Envoyer au concile",
+    "submittingToCouncil": "Envoi…",
+    "submitCouncilSuccess": "Rapport envoyé au concile avec succès.",
     "categories": {
       "financial": "Financial",
       "membership": "Membership",

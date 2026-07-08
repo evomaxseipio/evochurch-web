@@ -4,7 +4,12 @@ import {
   CEAD_COUNCIL_SEND_LABELS,
   CEAD_EXPENSE_LINE_LABELS,
   CEAD_INCOME_LINE_LABELS,
+  type CeadCouncilSendLabel,
 } from "@/lib/reports/templates/cead/constants";
+import {
+  councilPercentLabel,
+  type ParsedOrgReportRules,
+} from "@/lib/reports/org-report-rules";
 import { formatReportPeriodLabel } from "@/lib/reports/period";
 import type { MonthPeriod } from "@/lib/reports/period";
 
@@ -137,6 +142,7 @@ export function mapExpensesToCeadLines(
 export function buildCeadCouncilSends(
   incomeLines: CeadLineAmount[],
   expenseLines: CeadLineAmount[],
+  orgRules?: ParsedOrgReportRules | null,
 ): CeadCouncilSendLine[] {
   const totalIncome = incomeLines.reduce((sum, line) => sum + line.amount, 0);
   const pastoral =
@@ -144,26 +150,32 @@ export function buildCeadCouncilSends(
     0;
   const baseDiezmo = Math.max(totalIncome - pastoral, 0);
 
+  const tithePercent =
+    orgRules?.ceadPercents["Diezmo de la iglesia (10%)"] ?? 10;
+  const ibcrPercent = orgRules?.ceadPercents["IBCR (3%)"] ?? 3;
+  const eduPercent = orgRules?.ceadPercents["Educación Cristiana (1%)"] ?? 1;
+  const fpjPercent = orgRules?.ceadPercents["FPJ (1%)"] ?? 1;
+
   const lines: CeadCouncilSendLine[] = [
     {
       label: CEAD_COUNCIL_SEND_LABELS[0]!,
-      amount: Math.round(baseDiezmo * 0.1 * 100) / 100,
-      formula: "10% × (ingresos − asignación pastoral)",
+      amount: Math.round(baseDiezmo * (tithePercent / 100) * 100) / 100,
+      formula: `${councilPercentLabel(CEAD_COUNCIL_SEND_LABELS[0]!, tithePercent)} × (ingresos − asignación pastoral)`,
     },
     {
       label: CEAD_COUNCIL_SEND_LABELS[1]!,
-      amount: Math.round(totalIncome * 0.03 * 100) / 100,
-      formula: "3% × total ingresos",
+      amount: Math.round(totalIncome * (ibcrPercent / 100) * 100) / 100,
+      formula: `${councilPercentLabel(CEAD_COUNCIL_SEND_LABELS[1]!, ibcrPercent)} × total ingresos`,
     },
     {
       label: CEAD_COUNCIL_SEND_LABELS[2]!,
-      amount: Math.round(totalIncome * 0.01 * 100) / 100,
-      formula: "1% × total ingresos",
+      amount: Math.round(totalIncome * (eduPercent / 100) * 100) / 100,
+      formula: `${councilPercentLabel(CEAD_COUNCIL_SEND_LABELS[2]!, eduPercent)} × total ingresos`,
     },
     {
       label: CEAD_COUNCIL_SEND_LABELS[3]!,
-      amount: Math.round(totalIncome * 0.01 * 100) / 100,
-      formula: "1% × total ingresos",
+      amount: Math.round(totalIncome * (fpjPercent / 100) * 100) / 100,
+      formula: `${councilPercentLabel(CEAD_COUNCIL_SEND_LABELS[3]!, fpjPercent)} × total ingresos`,
     },
   ];
 
@@ -174,12 +186,19 @@ export function buildCeadFinancialMonthlyData(
   period: MonthPeriod,
   contributions: Contribution[],
   ledgerEntries: LedgerEntry[],
+  orgRules?: ParsedOrgReportRules | null,
 ): CeadFinancialMonthlyData {
   const incomeLines = mapContributionsToCeadIncome(contributions);
   const expenseLines = mapExpensesToCeadLines(ledgerEntries);
   const totalIncome = incomeLines.reduce((sum, line) => sum + line.amount, 0);
   const totalExpense = expenseLines.reduce((sum, line) => sum + line.amount, 0);
-  const councilLines = buildCeadCouncilSends(incomeLines, expenseLines);
+  const councilLines = buildCeadCouncilSends(incomeLines, expenseLines, orgRules);
+
+  const notes = [
+    orgRules?.organizationName
+      ? `Reglas de cálculo del concilio ${orgRules.organizationName}.`
+      : "Envíos al concilio calculados con reglas v1 documentadas en EvoChurch.",
+  ];
 
   return {
     periodLabel: formatReportPeriodLabel(period),
@@ -189,8 +208,6 @@ export function buildCeadFinancialMonthlyData(
     totalIncome,
     totalExpense,
     netBalance: totalIncome - totalExpense,
-    notes: [
-      "Envíos al concilio calculados con reglas v1 documentadas en EvoChurch.",
-    ],
+    notes,
   };
 }

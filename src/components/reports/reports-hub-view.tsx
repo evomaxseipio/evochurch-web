@@ -1,6 +1,6 @@
 "use client";
 
-import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewReportAction } from "@/app/(app)/reports/actions";
+import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewReportAction, submitConcilioReportAction } from "@/app/(app)/reports/actions";
 import { ReportActionMenu } from "@/components/reports/report-action-menu";
 import { ReportCard } from "@/components/reports/report-card";
 import { ReportPeriodFilter } from "@/components/reports/report-period-filter";
@@ -70,6 +70,7 @@ export function ReportsHubView({
   locale,
   initialReportId,
   autoOpenReport = false,
+  councilAffiliated = false,
 }: {
   catalog: ReportCatalogEntry[];
   exportableReportIds: ReportId[];
@@ -77,6 +78,7 @@ export function ReportsHubView({
   locale: string;
   initialReportId?: ReportId | null;
   autoOpenReport?: boolean;
+  councilAffiliated?: boolean;
 }) {
   const tCommon = useTranslations("common");
   const tReports = useTranslations("reports");
@@ -98,6 +100,7 @@ export function ReportsHubView({
   const [previewContext, setPreviewContext] = useState<PreviewContext | null>(
     null,
   );
+  const [submittingToCouncil, setSubmittingToCouncil] = useState(false);
   const autoOpenedRef = useRef(false);
   const handlePreviewRef = useRef<(entry: ReportCatalogEntry) => Promise<void>>(
     async () => {},
@@ -300,6 +303,32 @@ export function ReportsHubView({
       ? tReports("noReportsForRole")
       : tReports("noReportsMatch");
 
+  async function handleSubmitToCouncil() {
+    if (!previewContext?.concilioF001Payload) return;
+    const period = periodForCatalogEntry(
+      previewContext.entry,
+      monthPeriod,
+      yearPeriod,
+    );
+    if (period.kind !== "month") return;
+
+    setSubmittingToCouncil(true);
+    try {
+      const result = await submitConcilioReportAction(
+        period,
+        previewContext.concilioF001Payload,
+        locale,
+      );
+      if (!result.ok) {
+        toast.error(tReports("errors.submitCouncilFailed"), result.error);
+        return;
+      }
+      toast.success(tReports("submitCouncilSuccess"));
+    } finally {
+      setSubmittingToCouncil(false);
+    }
+  }
+
   const previewPeriodLabel = previewContext
     ? formatLabelForEntry(
         previewContext.entry,
@@ -447,6 +476,12 @@ export function ReportsHubView({
           if (!previewContext) return;
           void handleExport(previewContext.entry.id, "xlsx");
         }}
+        canSubmitToCouncil={
+          councilAffiliated &&
+          previewContext?.entry.id === "financial-monthly-concilio-f001"
+        }
+        submittingToCouncil={submittingToCouncil}
+        onSubmitToCouncil={handleSubmitToCouncil}
       />
     </div>
   );

@@ -14,6 +14,10 @@ import { buildConcilioF001MockPayload } from "@/lib/reports/templates/concilio/f
 import type { ConcilioF001Payload } from "@/lib/reports/templates/concilio/f001-types";
 import { buildCeadFinancialMonthlyData } from "@/lib/reports/templates/cead/financial-monthly";
 import {
+  parseOrgReportRules,
+  type ParsedOrgReportRules,
+} from "@/lib/reports/org-report-rules";
+import {
   buildMembershipAnnualCeadFields,
   type MembershipAnnualCeadFields,
 } from "@/lib/reports/templates/cead/membership-annual";
@@ -188,6 +192,37 @@ async function fetchMembershipMap(
   return map;
 }
 
+async function fetchChurchOrgReportRules(
+  supabase: SupabaseClient,
+  churchId: number,
+): Promise<ParsedOrgReportRules | null> {
+  const { data, error } = await supabase.rpc("sp_get_church_org_report_rules", {
+    p_church_id: churchId,
+  });
+  if (error) return null;
+
+  const envelope = data as {
+    success?: boolean;
+    organization_id?: number | null;
+    organization_name?: string | null;
+    report_rules?: unknown;
+  };
+  if (!envelope?.success) return null;
+
+  const orgId =
+    envelope.organization_id == null
+      ? null
+      : Number.parseInt(String(envelope.organization_id), 10) || null;
+
+  return parseOrgReportRules(
+    orgId,
+    typeof envelope.organization_name === "string"
+      ? envelope.organization_name
+      : null,
+    envelope.report_rules,
+  );
+}
+
 export async function fetchFinancialMonthlyPayload(
   supabase: SupabaseClient,
   churchId: number,
@@ -195,15 +230,21 @@ export async function fetchFinancialMonthlyPayload(
   meta: ReportChurchMeta = {},
 ): Promise<FinancialMonthlyPayload> {
   const bounds = monthBounds(period);
-  const [contributions, ledgerEntries] = await Promise.all([
+  const [contributions, ledgerEntries, orgRules] = await Promise.all([
     fetchContributionsForPeriod(supabase, churchId, bounds.from, bounds.to),
     fetchLedgerForPeriod(supabase, churchId, bounds.from, bounds.to),
+    fetchChurchOrgReportRules(supabase, churchId),
   ]);
 
   return {
     churchId,
     period,
-    cead: buildCeadFinancialMonthlyData(period, contributions, ledgerEntries),
+    cead: buildCeadFinancialMonthlyData(
+      period,
+      contributions,
+      ledgerEntries,
+      orgRules,
+    ),
     presbyterio: meta.presbyterio ?? "N/D",
     churchName: meta.churchName,
     pastorName: meta.pastorName,
@@ -482,7 +523,10 @@ export async function fetchConcilioF001Payload(
   period: MonthPeriod,
   meta: ReportChurchMeta = {},
 ): Promise<ConcilioF001ReportPayload> {
-  const profileMeta = await fetchChurchReportMeta(supabase, churchId, meta);
+  const [profileMeta, orgRules] = await Promise.all([
+    fetchChurchReportMeta(supabase, churchId, meta),
+    fetchChurchOrgReportRules(supabase, churchId),
+  ]);
   return buildConcilioF001MockPayload(churchId, period, {
     churchName: profileMeta.churchName,
     pastorName: meta.pastorName,
@@ -490,6 +534,7 @@ export async function fetchConcilioF001Payload(
     treasurerName: meta.treasurerName,
     churchCode: profileMeta.churchCode,
     address: profileMeta.address,
+    councilHeader: orgRules?.f001CouncilHeader ?? undefined,
   });
 }
 

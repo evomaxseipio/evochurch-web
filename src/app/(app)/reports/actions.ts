@@ -26,6 +26,8 @@ import {
   type FinancialMonthlyPayload,
   type ConcilioF001ReportPayload,
 } from "@/lib/services/reports";
+import { submitConcilioReport } from "@/lib/services/org-portal";
+import type { MonthPeriod } from "@/lib/reports/period";
 import { getTranslations } from "next-intl/server";
 
 export type GenerateReportResult =
@@ -272,5 +274,86 @@ export async function previewReportAction(
       error:
         e instanceof Error ? e.message : tReports("errors.previewFailedGeneric"),
     };
+  }
+}
+
+export type SubmitConcilioReportResult =
+  | { ok: true; reportId: string }
+  | { ok: false; error: string };
+
+export async function submitConcilioReportAction(
+  period: MonthPeriod,
+  payload: ConcilioF001ReportPayload,
+  localeArg?: string,
+): Promise<SubmitConcilioReportResult> {
+  const requestedLocale = localeArg ?? "";
+  const locale: Locale = isLocale(requestedLocale)
+    ? requestedLocale
+    : defaultLocale;
+
+  try {
+    const tReports = await getTranslations({ locale, namespace: "reports" });
+    const { supabase, session } = await getActionSession();
+    if (!session.churchId) {
+      return { ok: false, error: tReports("errors.noChurchAffiliation") };
+    }
+    if (!canExportReport(session, "financial-monthly-concilio-f001")) {
+      return { ok: false, error: tReports("errors.noExportPermission") };
+    }
+
+    const reportId = await submitConcilioReport(supabase, {
+      churchId: session.churchId,
+      periodYear: period.year,
+      periodMonth: period.month,
+      payload: payload as unknown as Record<string, unknown>,
+      reportKind: "concilio_f001",
+    });
+
+    return { ok: true, reportId };
+  } catch (e) {
+    const tReports = await getTranslations({ locale, namespace: "reports" });
+    return {
+      ok: false,
+      error:
+        e instanceof Error
+          ? e.message
+          : tReports("errors.submitCouncilFailed"),
+    };
+  }
+}
+
+export async function checkChurchCouncilAffiliationAction(): Promise<{
+  affiliated: boolean;
+  organizationName: string | null;
+}> {
+  try {
+    const { supabase, session } = await getActionSession();
+    if (!session.churchId) {
+      return { affiliated: false, organizationName: null };
+    }
+
+    const { data, error } = await supabase.rpc("sp_get_church_org_report_rules", {
+      p_church_id: session.churchId,
+    });
+    if (error) return { affiliated: false, organizationName: null };
+
+    const envelope = data as {
+      success?: boolean;
+      organization_id?: number | null;
+      organization_name?: string | null;
+    };
+    if (!envelope?.success || envelope.organization_id == null) {
+      return { affiliated: false, organizationName: null };
+    }
+
+    return {
+      affiliated: true,
+      organizationName:
+        typeof envelope.organization_name === "string"
+          ? envelope.organization_name
+          : null,
+    };
+  } catch {
+    return { affiliated: false, organizationName: null };
   }
 }

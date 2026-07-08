@@ -33,6 +33,9 @@ export function ReportPreviewDialog({
   onClose,
   onDownloadPdf,
   onDownloadExcel,
+  canSubmitToCouncil = false,
+  submittingToCouncil = false,
+  onSubmitToCouncil,
 }: {
   open: boolean;
   title: string;
@@ -52,6 +55,9 @@ export function ReportPreviewDialog({
   onClose: () => void;
   onDownloadPdf?: () => void;
   onDownloadExcel: () => void;
+  canSubmitToCouncil?: boolean;
+  submittingToCouncil?: boolean;
+  onSubmitToCouncil?: () => void;
 }) {
   const tCommon = useTranslations("common");
   const tReports = useTranslations("reports");
@@ -223,6 +229,19 @@ export function ReportPreviewDialog({
             </button>
             {canExport ? (
               <>
+                {canSubmitToCouncil && concilioF001Payload && onSubmitToCouncil ? (
+                  <button
+                    type="button"
+                    className="btn"
+                    disabled={submittingToCouncil}
+                    onClick={onSubmitToCouncil}
+                  >
+                    <Icons.arrowRight size={14} />
+                    {submittingToCouncil
+                      ? tReports("submittingToCouncil")
+                      : tReports("submitToCouncil")}
+                  </button>
+                ) : null}
                 <button type="button" className="btn outline" onClick={handleDownloadPdf}>
                   <Icons.filePdf size={14} />
                   {tReports("preview.ceadMonthly.downloadPdf")}

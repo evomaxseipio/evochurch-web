@@ -1600,8 +1600,13 @@
       "noExportPermission": "You do not have permission to export this report.",
       "unknownReport": "Unknown report.",
       "generateFailedGeneric": "Could not generate report.",
-      "previewFailedGeneric": "Could not generate preview."
+      "previewFailedGeneric": "Could not generate preview.",
+      "submitCouncilFailed": "Could not submit the report to the council.",
+      "noChurchAffiliation": "Your church is not affiliated with a council."
     },
+    "submitToCouncil": "Submit to council",
+    "submittingToCouncil": "Submitting…",
+    "submitCouncilSuccess": "Report submitted to the council successfully.",
     "categories": {
       "financial": "Financial",
       "membership": "Membership",

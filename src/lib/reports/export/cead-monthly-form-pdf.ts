@@ -112,27 +112,33 @@ function drawCeadHeader(
     doc.image(logoPath, left, y0, { width: 52, height: 52 });
   }
 
+  const genLine = sanitizePdfText(`${t("preview.ceadMonthly.generatedAt")}: ${generatedLabel}`);
+  const treLine = sanitizePdfText(`${t("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`);
+  doc.font("Helvetica").fontSize(8.5);
+  const infoInnerW = Math.max(doc.widthOfString(genLine), doc.widthOfString(treLine)) + 20;
+  const boxW = Math.min(infoInnerW, width * 0.38);
+  const gap = 12;
   const textX = left + 66;
-  const textW = width - 66 - 210;
+  const textW = width - 66 - boxW - gap;
   let textY = y0;
 
-  doc.font("Helvetica-Bold").fontSize(16).fillColor(NAVY).text(
+  doc.font("Helvetica-Bold").fontSize(13).fillColor(NAVY).text(
     sanitizePdfText(t("preview.ceadMonthly.title")),
     textX,
     textY,
-    { width: textW, lineGap: 1 },
+    { width: textW, lineGap: 0 },
   );
-  textY = doc.y + 4;
+  textY = doc.y + 3;
 
-  doc.font("Helvetica-Bold").fontSize(11).fillColor(NAVY).text(
+  doc.font("Helvetica-Bold").fontSize(12).fillColor(NAVY).text(
     sanitizePdfText(churchDisplay),
     textX,
     textY,
-    { width: textW, lineGap: 1 },
+    { width: textW, lineGap: 0 },
   );
-  textY = doc.y + 2;
+  textY = doc.y + 3;
 
-  doc.font("Helvetica").fontSize(10).fillColor("#5b6072").text(
+  doc.font("Helvetica").fontSize(9.5).fillColor("#5b6072").text(
     sanitizePdfText(payload.cead.periodLabel),
     textX,
     textY,
@@ -148,22 +154,16 @@ function drawCeadHeader(
   );
   const textBottom = doc.y;
 
-  const boxW = 200;
   const boxX = left + width - boxW;
-  const boxH = 52;
+  const boxH = 48;
   doc.save().roundedRect(boxX, y0, boxW, boxH, 6).fill("#f3f5f8").stroke(BORDER).restore();
-  doc.font("Helvetica").fontSize(9).fillColor("#5b6072").text(
-    sanitizePdfText(`${t("preview.ceadMonthly.generatedAt")}: ${generatedLabel}`),
+  doc.font("Helvetica").fontSize(8.5).fillColor("#5b6072").text(
+    genLine,
     boxX + 10,
-    y0 + 10,
-    { width: boxW - 20, lineGap: 1 },
+    y0 + 9,
+    { width: boxW - 20, lineGap: 0 },
   );
-  doc.text(
-    sanitizePdfText(`${t("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`),
-    boxX + 10,
-    y0 + 28,
-    { width: boxW - 20 },
-  );
+  doc.text(treLine, boxX + 10, y0 + 24, { width: boxW - 20, lineGap: 0 });
 
   const headerBottom = Math.max(textBottom, y0 + boxH);
   const ruleY = headerBottom + 12;
