@@ -817,6 +817,67 @@
       }
     }
   },
+  "org": {
+    "eyebrow": "Concile",
+    "nav": {
+      "portalLabel": "Portail d'audit",
+      "dashboard": "Tableau de bord",
+      "churches": "Églises",
+      "reports": "Rapports"
+    },
+    "login": {
+      "title": "Portail du concile",
+      "subtitle": "Accès pour auditeurs et administration dénominationnelle.",
+      "churchHint": "Personnel d'église ? Utilisez le portail principal EvoChurch.",
+      "noOrgAccess": "Votre compte n'a pas d'adhésion active à un concile. Contactez un administrateur."
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "subtitle": "Vue des églises affiliées et des rapports reçus.",
+      "churchCount": "Églises affiliées",
+      "reportCount": "Rapports reçus",
+      "recentReports": "Derniers envois",
+      "noReports": "Aucun rapport envoyé par les églises pour l'instant."
+    },
+    "churches": {
+      "title": "Répertoire",
+      "subtitle": "Églises sous cette organisation (lecture seule).",
+      "empty": "Aucune église liée à ce concile.",
+      "table": {
+        "name": "Église",
+        "city": "Ville",
+        "unit": "District",
+        "code": "Code",
+        "kind": "Type"
+      },
+      "provision": {
+        "add": "Ajouter une église",
+        "title": "Nouvelle église affiliée",
+        "name": "Nom",
+        "slug": "Slug public",
+        "shortName": "Nom court",
+        "city": "Ville",
+        "presbytery": "Presbytère",
+        "save": "Créer l'église",
+        "saving": "Création…",
+        "cancel": "Annuler",
+        "success": "Église créée avec succès.",
+        "error": "Impossible de créer l'église"
+      }
+    },
+    "reports": {
+      "title": "Rapports",
+      "subtitle": "F.001 et rapports envoyés par les églises.",
+      "empty": "Aucun rapport pour la période sélectionnée.",
+      "table": {
+        "church": "Église",
+        "code": "Code",
+        "period": "Période",
+        "kind": "Type",
+        "submitted": "Envoyé"
+      }
+    }
+  },
   "network": {
     "eyebrow": "Opérations",
     "title": "Réseau d'églises",
@@ -1140,6 +1201,10 @@
           "create": "A créé le type de dépense : {name}",
           "update": "A modifié le type de dépense : {name}",
           "delete": "A supprimé le type de dépense : {name}"
+        },
+        "church_profile": {
+          "update": "A mis à jour le profil de l'église : {name}",
+          "logo": "A mis à jour le logo de l'église"
         }
       }
     },
@@ -1549,8 +1614,13 @@
       "noExportPermission": "Vous n'avez pas la permission d'exporter ce rapport.",
       "unknownReport": "Rapport non reconnu.",
       "generateFailedGeneric": "Impossible de générer le rapport.",
-      "previewFailedGeneric": "Impossible de générer l'aperçu."
+      "previewFailedGeneric": "Impossible de générer l'aperçu.",
+      "submitCouncilFailed": "Impossible d'envoyer le rapport au concile.",
+      "noChurchAffiliation": "Votre église n'est pas affiliée à un concile."
     },
+    "submitToCouncil": "Envoyer au concile",
+    "submittingToCouncil": "Envoi…",
+    "submitCouncilSuccess": "Rapport envoyé au concile avec succès.",
     "categories": {
       "financial": "Financial",
       "membership": "Membership",

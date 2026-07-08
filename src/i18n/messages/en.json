@@ -817,6 +817,67 @@
       }
     }
   },
+  "org": {
+    "eyebrow": "Council",
+    "nav": {
+      "portalLabel": "Audit portal",
+      "dashboard": "Dashboard",
+      "churches": "Churches",
+      "reports": "Reports"
+    },
+    "login": {
+      "title": "Council portal",
+      "subtitle": "Access for denominational auditors and administrators.",
+      "churchHint": "Church staff? Use the main EvoChurch app instead.",
+      "noOrgAccess": "Your account has no active council membership. Contact an administrator."
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Affiliated churches and submitted reports overview.",
+      "churchCount": "Affiliated churches",
+      "reportCount": "Reports received",
+      "recentReports": "Recent submissions",
+      "noReports": "No reports submitted by churches yet."
+    },
+    "churches": {
+      "title": "Directory",
+      "subtitle": "Churches under this organization (read-only).",
+      "empty": "No churches are linked to this council.",
+      "table": {
+        "name": "Church",
+        "city": "City",
+        "unit": "District",
+        "code": "Code",
+        "kind": "Kind"
+      },
+      "provision": {
+        "add": "Add church",
+        "title": "New affiliated church",
+        "name": "Name",
+        "slug": "Public slug",
+        "shortName": "Short name",
+        "city": "City",
+        "presbytery": "Presbytery",
+        "save": "Create church",
+        "saving": "Creating…",
+        "cancel": "Cancel",
+        "success": "Church created successfully.",
+        "error": "Could not create church"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "F.001 and reports submitted by churches.",
+      "empty": "No reports for the selected period.",
+      "table": {
+        "church": "Church",
+        "code": "Code",
+        "period": "Period",
+        "kind": "Kind",
+        "submitted": "Submitted"
+      }
+    }
+  },
   "network": {
     "eyebrow": "Operations",
     "title": "Church network",
@@ -1140,6 +1201,10 @@
           "create": "Created expense type: {name}",
           "update": "Updated expense type: {name}",
           "delete": "Deleted expense type: {name}"
+        },
+        "church_profile": {
+          "update": "Updated church profile: {name}",
+          "logo": "Updated church logo"
         }
       }
     },
@@ -1549,8 +1614,13 @@
       "noExportPermission": "You do not have permission to export this report.",
       "unknownReport": "Unknown report.",
       "generateFailedGeneric": "Could not generate report.",
-      "previewFailedGeneric": "Could not generate preview."
+      "previewFailedGeneric": "Could not generate preview.",
+      "submitCouncilFailed": "Could not submit the report to the council.",
+      "noChurchAffiliation": "Your church is not affiliated with a council."
     },
+    "submitToCouncil": "Submit to council",
+    "submittingToCouncil": "Submitting…",
+    "submitCouncilSuccess": "Report submitted to the council successfully.",
     "categories": {
       "financial": "Financial",
       "membership": "Membership",

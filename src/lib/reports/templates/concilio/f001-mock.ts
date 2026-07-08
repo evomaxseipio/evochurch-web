@@ -39,6 +39,7 @@ export function buildConcilioF001MockPayload(
     treasurerName?: string;
     churchCode?: string;
     address?: string;
+    councilHeader?: string;
   },
 ): ConcilioF001Payload {
   const generalAmounts = [485_000, 125_400, 45_500, 0, 25_000, 0, 5_000];
@@ -77,6 +78,7 @@ export function buildConcilioF001MockPayload(
     meta: {
       formCode: "F.001",
       councilHeader:
+        meta?.councilHeader?.trim() ||
         "Concilio Evangélico Asambleas de Dios — Autopista Duarte Km. 12 1/2, Santo Domingo Oeste",
       presbyterio,
       presbyterName: "Pr. Carlos Rodríguez",

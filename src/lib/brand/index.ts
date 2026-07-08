@@ -3,6 +3,8 @@ import { FUENTE_INAGOTABLE } from "./fuente-inagotable";
 export {
   CHURCH_BRAND_DEFAULTS,
   normalizeChurchHexColor,
+  resolveChurchBrandCssVars,
+  type ChurchBrandInput,
 } from "./church-defaults";
 export {
   FUENTE_INAGOTABLE,
