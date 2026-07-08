@@ -143,8 +143,8 @@ export async function generateReport(
       );
       data =
         format === "xlsx"
-          ? await generateFinancialMonthlyCeadXlsx(payload, locale)
-          : await generateFinancialMonthlyCeadPdf(payload, locale);
+          ? await generateFinancialMonthlyCeadXlsx(payload, locale, session.fullName)
+          : await generateFinancialMonthlyCeadPdf(payload, locale, session.fullName);
       filenameBase = "informe-financiero-cead";
       resolvedPeriod = month;
       break;

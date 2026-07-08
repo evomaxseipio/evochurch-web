@@ -1,6 +1,16 @@
 import type { Locale } from "@/i18n/config";
 import { fmtRD } from "@/lib/format-currency";
-import { buildPdfKeyValueForm } from "@/lib/reports/export/pdf";
+import { collectPdfBuffer } from "@/lib/reports/export/pdf";
+import {
+  createFormPdfDocument,
+  drawFormFooter,
+  drawFormHeader,
+  drawFormNote,
+  drawFormTable,
+  drawSectionHeading,
+  sixColumnFormWidths,
+  type PdfFormTableRow,
+} from "@/lib/reports/export/pdf-form";
 import {
   createWorkbook,
   workbookToBuffer,
@@ -24,7 +34,7 @@ function fmtAmount(value: number): string {
   return fmtRD(value);
 }
 
-function sectionBRows(payload: ConcilioF001Payload, t: TranslateFn): string[][] {
+function buildSectionBDataRows(payload: ConcilioF001Payload, t: TranslateFn): string[][] {
   const maxRows = Math.max(
     payload.sectionB.generalIncome.length,
     payload.sectionB.ministryIncome.length,
@@ -55,7 +65,7 @@ function sectionBRows(payload: ConcilioF001Payload, t: TranslateFn): string[][] 
   return rows;
 }
 
-function sectionCRows(payload: ConcilioF001Payload, t: TranslateFn): string[][] {
+function buildSectionCDataRows(payload: ConcilioF001Payload, t: TranslateFn): string[][] {
   const maxRows = Math.max(
     payload.sectionC.churchToCouncil.length,
     payload.sectionC.ministryToNational.length,
@@ -91,86 +101,151 @@ export async function generateConcilioF001Pdf(
   locale: Locale,
 ): Promise<Uint8Array> {
   const t = await getTranslations({ locale, namespace: "reports" });
+  const doc = createFormPdfDocument();
+  const bufferPromise = collectPdfBuffer(doc);
+  const cols = sixColumnFormWidths(doc);
 
-  const sections: {
-    heading?: string;
-    rows: { label: string; value: string }[];
-  }[] = [
-    {
-      heading: t("exports.concilioF001.sectionA"),
-      rows: [
-        { label: t("exports.concilioF001.presbytery"), value: payload.meta.presbyterio },
-        { label: t("exports.concilioF001.presbyter"), value: payload.meta.presbyterName },
-        { label: t("exports.common.pastor"), value: payload.meta.pastorName },
-        {
-          label: t("exports.concilioF001.pastorCredential"),
-          value: payload.meta.pastorCredential,
-        },
-        { label: t("exports.common.church"), value: payload.meta.churchName },
-        { label: t("exports.concilioF001.churchCode"), value: payload.meta.churchCode },
-        { label: t("exports.concilioF001.spouse"), value: payload.meta.spouseName ?? "—" },
-        { label: t("exports.concilioF001.period"), value: payload.periodLabel },
-      ],
-    },
-    {
-      heading: t("exports.concilioF001.sectionB"),
-      rows: sectionBRows(payload, t).flatMap((row) => [
-        {
-          label: `${row[0]} | ${row[2]} | ${row[4]}`,
-          value: `${row[1]} | ${row[3]} | ${row[5]}`,
-        },
-      ]),
-    },
-    {
-      heading: t("exports.concilioF001.sectionC"),
-      rows: sectionCRows(payload, t).flatMap((row) => [
-        {
-          label: `${row[0]} | ${row[2]} | ${row[4]}`,
-          value: `${row[1]} | ${row[3]} | ${row[5]}`,
-        },
-      ]),
-    },
-    {
-      heading: t("exports.concilioF001.sectionD"),
-      rows: [
-        {
-          label: t("exports.concilioF001.churchSavings"),
-          value: fmtAmount(payload.sectionD.church.savings),
-        },
-        {
-          label: t("exports.concilioF001.churchLoan"),
-          value: fmtAmount(payload.sectionD.church.loanPayment),
-        },
-        {
-          label: t("exports.concilioF001.churchFuneralPlan"),
-          value: fmtAmount(payload.sectionD.church.funeralPlan),
-        },
-        {
-          label: t("exports.concilioF001.pastorSavings"),
-          value: fmtAmount(payload.sectionD.pastor.savings),
-        },
-        {
-          label: t("exports.concilioF001.pastorLoan"),
-          value: fmtAmount(payload.sectionD.pastor.loanPayment),
-        },
-        {
-          label: t("exports.concilioF001.pastorFuneralPlan"),
-          value: fmtAmount(payload.sectionD.pastor.funeralPlan),
-        },
-        {
-          label: t("exports.concilioF001.totalMovements"),
-          value: fmtAmount(payload.sectionD.totalMovements),
-        },
-      ],
-    },
+  drawFormHeader(doc, [
+    { text: payload.meta.councilHeader, size: 9 },
+    { text: `RNC. 4-01-50833-8 · ${payload.meta.formCode}`, size: 9 },
+    { text: t("exports.concilioF001.title").toUpperCase(), size: 13, bold: true },
+  ]);
+
+  drawSectionHeading(doc, t("exports.concilioF001.sectionA"));
+  drawFormTable(doc, cols, [
+    [
+      { text: t("exports.concilioF001.presbytery"), style: "label" },
+      { text: payload.meta.presbyterio, colSpan: 2 },
+      { text: t("exports.concilioF001.presbyter"), style: "label" },
+      { text: payload.meta.presbyterName, colSpan: 2 },
+    ],
+    [
+      { text: t("exports.common.pastor"), style: "label" },
+      { text: payload.meta.pastorName, colSpan: 2 },
+      { text: t("exports.concilioF001.pastorCredential"), style: "label" },
+      { text: payload.meta.pastorCredential, colSpan: 2 },
+    ],
+    [
+      { text: t("exports.common.church"), style: "label" },
+      { text: payload.meta.churchName, colSpan: 2 },
+      { text: t("exports.concilioF001.churchCode"), style: "label" },
+      { text: payload.meta.churchCode, colSpan: 2 },
+    ],
+    [
+      { text: t("exports.concilioF001.spouse"), style: "label" },
+      { text: payload.meta.spouseName ?? "", colSpan: 2 },
+      { text: t("exports.concilioF001.spouseCredential"), style: "label" },
+      { text: payload.meta.spouseCredential ?? "", colSpan: 2 },
+    ],
+    [
+      { text: t("exports.concilioF001.month"), style: "label" },
+      { text: String(payload.meta.month) },
+      { text: t("exports.concilioF001.year"), style: "label" },
+      { text: String(payload.meta.year) },
+      { text: "", colSpan: 2 },
+    ],
+  ]);
+  doc.moveDown(0.45);
+
+  drawSectionHeading(doc, t("exports.concilioF001.sectionB"));
+  const sectionBData = buildSectionBDataRows(payload, t);
+  const sectionBTable: PdfFormTableRow[] = [
+    [
+      { text: t("exports.concilioF001.generalIncomeCol"), colSpan: 2, style: "header" },
+      { text: t("exports.concilioF001.ministryIncomeCol"), colSpan: 2, style: "header" },
+      { text: t("exports.concilioF001.churchExpensesCol"), colSpan: 2, style: "header" },
+    ],
+    [
+      { text: t("exports.common.concept"), style: "header" },
+      { text: t("exports.common.amountRd"), style: "header" },
+      { text: t("exports.common.concept"), style: "header" },
+      { text: t("exports.common.amountRd"), style: "header" },
+      { text: t("exports.common.concept"), style: "header" },
+      { text: t("exports.common.amountRd"), style: "header" },
+    ],
+    ...sectionBData.map((row, index) => {
+      const isTotal = index === sectionBData.length - 1;
+      return [
+        { text: row[0], style: isTotal ? "total" : undefined },
+        { text: row[1], style: isTotal ? "totalAmount" : "amount" },
+        { text: row[2], style: isTotal ? "total" : undefined },
+        { text: row[3], style: isTotal ? "totalAmount" : "amount" },
+        { text: row[4], style: isTotal ? "total" : undefined },
+        { text: row[5], style: isTotal ? "totalAmount" : "amount" },
+      ] satisfies PdfFormTableRow;
+    }),
   ];
+  drawFormTable(doc, cols, sectionBTable);
+  doc.moveDown(0.45);
 
-  return buildPdfKeyValueForm(
-    t("exports.concilioF001.title"),
-    `${payload.meta.churchName} · ${payload.periodLabel} · ${payload.meta.formCode}`,
-    sections,
-    t("exports.concilioF001.regulationNote"),
-  );
+  drawSectionHeading(doc, t("exports.concilioF001.sectionC"));
+  const sectionCData = buildSectionCDataRows(payload, t);
+  const sectionCTable: PdfFormTableRow[] = [
+    [
+      { text: t("exports.concilioF001.churchToCouncilCol"), colSpan: 2, style: "header" },
+      { text: t("exports.concilioF001.ministryNationalCol"), colSpan: 2, style: "header" },
+      { text: t("exports.concilioF001.specialContributionsCol"), colSpan: 2, style: "header" },
+    ],
+    ...sectionCData.map((row, index) => {
+      const isTotal = index === sectionCData.length - 1;
+      return [
+        { text: row[0], style: isTotal ? "total" : undefined },
+        { text: row[1], style: isTotal ? "totalAmount" : "amount" },
+        { text: row[2], style: isTotal ? "total" : undefined },
+        { text: row[3], style: isTotal ? "totalAmount" : "amount" },
+        { text: row[4], style: isTotal ? "total" : undefined },
+        { text: row[5], style: isTotal ? "totalAmount" : "amount" },
+      ] satisfies PdfFormTableRow;
+    }),
+  ];
+  drawFormTable(doc, cols, sectionCTable);
+  drawFormNote(doc, t("exports.concilioF001.regulationNote"));
+  doc.moveDown(0.35);
+
+  drawSectionHeading(doc, t("exports.concilioF001.sectionD"));
+  drawFormTable(doc, cols, [
+    [
+      { text: t("exports.concilioF001.churchBlock"), colSpan: 2, style: "header" },
+      { text: t("exports.concilioF001.pastorBlock"), colSpan: 2, style: "header" },
+      { text: "", colSpan: 2, style: "header" },
+    ],
+    [
+      { text: t("exports.concilioF001.churchSavings") },
+      { text: fmtAmount(payload.sectionD.church.savings), style: "amount" },
+      { text: t("exports.concilioF001.pastorSavings") },
+      { text: fmtAmount(payload.sectionD.pastor.savings), style: "amount" },
+      { text: "", colSpan: 2 },
+    ],
+    [
+      { text: t("exports.concilioF001.churchLoan") },
+      { text: fmtAmount(payload.sectionD.church.loanPayment), style: "amount" },
+      { text: t("exports.concilioF001.pastorLoan") },
+      { text: fmtAmount(payload.sectionD.pastor.loanPayment), style: "amount" },
+      { text: "", colSpan: 2 },
+    ],
+    [
+      { text: t("exports.concilioF001.churchFuneralPlan") },
+      { text: fmtAmount(payload.sectionD.church.funeralPlan), style: "amount" },
+      { text: t("exports.concilioF001.pastorFuneralPlan") },
+      { text: fmtAmount(payload.sectionD.pastor.funeralPlan), style: "amount" },
+      { text: "", colSpan: 2 },
+    ],
+    [
+      { text: t("exports.concilioF001.totalMovements"), colSpan: 2, style: "total" },
+      { text: fmtAmount(payload.sectionD.totalMovements), colSpan: 2, style: "totalAmount" },
+      { text: "", colSpan: 2 },
+    ],
+  ]);
+
+  drawFormFooter(doc, [
+    `${t("exports.concilioF001.preparedOn")}: ${payload.signatures.preparedOn ?? ""}`,
+    `${t("exports.concilioF001.treasurerSignature")}:`,
+    `${t("exports.concilioF001.pastorSignature")}: ${payload.meta.pastorName}`,
+  ]);
+
+  doc.end();
+  const buffer = await bufferPromise;
+  return new Uint8Array(buffer);
 }
 
 function setCell(

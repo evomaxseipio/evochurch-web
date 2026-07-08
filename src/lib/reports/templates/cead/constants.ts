@@ -58,6 +58,16 @@ export const CEAD_COUNCIL_FORMULA_I18N_KEYS: Record<string, string> = {
   "1% × total ingresos": "cead.formulas.onePercent",
 };
 
+/** Escala vertical del gráfico ingresos/egresos (preview, impresión, PDF). */
+export const CEAD_CHART_SCALE = 800_000;
+
+export const CEAD_COUNCIL_PERCENT: Record<CeadCouncilSendLabel, string> = {
+  "Diezmo de la iglesia (10%)": "10%",
+  "IBCR (3%)": "3%",
+  "Educación Cristiana (1%)": "1%",
+  "FPJ (1%)": "1%",
+};
+
 /** Buckets de edad formulario estadístico anual (REP-4). */
 export const CEAD_AGE_BUCKET_LABELS = [
   "0-5",

@@ -88,21 +88,21 @@ export function ReportCard({
       </div>
 
       {showMemberFilter ? (
-        <div className="input-wrap" style={{ maxWidth: 220 }}>
-          <select
-            value={memberFilter}
-            onChange={(e) =>
-              onMemberFilterChange(e.target.value as MemberFilterKey)
-            }
-            aria-label={tReports("memberFilter")}
-          >
-            {MEMBER_FILTERS.map((key) => (
-              <option key={key} value={key}>
-                {tReports(`memberFilters.${key}`)}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          className="select"
+          style={{ maxWidth: 220, width: "100%" }}
+          value={memberFilter}
+          onChange={(e) =>
+            onMemberFilterChange(e.target.value as MemberFilterKey)
+          }
+          aria-label={tReports("memberFilter")}
+        >
+          {MEMBER_FILTERS.map((key) => (
+            <option key={key} value={key}>
+              {tReports(`memberFilters.${key}`)}
+            </option>
+          ))}
+        </select>
       ) : null}
 
       <div

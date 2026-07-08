@@ -21,6 +21,7 @@ import type {
   PendingAuthorizationItem,
 } from "@/lib/dashboard/types";
 import { fmtRD } from "@/lib/format-currency";
+import type { ChurchEvent } from "@/lib/mock/dashboard-data";
 import { dashboardMock } from "@/lib/mock/dashboard-data";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -37,6 +38,7 @@ export function DashboardView({
   pendingItems,
   recentAudit = [],
   canViewAuditLog = false,
+  events,
 }: {
   pastorName?: string;
   churchName?: string | null;
@@ -51,6 +53,7 @@ export function DashboardView({
   pendingItems: PendingAuthorizationItem[];
   recentAudit?: AuditLogEntry[];
   canViewAuditLog?: boolean;
+  events?: ChurchEvent[];
 }) {
   const t = useTranslations("dashboard");
   const locale = useLocale() as Locale;
@@ -109,27 +112,27 @@ export function DashboardView({
   const contributionsTotalFormatted = fmtRD(contributionsTotal, locale);
 
   return (
-    <div>
+    <div className="dashboard-view">
       <DashboardHero
         pastor={pastor}
         churchName={churchName ?? undefined}
         hero={hero}
       />
 
-      <div className="grid-12" style={{ marginTop: 24 }}>
-        {headKpis.map((kpi, index) => (
-          <div key={kpi.labelKey ?? kpi.label} className="span-3">
-            <KpiCard {...kpi} feature={index === 0} kind="elevated" />
+      <div className="grid-12 dashboard-kpis" style={{ marginTop: 24 }}>
+        {headKpis.map((kpi) => (
+          <div key={kpi.labelKey ?? kpi.label} className="span-3 dashboard-kpi-cell">
+            <KpiCard {...kpi} feature={false} kind="elevated" />
           </div>
         ))}
         {restKpis.map((kpi) => (
-          <div key={kpi.labelKey ?? kpi.label} className="span-3">
-            <KpiCard {...kpi} />
+          <div key={kpi.labelKey ?? kpi.label} className="span-3 dashboard-kpi-cell">
+            <KpiCard {...kpi} feature={false} kind="elevated" />
           </div>
         ))}
       </div>
 
-      <div className="grid-12" style={{ marginTop: 18 }}>
+      <div className="grid-12 dashboard-charts" style={{ marginTop: 18 }}>
         <div className="card span-7">
           <div
             className="row between"
@@ -202,10 +205,10 @@ export function DashboardView({
         </div>
       </div>
 
-      <div className="grid-12" style={{ marginTop: 18 }}>
+      <div className="grid-12 dashboard-foot" style={{ marginTop: 18 }}>
         <PendingTransactionsList items={pendingItems} />
 
-        <div className="card span-5">
+        <div className="card span-5 dashboard-activity-card">
           <div className="row between" style={{ marginBottom: 14 }}>
             <div>
               <div className="eyebrow">{t("recentActivity")}</div>
@@ -234,7 +237,7 @@ export function DashboardView({
           )}
         </div>
 
-        <LastEventCard events={dashboardMock.events} />
+        <LastEventCard events={events ?? dashboardMock.events} />
       </div>
     </div>
   );

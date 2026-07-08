@@ -30,7 +30,7 @@ export function LastEventCard({ events }: { events: ChurchEvent[] }) {
   const event = nextEvent(events);
 
   return (
-    <div className="card span-3">
+    <div className="card span-3 dashboard-event-card">
       <div style={{ marginBottom: 14 }}>
         <div className="eyebrow">{t("agenda")}</div>
         <div className="display" style={{ fontSize: 22, marginTop: 4 }}>
@@ -58,14 +58,7 @@ export function LastEventCard({ events }: { events: ChurchEvent[] }) {
           const dayLabel = formatDate(d, locale, { day: "2-digit" });
           const colors = eventColors(event.type);
           return (
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 14,
-                background: "var(--surface-2)",
-                border: "1px solid var(--hairline)",
-              }}
-            >
+            <div className="dashboard-event-body">
               <div className="row" style={{ gap: 12, alignItems: "center" }}>
                 <div
                   style={{
