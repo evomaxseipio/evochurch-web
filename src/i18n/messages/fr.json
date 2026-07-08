@@ -823,7 +823,8 @@
       "portalLabel": "Portail d'audit",
       "dashboard": "Tableau de bord",
       "churches": "Églises",
-      "reports": "Rapports"
+      "reports": "Rapports",
+      "settings": "Intégrations"
     },
     "login": {
       "title": "Portail du concile",
@@ -836,6 +837,10 @@
       "subtitle": "Vue des églises affiliées et des rapports reçus.",
       "churchCount": "Églises affiliées",
       "reportCount": "Rapports reçus",
+      "overdueCount": "F.001 en retard",
+      "overdueTitle": "Églises en retard sur le F.001",
+      "overdueSubtitle": "Sans envoi pour {month}/{year} (échéance le jour {dueDay} du mois suivant).",
+      "noOverdue": "Toutes les églises actives sont à jour pour la période F.001 en cours.",
       "recentReports": "Derniers envois",
       "noReports": "Aucun rapport envoyé par les églises pour l'instant."
     },
@@ -848,7 +853,23 @@
         "city": "Ville",
         "unit": "District",
         "code": "Code",
-        "kind": "Type"
+        "kind": "Type",
+        "plan": "Forfait",
+        "billing": "État"
+      },
+      "billing": {
+        "success": "Facturation mise à jour.",
+        "error": "Impossible de mettre à jour la facturation",
+        "plans": {
+          "trial": "Essai",
+          "standard": "Standard",
+          "enterprise": "Enterprise"
+        },
+        "statuses": {
+          "active": "Actif",
+          "past_due": "En retard",
+          "suspended": "Suspendu"
+        }
       },
       "provision": {
         "add": "Ajouter une église",
@@ -875,6 +896,36 @@
         "period": "Période",
         "kind": "Type",
         "submitted": "Envoyé"
+      }
+    },
+    "settings": {
+      "title": "Intégrations",
+      "subtitle": "Clés API pour les systèmes externes du concile.",
+      "api": {
+        "title": "API externe",
+        "description": "Générez des clés en lecture seule pour consulter églises et rapports reçus.",
+        "label": "Libellé",
+        "create": "Générer une clé",
+        "creating": "Génération…",
+        "createSuccess": "Clé API créée.",
+        "createError": "Impossible de créer la clé",
+        "copyOnce": "Copiez cette clé maintenant. Elle ne sera plus affichée.",
+        "endpoints": "Points de terminaison disponibles",
+        "authHint": "En-tête : Authorization: Bearer <clé>",
+        "revoke": "Révoquer",
+        "revokeSuccess": "Clé révoquée.",
+        "revokeError": "Impossible de révoquer la clé",
+        "active": "Active",
+        "revoked": "Révoquée",
+        "empty": "Aucune clé API configurée.",
+        "table": {
+          "label": "Libellé",
+          "prefix": "Préfixe",
+          "created": "Créée",
+          "lastUsed": "Dernière utilisation",
+          "status": "État",
+          "actions": "Actions"
+        }
       }
     }
   },

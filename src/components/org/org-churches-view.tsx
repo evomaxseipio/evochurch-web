@@ -1,6 +1,7 @@
 "use client";
 
 import { provisionChurchAction } from "@/app/org/(console)/churches/actions";
+import { updateChurchBillingAction } from "@/app/org/(console)/churches/billing-actions";
 import { PageHeader } from "@/components/ui/page-header";
 import { DataTable } from "@/components/ui/data-table";
 import type { OrgChurchRow } from "@/lib/services/org-portal";
@@ -9,14 +10,19 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
+const BILLING_PLANS = ["trial", "standard", "enterprise"] as const;
+const BILLING_STATUSES = ["active", "past_due", "suspended"] as const;
+
 export function OrgChurchesView({
   organizationName,
   churches,
   canProvision = false,
+  canEditBilling = false,
 }: {
   organizationName: string;
   churches: OrgChurchRow[];
   canProvision?: boolean;
+  canEditBilling?: boolean;
 }) {
   const t = useTranslations("org");
   const router = useRouter();
@@ -34,6 +40,25 @@ export function OrgChurchesView({
       }
       toast.success(t("churches.provision.success"));
       setShowForm(false);
+      router.refresh();
+    });
+  }
+
+  function handleBillingChange(
+    churchId: number,
+    field: "billingPlan" | "billingStatus",
+    value: string,
+  ) {
+    startTransition(async () => {
+      const result = await updateChurchBillingAction(churchId, {
+        billingPlan: field === "billingPlan" ? value : undefined,
+        billingStatus: field === "billingStatus" ? value : undefined,
+      });
+      if (!result.ok) {
+        toast.error(t("churches.billing.error"), result.error);
+        return;
+      }
+      toast.success(t("churches.billing.success"));
       router.refresh();
     });
   }
@@ -161,6 +186,71 @@ export function OrgChurchesView({
             key: "kind",
             label: t("churches.table.kind"),
             render: (row) => row.churchKind,
+          },
+          {
+            key: "plan",
+            label: t("churches.table.plan"),
+            render: (row) =>
+              canEditBilling ? (
+                <select
+                  className="input text-sm"
+                  value={row.billingPlan}
+                  disabled={isPending}
+                  onChange={(event) =>
+                    handleBillingChange(row.id, "billingPlan", event.target.value)
+                  }
+                >
+                  {BILLING_PLANS.map((plan) => (
+                    <option key={plan} value={plan}>
+                      {t(`churches.billing.plans.${plan}`)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                t(`churches.billing.plans.${row.billingPlan as (typeof BILLING_PLANS)[number]}`, {
+                  defaultValue: row.billingPlan,
+                })
+              ),
+          },
+          {
+            key: "billing",
+            label: t("churches.table.billing"),
+            render: (row) =>
+              canEditBilling ? (
+                <select
+                  className="input text-sm"
+                  value={row.billingStatus}
+                  disabled={isPending}
+                  onChange={(event) =>
+                    handleBillingChange(
+                      row.id,
+                      "billingStatus",
+                      event.target.value,
+                    )
+                  }
+                >
+                  {BILLING_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {t(`churches.billing.statuses.${status}`)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span
+                  className={
+                    row.billingStatus === "past_due"
+                      ? "text-[var(--warning)]"
+                      : row.billingStatus === "suspended"
+                        ? "text-[var(--danger)]"
+                        : undefined
+                  }
+                >
+                  {t(
+                    `churches.billing.statuses.${row.billingStatus as (typeof BILLING_STATUSES)[number]}`,
+                    { defaultValue: row.billingStatus },
+                  )}
+                </span>
+              ),
           },
         ]}
         rows={churches}

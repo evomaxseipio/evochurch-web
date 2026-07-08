@@ -823,7 +823,8 @@
       "portalLabel": "Portal de auditoría",
       "dashboard": "Dashboard",
       "churches": "Iglesias",
-      "reports": "Reportes"
+      "reports": "Reportes",
+      "settings": "Integraciones"
     },
     "login": {
       "title": "Portal del concilio",
@@ -836,6 +837,10 @@
       "subtitle": "Resumen de iglesias afiliadas y reportes recibidos.",
       "churchCount": "Iglesias afiliadas",
       "reportCount": "Reportes recibidos",
+      "overdueCount": "F.001 pendientes",
+      "overdueTitle": "Iglesias morosas en F.001",
+      "overdueSubtitle": "Sin envío para {month}/{year} (vencimiento día {dueDay} del mes siguiente).",
+      "noOverdue": "Todas las iglesias activas están al día con el F.001 del período vigente.",
       "recentReports": "Últimos envíos",
       "noReports": "Aún no hay reportes enviados por las iglesias."
     },
@@ -848,7 +853,23 @@
         "city": "Ciudad",
         "unit": "Distrito",
         "code": "Código",
-        "kind": "Tipo"
+        "kind": "Tipo",
+        "plan": "Plan",
+        "billing": "Estado"
+      },
+      "billing": {
+        "success": "Facturación actualizada.",
+        "error": "No se pudo actualizar la facturación",
+        "plans": {
+          "trial": "Prueba",
+          "standard": "Estándar",
+          "enterprise": "Enterprise"
+        },
+        "statuses": {
+          "active": "Activo",
+          "past_due": "Moroso",
+          "suspended": "Suspendido"
+        }
       },
       "provision": {
         "add": "Dar de alta iglesia",
@@ -875,6 +896,36 @@
         "period": "Período",
         "kind": "Tipo",
         "submitted": "Enviado"
+      }
+    },
+    "settings": {
+      "title": "Integraciones",
+      "subtitle": "Claves API para sistemas externos del concilio.",
+      "api": {
+        "title": "API externa",
+        "description": "Genera claves de solo lectura para consultar iglesias y reportes recibidos.",
+        "label": "Etiqueta",
+        "create": "Generar clave",
+        "creating": "Generando…",
+        "createSuccess": "Clave API creada.",
+        "createError": "No se pudo crear la clave",
+        "copyOnce": "Copia esta clave ahora. No se volverá a mostrar.",
+        "endpoints": "Endpoints disponibles",
+        "authHint": "Header: Authorization: Bearer <clave>",
+        "revoke": "Revocar",
+        "revokeSuccess": "Clave revocada.",
+        "revokeError": "No se pudo revocar la clave",
+        "active": "Activa",
+        "revoked": "Revocada",
+        "empty": "No hay claves API configuradas.",
+        "table": {
+          "label": "Etiqueta",
+          "prefix": "Prefijo",
+          "created": "Creada",
+          "lastUsed": "Último uso",
+          "status": "Estado",
+          "actions": "Acciones"
+        }
       }
     }
   },

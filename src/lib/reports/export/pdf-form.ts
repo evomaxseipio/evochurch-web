@@ -120,7 +120,7 @@ export function drawFormTable(
       const span = cell.colSpan ?? 1;
       let width = 0;
       for (let i = 0; i < span; i += 1) {
-        width += columnWidths[colIndex + i] ?? 0;
+        width += columnWidths[colIndex] ?? 0;
         colIndex += 1;
       }
       cells.push({ text: sanitizePdfText(cell.text), width, style: cell.style });

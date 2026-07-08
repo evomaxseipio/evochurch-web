@@ -823,7 +823,8 @@
       "portalLabel": "Audit portal",
       "dashboard": "Dashboard",
       "churches": "Churches",
-      "reports": "Reports"
+      "reports": "Reports",
+      "settings": "Integrations"
     },
     "login": {
       "title": "Council portal",
@@ -836,6 +837,10 @@
       "subtitle": "Affiliated churches and submitted reports overview.",
       "churchCount": "Affiliated churches",
       "reportCount": "Reports received",
+      "overdueCount": "Overdue F.001",
+      "overdueTitle": "Churches overdue on F.001",
+      "overdueSubtitle": "Missing submission for {month}/{year} (due by day {dueDay} of the following month).",
+      "noOverdue": "All active churches are up to date on the current F.001 period.",
       "recentReports": "Recent submissions",
       "noReports": "No reports submitted by churches yet."
     },
@@ -848,7 +853,23 @@
         "city": "City",
         "unit": "District",
         "code": "Code",
-        "kind": "Kind"
+        "kind": "Kind",
+        "plan": "Plan",
+        "billing": "Status"
+      },
+      "billing": {
+        "success": "Billing updated.",
+        "error": "Could not update billing",
+        "plans": {
+          "trial": "Trial",
+          "standard": "Standard",
+          "enterprise": "Enterprise"
+        },
+        "statuses": {
+          "active": "Active",
+          "past_due": "Past due",
+          "suspended": "Suspended"
+        }
       },
       "provision": {
         "add": "Add church",
@@ -875,6 +896,36 @@
         "period": "Period",
         "kind": "Kind",
         "submitted": "Submitted"
+      }
+    },
+    "settings": {
+      "title": "Integrations",
+      "subtitle": "API keys for external council systems.",
+      "api": {
+        "title": "External API",
+        "description": "Generate read-only keys to query churches and received reports.",
+        "label": "Label",
+        "create": "Generate key",
+        "creating": "Generating…",
+        "createSuccess": "API key created.",
+        "createError": "Could not create key",
+        "copyOnce": "Copy this key now. It will not be shown again.",
+        "endpoints": "Available endpoints",
+        "authHint": "Header: Authorization: Bearer <key>",
+        "revoke": "Revoke",
+        "revokeSuccess": "Key revoked.",
+        "revokeError": "Could not revoke key",
+        "active": "Active",
+        "revoked": "Revoked",
+        "empty": "No API keys configured.",
+        "table": {
+          "label": "Label",
+          "prefix": "Prefix",
+          "created": "Created",
+          "lastUsed": "Last used",
+          "status": "Status",
+          "actions": "Actions"
+        }
       }
     }
   },

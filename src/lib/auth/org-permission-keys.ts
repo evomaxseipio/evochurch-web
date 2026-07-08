@@ -4,6 +4,9 @@ export const ORG_PERMISSION_KEYS = [
   "org:reports:read",
   "org:reports:aggregate",
   "org:churches:provision",
+  "org:billing:read",
+  "org:billing:write",
+  "org:api:manage",
 ] as const;
 
 export type OrgPermissionKey = (typeof ORG_PERMISSION_KEYS)[number];
