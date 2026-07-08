@@ -39,6 +39,12 @@ export function ConcilioF001FormPrint({
       <section className="concilio-form-section">
         <h3>{t("exports.concilioF001.sectionA")}</h3>
         <table className="concilio-form-meta">
+          <colgroup>
+            <col className="concilio-meta-col-label-left" />
+            <col className="concilio-meta-col-value-left" span={2} />
+            <col className="concilio-meta-col-label-right" />
+            <col className="concilio-meta-col-value-right" span={2} />
+          </colgroup>
           <tbody>
             <tr>
               <th>{t("exports.concilioF001.presbytery")}</th>

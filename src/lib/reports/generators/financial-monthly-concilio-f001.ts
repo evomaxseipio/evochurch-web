@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/config";
 import { fmtRD } from "@/lib/format-currency";
 import { collectPdfBuffer } from "@/lib/reports/export/pdf";
 import {
+  concilioMetaTableWidths,
   createFormPdfDocument,
   drawFormFooter,
   drawFormHeader,
@@ -103,6 +104,7 @@ export async function generateConcilioF001Pdf(
   const t = await getTranslations({ locale, namespace: "reports" });
   const doc = createFormPdfDocument();
   const bufferPromise = collectPdfBuffer(doc);
+  const metaCols = concilioMetaTableWidths(doc);
   const cols = sixColumnFormWidths(doc);
 
   drawFormHeader(doc, [
@@ -112,7 +114,7 @@ export async function generateConcilioF001Pdf(
   ]);
 
   drawSectionHeading(doc, t("exports.concilioF001.sectionA"));
-  drawFormTable(doc, cols, [
+  drawFormTable(doc, metaCols, [
     [
       { text: t("exports.concilioF001.presbytery"), style: "label" },
       { text: payload.meta.presbyterio, colSpan: 2 },

@@ -46,6 +46,19 @@ export function sixColumnFormWidths(doc: InstanceType<typeof PDFDocument>): numb
   return [concept, amount, concept, amount, concept, amount + remainder];
 }
 
+/** CONCILIO F.001 sección A: etiqueta | valor | etiqueta | valor (6 cols con colSpan). */
+export function concilioMetaTableWidths(doc: InstanceType<typeof PDFDocument>): number[] {
+  const total = contentWidth(doc);
+  const pct = (n: number) => Math.floor(total * n);
+  const c1 = pct(0.11);
+  const c2 = pct(0.17);
+  const c3 = pct(0.17);
+  const c4 = pct(0.23);
+  const c5 = pct(0.16);
+  const c6 = total - c1 - c2 - c3 - c4 - c5;
+  return [c1, c2, c3, c4, c5, c6];
+}
+
 function cellPresentation(style: PdfFormCellStyle | undefined) {
   switch (style) {
     case "header":

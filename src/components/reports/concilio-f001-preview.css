@@ -80,6 +80,22 @@
     border-collapse: collapse;
   }
 
+  .concilio-f001-form-print .concilio-form-meta .concilio-meta-col-label-left {
+    width: 11%;
+  }
+
+  .concilio-f001-form-print .concilio-form-meta .concilio-meta-col-value-left {
+    width: 34%;
+  }
+
+  .concilio-f001-form-print .concilio-form-meta .concilio-meta-col-label-right {
+    width: 23%;
+  }
+
+  .concilio-f001-form-print .concilio-form-meta .concilio-meta-col-value-right {
+    width: 32%;
+  }
+
   .concilio-f001-form-print th,
   .concilio-f001-form-print td {
     border: 1px solid #333;
