@@ -6,6 +6,7 @@ import {
   uploadChurchLogoAction,
   type ChurchProfileActionResult,
 } from "@/app/(app)/settings/church/actions";
+import { normalizeChurchHexColor } from "@/lib/brand/church-defaults";
 import type { ChurchProfile } from "@/lib/services/church-profile";
 import { useTranslations } from "next-intl";
 import { useActionState, useRef, useState, useTransition } from "react";
@@ -23,25 +24,31 @@ function ColorField({
   value: string;
   disabled: boolean;
 }) {
+  const normalized = normalizeChurchHexColor(value);
+  const pickerValue = normalized.toLowerCase();
+
   return (
     <label className="block space-y-1.5" htmlFor={id}>
       <span className="text-sm font-medium text-[var(--fg-dim)]">{label}</span>
       <div className="flex items-center gap-3">
         <input
+          key={`${name}-${pickerValue}`}
           id={id}
           type="color"
           name={name}
-          defaultValue={value}
+          defaultValue={pickerValue}
           disabled={disabled}
           className="h-10 w-14 cursor-pointer rounded-lg border border-[var(--hairline)] bg-transparent p-1"
         />
         <input
           type="text"
-          defaultValue={value}
-          disabled={disabled}
+          name={`${name}Display`}
+          defaultValue={normalized}
+          disabled
           readOnly
           className="input flex-1 font-mono text-sm"
           tabIndex={-1}
+          aria-hidden
         />
       </div>
     </label>

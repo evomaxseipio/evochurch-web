@@ -1,3 +1,7 @@
+import {
+  CHURCH_BRAND_DEFAULTS,
+  normalizeChurchHexColor,
+} from "@/lib/brand/church-defaults";
 import { createClient } from "@/lib/supabase/server";
 import { getVerifiedUser } from "@/lib/supabase/session";
 import { sessionRequiresPasswordChange } from "@/lib/auth/temp-password-flow";
@@ -117,18 +121,18 @@ function parseChurchBranding(raw: SessionContextRow["church_branding"]): ChurchB
       typeof raw.logo_url === "string" && raw.logo_url.length > 0
         ? raw.logo_url
         : null,
-    primaryColor:
-      typeof raw.primary_color === "string" && raw.primary_color.length > 0
-        ? raw.primary_color
-        : "#5B21B6",
-    secondaryColor:
-      typeof raw.secondary_color === "string" && raw.secondary_color.length > 0
-        ? raw.secondary_color
-        : "#4C1D95",
-    accentColor:
-      typeof raw.accent_color === "string" && raw.accent_color.length > 0
-        ? raw.accent_color
-        : "#1E0A4C",
+    primaryColor: normalizeChurchHexColor(
+      raw.primary_color,
+      CHURCH_BRAND_DEFAULTS.primaryColor,
+    ),
+    secondaryColor: normalizeChurchHexColor(
+      raw.secondary_color,
+      CHURCH_BRAND_DEFAULTS.secondaryColor,
+    ),
+    accentColor: normalizeChurchHexColor(
+      raw.accent_color,
+      CHURCH_BRAND_DEFAULTS.accentColor,
+    ),
   };
 }
 

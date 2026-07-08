@@ -1,5 +1,6 @@
 "use server";
 
+import { CHURCH_BRAND_DEFAULTS } from "@/lib/brand/church-defaults";
 import { getActionSessionWith } from "@/lib/auth/permissions-server";
 import {
   fetchChurchProfile,
@@ -33,9 +34,15 @@ function parseProfileInput(formData: FormData): ChurchProfileInput {
     phone: String(formData.get("phone") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim(),
     websiteUrl: String(formData.get("websiteUrl") ?? "").trim(),
-    primaryColor: String(formData.get("primaryColor") ?? "#5B21B6").trim(),
-    secondaryColor: String(formData.get("secondaryColor") ?? "#4C1D95").trim(),
-    accentColor: String(formData.get("accentColor") ?? "#1E0A4C").trim(),
+    primaryColor: String(
+      formData.get("primaryColor") ?? CHURCH_BRAND_DEFAULTS.primaryColor,
+    ).trim(),
+    secondaryColor: String(
+      formData.get("secondaryColor") ?? CHURCH_BRAND_DEFAULTS.secondaryColor,
+    ).trim(),
+    accentColor: String(
+      formData.get("accentColor") ?? CHURCH_BRAND_DEFAULTS.accentColor,
+    ).trim(),
     externalCode: String(formData.get("externalCode") ?? "").trim(),
     presbyteryName: String(formData.get("presbyteryName") ?? "").trim(),
     timezone: String(formData.get("timezone") ?? "").trim(),

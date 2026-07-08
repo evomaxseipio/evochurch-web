@@ -1,17 +1,26 @@
 "use client";
 
 import type { ChurchBranding } from "@/lib/auth/app-session";
+import {
+  CHURCH_BRAND_DEFAULTS,
+  normalizeChurchHexColor,
+} from "@/lib/brand/church-defaults";
 import { useEffect } from "react";
-
-const DEFAULT_PRIMARY = "#5B21B6";
-const DEFAULT_SECONDARY = "#4C1D95";
-const DEFAULT_ACCENT = "#1E0A4C";
 
 function applyBrandVariables(branding: ChurchBranding | null | undefined) {
   const root = document.documentElement;
-  const primary = branding?.primaryColor ?? DEFAULT_PRIMARY;
-  const secondary = branding?.secondaryColor ?? DEFAULT_SECONDARY;
-  const accent = branding?.accentColor ?? DEFAULT_ACCENT;
+  const primary = normalizeChurchHexColor(
+    branding?.primaryColor,
+    CHURCH_BRAND_DEFAULTS.primaryColor,
+  );
+  const secondary = normalizeChurchHexColor(
+    branding?.secondaryColor,
+    CHURCH_BRAND_DEFAULTS.secondaryColor,
+  );
+  const accent = normalizeChurchHexColor(
+    branding?.accentColor,
+    CHURCH_BRAND_DEFAULTS.accentColor,
+  );
 
   root.style.setProperty("--brand-primary", primary);
   root.style.setProperty("--brand-secondary", secondary);
@@ -22,8 +31,9 @@ function applyBrandVariables(branding: ChurchBranding | null | undefined) {
     "--accent-soft",
     `color-mix(in oklab, ${primary} 16%, transparent)`,
   );
-  root.style.setProperty("--sb-brand", secondary);
-  root.style.setProperty("--sb-bg", secondary);
+  /* Sidebar y superficies de marca usan el color primario (#5B21B6 por defecto). */
+  root.style.setProperty("--sb-brand", primary);
+  root.style.setProperty("--sb-bg", primary);
 }
 
 function clearBrandVariables() {

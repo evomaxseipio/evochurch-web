@@ -1,3 +1,7 @@
+import {
+  CHURCH_BRAND_DEFAULTS,
+  normalizeChurchHexColor,
+} from "@/lib/brand/church-defaults";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 const LOGO_BUCKET = "church-assets";
@@ -108,9 +112,18 @@ function parseProfileRow(row: ChurchProfileRow | null | undefined): ChurchProfil
     email: row.email ?? null,
     websiteUrl: row.website_url ?? null,
     logoUrl: row.logo_url ?? null,
-    primaryColor: row.primary_color ?? "#5B21B6",
-    secondaryColor: row.secondary_color ?? "#4C1D95",
-    accentColor: row.accent_color ?? "#1E0A4C",
+    primaryColor: normalizeChurchHexColor(
+      row.primary_color,
+      CHURCH_BRAND_DEFAULTS.primaryColor,
+    ),
+    secondaryColor: normalizeChurchHexColor(
+      row.secondary_color,
+      CHURCH_BRAND_DEFAULTS.secondaryColor,
+    ),
+    accentColor: normalizeChurchHexColor(
+      row.accent_color,
+      CHURCH_BRAND_DEFAULTS.accentColor,
+    ),
     externalCode: row.external_code ?? null,
     presbyteryName: row.presbytery_name ?? null,
     timezone: row.timezone ?? "America/Santo_Domingo",
@@ -136,9 +149,18 @@ function profileToPayload(input: ChurchProfileInput): Record<string, string | nu
     email: input.email ?? "",
     website_url: input.websiteUrl ?? "",
     logo_url: input.logoUrl ?? "",
-    primary_color: input.primaryColor,
-    secondary_color: input.secondaryColor,
-    accent_color: input.accentColor,
+    primary_color: normalizeChurchHexColor(
+      input.primaryColor,
+      CHURCH_BRAND_DEFAULTS.primaryColor,
+    ),
+    secondary_color: normalizeChurchHexColor(
+      input.secondaryColor,
+      CHURCH_BRAND_DEFAULTS.secondaryColor,
+    ),
+    accent_color: normalizeChurchHexColor(
+      input.accentColor,
+      CHURCH_BRAND_DEFAULTS.accentColor,
+    ),
     external_code: input.externalCode ?? "",
     presbytery_name: input.presbyteryName ?? "",
     timezone: input.timezone ?? "",
