@@ -4,6 +4,7 @@ export const ORG_ROUTE_PERMISSIONS: Record<string, OrgPermissionKey> = {
   "/org/dashboard": "org:reports:aggregate",
   "/org/churches": "org:churches:read",
   "/org/reports": "org:reports:read",
+  "/org/settings": "org:api:manage",
 };
 
 export function orgPermissionForPath(pathname: string): OrgPermissionKey | null {

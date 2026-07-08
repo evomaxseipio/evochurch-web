@@ -39,6 +39,7 @@ export default async function OrgChurchesPage() {
       organizationName={session.organizationName}
       churches={churches}
       canProvision={orgHasPermission(session, "org:churches:provision")}
+      canEditBilling={orgHasPermission(session, "org:billing:write")}
     />
   );
 }

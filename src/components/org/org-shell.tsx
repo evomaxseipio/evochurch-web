@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 
 const NAV: Array<{
   href: string;
-  labelKey: "dashboard" | "churches" | "reports";
+  labelKey: "dashboard" | "churches" | "reports" | "settings";
   icon: keyof typeof Icons;
   permission: OrgPermissionKey;
 }> = [
@@ -29,6 +29,12 @@ const NAV: Array<{
     labelKey: "reports",
     icon: "download",
     permission: "org:reports:read",
+  },
+  {
+    href: "/org/settings",
+    labelKey: "settings",
+    icon: "settings",
+    permission: "org:api:manage",
   },
 ];
 

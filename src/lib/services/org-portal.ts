@@ -11,6 +11,27 @@ export type OrgChurchRow = {
   churchKind: string;
   orgUnitId: number | null;
   orgUnitName: string | null;
+  billingPlan: string;
+  billingStatus: string;
+};
+
+export type OrgApiKeyRow = {
+  id: string;
+  label: string;
+  keyPrefix: string;
+  createdAt: string;
+  revokedAt: string | null;
+  lastUsedAt: string | null;
+};
+
+export type OrgOverdueChurchRow = {
+  churchId: number;
+  churchName: string;
+  externalCode: string | null;
+  billingStatus: string;
+  periodYear: number;
+  periodMonth: number;
+  dueDay: number;
 };
 
 export type OrgSubmittedReportRow = {
@@ -29,6 +50,7 @@ export type OrgDashboardPayload = {
   totals: {
     churchCount: number;
     reportCount: number;
+    overdueCount: number;
   };
   recentReports: Array<{
     id: string;
@@ -39,6 +61,12 @@ export type OrgDashboardPayload = {
     reportKind: string;
     submittedAt: string;
   }>;
+  overdueChurches: OrgOverdueChurchRow[];
+  overduePeriod: {
+    year: number;
+    month: number;
+    dueDay: number;
+  };
 };
 
 type RpcEnvelope<T> = {
@@ -87,6 +115,8 @@ function parseChurchRow(raw: unknown): OrgChurchRow | null {
       typeof row.org_unit_name === "string" && row.org_unit_name.length > 0
         ? row.org_unit_name
         : null,
+    billingPlan: String(row.billing_plan ?? "standard"),
+    billingStatus: String(row.billing_status ?? "active"),
   };
 }
 
@@ -145,6 +175,8 @@ export async function fetchOrgDashboard(
   const envelope = data as RpcEnvelope<{
     totals?: Record<string, unknown>;
     recent_reports?: unknown[];
+    overdue_churches?: unknown[];
+    overdue_period?: Record<string, unknown>;
   }>;
   assertRpcSuccess(envelope, "No se pudo cargar el dashboard del concilio.");
 
@@ -165,12 +197,40 @@ export async function fetchOrgDashboard(
     })
     .filter((row): row is NonNullable<typeof row> => row != null && row.id !== "");
 
+  const overdue = (envelope.overdue_churches ?? [])
+    .map((raw) => {
+      if (!raw || typeof raw !== "object") return null;
+      const row = raw as Record<string, unknown>;
+      return {
+        churchId: Number(row.church_id ?? 0) || 0,
+        churchName: String(row.church_name ?? ""),
+        externalCode:
+          typeof row.external_code === "string" && row.external_code.length > 0
+            ? row.external_code
+            : null,
+        billingStatus: String(row.billing_status ?? "active"),
+        periodYear: Number(row.period_year ?? 0) || 0,
+        periodMonth: Number(row.period_month ?? 0) || 0,
+        dueDay: Number(row.due_day ?? 10) || 10,
+      };
+    })
+    .filter((row): row is OrgOverdueChurchRow => row != null && row.churchId > 0);
+
+  const period = envelope.overdue_period ?? {};
+
   return {
     totals: {
       churchCount: Number(totals.church_count ?? 0) || 0,
       reportCount: Number(totals.report_count ?? 0) || 0,
+      overdueCount: Number(totals.overdue_count ?? overdue.length) || 0,
     },
     recentReports: recent,
+    overdueChurches: overdue,
+    overduePeriod: {
+      year: Number(period.year ?? 0) || 0,
+      month: Number(period.month ?? 0) || 0,
+      dueDay: Number(period.due_day ?? 10) || 10,
+    },
   };
 }
 
@@ -255,4 +315,95 @@ export async function provisionChurchUnderOrg(
     throw new Error("No se recibió el ID de la iglesia creada.");
   }
   return churchId;
+}
+
+export async function updateChurchBilling(
+  supabase: SupabaseClient,
+  organizationId: number,
+  churchId: number,
+  input: { billingPlan?: string; billingStatus?: string },
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_update_church_billing", {
+    p_org_id: organizationId,
+    p_church_id: churchId,
+    p_payload: {
+      billing_plan: input.billingPlan ?? "",
+      billing_status: input.billingStatus ?? "",
+    },
+  });
+  if (error) throw new Error(error.message);
+
+  const envelope = data as RpcEnvelope<unknown>;
+  assertRpcSuccess(envelope, "No se pudo actualizar la facturación.");
+}
+
+function parseApiKeyRow(raw: unknown): OrgApiKeyRow | null {
+  if (!raw || typeof raw !== "object") return null;
+  const row = raw as Record<string, unknown>;
+  const id = String(row.id ?? "");
+  if (!id) return null;
+  return {
+    id,
+    label: String(row.label ?? ""),
+    keyPrefix: String(row.key_prefix ?? ""),
+    createdAt: String(row.created_at ?? ""),
+    revokedAt:
+      typeof row.revoked_at === "string" && row.revoked_at.length > 0
+        ? row.revoked_at
+        : null,
+    lastUsedAt:
+      typeof row.last_used_at === "string" && row.last_used_at.length > 0
+        ? row.last_used_at
+        : null,
+  };
+}
+
+export async function fetchOrgApiKeys(
+  supabase: SupabaseClient,
+  organizationId: number,
+): Promise<OrgApiKeyRow[]> {
+  const { data, error } = await supabase.rpc("sp_list_org_api_keys", {
+    p_org_id: organizationId,
+  });
+  if (error) throw new Error(error.message);
+
+  const envelope = data as RpcEnvelope<{ items?: unknown[] }>;
+  assertRpcSuccess(envelope, "No se pudo listar las claves API.");
+
+  return (envelope.items ?? [])
+    .map(parseApiKeyRow)
+    .filter((row): row is OrgApiKeyRow => row != null);
+}
+
+export async function createOrgApiKey(
+  supabase: SupabaseClient,
+  organizationId: number,
+  input: { label: string; keyPrefix: string; keyHash: string },
+): Promise<string> {
+  const { data, error } = await supabase.rpc("sp_create_org_api_key", {
+    p_org_id: organizationId,
+    p_label: input.label,
+    p_key_prefix: input.keyPrefix,
+    p_key_hash: input.keyHash,
+  });
+  if (error) throw new Error(error.message);
+
+  const envelope = data as RpcEnvelope<{ key_id?: string }>;
+  assertRpcSuccess(envelope, "No se pudo crear la clave API.");
+  return String(envelope.key_id ?? "");
+}
+
+export async function revokeOrgApiKey(
+  supabase: SupabaseClient,
+  organizationId: number,
+  keyId: string,
+): Promise<void> {
+  const { data, error } = await supabase.rpc("sp_revoke_org_api_key", {
+    p_org_id: organizationId,
+    p_key_id: keyId,
+  });
+  if (error) throw new Error(error.message);
+
+  const envelope = data as RpcEnvelope<unknown>;
+  assertRpcSuccess(envelope, "No se pudo revocar la clave API.");
 }

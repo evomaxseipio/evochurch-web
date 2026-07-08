@@ -11,6 +11,18 @@
 | `sp_submit_concilio_report(p_church_id, p_period_year, p_period_month, p_payload)` | Iglesia envía reporte |
 | `sp_get_church_org_report_rules(p_church_id)` | Reglas CEAD/F.001 del concilio |
 | `sp_provision_church_under_org(p_org_id, p_payload)` | Alta iglesia bajo org (admin concilio) |
+| `sp_update_church_billing(p_org_id, p_church_id, p_payload)` | Plan/estado facturación por iglesia |
+| `sp_list_org_api_keys` / `sp_create_org_api_key` / `sp_revoke_org_api_key` | Gestión claves API (portal) |
+| `sp_resolve_org_api_key(p_key_hash)` | Solo service role — validar Bearer en API HTTP |
+
+## API HTTP externa (Fase 4)
+
+| Endpoint | Descripción |
+|----------|-------------|
+| `GET /api/org/v1/churches` | Directorio iglesias del concilio |
+| `GET /api/org/v1/reports?periodYear=&periodMonth=` | Bandeja F.001 recibidos |
+
+Autenticación: `Authorization: Bearer evo_org_<secret>` (clave generada en `/org/settings`).
 
 ## Permisos org (`org_role_permissions`)
 
@@ -36,7 +48,8 @@ Flutter puede implementar las mismas pantallas llamando los RPCs anteriores; no 
     "fpj_percent": 1
   },
   "f001": {
-    "council_header": "Concilio … dirección"
+    "council_header": "Concilio … dirección",
+    "due_day": 10
   }
 }
 ```
