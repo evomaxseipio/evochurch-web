@@ -94,7 +94,7 @@ function drawCeadHeader(
 ): void {
   const left = doc.page.margins.left;
   const width = contentWidth(doc);
-  const y0 = ensureSpace(doc, doc.y, 72);
+  const y0 = ensureSpace(doc, doc.y, 80);
   const churchDisplay =
     payload.churchName?.trim() || FUENTE_INAGOTABLE.churchDisplayName;
   const pastorDisplay = payload.pastorName?.trim() || "-";
@@ -113,28 +113,40 @@ function drawCeadHeader(
   }
 
   const textX = left + 66;
+  const textW = width - 66 - 210;
+  let textY = y0;
+
   doc.font("Helvetica-Bold").fontSize(16).fillColor(NAVY).text(
     sanitizePdfText(t("preview.ceadMonthly.title")),
     textX,
-    y0,
-    { width: width - 66 - 210 },
+    textY,
+    { width: textW, lineGap: 1 },
   );
+  textY = doc.y + 4;
+
   doc.font("Helvetica-Bold").fontSize(11).fillColor(NAVY).text(
     sanitizePdfText(churchDisplay),
     textX,
-    y0 + 20,
-    { width: width - 66 - 210 },
+    textY,
+    { width: textW, lineGap: 1 },
   );
+  textY = doc.y + 2;
+
   doc.font("Helvetica").fontSize(10).fillColor("#5b6072").text(
     sanitizePdfText(payload.cead.periodLabel),
     textX,
-    y0 + 34,
+    textY,
+    { width: textW },
   );
+  textY = doc.y + 2;
+
   doc.text(
     sanitizePdfText(`${t("preview.ceadMonthly.pastor")}: ${pastorDisplay}`),
     textX,
-    y0 + 46,
+    textY,
+    { width: textW },
   );
+  const textBottom = doc.y;
 
   const boxW = 200;
   const boxX = left + width - boxW;
@@ -144,7 +156,7 @@ function drawCeadHeader(
     sanitizePdfText(`${t("preview.ceadMonthly.generatedAt")}: ${generatedLabel}`),
     boxX + 10,
     y0 + 10,
-    { width: boxW - 20 },
+    { width: boxW - 20, lineGap: 1 },
   );
   doc.text(
     sanitizePdfText(`${t("preview.ceadMonthly.treasurer")}: ${treasurerDisplay}`),
@@ -153,7 +165,8 @@ function drawCeadHeader(
     { width: boxW - 20 },
   );
 
-  const ruleY = y0 + 64;
+  const headerBottom = Math.max(textBottom, y0 + boxH);
+  const ruleY = headerBottom + 12;
   doc.save().moveTo(left, ruleY).lineTo(left + width, ruleY).strokeColor(GOLD).lineWidth(2).stroke().restore();
   doc.x = left;
   doc.y = ruleY + 14;
