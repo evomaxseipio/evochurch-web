@@ -16,12 +16,31 @@ Antes de proponer cambios, leer en este orden:
 | 1 | [product/PRODUCT_STRATEGY.md](product/PRODUCT_STRATEGY.md) | **Siempre** — visión, EPICs, prioridades, backlog |
 | 2 | [architecture/SYSTEM_OVERVIEW.md](architecture/SYSTEM_OVERVIEW.md) | Primera vez en el repo o cambios cross-stack |
 | 3 | [architecture/MULTI_TENANT.md](architecture/MULTI_TENANT.md) | Auth, sesión, permisos, datos por iglesia |
-| 4 | [engineering/AI_DATABASE_GUIDE.md](engineering/AI_DATABASE_GUIDE.md) | RPC, migraciones, RLS, triggers |
-| 5 | [engineering/AI_BACKEND_GUIDE.md](engineering/AI_BACKEND_GUIDE.md) | Server Actions, servicios, autorización |
-| 6 | Guía por stack | Según el cambio: `AI_FRONTEND_GUIDE`, `AI_FLUTTER_GUIDE`, `AI_SECURITY_GUIDE` |
-| 7 | Guía por dominio | Producto/UX: `product/AI_*` · Arquitectura: `architecture/MODULES` |
 
-**Complemento Flutter (legacy, aún vigente):** `uploads/CONTEXT.md`, `uploads/CLAUDE.md`, `uploads/UI_SPEC.md` — se migran gradualmente a `.evo/`.
+**Complemento Flutter (legacy, aún vigente):** [uploads/CONTEXT.md](../uploads/CONTEXT.md), [uploads/CLAUDE.md](../uploads/CLAUDE.md), [uploads/UI_SPEC.md](../uploads/UI_SPEC.md) — se migran gradualmente a `.evo/`.
+
+---
+
+## Guía por tipo de tarea (agentes IA)
+
+Después de la lectura obligatoria (ítems 0–3), **identifica qué vas a hacer** y lee **además** las guías de esta tabla **antes de escribir código**.
+
+| Si el agente va a… | Leer también |
+|------------------|--------------|
+| Server Actions, APIs, servicios | [engineering/AI_BACKEND_GUIDE.md](engineering/AI_BACKEND_GUIDE.md) |
+| RPC, migraciones, RLS | [engineering/AI_DATABASE_GUIDE.md](engineering/AI_DATABASE_GUIDE.md) + [templates/MIGRATION_TEMPLATE.md](templates/MIGRATION_TEMPLATE.md) |
+| UI web (páginas, componentes) | [engineering/AI_FRONTEND_GUIDE.md](engineering/AI_FRONTEND_GUIDE.md) + [product/AI_DESIGN_SYSTEM.md](product/AI_DESIGN_SYSTEM.md) |
+| Flutter | [engineering/AI_FLUTTER_GUIDE.md](engineering/AI_FLUTTER_GUIDE.md) + [uploads/CONTEXT.md](../uploads/CONTEXT.md) |
+| Auth, permisos, datos sensibles | [engineering/AI_SECURITY_GUIDE.md](engineering/AI_SECURITY_GUIDE.md) + [architecture/MULTI_TENANT.md](architecture/MULTI_TENANT.md) |
+| Nueva feature / priorización | [product/AI_PRODUCT_GUIDE.md](product/AI_PRODUCT_GUIDE.md) + [product/PRODUCT_ROADMAP.md](product/PRODUCT_ROADMAP.md) |
+| UX / pantallas | [product/AI_UX_GUIDE.md](product/AI_UX_GUIDE.md) |
+| Reglas de negocio (miembros, finanzas…) | [product/AI_BUSINESS_RULES.md](product/AI_BUSINESS_RULES.md) + [architecture/MODULES.md](architecture/MODULES.md) |
+| Primera vez en el repo o cambio cross-stack | [architecture/SYSTEM_OVERVIEW.md](architecture/SYSTEM_OVERVIEW.md) |
+| Tocar tablas o contratos RPC | [architecture/DATABASE_SCHEMA.md](architecture/DATABASE_SCHEMA.md) |
+
+**Regla:** Si la tarea cruza varias filas (ej. feature con UI + BD), leer **todas** las guías que apliquen. Si hay duda, priorizar `MULTI_TENANT` y la guía del stack.
+
+**Antes de implementar**, el agente debe poder responder en una línea: *qué guías de apoyo consultó y por qué*.
 
 ---
 
@@ -66,11 +85,12 @@ Antes de proponer cambios, leer en este orden:
 
 ## Trabajar con agentes IA
 
-1. Pegar el prompt adecuado desde `prompts/` (feature, bugfix, refactor, review).
-2. Referenciar `@.evo/product/PRODUCT_STRATEGY.md` y `@.evo/engineering/AI_ENGINEERING_GUIDE.md`.
-3. Indicar módulo y stack (Next.js / Flutter / BD).
-4. Exigir architecture review antes de código si el cambio es no trivial.
-5. No autorizar cambios fuera del alcance del sprint o tarea activa.
+1. Entrar por este README → **Guía por tipo de tarea** → leer guías de apoyo según el cambio.
+2. Pegar el prompt adecuado desde `prompts/` (feature, bugfix, refactor, review).
+3. Referenciar `@.evo/product/PRODUCT_STRATEGY.md` y `@.evo/engineering/AI_ENGINEERING_GUIDE.md`.
+4. Indicar módulo y stack (Next.js / Flutter / BD).
+5. Exigir architecture review antes de código si el cambio es no trivial.
+6. No autorizar cambios fuera del alcance del sprint o tarea activa.
 
 ---
 

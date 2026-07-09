@@ -2,7 +2,7 @@
 
 Repo **Next.js** (consola web). App Flutter: `github.com/evomaxseipio/evochurch`.
 
-**Punto de entrada EDK:** **[.evo/README.md](.evo/README.md)** — índice completo, flujo de trabajo y plantillas.
+**Punto de entrada EDK:** **[.evo/README.md](.evo/README.md)** — índice completo, **guía por tipo de tarea**, flujo de trabajo y plantillas.
 
 Antes de cambiar lógica de producto, auth o datos, lee en este orden:
 
