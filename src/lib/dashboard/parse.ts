@@ -15,7 +15,7 @@ import type {
 } from "@/lib/dashboard/types";
 import { CHART_PERIODS } from "@/lib/dashboard/types";
 import { formatHeroDateLabel } from "@/lib/dashboard/period";
-import { fmtRDshort } from "@/lib/format-currency";
+import { fmtRD } from "@/lib/format-currency";
 import type { Locale } from "@/i18n/config";
 import { formatNumber } from "@/lib/i18n/format";
 import type { MembersListStats } from "@/lib/members/types";
@@ -192,7 +192,7 @@ function buildDashboardKpisFromSummary(params: {
     {
       labelKey: "kpiFundsBalance",
       label: "Saldo en fondos",
-      value: fmtRDshort(params.fundsSummary.totalBalance, locale),
+      value: fmtRD(params.fundsSummary.totalBalance, locale),
       deltaKey: "deltaActiveFunds",
       deltaValues: { count: params.fundsSummary.activeCount },
       deltaDir: "up",
@@ -202,7 +202,7 @@ function buildDashboardKpisFromSummary(params: {
     {
       labelKey: "kpiContributionsMonth",
       label: "Contribuciones (mes)",
-      value: fmtRDshort(params.kpiMonth.contributionsThisMonth, locale),
+      value: fmtRD(params.kpiMonth.contributionsThisMonth, locale),
       delta: contributionsDelta.delta,
       deltaDir: contributionsDelta.deltaDir,
       icon: "wallet",
@@ -237,7 +237,7 @@ function buildDashboardKpisFromSummary(params: {
     {
       labelKey: "kpiLedgerIncomeMonth",
       label: "Ingresos recibidos (mes)",
-      value: fmtRDshort(params.kpiMonth.ledgerIncomeThisMonth, locale),
+      value: fmtRD(params.kpiMonth.ledgerIncomeThisMonth, locale),
       delta: incomeDelta.delta,
       deltaDir: incomeDelta.deltaDir,
       icon: "trendUp",
@@ -246,7 +246,7 @@ function buildDashboardKpisFromSummary(params: {
     {
       labelKey: "kpiLedgerExpenseMonth",
       label: "Transacciones (mes)",
-      value: fmtRDshort(params.kpiMonth.ledgerExpenseThisMonth, locale),
+      value: fmtRD(params.kpiMonth.ledgerExpenseThisMonth, locale),
       delta: expenseDelta.delta,
       deltaDir: expenseDelta.deltaDir,
       icon: "arrowDn",

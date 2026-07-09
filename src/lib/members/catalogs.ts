@@ -21,6 +21,21 @@ export const ID_TYPE_OPTIONS: readonly SelectOption[] = [
   { value: "Other", label: "Otro" },
 ] as const;
 
+export const BLOOD_TYPE_VALUES = [
+  "",
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+  "Unknown",
+] as const;
+
+export type BloodTypeValue = (typeof BLOOD_TYPE_VALUES)[number];
+
 function matchOption(
   raw: string,
   options: readonly SelectOption[],

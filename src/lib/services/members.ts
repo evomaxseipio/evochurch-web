@@ -12,6 +12,7 @@ import type {
   MembersPageResult,
   MembershipInput,
   MembershipRecord,
+  ProfileEmploymentInput,
 } from "@/lib/members/types";
 import { catalogTags } from "@/lib/cache/catalog-tags";
 import { assertRpcSuccess } from "@/lib/supabase/rpc-result";
@@ -110,6 +111,20 @@ export async function fetchMemberRoles(
   )();
 }
 
+function profileExtensionRpcParams(input: MemberProfileInput) {
+  return {
+  ...(input.bloodType !== undefined
+    ? { p_blood_type: input.bloodType || null }
+    : {}),
+  ...(input.allergies !== undefined
+    ? { p_allergies: input.allergies }
+    : {}),
+  ...(input.professions !== undefined
+    ? { p_professions: input.professions }
+    : {}),
+  };
+}
+
 export async function insertMember(
   supabase: SupabaseClient,
   churchId: number,
@@ -136,6 +151,7 @@ export async function insertMember(
     p_phone: input.phone || null,
     p_mobile_phone: input.mobilePhone || null,
     p_email: input.email || null,
+    ...profileExtensionRpcParams(input),
   });
 
   if (error) throw error;
@@ -170,6 +186,7 @@ export async function updateMember(
     p_phone: input.phone || null,
     p_mobile_phone: input.mobilePhone || null,
     p_email: input.email || null,
+    ...profileExtensionRpcParams(input),
   });
 
   if (error) throw error;
@@ -212,5 +229,37 @@ export async function saveMembership(
   if (error) throw error;
   const result = (data as Record<string, unknown>) ?? {};
   assertRpcSuccess(result, "No se pudo guardar la membresía.");
+  return result;
+}
+
+export type MaintainEmploymentAction =
+  | "upsert_primary"
+  | "upsert_history"
+  | "delete";
+
+export async function maintainProfileEmployment(
+  supabase: SupabaseClient,
+  churchId: number,
+  action: MaintainEmploymentAction,
+  input: ProfileEmploymentInput & { employmentId?: string },
+): Promise<Record<string, unknown>> {
+  const { data, error } = await supabase.rpc("sp_maintain_profile_employment", {
+    p_profile_id: input.profileId,
+    p_church_id: churchId,
+    p_action: action,
+    p_employment_id: input.employmentId || null,
+    p_employer_name: input.employerName || null,
+    p_job_title: input.jobTitle || null,
+    p_sector: input.sector || null,
+    p_work_phone: input.workPhone || null,
+    p_work_email: input.workEmail || null,
+    p_start_date: input.startDate || null,
+    p_end_date: input.endDate || null,
+    p_notes: input.notes || null,
+  });
+
+  if (error) throw error;
+  const result = (data as Record<string, unknown>) ?? {};
+  assertRpcSuccess(result, "No se pudo guardar el empleo.");
   return result;
 }

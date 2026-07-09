@@ -16,6 +16,7 @@ import type {
   MembersPagination,
   MembershipHistoryEntry,
   MembershipRecord,
+  ProfileEmployment,
 } from "./types";
 
 function asRecord(v: unknown): Record<string, unknown> | null {
@@ -108,6 +109,43 @@ export function parseMembersPageResponse(data: unknown): MembersPageResult {
   };
 }
 
+function parseStringArray(v: unknown): string[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((item) => str(item))
+    .filter(Boolean);
+}
+
+function parseEmployment(raw: unknown): ProfileEmployment | null {
+  const json = asRecord(raw);
+  if (!json) return null;
+
+  const id = str(json.id);
+  if (!id) return null;
+
+  return {
+    id,
+    employerName: str(json.employerName ?? json.employer_name),
+    jobTitle: str(json.jobTitle ?? json.job_title),
+    sector: str(json.sector),
+    workPhone: str(json.workPhone ?? json.work_phone),
+    workEmail: str(json.workEmail ?? json.work_email),
+    isPrimary: bool(json.isPrimary ?? json.is_primary),
+    startDate: parseDateOnly(json.startDate ?? json.start_date),
+    endDate: parseDateOnly(json.endDate ?? json.end_date),
+    source: str(json.source, "staff"),
+    notes: str(json.notes),
+    marketplaceOptIn: bool(json.marketplaceOptIn ?? json.marketplace_opt_in),
+  };
+}
+
+function parseEmploymentList(v: unknown): ProfileEmployment[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((row) => parseEmployment(row))
+    .filter((row): row is ProfileEmployment => row != null);
+}
+
 export function parseMember(raw: unknown): Member | null {
   const json = asRecord(raw);
   if (!json) return null;
@@ -117,6 +155,8 @@ export function parseMember(raw: unknown): Member | null {
 
   const memberId = str(json.memberId ?? json.member_id ?? json.id);
   if (!memberId) return null;
+
+  const employment = parseEmploymentList(json.employment);
 
   return {
     memberId,
@@ -142,6 +182,11 @@ export function parseMember(raw: unknown): Member | null {
       json.membershipRole ?? json.membership_role ?? json.role,
       "Visita",
     ),
+    bloodType: str(json.bloodType ?? json.blood_type),
+    allergies: parseStringArray(json.allergies),
+    professions: parseStringArray(json.professions),
+    employment,
+    primaryEmployment: employment.find((e) => e.isPrimary) ?? null,
     address: {
       streetAddress: str(addr?.streetAddress ?? addr?.street_address),
       stateProvince: str(addr?.stateProvince ?? addr?.state_province),

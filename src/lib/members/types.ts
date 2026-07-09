@@ -11,6 +11,21 @@ export type MemberContact = {
   email: string;
 };
 
+export type ProfileEmployment = {
+  id: string;
+  employerName: string;
+  jobTitle: string;
+  sector: string;
+  workPhone: string;
+  workEmail: string;
+  isPrimary: boolean;
+  startDate: string;
+  endDate: string;
+  source: string;
+  notes: string;
+  marketplaceOptIn: boolean;
+};
+
 export type Member = {
   memberId: string;
   churchId: number | null;
@@ -28,6 +43,11 @@ export type Member = {
   bio: string;
   membershipRoleId: string;
   membershipRole: string;
+  bloodType: string;
+  allergies: string[];
+  professions: string[];
+  employment: ProfileEmployment[];
+  primaryEmployment: ProfileEmployment | null;
   address: MemberAddress;
   contact: MemberContact;
 };
@@ -134,6 +154,22 @@ export type MemberProfileInput = {
   phone: string;
   mobilePhone: string;
   email: string;
+  bloodType?: string;
+  allergies?: string[];
+  professions?: string[];
+};
+
+export type ProfileEmploymentInput = {
+  profileId: string;
+  employmentId?: string;
+  employerName: string;
+  jobTitle: string;
+  sector: string;
+  workPhone: string;
+  workEmail: string;
+  startDate: string;
+  endDate?: string;
+  notes: string;
 };
 
 export type MembershipInput = {

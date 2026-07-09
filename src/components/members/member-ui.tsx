@@ -25,19 +25,8 @@ export function MemberAvatar({
 
 export function StatusChip({ member }: { member: Member }) {
   const t = useTranslations("members");
-  const label = member.isActive
-    ? member.isMember
-      ? t("statusActive")
-      : t("statusVisit")
-    : t("statusInactive");
-  const chipClass =
-    member.isActive && member.isMember
-      ? "success"
-      : member.isActive && !member.isMember
-        ? "warn"
-        : !member.isActive
-          ? ""
-          : "pending";
+  const label = member.isActive ? t("statusActive") : t("statusInactive");
+  const chipClass = member.isActive ? "success" : "";
 
   return (
     <span className={`chip ${chipClass}`.trim()}>

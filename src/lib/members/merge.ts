@@ -37,5 +37,8 @@ export function mergeMemberFromInput(
       mobilePhone: input.mobilePhone,
       email: input.email,
     },
+    ...(input.bloodType !== undefined ? { bloodType: input.bloodType } : {}),
+    ...(input.allergies !== undefined ? { allergies: input.allergies } : {}),
+    ...(input.professions !== undefined ? { professions: input.professions } : {}),
   };
 }

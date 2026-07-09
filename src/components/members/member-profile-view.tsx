@@ -7,6 +7,9 @@ import {
 } from "@/app/(app)/members/actions";
 import { Icons } from "@/components/icons";
 import { MemberFinancesTab } from "@/components/members/member-finances-tab";
+import { MemberHealthTab } from "@/components/members/member-health-tab";
+import { MemberProfessionsTab } from "@/components/members/member-professions-tab";
+import { MemberEmploymentTab } from "@/components/members/member-employment-tab";
 import {
   MembershipStatusField,
   ProfileField,
@@ -48,6 +51,9 @@ const PROFILE_TABS: {
 }[] = [
   { id: "profile", labelKey: "tabProfile", icon: "users" },
   { id: "membership", labelKey: "tabMembership", icon: "cross" },
+  { id: "health", labelKey: "tabHealth", icon: "shield" },
+  { id: "professions", labelKey: "tabProfessions", icon: "star" },
+  { id: "employment", labelKey: "tabEmployment", icon: "pin" },
   { id: "finances", labelKey: "tabFinances", icon: "wallet" },
   { id: "delete", labelKey: "deleteAccount", icon: "trash", isDanger: true },
 ];
@@ -92,6 +98,9 @@ export function MemberProfileView({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
   const [membershipPending, setMembershipPending] = useState(false);
+  const [healthPending, setHealthPending] = useState(false);
+  const [professionsPending, setProfessionsPending] = useState(false);
+  const [employmentPending, setEmploymentPending] = useState(false);
 
   const active =
     PROFILE_TABS.find((t) => t.id === tab) ?? PROFILE_TABS[0];
@@ -146,6 +155,9 @@ export function MemberProfileView({
           tab={tab}
           profilePending={profilePending}
           membershipPending={membershipPending}
+          healthPending={healthPending}
+          professionsPending={professionsPending}
+          employmentPending={employmentPending}
           canWriteMembers={canWriteMembers}
         />
       </div>
@@ -276,6 +288,30 @@ export function MemberProfileView({
               onPending={setMembershipPending}
               onMemberUpdated={onMemberUpdated}
               onMembershipUpdated={onMembershipUpdated}
+              readOnly={!canWriteMembers}
+            />
+          ) : null}
+          {tab === "health" ? (
+            <MemberHealthTab
+              member={member}
+              onPending={setHealthPending}
+              onMemberUpdated={onMemberUpdated}
+              readOnly={!canWriteMembers}
+            />
+          ) : null}
+          {tab === "professions" ? (
+            <MemberProfessionsTab
+              member={member}
+              onPending={setProfessionsPending}
+              onMemberUpdated={onMemberUpdated}
+              readOnly={!canWriteMembers}
+            />
+          ) : null}
+          {tab === "employment" ? (
+            <MemberEmploymentTab
+              member={member}
+              onPending={setEmploymentPending}
+              onMemberUpdated={onMemberUpdated}
               readOnly={!canWriteMembers}
             />
           ) : null}

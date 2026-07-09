@@ -47,6 +47,7 @@ import type {
   OperationalIncomeType,
 } from "@/lib/ledger/types";
 import { fmtRD } from "@/lib/format-currency";
+import { formatDate } from "@/lib/i18n/format";
 import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -276,6 +277,17 @@ export function TransactionsListView({
         ),
       },
       {
+        key: "date",
+        label: tCommon("date"),
+        className: "muted",
+        render: (entry: LedgerEntry) =>
+          formatDate(entry.movementDate, locale, {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+      },
+      {
         key: "amount",
                 label: tCommon("amount"),
         align: "right" as const,
@@ -312,7 +324,7 @@ export function TransactionsListView({
             : entry.authorizedBy,
       },
     ],
-    [canAuthorizeFinances, tCommon, tTransactions],
+    [canAuthorizeFinances, locale, tCommon, tTransactions],
   );
 
   const emptyMessage =

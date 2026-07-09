@@ -2,7 +2,7 @@ import type { Contribution } from "@/lib/contributions/types";
 import type { Fund } from "@/lib/funds/types";
 import { computeLedgerStats } from "@/lib/ledger/parse";
 import type { LedgerEntry } from "@/lib/ledger/types";
-import { fmtRDshort } from "@/lib/format-currency";
+import { fmtRD } from "@/lib/format-currency";
 import type { MembersListStats } from "@/lib/members/types";
 import {
   buildPeriodBuckets,
@@ -234,7 +234,7 @@ export function buildDashboardKpis(params: {
     },
     {
       label: "Saldo en fondos",
-      value: fmtRDshort(fundsBalance.total),
+      value: fmtRD(fundsBalance.total),
       delta: `${fundsBalance.activeCount} fondo${fundsBalance.activeCount === 1 ? "" : "s"} activo${fundsBalance.activeCount === 1 ? "" : "s"}`,
       deltaDir: "up",
       icon: "wallet",
@@ -242,7 +242,7 @@ export function buildDashboardKpis(params: {
     },
     {
       label: "Contribuciones (mes)",
-      value: fmtRDshort(contributionsThisMonth),
+      value: fmtRD(contributionsThisMonth),
       delta: contributionsDelta.delta,
       deltaDir: contributionsDelta.deltaDir,
       icon: "wallet",
@@ -270,7 +270,7 @@ export function buildDashboardKpis(params: {
     },
     {
       label: "Ingresos recibidos (mes)",
-      value: fmtRDshort(ledgerThisMonth.incomeAmount),
+      value: fmtRD(ledgerThisMonth.incomeAmount),
       delta: incomeDelta.delta,
       deltaDir: incomeDelta.deltaDir,
       icon: "trendUp",
@@ -278,7 +278,7 @@ export function buildDashboardKpis(params: {
     },
     {
       label: "Transacciones (mes)",
-      value: fmtRDshort(ledgerThisMonth.expenseAmount),
+      value: fmtRD(ledgerThisMonth.expenseAmount),
       delta: expenseDelta.delta,
       deltaDir: expenseDelta.deltaDir,
       icon: "arrowDn",

@@ -16,6 +16,9 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | [AGENT-PROMPT-REPORTES-MODULE.md](./AGENT-PROMPT-REPORTES-MODULE.md) | **Módulo Reportes** — hub + CEAD + directorio + ejecutivo (por sección REP-0…REP-6) |
 | [AGENT-PROMPT-I18N-MODULE.md](./AGENT-PROMPT-I18N-MODULE.md) | **Internacionalización** — es/en/fr, next-intl, por sección I18N-0…I18N-QA |
 | [AGENT-PROMPT-AUDIT-LOG.md](./AGENT-PROMPT-AUDIT-LOG.md) | **Audit log** — bitácora por iglesia, dashboard + reporte `/reports` |
+| [AGENT-PROMPT-FASE-1-REUNION.md](./AGENT-PROMPT-FASE-1-REUNION.md) | **Fase 1 reunión** — dashboard montos completos, fecha transacciones, estatus miembros |
+| [AGENT-PROMPT-FASE-2-REUNION.md](./AGENT-PROMPT-FASE-2-REUNION.md) | **Fase 2 reunión** — salud (sangre + alergias), oficios tags, empleo principal |
+| [DEBATE-MODULO-DESCUENTOS-DIEZMO.md](./DEBATE-MODULO-DESCUENTOS-DIEZMO.md) | **Debate** — reparto diezmo 70/15/15 y módulo de descuentos (pre-implementación) |
 
 ## Cómo usar
 
@@ -113,7 +116,8 @@ Registrar resultados en PR o comentario de cierre MVP.
 
 Antes de tocar lógica de producto, auth o datos, leer:
 
-1. `uploads/CONTEXT.md`
-2. `AGENTS.md` (raíz del repo)
+1. **`.ai/engineering/AI_ENGINEERING_GUIDE.md`** — estándar obligatorio antes de ejecutar cualquier prompt
+2. `uploads/CONTEXT.md`
+3. `AGENTS.md` (raíz del repo)
 
 Multitenant: `church_id` vía `getAppSession()` / `getActionSession()` — no autorizar desde metadata del cliente.

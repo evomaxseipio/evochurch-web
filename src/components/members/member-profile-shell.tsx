@@ -7,7 +7,15 @@ import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-const TABS: ProfileTabId[] = ["profile", "membership", "finances", "delete"];
+const TABS: ProfileTabId[] = [
+  "profile",
+  "membership",
+  "health",
+  "professions",
+  "employment",
+  "finances",
+  "delete",
+];
 
 function parseTab(value: string | null): ProfileTabId {
   if (value && TABS.includes(value as ProfileTabId)) {

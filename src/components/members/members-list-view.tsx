@@ -494,6 +494,26 @@ export function MembersListView({
                 m.address.stateProvince || m.address.cityState || "—",
             },
             {
+              key: "professions",
+              label: t("professionsColumn"),
+              className: "muted hide-mobile",
+              render: (m) =>
+                m.professions.length > 0 ? (
+                  <span className="row" style={{ gap: 4, flexWrap: "wrap" }}>
+                    {m.professions.slice(0, 2).map((p) => (
+                      <span key={p} className="chip lila" style={{ fontSize: 11 }}>
+                        {p}
+                      </span>
+                    ))}
+                    {m.professions.length > 2 ? (
+                      <span className="tiny muted">+{m.professions.length - 2}</span>
+                    ) : null}
+                  </span>
+                ) : (
+                  "—"
+                ),
+            },
+            {
               key: "nationality",
               label: t("nationality"),
               className: "muted",
