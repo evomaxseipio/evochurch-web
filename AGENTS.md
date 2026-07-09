@@ -2,11 +2,18 @@
 
 Repo **Next.js** (consola web). App Flutter: `github.com/evomaxseipio/evochurch`.
 
+**Punto de entrada EDK:** **[.evo/README.md](.evo/README.md)** — índice completo, flujo de trabajo y plantillas.
+
 Antes de cambiar lógica de producto, auth o datos, lee en este orden:
 
-1. **[uploads/CONTEXT.md](uploads/CONTEXT.md)** — estado de migración Flutter (Riverpod), módulos tocables vs legacy, riesgos (members), RPCs Supabase, diseño M3.
-2. **[uploads/CLAUDE.md](uploads/CLAUDE.md)** — comandos Flutter, estructura por features, reglas de estado (`authProvider`, `churchId`), rutas GoRouter, integración Supabase.
-3. **[uploads/UI_SPEC.md](uploads/UI_SPEC.md)** — especificación UI (producto, tokens, layout).
+0. **[.evo/engineering/AI_ENGINEERING_GUIDE.md](.evo/engineering/AI_ENGINEERING_GUIDE.md)** — estándar obligatorio: KISS/DRY/SOLID, architecture review, impact analysis, definition of done. **Consultar siempre antes de ejecutar cualquier prompt o sprint.**
+1. **[.evo/product/PRODUCT_STRATEGY.md](.evo/product/PRODUCT_STRATEGY.md)** — visión, prioridades, estados del backlog y norte estratégico del producto. **Mantener siempre pendiente** al proponer features, priorizar tareas o tomar decisiones de alcance.
+2. **[.evo/architecture/SYSTEM_OVERVIEW.md](.evo/architecture/SYSTEM_OVERVIEW.md)** — mapa del sistema (Next.js, Flutter, Supabase).
+3. **[.evo/architecture/MULTI_TENANT.md](.evo/architecture/MULTI_TENANT.md)** — sesión, guards RPC, permisos RBAC.
+4. **[uploads/CONTEXT.md](uploads/CONTEXT.md)** — estado de migración Flutter (Riverpod), módulos tocables vs legacy, riesgos (members), RPCs Supabase, diseño M3.
+5. **[uploads/CLAUDE.md](uploads/CLAUDE.md)** — comandos Flutter, estructura por features, reglas de estado (`authProvider`, `churchId`), rutas GoRouter, integración Supabase.
+6. **[uploads/UI_SPEC.md](uploads/UI_SPEC.md)** — especificación UI (producto, tokens, layout).
+7. Guías por stack (según cambio): [AI_FRONTEND_GUIDE.md](.evo/engineering/AI_FRONTEND_GUIDE.md), [AI_FLUTTER_GUIDE.md](.evo/engineering/AI_FLUTTER_GUIDE.md), [AI_SECURITY_GUIDE.md](.evo/engineering/AI_SECURITY_GUIDE.md).
 
 ## Multitenant
 
@@ -19,9 +26,10 @@ Antes de cambiar lógica de producto, auth o datos, lee en este orden:
 
 | Carpeta / raíz | Qué es |
 |----------------|--------|
+| **`.evo/`** | **EDK** — guías, arquitectura, producto, prompts y plantillas para agentes |
 | **`src/`**, `package.json` | App **Next.js 16 + TypeScript + Supabase** (SaaS web) |
 | **`mockup/`** | Prototipo HTML/React con datos ficticios (`EvoChurch.html`) — solo referencia visual |
-| **`uploads/`** | Contexto Flutter, UI spec, guías para agentes |
+| **`uploads/`** | Contexto Flutter legacy — migrando gradualmente a `.evo/` |
 | Flutter (Dart) | Puede vivir en otro clon; no está versionado aquí |
 
 ## Convenciones del producto (resumen)
