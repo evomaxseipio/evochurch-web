@@ -81,7 +81,8 @@
     "phone": "Phone",
     "password": "Password",
     "created": "Created",
-    "updated": "Updated"
+    "updated": "Updated",
+    "comment": "Commentaire"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -122,8 +123,8 @@
     "promoTitle": "Une seule plateforme pour votre ministère.",
     "promoSubtitle": "Membres, finances, événements et communication — conçue pour les églises en croissance.",
     "loginSubtitle": "Entrez votre e-mail et mot de passe pour accéder à votre compte.",
-    "email": "Correo electrónico",
-    "password": "Contraseña",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
     "rememberMe": "Se souvenir de moi",
     "forgotPassword": "Mot de passe oublié ?",
     "signIn": "Se connecter",
@@ -351,8 +352,8 @@
   "comunicacion": {
     "title": "Communication",
     "subtitle": "Announcements, internal chat and notifications",
-    "comingSoon": "Próximamente",
-    "description": "Esta pantalla se implementará en la siguiente fase del diseño."
+    "comingSoon": "Bientôt disponible",
+    "description": "Cet écran sera implémenté dans la prochaine phase de conception."
   },
   "members": {
     "title": "Membres",
@@ -392,7 +393,7 @@
     "roleAndStatus": "Role and status in the church",
     "membershipHistory": "Membership history",
     "dangerZone": "Danger zone",
-    "archiveHint": "Just want to archive?",
+    "archiveHint": "Recommandé lorsqu'un membre déménage, se transfère dans une autre église ou met son activité en pause temporairement.",
     "firstName": "First name",
     "lastName": "Last name",
     "gender": "Gender",
@@ -408,8 +409,8 @@
     "memberContributions": "Member contributions",
     "noChartData": "No data for chart.",
     "newMember": "New record",
-    "personalSection": "Información personal",
-    "addressSection": "Dirección",
+    "personalSection": "Informations personnelles",
+    "addressSection": "Adresse",
     "contactSection": "Contacto",
     "requiredFields": "Required fields",
     "confirmDelete": "Confirm deletion",
@@ -502,7 +503,6 @@
     "archiveEyebrow": "Alternative",
     "archiveTitle": "Voulez-vous simplement archiver ?",
     "archiveBody": "Marquer le membre comme inactif le masque des vues actives mais conserve toutes les informations.",
-    "archiveHint": "Recommandé lorsqu'un membre déménage, se transfère dans une autre église ou met son activité en pause temporairement.",
     "archiveCta": "Archiver le membre",
     "countryDominicanRepublic": "République dominicaine",
     "countryUnitedStates": "États-Unis",
@@ -556,7 +556,15 @@
     "tagInputPlaceholder": "Saisir et appuyer sur Entrée…",
     "removeTag": "Retirer {tag}",
     "professionsColumn": "Métiers",
-    "count": "{count, plural, =0 {Aucun membre} one {# membre} other {# membres}}"
+    "count": "{count, plural, =0 {Aucun membre} one {# membre} other {# membres}}",
+    "monthlyContributionsSubtitle": "Dîmes, offrandes et dons enregistrés par mois.",
+    "trendEyebrow": "Tendance",
+    "monthlyTotal": "Total mensuel",
+    "chartAriaLabel": "Graphique des contributions mensuelles par type et total",
+    "searchContributionsPlaceholder": "Rechercher par type, montant, date…",
+    "noContributionsMatchSearch": "Aucun enregistrement ne correspond à la recherche.",
+    "catalogLoadFailed": "Impossible de charger les catalogues.",
+    "otherType": "Autre"
   },
   "finances": {
     "stewardship": "Stewardship · Finances",
@@ -567,24 +575,24 @@
       "titheClose": "Clôture des dîmes"
     },
     "paymentMethods": {
-      "cash": "Efectivo",
-      "transfer": "Transferencia",
-      "check": "Cheque",
-      "card": "Tarjeta"
+      "cash": "Espèces",
+      "transfer": "Virement",
+      "check": "Chèque",
+      "card": "Carte"
     },
     "txTypes": {
-      "income": "Ingreso",
-      "expense": "Egreso",
-      "transfer": "Transferencia",
-      "pending": "Pendiente"
+      "income": "Revenu",
+      "expense": "Dépense",
+      "transfer": "Virement",
+      "pending": "En attente"
     },
     "contributionTypes": {
-      "tithe": "Diezmo",
-      "offering": "Ofrenda",
-      "donation": "Donación",
-      "collective": "Colectivo",
+      "tithe": "Dîme",
+      "offering": "Offrande",
+      "donation": "Don",
+      "collective": "Collectif",
       "individual": "Individual",
-      "collectiveOffering": "Ofrenda colectiva"
+      "collectiveOffering": "Offrande collective"
     },
     "searchTransactions": "Search by description, fund, category…",
     "from": "De",
@@ -645,21 +653,23 @@
       "pdfTitle": "Clôture hebdomadaire des dîmes",
       "pdfFooter": "Généré le {date} · Clôturée : {closed}",
       "yes": "Oui",
-      "no": "Non"
+      "no": "Non",
+      "seedFailed": "Impossible de créer le modèle.",
+      "closeFailed": "Impossible de clôturer la semaine."
     },
     "monthNames": {
-      "0": "Enero",
-      "1": "Febrero",
-      "2": "Marzo",
-      "3": "Abril",
-      "4": "Mayo",
-      "5": "Junio",
-      "6": "Julio",
-      "7": "Agosto",
-      "8": "Septiembre",
-      "9": "Octubre",
-      "10": "Noviembre",
-      "11": "Diciembre"
+      "0": "Janvier",
+      "1": "Février",
+      "2": "Mars",
+      "3": "Avril",
+      "4": "Mai",
+      "5": "Juin",
+      "6": "Juillet",
+      "7": "Août",
+      "8": "Septembre",
+      "9": "Octobre",
+      "10": "Novembre",
+      "11": "Décembre"
     }
   },
   "funds": {
@@ -768,7 +778,8 @@
     },
     "errors": {
       "selectContributor": "Sélectionnez un contributeur."
-    }
+    },
+    "registerAs": "Enregistrer comme"
   },
   "ministerios": {
     "title": "Ministries",
@@ -854,7 +865,7 @@
       "appearance": "Apariencia",
       "language": "Idioma",
       "notifications": "Notificaciones",
-      "access": "Acceso y catálogos"
+      "access": "Accès et catalogues"
     },
     "fullName": "Full name",
     "role": "Role",
@@ -868,8 +879,8 @@
     "localeUpdated": "Langue mise à jour",
     "notificationsEyebrow": "Préférences",
     "notifications": {
-      "newMembers": "Nuevos miembros",
-      "tithesOfferings": "Diezmos y ofrendas",
+      "newMembers": "Nouveaux membres",
+      "tithesOfferings": "Dîmes et offrandes",
       "eventReminders": "Recordatorios de eventos",
       "directMessages": "Mensajes directos",
       "weeklyReports": "Reportes semanales",
@@ -881,9 +892,9 @@
       "systemUsers": "Usuarios del sistema",
       "systemUsersDesc": "Dar acceso a la consola web",
       "expenseTypes": "Tipos de gasto",
-      "expenseTypesDesc": "Catálogo de categorías de egreso",
-      "incomeTypes": "Tipos de ingreso",
-      "incomeTypesDesc": "Catálogo de categorías de ingreso"
+      "expenseTypesDesc": "Catalogue des catégories de dépenses",
+      "incomeTypes": "Types de revenus",
+      "incomeTypesDesc": "Catalogue des catégories de revenus"
     },
     "toasts": {
       "profileUpdated": "Profil mis à jour",
@@ -1091,10 +1102,10 @@
     "connectedToday": "Conectados hoy",
     "grantAccess": "Dar acceso",
     "editAccess": "Editar acceso",
-    "tempPassword": "Contraseña temporal",
+    "tempPassword": "Mot de passe temporaire",
     "activeAccount": "Cuenta activa",
-    "deleteRecord": "¿Eliminar registro?",
-    "lastLogin": "Dernier accès",
+    "deleteRecord": "Supprimer l'enregistrement ?",
+    "lastLogin": "Dernière connexion",
     "settingsAccessEyebrow": "Configuration · Accès",
     "adminOnlyMessage": "Seul un Administrateur peut gérer les comptes d'accès. Votre rôle actuel est {role}.",
     "noRoleAssigned": "aucun rôle assigné",
@@ -1160,11 +1171,11 @@
     "deleteMessage": "Supprimer « {name} » ? Les liens aux rapports seront aussi supprimés."
   },
   "catalogs": {
-    "incomeTypes": "Tipos de ingreso",
+    "incomeTypes": "Types de revenus",
     "expenseTypes": "Tipos de gasto",
-    "configFinances": "Configuración · Finanzas",
-    "deleteType": "¿Eliminar \"{name}\"?",
-    "namePlaceholder": "Ej. Servicios básicos",
+    "configFinances": "Configuration · Finances",
+    "deleteType": "Supprimer « {name} » ?",
+    "namePlaceholder": "p. ex. Services publics",
     "descPlaceholder": "Quel type de mouvements couvre cette catégorie ?",
     "churchSuffix": "de l'église",
     "dash": "—",
@@ -1191,16 +1202,16 @@
   },
   "roles": {
     "title": "Roles y permisos",
-    "subtitle": "Matriz de permisos por iglesia",
+    "subtitle": "Matrice des permissions par église",
     "permissionMatrix": "Matriz de permisos",
     "systemRoles": "Roles del sistema",
     "createRole": "Crear rol",
     "editRole": "Editar rol",
     "newRole": "Nuevo rol",
     "roleNamePlaceholder": "Ej. Coordinador de eventos",
-    "roleDescPlaceholder": "¿Qué funciones cumple este rol…?",
+    "roleDescPlaceholder": "Quelles fonctions ce rôle remplit-il dans l'église ?",
     "creating": "Creando…",
-    "unsavedChanges": "Cambios sin guardar",
+    "unsavedChanges": "Modifications non enregistrées",
     "deactivateRole": "Désactiver le rôle",
     "viewUsers": "Voir les utilisateurs",
     "roleUsers": "Utilisateurs du rôle",
@@ -1225,18 +1236,18 @@
     "pageStats": "{roleCount} rôles système · {userCount} utilisateurs avec un rôle assigné",
     "userCount": "{count, plural, one {# utilisateur} other {# utilisateurs}}",
     "modules": {
-      "dashboard": "Panel principal e indicadores de la iglesia",
+      "dashboard": "Tableau de bord principal et indicateurs de l'église",
       "network": "Réseau siège et succursales (lecture seule)",
-      "finances": "Ingresos, egresos, transferencias y reportes",
-      "members": "Gestión de miembros y asistentes",
-      "ministerios": "Ver y gestionar equipos de servicio (ABAC para líderes)",
-      "eventos": "Calendario, agenda y actividades de la congregación",
+      "finances": "Revenus, dépenses, virements et rapports",
+      "members": "Gestion des membres et visiteurs",
+      "ministerios": "Voir et gérer les équipes de ministère (ABAC pour les responsables)",
+      "eventos": "Calendrier, agenda et activités de la congrégation",
       "comunicacion": "Anuncios, chat interno y notificaciones",
-      "settings": "Configuración personal y catálogos del sistema",
+      "settings": "Paramètres personnels et catalogues système",
       "admin_users": "Usuarios con acceso a la consola web",
-      "roles": "Matriz de roles y permisos por iglesia",
+      "roles": "Matrice des rôles et permissions par église",
       "audit": "Journal d'activité administrative",
-      "reports": "Informes financieros, membresía y ejecutivos"
+      "reports": "Rapports financiers, adhésion et exécutifs"
     },
     "financeResources": {
       "funds": "Fondos",
@@ -1356,7 +1367,7 @@
       "export": "Exportar",
       "manage": "Gestionar",
       "publish": "Publicar",
-      "leader": "Como líder"
+      "leader": "En tant que responsable"
     }
   },
   "audit": {
@@ -1937,15 +1948,16 @@
   },
   "validation": {
     "required": "Este campo es obligatorio",
-    "email": "Correo electrónico no válido",
-    "minLength": "Mínimo {min} caracteres",
-    "invalidAmount": "Monto inválido",
+    "email": "Adresse e-mail non valide",
+    "minLength": "Minimum {min} caractères",
+    "invalidAmount": "Montant non valide",
     "firstNameRequired": "Le prénom et le nom sont obligatoires.",
     "phoneRequired": "Le téléphone est obligatoire.",
     "invalidMemberId": "ID de membre invalide.",
     "invalidProfileId": "ID de profil invalide.",
     "invalidEmploymentId": "ID d'emploi invalide.",
-    "passwordMismatch": "Les mots de passe ne correspondent pas."
+    "passwordMismatch": "Les mots de passe ne correspondent pas.",
+    "maxLength": "Maximum {max} caractères"
   },
   "placeholder": {
     "comingSoon": "Coming soon",

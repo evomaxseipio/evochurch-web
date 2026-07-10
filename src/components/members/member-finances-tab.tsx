@@ -32,35 +32,43 @@ const ContributionFormDrawer = dynamic(
 
 const PAGE_SIZE = 5;
 
-const TYPE_STYLES: Record<
+const TYPE_STYLE_BASE: Record<
   number,
-  { label: string; color: string; gradient: string }
+  { color: string; gradient: string }
 > = {
   1: {
-    label: "Diezmo",
     color: "var(--d-tithe)",
     gradient: "from-blue-600 to-indigo-700",
   },
   2: {
-    label: "Ofrenda",
     color: "var(--d-offering)",
     gradient: "from-emerald-600 to-teal-700",
   },
   3: {
-    label: "Donación",
     color: "var(--d-donation)",
     gradient: "from-orange-500 to-orange-700",
   },
 };
 
-function typeStyle(collectionType: number) {
-  return (
-    TYPE_STYLES[collectionType] ?? {
-      label: "Otro",
-      color: "#64748b",
-      gradient: "from-slate-500 to-slate-600",
-    }
-  );
+function typeStyle(
+  collectionType: number,
+  labels: { tithe: string; offering: string; donation: string; other: string },
+) {
+  const base = TYPE_STYLE_BASE[collectionType];
+  if (base) {
+    const label =
+      collectionType === 1
+        ? labels.tithe
+        : collectionType === 2
+          ? labels.offering
+          : labels.donation;
+    return { label, ...base };
+  }
+  return {
+    label: labels.other,
+    color: "#64748b",
+    gradient: "from-slate-500 to-slate-600",
+  };
 }
 
 export function MemberFinancesTab({
@@ -151,6 +159,8 @@ function MemberFinancesContent({
 }) {
   const router = useRouter();
   const t = useTranslations("members");
+  const tContributions = useTranslations("contributions");
+  const tCommon = useTranslations("common");
   const { summary, chartData, collections, statusCode, message } = finances;
   const isEmpty = statusCode === 204 || collections.length === 0;
   const [contributionOpen, setContributionOpen] = useState(false);
@@ -177,7 +187,7 @@ function MemberFinancesContent({
     try {
       const result = await fetchContributionCatalogAction();
       if (!result.ok) {
-        toast.error("Contribuciones", "No se pudieron cargar los catálogos.");
+        toast.error(tContributions("title"), t("catalogLoadFailed"));
         setContributionOpen(false);
         return;
       }
@@ -199,28 +209,28 @@ function MemberFinancesContent({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <FundsKpi
           kind="elevated"
-          label="Diezmos"
+          label={t("tithes")}
           value={fmtRD(summary.tithesAmount)}
           icon={<Icons.wallet size={16} />}
           tone="d-funds"
         />
         <FundsKpi
           kind="elevated"
-          label="Ofrendas"
+          label={t("offerings")}
           value={fmtRD(summary.offeringAmount)}
           icon={<Icons.check size={16} />}
           tone="d-income"
         />
         <FundsKpi
           kind="elevated"
-          label="Donaciones"
+          label={t("donations")}
           value={fmtRD(summary.donationAmount)}
           icon={<Icons.star size={16} />}
           tone="d-donation"
         />
         <FundsKpi
           kind="elevated"
-          label="Total"
+          label={tCommon("total")}
           value={fmtRD(summary.totalContributions)}
           icon={<Icons.trendUp size={16} />}
           tone="d-system"
@@ -229,22 +239,25 @@ function MemberFinancesContent({
       </div>
 
       <SectionCard
-        eyebrow="Tendencia"
-        title="Contribuciones mensuales"
-        subtitle="Diezmos, ofrendas y donaciones registradas por mes."
+        eyebrow={t("trendEyebrow")}
+        title={t("monthlyContributions")}
+        subtitle={t("monthlyContributionsSubtitle")}
       >
         {chartData.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted">
-            {isEmpty ? message : "Sin datos para el gráfico."}
+            {isEmpty ? message : t("noChartData")}
           </p>
         ) : (
           <>
-            <MonthlyGroupedChart data={chartData} />
+            <MonthlyGroupedChart
+              data={chartData}
+              ariaLabel={t("chartAriaLabel")}
+            />
             <div className="mt-3 flex flex-wrap gap-4">
-              <LegendDot color="var(--d-tithe)" label="Diezmos" />
-              <LegendDot color="var(--d-offering)" label="Ofrendas" />
-              <LegendDot color="var(--d-donation)" label="Donaciones" />
-              <LegendLine label="Total mensual" />
+              <LegendDot color="var(--d-tithe)" label={t("tithes")} />
+              <LegendDot color="var(--d-offering)" label={t("offerings")} />
+              <LegendDot color="var(--d-donation)" label={t("donations")} />
+              <LegendLine label={t("monthlyTotal")} />
             </div>
           </>
         )}
@@ -274,7 +287,13 @@ function MemberFinancesContent({
   );
 }
 
-function MonthlyGroupedChart({ data }: { data: MemberFinanceChartPoint[] }) {
+function MonthlyGroupedChart({
+  data,
+  ariaLabel,
+}: {
+  data: MemberFinanceChartPoint[];
+  ariaLabel: string;
+}) {
   const max = Math.max(...data.map((d) => d.tithe + d.offer + d.donation), 1);
   const W = 640;
   const H = 220;
@@ -309,7 +328,7 @@ function MonthlyGroupedChart({ data }: { data: MemberFinanceChartPoint[] }) {
         preserveAspectRatio="xMidYMid meet"
         className="block"
         role="img"
-        aria-label="Gráfico de contribuciones mensuales por tipo y total"
+        aria-label={ariaLabel}
       >
         {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
           const y = padT + innerH * (1 - p);
@@ -456,6 +475,16 @@ function ContributionsTable({
   addContributionLabel: string;
   onAddContribution: () => void;
 }) {
+  const t = useTranslations("members");
+  const tFin = useTranslations("finances");
+  const tContributions = useTranslations("contributions");
+  const tCommon = useTranslations("common");
+  const typeLabels = {
+    tithe: tFin("contributionTypes.tithe"),
+    offering: tFin("contributionTypes.offering"),
+    donation: tFin("contributionTypes.donation"),
+    other: t("otherType"),
+  };
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -483,18 +512,18 @@ function ContributionsTable({
 
   return (
     <SectionCard
-      eyebrow="Registros"
-      title="Contribuciones del miembro"
+      eyebrow={tCommon("records")}
+      title={t("memberContributions")}
       action={
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             disabled
-            title="Próximamente"
+            title={tCommon("comingSoon")}
             className="inline-flex items-center gap-1.5 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted opacity-60"
           >
             <DownloadIcon />
-            Exportar
+            {tCommon("export")}
           </button>
           {canWriteContributions ? (
             <button
@@ -518,7 +547,7 @@ function ContributionsTable({
               setSearch(e.target.value);
               setPage(1);
             }}
-            placeholder="Buscar por tipo, monto, fecha…"
+            placeholder={t("searchContributionsPlaceholder")}
             className="w-full max-w-sm rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -528,7 +557,7 @@ function ContributionsTable({
         <p className="py-6 text-center text-sm text-muted">{emptyMessage}</p>
       ) : filtered.length === 0 ? (
         <p className="py-6 text-center text-sm text-muted">
-          Ningún registro coincide con la búsqueda.
+          {t("noContributionsMatchSearch")}
         </p>
       ) : (
         <>
@@ -536,16 +565,16 @@ function ContributionsTable({
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead>
                 <tr className="text-xs uppercase tracking-wide text-muted">
-                  <th className="pb-3 pr-4 font-semibold">Tipo</th>
-                  <th className="pb-3 pr-4 font-semibold">Fecha</th>
-                  <th className="pb-3 pr-4 font-semibold">Monto</th>
-                  <th className="pb-3 pr-4 font-semibold">Comentario</th>
-                  <th className="pb-3 font-semibold">Vía</th>
+                  <th className="pb-3 pr-4 font-semibold">{tCommon("type")}</th>
+                  <th className="pb-3 pr-4 font-semibold">{tCommon("date")}</th>
+                  <th className="pb-3 pr-4 font-semibold">{tCommon("amount")}</th>
+                  <th className="pb-3 pr-4 font-semibold">{tCommon("comment")}</th>
+                  <th className="pb-3 font-semibold">{tContributions("paymentMethod")}</th>
                 </tr>
               </thead>
               <tbody>
                 {pageRows.map((c) => {
-                  const style = typeStyle(c.collectionType);
+                  const style = typeStyle(c.collectionType, typeLabels);
                   return (
                     <tr key={c.collectionId} className="border-t border-border">
                       <td className="py-3 pr-4">
@@ -585,26 +614,18 @@ function ContributionsTable({
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-muted">
-              Mostrando{" "}
-              <span className="font-semibold text-foreground tabular-nums">
-                {pageStart + 1}
-              </span>
-              {" – "}
-              <span className="font-semibold text-foreground tabular-nums">
-                {Math.min(pageStart + PAGE_SIZE, filtered.length)}
-              </span>
-              {" de "}
-              <span className="font-semibold text-foreground tabular-nums">
-                {filtered.length}
-              </span>{" "}
-              entradas
+              {tCommon("showing", {
+                from: pageStart + 1,
+                to: Math.min(pageStart + PAGE_SIZE, filtered.length),
+                total: filtered.length,
+              })}
             </p>
             <div className="flex flex-wrap gap-1">
               <PaginationBtn
                 disabled={safePage <= 1}
                 onClick={() => setPage(safePage - 1)}
               >
-                Anterior
+                {tCommon("previous")}
               </PaginationBtn>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                 <PaginationBtn
@@ -619,7 +640,7 @@ function ContributionsTable({
                 disabled={safePage >= totalPages}
                 onClick={() => setPage(safePage + 1)}
               >
-                Siguiente
+                {tCommon("next")}
               </PaginationBtn>
             </div>
           </div>

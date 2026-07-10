@@ -12,6 +12,7 @@ import { Icons } from "@/components/icons";
 import { formatMinistryDate } from "@/lib/ministries/parse";
 import type { Ministry } from "@/lib/ministries/types";
 import type { Member } from "@/lib/members/types";
+import { useTranslations } from "next-intl";
 
 export function MinistryCard({
   ministry,
@@ -32,6 +33,8 @@ export function MinistryCard({
   onViewEvents: () => void;
   onDelete: () => void;
 }) {
+  const t = useTranslations("ministerios");
+
   return (
     <div
       className="card span-4"
@@ -95,7 +98,7 @@ export function MinistryCard({
 
       <div>
         <div className="tiny muted" style={{ marginBottom: 6 }}>
-          Miembros
+          {t("members")}
         </div>
         <MemberAvatarStack
           memberIds={ministry.memberProfileIds}

@@ -160,7 +160,7 @@ export function RoleFormDrawer({
           </div>
 
           <div className="field">
-            <label>Descripción</label>
+            <label>{tCommon("description")}</label>
             <div
               className="input-wrap"
               style={{ alignItems: "flex-start", padding: "10px 12px" }}

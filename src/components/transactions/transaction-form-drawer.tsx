@@ -126,6 +126,7 @@ export function TransactionFormDrawer({
 }) {
   const tCommon = useTranslations("common");
   const tTransactions = useTranslations("transactions");
+  const tValidation = useTranslations("validation");
   const [state, formAction, pending] = useActionState(
     saveLedgerEntryAction,
     initial,
@@ -219,14 +220,14 @@ export function TransactionFormDrawer({
         e.destinationFundId = "Debe ser distinto al fondo origen";
       }
       if (v.userComment.trim().length > TRANSFER_COMMENT_MAX) {
-        e.userComment = `Máximo ${TRANSFER_COMMENT_MAX} caracteres`;
+        e.userComment = tValidation("maxLength", { max: TRANSFER_COMMENT_MAX });
       }
     } else {
       if (!v.fundId) e.fundId = "Obligatorio";
       if (!v.typeId) e.typeId = "Obligatorio";
       if (!v.description.trim()) e.description = "Obligatorio";
       if (v.description.trim().length > DESCRIPTION_MAX) {
-        e.description = `Máximo ${DESCRIPTION_MAX} caracteres`;
+        e.description = tValidation("maxLength", { max: DESCRIPTION_MAX });
       }
     }
 
@@ -414,7 +415,7 @@ export function TransactionFormDrawer({
                   gap: 8,
                 }}
               >
-                <span>Máximo {DESCRIPTION_MAX} caracteres.</span>
+                <span>{tValidation("maxLength", { max: DESCRIPTION_MAX })}.</span>
                 <span className="tnum">
                   {v.description.length}/{DESCRIPTION_MAX}
                 </span>
@@ -504,7 +505,7 @@ export function TransactionFormDrawer({
                     gap: 8,
                   }}
                 >
-                  <span>Máximo {TRANSFER_COMMENT_MAX} caracteres.</span>
+                  <span>{tValidation("maxLength", { max: TRANSFER_COMMENT_MAX })}.</span>
                   <span className="tnum">
                     {v.userComment.length}/{TRANSFER_COMMENT_MAX}
                   </span>

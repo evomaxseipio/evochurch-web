@@ -33,6 +33,7 @@ async function readContext(needWrite = false) {
 }
 
 export async function seedDefaultTitheTemplateAction(): Promise<TitheCloseActionResult> {
+  const t = await getTranslations("finances.titheClose");
   try {
     const { supabase, session } = await readContext(true);
     await seedDefaultTitheTemplate(supabase, session.churchId);
@@ -42,7 +43,7 @@ export async function seedDefaultTitheTemplateAction(): Promise<TitheCloseAction
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "No se pudo crear la plantilla.",
+      error: e instanceof Error ? e.message : t("seedFailed"),
     };
   }
 }
@@ -50,6 +51,7 @@ export async function seedDefaultTitheTemplateAction(): Promise<TitheCloseAction
 export async function closeTitheWeekAction(
   periodStart: string,
 ): Promise<TitheCloseActionResult> {
+  const t = await getTranslations("finances.titheClose");
   try {
     const { supabase, session } = await readContext(true);
     await closeDiscountPeriodRun(supabase, session.churchId, periodStart);
@@ -58,7 +60,7 @@ export async function closeTitheWeekAction(
   } catch (e) {
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "No se pudo cerrar la semana.",
+      error: e instanceof Error ? e.message : t("closeFailed"),
     };
   }
 }

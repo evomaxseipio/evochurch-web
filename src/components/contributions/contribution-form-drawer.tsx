@@ -521,7 +521,8 @@ export function ContributionFormDrawer({
                     }}
                   />
                   <span style={{ fontSize: 13 }}>
-                    Registrar como <b>Anónimo</b>
+                    {tContributions("registerAs")}{" "}
+                    <b>{tCommon("anonymous")}</b>
                   </span>
                 </label>
                 {!isAnonymous ? (

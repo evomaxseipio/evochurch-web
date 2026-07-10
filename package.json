@@ -15,7 +15,8 @@
     "qa:reports": "node scripts/qa-reports.mjs",
     "seed:website-events": "node scripts/seed-website-test-events.mjs",
     "seed:website-events:clean": "node scripts/seed-website-test-events.mjs --clean",
-    "test:unit": "tsx --test src/lib/ministries/funds.test.ts"
+    "test:unit": "tsx --test src/lib/ministries/funds.test.ts",
+    "qa:i18n": "node scripts/compare-i18n-keys.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

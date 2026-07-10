@@ -81,7 +81,8 @@
     "phone": "Teléfono",
     "password": "Contraseña",
     "created": "Creado",
-    "updated": "Actualizado"
+    "updated": "Actualizado",
+    "comment": "Comentario"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -392,7 +393,7 @@
     "roleAndStatus": "Rol y estado en la iglesia",
     "membershipHistory": "Historial de membresía",
     "dangerZone": "Zona de peligro",
-    "archiveHint": "¿Solo quieres archivar?",
+    "archiveHint": "Recomendado cuando un miembro se muda, se traslada a otra iglesia o pausa su actividad temporalmente.",
     "firstName": "Nombre",
     "lastName": "Apellido",
     "gender": "Género",
@@ -502,7 +503,6 @@
     "archiveEyebrow": "Alternativa",
     "archiveTitle": "¿Solo quieres archivar?",
     "archiveBody": "Marcar al miembro como inactivo lo oculta de las vistas activas pero conserva toda la información.",
-    "archiveHint": "Recomendado cuando un miembro se muda, se traslada a otra iglesia o pausa su actividad temporalmente.",
     "archiveCta": "Archivar miembro",
     "countryDominicanRepublic": "República Dominicana",
     "countryUnitedStates": "Estados Unidos",
@@ -556,7 +556,15 @@
     "tagInputPlaceholder": "Escribe y presiona Enter…",
     "removeTag": "Quitar {tag}",
     "professionsColumn": "Oficios",
-    "count": "{count, plural, =0 {Sin miembros} one {# miembro} other {# miembros}}"
+    "count": "{count, plural, =0 {Sin miembros} one {# miembro} other {# miembros}}",
+    "monthlyContributionsSubtitle": "Diezmos, ofrendas y donaciones registradas por mes.",
+    "trendEyebrow": "Tendencia",
+    "monthlyTotal": "Total mensual",
+    "chartAriaLabel": "Gráfico de contribuciones mensuales por tipo y total",
+    "searchContributionsPlaceholder": "Buscar por tipo, monto, fecha…",
+    "noContributionsMatchSearch": "Ningún registro coincide con la búsqueda.",
+    "catalogLoadFailed": "No se pudieron cargar los catálogos.",
+    "otherType": "Otro"
   },
   "finances": {
     "stewardship": "Mayordomía · Finanzas",
@@ -645,7 +653,9 @@
       "pdfTitle": "Cierre semanal de diezmos",
       "pdfFooter": "Generado el {date} · Cerrada: {closed}",
       "yes": "Sí",
-      "no": "No"
+      "no": "No",
+      "seedFailed": "No se pudo crear la plantilla.",
+      "closeFailed": "No se pudo cerrar la semana."
     },
     "monthNames": {
       "0": "Enero",
@@ -768,7 +778,8 @@
     },
     "errors": {
       "selectContributor": "Selecciona un contribuyente."
-    }
+    },
+    "registerAs": "Registrar como"
   },
   "ministerios": {
     "title": "Ministerios",
@@ -1945,7 +1956,8 @@
     "invalidMemberId": "ID de miembro inválido.",
     "invalidProfileId": "ID de perfil inválido.",
     "invalidEmploymentId": "ID de empleo inválido.",
-    "passwordMismatch": "Las contraseñas no coinciden."
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "maxLength": "Máximo {max} caracteres"
   },
   "placeholder": {
     "comingSoon": "Próximamente",
