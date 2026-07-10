@@ -15,8 +15,8 @@ import {
 } from "@/lib/reports/export/pdf-form";
 import {
   CEAD_CHART_SCALE,
-  CEAD_COUNCIL_PERCENT,
   councilFormulaDetail,
+  councilLinePercentDisplay,
   translateCeadLineLabel,
 } from "@/lib/reports/templates/cead/form-helpers";
 import type { FinancialMonthlyPayload } from "@/lib/services/reports";
@@ -415,7 +415,7 @@ function drawCouncilSection(
     ...payload.cead.councilLines.map((line) => [
       { text: translateCeadLineLabel(line.label, t) },
       {
-        text: CEAD_COUNCIL_PERCENT[line.label as keyof typeof CEAD_COUNCIL_PERCENT] ?? "-",
+        text: councilLinePercentDisplay(line),
       },
       { text: councilFormulaDetail(line, payload, locale, t) },
       { text: formatCurrency(line.amount, locale), style: "amount" },

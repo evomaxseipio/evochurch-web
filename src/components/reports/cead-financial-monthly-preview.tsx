@@ -6,8 +6,8 @@ import "./cead-financial-monthly-form-print.css";
 import { CeadFinancialMonthlyChart } from "@/components/reports/cead-financial-monthly-chart";
 import { CeadFinancialMonthlyFormPrint } from "@/components/reports/cead-financial-monthly-form-print";
 import {
-  COUNCIL_PERCENT,
   councilFormulaDetail,
+  councilLinePercentDisplay,
   translateCeadLineLabel,
 } from "@/components/reports/cead-financial-monthly-helpers";
 import type { Locale } from "@/i18n/config";
@@ -289,7 +289,7 @@ export function CeadFinancialMonthlyPreview({
                   {cead.councilLines.map((line) => (
                     <tr key={line.label}>
                       <td>{translateCeadLineLabel(line.label, t)}</td>
-                      <td className="num">{COUNCIL_PERCENT[line.label] ?? "—"}</td>
+                      <td className="num">{councilLinePercentDisplay(line)}</td>
                       <td className="formula">{councilFormulaDetail(line, payload, locale, t)}</td>
                       <td className="amt mono">{fmtRD(line.amount, locale)}</td>
                     </tr>

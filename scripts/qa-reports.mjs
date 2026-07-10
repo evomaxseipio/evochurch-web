@@ -19,6 +19,7 @@ import {
 
 const FINANCIAL_REPORT_IDS = [
   "financial-monthly-cead",
+  "financial-monthly-concilio-f001",
   "executive-monthly-summary",
 ];
 const MEMBERSHIP_REPORT_IDS = [
@@ -137,6 +138,16 @@ async function main() {
       "Admin export financial-monthly-cead",
       canExportFinancial ? "PASS" : "FAIL",
       `export=${hasReportPermission(admin.perms, "financial_monthly_cead", "export")}`,
+    );
+
+    const canExportConcilioF001 =
+      hasReportPermission(admin.perms, "financial_monthly_concilio_f001", "read") &&
+      hasReportPermission(admin.perms, "financial_monthly_concilio_f001", "export");
+    record(
+      "R-PERM-CONCILIO",
+      "Admin export financial-monthly-concilio-f001",
+      canExportConcilioF001 ? "PASS" : "FAIL",
+      `export=${hasReportPermission(admin.perms, "financial_monthly_concilio_f001", "export")}`,
     );
 
     try {

@@ -28,6 +28,19 @@ function formatFormulaAmount(value: number, locale: Locale): string {
   });
 }
 
+function isDiscountTemplateCouncilLine(line: CeadCouncilSendLine): boolean {
+  return Boolean(line.formula?.includes("× base ("));
+}
+
+/** Percent column for council sends — CEAD defaults or discount template formula. */
+export function councilLinePercentDisplay(line: CeadCouncilSendLine): string {
+  if (isDiscountTemplateCouncilLine(line) && line.formula) {
+    const match = line.formula.match(/^([\d.]+%)/);
+    return match?.[1] ?? "—";
+  }
+  return CEAD_COUNCIL_PERCENT[line.label as keyof typeof CEAD_COUNCIL_PERCENT] ?? "—";
+}
+
 export function translateCeadLineLabel(label: string, t: TranslateFn): string {
   const incomeKey =
     CEAD_INCOME_LINE_I18N_KEYS[label as keyof typeof CEAD_INCOME_LINE_I18N_KEYS];
@@ -74,6 +87,10 @@ export function councilFormulaDetail(
   locale: Locale,
   t: TranslateFn,
 ): string {
+  if (isDiscountTemplateCouncilLine(line) && line.formula) {
+    return line.formula;
+  }
+
   const { totalIncome, expenseLines } = payload.cead;
   const pastoral =
     expenseLines.find((row) => row.label === "Asignación Pastoral")?.amount ?? 0;

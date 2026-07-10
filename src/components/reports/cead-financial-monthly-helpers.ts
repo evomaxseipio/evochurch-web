@@ -4,5 +4,6 @@ export {
   councilCalculationBaseAmount,
   councilCalculationBaseLabel,
   councilFormulaDetail,
+  councilLinePercentDisplay,
   translateCeadLineLabel,
 } from "@/lib/reports/templates/cead/form-helpers";

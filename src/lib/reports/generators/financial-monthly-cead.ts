@@ -9,8 +9,8 @@ import {
   workbookToBuffer,
 } from "@/lib/reports/export/xlsx";
 import {
-  CEAD_COUNCIL_PERCENT,
   councilFormulaDetail,
+  councilLinePercentDisplay,
   translateCeadLineLabel,
 } from "@/lib/reports/templates/cead/form-helpers";
 import type { FinancialMonthlyPayload } from "@/lib/services/reports";
@@ -143,7 +143,7 @@ export async function generateFinancialMonthlyCeadXlsx(
 
   for (const line of cead.councilLines) {
     setCell(sheet, r, 1, translateCeadLineLabel(line.label, tReports));
-    setCell(sheet, r, 2, CEAD_COUNCIL_PERCENT[line.label as keyof typeof CEAD_COUNCIL_PERCENT] ?? "");
+    setCell(sheet, r, 2, councilLinePercentDisplay(line));
     setCell(sheet, r, 3, councilFormulaDetail(line, payload, locale, tReports));
     setCell(sheet, r, 4, line.amount);
     r += 1;
