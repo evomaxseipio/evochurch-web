@@ -34,7 +34,7 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 
 | Track | Estado | Pendiente |
 |-------|--------|-----------|
-| **Fase 3 — Cierre semanal diezmos** | ⏳ PENDING | Ver [AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md](./AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md); rama `feat/tithe-weekly-allocation` |
+| **Fase 3 — Cierre semanal diezmos** | ✅ | `/finances/tithe-close`, migración `20260710120000_tithe_weekly_close.sql` |
 | Módulos core (auth, miembros, finanzas, ministerios, settings, reportes) | ✅ | Merge rama `feat/ministerios-fondos` + migraciones SQL |
 | Sprint performance 1–3 | ✅ cerrado | — |
 | Sprint performance 4 | ⚙️ | Captura manual baselines (ver abajo) |

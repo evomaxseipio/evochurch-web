@@ -15,6 +15,11 @@ const TABS = [
     href: "/finances/contributions",
     labelKey: "tabs.contributions",
   },
+  {
+    id: "tithe-close",
+    href: "/finances/tithe-close",
+    labelKey: "tabs.titheClose",
+  },
 ] as const;
 
 export type FinancesTabId = (typeof TABS)[number]["id"];

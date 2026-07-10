@@ -1,9 +1,13 @@
 import type {
   DiscountAllocation,
   DiscountBaseKind,
+  DiscountPeriodRun,
+  DiscountPeriodRunSummary,
   DiscountTemplate,
   DiscountTemplateLine,
+  DiscountAllocationLine,
   ReportDiscountLink,
+  TitheContributionRow,
 } from "@/lib/discounts/types";
 import { DISCOUNT_BASE_KINDS } from "@/lib/discounts/types";
 
@@ -157,4 +161,105 @@ export function linePercentsExceedMax(lines: { percent: number }[]): boolean {
 export function linePercentsValidForSave(lines: { percent: number }[]): boolean {
   if (lines.length === 0) return false;
   return !linePercentsExceedMax(lines);
+}
+
+function parseContributionRow(raw: unknown): TitheContributionRow | null {
+  const row = asRecord(raw);
+  if (!row) return null;
+  return {
+    incomeId: asString(row.incomeId ?? row.income_id),
+    paymentDate: asString(row.paymentDate ?? row.payment_date),
+    amount: asNumber(row.amount),
+    fundId: row.fundId != null || row.fund_id != null
+      ? asString(row.fundId ?? row.fund_id) || null
+      : null,
+    fundName: asString(row.fundName ?? row.fund_name),
+    memberName: asString(row.memberName ?? row.member_name),
+    receiptNumber: asString(row.receiptNumber ?? row.receipt_number),
+  };
+}
+
+function parseAllocationLines(raw: unknown): DiscountAllocationLine[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => {
+      const row = asRecord(item);
+      if (!row) return null;
+      const label = asString(row.label).trim();
+      if (!label) return null;
+      return {
+        label,
+        percent: asNumber(row.percent),
+        amount: asNumber(row.amount),
+        sortOrder: asNumber(row.sortOrder ?? row.sort_order),
+      };
+    })
+    .filter((l): l is NonNullable<typeof l> => l != null);
+}
+
+export function parseDiscountPeriodRun(data: unknown): {
+  run: DiscountPeriodRun | null;
+  noTemplate: boolean;
+} {
+  const envelope = asRecord(data);
+  if (!envelope || envelope.success === false) {
+    throw new Error(asString(envelope?.message) || "Error al cargar cierre semanal.");
+  }
+  if (envelope.noTemplate === true) {
+    return { run: null, noTemplate: true };
+  }
+  const row = asRecord(envelope.run);
+  if (!row) return { run: null, noTemplate: false };
+
+  const allocRaw = row.allocation;
+  const contribRaw = row.contributions;
+
+  return {
+    run: {
+      id: row.id != null ? asString(row.id) : null,
+      churchId: asNumber(row.churchId ?? row.church_id),
+      templateId: asString(row.templateId ?? row.template_id),
+      periodStart: asString(row.periodStart ?? row.period_start),
+      periodEnd: asString(row.periodEnd ?? row.period_end),
+      status: asString(row.status) === "closed" ? "closed" : "open",
+      baseAmount: asNumber(row.baseAmount ?? row.base_amount),
+      allocation: parseAllocationLines(allocRaw),
+      contributions: Array.isArray(contribRaw)
+        ? contribRaw
+            .map(parseContributionRow)
+            .filter((c): c is TitheContributionRow => c != null)
+        : [],
+      closedAt: row.closedAt != null || row.closed_at != null
+        ? asString(row.closedAt ?? row.closed_at)
+        : null,
+      closedBy: row.closedBy != null || row.closed_by != null
+        ? asString(row.closedBy ?? row.closed_by)
+        : null,
+      notes: asString(row.notes),
+    },
+    noTemplate: false,
+  };
+}
+
+export function parseDiscountPeriodRunSummaries(data: unknown): DiscountPeriodRunSummary[] {
+  const envelope = asRecord(data);
+  if (!envelope || envelope.success === false) return [];
+  const runs = envelope.runs;
+  if (!Array.isArray(runs)) return [];
+  return runs
+    .map((raw) => {
+      const row = asRecord(raw);
+      if (!row) return null;
+      const id = asString(row.id);
+      if (!id) return null;
+      return {
+        id,
+        periodStart: asString(row.periodStart ?? row.period_start),
+        periodEnd: asString(row.periodEnd ?? row.period_end),
+        status: asString(row.status) === "closed" ? "closed" : "open",
+        baseAmount: asNumber(row.baseAmount ?? row.base_amount),
+        closedAt: row.closedAt != null ? asString(row.closedAt ?? row.closed_at) : null,
+      } as DiscountPeriodRunSummary;
+    })
+    .filter((r): r is DiscountPeriodRunSummary => r != null);
 }

@@ -8,6 +8,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/finances/funds": "finances:funds:read",
   "/finances/transactions": "finances:transactions:read",
   "/finances/contributions": "finances:contributions:read",
+  "/finances/tithe-close": "finances:tithe_close:read",
   "/finances": "finances:funds:read",
   "/eventos": "eventos:read",
   "/comunicacion": "comunicacion:read",

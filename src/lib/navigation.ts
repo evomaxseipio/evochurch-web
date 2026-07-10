@@ -77,6 +77,13 @@ export const MAIN_NAV: NavEntry[] = [
         icon: "wallet",
         permission: "finances:contributions:read",
       },
+      {
+        id: "tithe-close",
+        href: "/finances/tithe-close",
+        labelKey: "titheClose",
+        icon: "wallet",
+        permission: "finances:tithe_close:read",
+      },
     ],
   },
   {

@@ -39,6 +39,8 @@ export const PERMISSION_KEYS = [
   "finances:contributions:write",
   "finances:contributions:delete",
   "finances:contributions:export",
+  "finances:tithe_close:read",
+  "finances:tithe_close:write",
   "admin_users:manage",
   "roles:manage",
   "audit:read",
@@ -67,6 +69,7 @@ export const FINANCE_READ_PERMISSIONS = [
   "finances:funds:read",
   "finances:transactions:read",
   "finances:contributions:read",
+  "finances:tithe_close:read",
 ] as const satisfies readonly PermissionKey[];
 
 export function isPermissionKey(value: string): value is PermissionKey {

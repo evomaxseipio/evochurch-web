@@ -91,6 +91,7 @@
     "funds": "Fonds",
     "transactions": "Transactions",
     "contributions": "Contributions",
+    "titheClose": "Clôture des dîmes",
     "eventos": "Événements",
     "comunicacion": "Communication",
     "reports": "Rapports",
@@ -560,9 +561,10 @@
   "finances": {
     "stewardship": "Stewardship · Finances",
     "tabs": {
-      "funds": "Fondos",
-      "transactions": "Transacciones",
-      "contributions": "Contribuciones"
+      "funds": "Fonds",
+      "transactions": "Transactions",
+      "contributions": "Contributions",
+      "titheClose": "Clôture des dîmes"
     },
     "paymentMethods": {
       "cash": "Efectivo",
@@ -613,6 +615,38 @@
     "reportGenerated": "Report generated",
     "fileDownloaded": "{file} downloaded",
     "newTransaction": "New transaction",
+    "titheClose": {
+      "title": "Clôture hebdomadaire des dîmes",
+      "subtitle": "Résumé des dîmes par semaine (dimanche à dimanche) et répartition selon le modèle actif.",
+      "prevWeek": "Semaine précédente",
+      "nextWeek": "Semaine suivante",
+      "statusOpen": "Ouverte",
+      "statusClosed": "Clôturée",
+      "exportPdf": "Exporter PDF",
+      "closeWeek": "Clôturer la semaine",
+      "closeConfirm": "Clôturer cette semaine ? Un instantané de la répartition et des contributions sera enregistré.",
+      "closeSuccess": "Semaine clôturée avec succès.",
+      "exportSuccess": "PDF téléchargé.",
+      "exportFailed": "Impossible de générer le PDF.",
+      "seedDefault": "Créer modèle 70/15/15",
+      "seedSuccess": "Modèle de dîme créé.",
+      "goTemplates": "Gérer les modèles",
+      "noTemplate": "Aucun modèle de dîme actif.",
+      "askAdminTemplate": "Demandez à un administrateur de configurer le modèle de répartition.",
+      "totalTithes": "Total des dîmes",
+      "allocation": "Répartition",
+      "destiny": "Destination",
+      "contributions": "Contributions",
+      "noContributions": "Aucune contribution de dîme cette semaine.",
+      "date": "Date",
+      "member": "Membre",
+      "fund": "Fonds",
+      "closedAt": "Clôturée le {date}",
+      "pdfTitle": "Clôture hebdomadaire des dîmes",
+      "pdfFooter": "Généré le {date} · Clôturée : {closed}",
+      "yes": "Oui",
+      "no": "Non"
+    },
     "monthNames": {
       "0": "Enero",
       "1": "Febrero",
@@ -1207,7 +1241,8 @@
     "financeResources": {
       "funds": "Fondos",
       "transactions": "Transacciones",
-      "contributions": "Contribuciones"
+      "contributions": "Contributions",
+      "tithe_close": "Clôture des dîmes"
     },
     "reportResources": {
       "financial_monthly_cead": "Rapport financier mensuel CEAD",
@@ -1239,6 +1274,10 @@
           "write": "Enregistrer des contributions",
           "delete": "Supprimer des contributions",
           "export": "Exporter des contributions"
+        },
+        "tithe_close": {
+          "read": "Voir la clôture hebdomadaire des dîmes",
+          "write": "Clôturer la semaine et exporter la clôture"
         }
       },
       "members": {
@@ -1370,6 +1409,9 @@
         },
         "fund_transfer": {
           "authorize": "A autorisé un transfert de {amount}"
+        },
+        "tithe_close": {
+          "close": "A clôturé la semaine de dîmes ({periodStart}) — base {baseAmount}"
         }
       },
       "eventos": {

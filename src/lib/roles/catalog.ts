@@ -37,6 +37,11 @@ export const FINANCE_RESOURCE_DEFS = [
     label: "Contribuciones",
     actions: ["read", "write", "delete", "export"],
   },
+  {
+    key: "tithe_close",
+    label: "Cierre de diezmos",
+    actions: ["read", "write"],
+  },
 ] as const;
 
 /** Una fila en la matriz — permisos ABAC de ministerios (líder). */
@@ -248,7 +253,12 @@ const CRUD_MODULES = ["members", "eventos", "comunicacion"] as const;
 
 const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types", "church"] as const;
 
-const FINANCE_RESOURCES = ["funds", "transactions", "contributions"] as const;
+const FINANCE_RESOURCES = [
+  "funds",
+  "transactions",
+  "contributions",
+  "tithe_close",
+] as const;
 
 const REPORT_RESOURCES = REPORT_RESOURCE_DEFS.map((def) => def.key);
 

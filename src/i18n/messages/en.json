@@ -91,6 +91,7 @@
     "funds": "Funds",
     "transactions": "Transactions",
     "contributions": "Contributions",
+    "titheClose": "Tithe close",
     "eventos": "Events",
     "comunicacion": "Communication",
     "reports": "Reports",
@@ -560,9 +561,10 @@
   "finances": {
     "stewardship": "Stewardship · Finances",
     "tabs": {
-      "funds": "Fondos",
-      "transactions": "Transacciones",
-      "contributions": "Contribuciones"
+      "funds": "Funds",
+      "transactions": "Transactions",
+      "contributions": "Contributions",
+      "titheClose": "Tithe close"
     },
     "paymentMethods": {
       "cash": "Efectivo",
@@ -613,6 +615,38 @@
     "reportGenerated": "Report generated",
     "fileDownloaded": "{file} downloaded",
     "newTransaction": "New transaction",
+    "titheClose": {
+      "title": "Weekly tithe close",
+      "subtitle": "Tithe summary per week (Sunday to Sunday) and allocation per active template.",
+      "prevWeek": "Previous week",
+      "nextWeek": "Next week",
+      "statusOpen": "Open",
+      "statusClosed": "Closed",
+      "exportPdf": "Export PDF",
+      "closeWeek": "Close week",
+      "closeConfirm": "Close this week? A snapshot of allocation and contributions will be saved.",
+      "closeSuccess": "Week closed successfully.",
+      "exportSuccess": "PDF downloaded.",
+      "exportFailed": "Could not generate PDF.",
+      "seedDefault": "Create 70/15/15 template",
+      "seedSuccess": "Tithe template created.",
+      "goTemplates": "Manage templates",
+      "noTemplate": "No active tithe template.",
+      "askAdminTemplate": "Ask an administrator to configure the discount template.",
+      "totalTithes": "Total tithes",
+      "allocation": "Allocation",
+      "destiny": "Destination",
+      "contributions": "Contributions",
+      "noContributions": "No tithe contributions this week.",
+      "date": "Date",
+      "member": "Member",
+      "fund": "Fund",
+      "closedAt": "Closed on {date}",
+      "pdfTitle": "Weekly tithe close",
+      "pdfFooter": "Generated on {date} · Closed: {closed}",
+      "yes": "Yes",
+      "no": "No"
+    },
     "monthNames": {
       "0": "Enero",
       "1": "Febrero",
@@ -1207,7 +1241,8 @@
     "financeResources": {
       "funds": "Fondos",
       "transactions": "Transacciones",
-      "contributions": "Contribuciones"
+      "contributions": "Contributions",
+      "tithe_close": "Tithe close"
     },
     "reportResources": {
       "financial_monthly_cead": "CEAD monthly financial report",
@@ -1239,6 +1274,10 @@
           "write": "Register contributions",
           "delete": "Delete contributions",
           "export": "Export contributions"
+        },
+        "tithe_close": {
+          "read": "View weekly tithe close",
+          "write": "Close week and export tithe close"
         }
       },
       "members": {
@@ -1370,6 +1409,9 @@
         },
         "fund_transfer": {
           "authorize": "Authorized transfer for {amount}"
+        },
+        "tithe_close": {
+          "close": "Closed tithe week ({periodStart}) — base {baseAmount}"
         }
       },
       "eventos": {

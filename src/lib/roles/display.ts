@@ -61,12 +61,14 @@ export const FINANCE_RESOURCE_LABELS: Record<string, string> = {
   funds: "Fondos",
   transactions: "Transacciones",
   contributions: "Contribuciones",
+  tithe_close: "Cierre de diezmos",
 };
 
 const FINANCE_RESOURCE_LABEL_KEYS: Record<string, string> = {
   funds: "financeResources.funds",
   transactions: "financeResources.transactions",
   contributions: "financeResources.contributions",
+  tithe_close: "financeResources.tithe_close",
 };
 
 export const REPORT_RESOURCE_LABELS: Record<string, string> = Object.fromEntries(
@@ -98,6 +100,8 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "finances:contributions:write": "Registrar contribuciones",
   "finances:contributions:delete": "Eliminar contribuciones",
   "finances:contributions:export": "Exportar contribuciones",
+  "finances:tithe_close:read": "Ver cierre semanal de diezmos",
+  "finances:tithe_close:write": "Cerrar semana y exportar cierre de diezmos",
   "members:read": "Ver miembros",
   "members:write": "Editar miembros",
   "members:delete": "Eliminar miembros",
@@ -145,6 +149,8 @@ const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
   "finances:contributions:write": "permissions.finances.contributions.write",
   "finances:contributions:delete": "permissions.finances.contributions.delete",
   "finances:contributions:export": "permissions.finances.contributions.export",
+  "finances:tithe_close:read": "permissions.finances.tithe_close.read",
+  "finances:tithe_close:write": "permissions.finances.tithe_close.write",
   "members:read": "permissions.members.read",
   "members:write": "permissions.members.write",
   "members:delete": "permissions.members.delete",

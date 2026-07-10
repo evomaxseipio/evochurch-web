@@ -91,6 +91,7 @@
     "funds": "Fondos",
     "transactions": "Transacciones",
     "contributions": "Contribuciones",
+    "titheClose": "Cierre de diezmos",
     "eventos": "Eventos",
     "comunicacion": "Comunicación",
     "reports": "Reportes",
@@ -562,7 +563,8 @@
     "tabs": {
       "funds": "Fondos",
       "transactions": "Transacciones",
-      "contributions": "Contribuciones"
+      "contributions": "Contribuciones",
+      "titheClose": "Cierre de diezmos"
     },
     "paymentMethods": {
       "cash": "Efectivo",
@@ -613,6 +615,38 @@
     "reportGenerated": "Reporte generado",
     "fileDownloaded": "{file} descargado",
     "newTransaction": "Nueva transacción",
+    "titheClose": {
+      "title": "Cierre semanal de diezmos",
+      "subtitle": "Resumen de diezmos por semana (domingo a domingo) y reparto según plantilla activa.",
+      "prevWeek": "Semana anterior",
+      "nextWeek": "Semana siguiente",
+      "statusOpen": "Abierta",
+      "statusClosed": "Cerrada",
+      "exportPdf": "Exportar PDF",
+      "closeWeek": "Cerrar semana",
+      "closeConfirm": "¿Cerrar esta semana? Se guardará un snapshot del reparto y las contribuciones.",
+      "closeSuccess": "Semana cerrada correctamente.",
+      "exportSuccess": "PDF descargado.",
+      "exportFailed": "No se pudo generar el PDF.",
+      "seedDefault": "Crear plantilla 70/15/15",
+      "seedSuccess": "Plantilla de diezmo creada.",
+      "goTemplates": "Configurar plantillas",
+      "noTemplate": "No hay plantilla de diezmo activa.",
+      "askAdminTemplate": "Pide a un administrador que configure la plantilla de descuento.",
+      "totalTithes": "Total diezmos",
+      "allocation": "Reparto",
+      "destiny": "Destino",
+      "contributions": "Contribuciones",
+      "noContributions": "No hay contribuciones de diezmo en esta semana.",
+      "date": "Fecha",
+      "member": "Miembro",
+      "fund": "Fondo",
+      "closedAt": "Cerrada el {date}",
+      "pdfTitle": "Cierre semanal de diezmos",
+      "pdfFooter": "Generado el {date} · Cerrada: {closed}",
+      "yes": "Sí",
+      "no": "No"
+    },
     "monthNames": {
       "0": "Enero",
       "1": "Febrero",
@@ -1207,7 +1241,8 @@
     "financeResources": {
       "funds": "Fondos",
       "transactions": "Transacciones",
-      "contributions": "Contribuciones"
+      "contributions": "Contribuciones",
+      "tithe_close": "Cierre de diezmos"
     },
     "reportResources": {
       "financial_monthly_cead": "Informe financiero mensual CEAD",
@@ -1239,6 +1274,10 @@
           "write": "Registrar contribuciones",
           "delete": "Eliminar contribuciones",
           "export": "Exportar contribuciones"
+        },
+        "tithe_close": {
+          "read": "Ver cierre semanal de diezmos",
+          "write": "Cerrar semana y exportar cierre de diezmos"
         }
       },
       "members": {
@@ -1370,6 +1409,9 @@
         },
         "fund_transfer": {
           "authorize": "Autorizó transferencia por {amount}"
+        },
+        "tithe_close": {
+          "close": "Cerró semana de diezmos ({periodStart}) — base {baseAmount}"
         }
       },
       "eventos": {

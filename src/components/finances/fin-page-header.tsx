@@ -14,10 +14,11 @@ export function FinPageHeader({
   eyebrow: string;
   title: string;
   subtitle: string;
-  onExportPdf: () => void;
-  onExportExcel: () => void;
+  onExportPdf?: () => void;
+  onExportExcel?: () => void;
 }) {
   const tCommon = useTranslations("common");
+  const showExports = onExportPdf != null || onExportExcel != null;
   return (
     <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
       <div>
@@ -36,14 +37,24 @@ export function FinPageHeader({
           {subtitle}
         </p>
       </div>
-      <div className="row">
-        <button type="button" className="btn outline" onClick={onExportPdf}>
-          <Icons.download size={16} /> {tCommon("download")} PDF
-        </button>
-        <button type="button" className="btn outline" onClick={onExportExcel}>
-          <Icons.download size={16} /> {tCommon("download")} Excel
-        </button>
-      </div>
+      {showExports ? (
+        <div className="row">
+          {onExportPdf ? (
+            <button type="button" className="btn outline" onClick={onExportPdf}>
+              <Icons.download size={16} /> {tCommon("download")} PDF
+            </button>
+          ) : null}
+          {onExportExcel ? (
+            <button
+              type="button"
+              className="btn outline"
+              onClick={onExportExcel}
+            >
+              <Icons.download size={16} /> {tCommon("download")} Excel
+            </button>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
