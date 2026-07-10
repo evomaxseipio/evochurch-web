@@ -19,6 +19,7 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | [AGENT-PROMPT-FASE-1-REUNION.md](./AGENT-PROMPT-FASE-1-REUNION.md) | **Fase 1 reunión** — dashboard montos completos, fecha transacciones, estatus miembros |
 | [AGENT-PROMPT-FASE-2-REUNION.md](./AGENT-PROMPT-FASE-2-REUNION.md) | **Fase 2 reunión** — salud (sangre + alergias), oficios tags, empleo principal |
 | [DEBATE-MODULO-DESCUENTOS-DIEZMO.md](./DEBATE-MODULO-DESCUENTOS-DIEZMO.md) | **Debate + MVP** — plantillas descuento vinculadas a reportes |
+| [AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md](./AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md) | **Fase 3 diezmo semanal** — cierre domingo–domingo, PDF, snapshot (`feat/tithe-weekly-allocation`) |
 
 ## Cómo usar
 
@@ -33,6 +34,7 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 
 | Track | Estado | Pendiente |
 |-------|--------|-----------|
+| **Fase 3 — Cierre semanal diezmos** | ⏳ PENDING | Ver [AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md](./AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md); rama `feat/tithe-weekly-allocation` |
 | Módulos core (auth, miembros, finanzas, ministerios, settings, reportes) | ✅ | Merge rama `feat/ministerios-fondos` + migraciones SQL |
 | Sprint performance 1–3 | ✅ cerrado | — |
 | Sprint performance 4 | ⚙️ | Captura manual baselines (ver abajo) |

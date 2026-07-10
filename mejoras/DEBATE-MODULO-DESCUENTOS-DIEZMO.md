@@ -2,7 +2,7 @@
 
 Documento de producto para decidir **antes** de implementar. Fase 2 (miembros) corre en paralelo; este módulo sería **Fase 2b o Fase 3 financiera**.
 
-**Estado:** 🟢 MVP implementado (rama `feat/discount-templates`) — plantillas + vínculo a reportes; CEAD aplica si hay link.
+**Estado:** 🟢 MVP plantillas implementado (rama `feat/discount-templates`, mergeado) — plantillas + vínculo a reportes + toggle plantillas por reporte; exports Concilio F.001 y Executive operativos. **Siguiente:** cierre semanal (`feat/tithe-weekly-allocation`).
 **Última actualización:** Jul 2026
 
 ---
@@ -59,20 +59,20 @@ Marcar decisión cuando se debata:
 
 ### Alcance del monto base
 
-- [ ] **A)** Solo diezmos (`category = tithe`) de la semana  
+- [x] **A)** Solo diezmos (`category = tithe`) de la semana — *default MVP hasta reunión*  
 - [ ] **B)** Diezmos + ofrendas  
 - [ ] **C)** Total ingresos del período  
 - [ ] **D)** Otro: _______________
 
 ### Periodicidad
 
-- [ ] Semanal (domingo a domingo) — *lo pedido en reunión*  
+- [x] Semanal (domingo a domingo) — *default MVP; lo pedido en reunión*  
 - [ ] También mensual (alineado CEAD)  
 - [ ] Ambos con esquemas distintos
 
 ### ¿Qué hace el sistema con el desglose?
 
-- [ ] **Solo reporte** — muestra 70/15/15 en PDF/pantalla; tesorero mueve dinero manual  
+- [x] **Solo reporte** — muestra 70/15/15 en PDF/pantalla; tesorero mueve dinero manual — *default MVP*  
 - [ ] **Sugerencia + confirmación** — propone asientos; tesorero aprueba  
 - [ ] **Automático** — crea movimientos entre fondos al cerrar la semana  
 
@@ -81,14 +81,14 @@ Marcar decisión cuando se debata:
 ### Relación con CEAD / concilio
 
 - [ ] El 15% “concilio” del reparto semanal **es el mismo** envío que el reporte CEAD  
-- [ ] Son flujos **independientes** (semanal interno vs mensual al concilio)  
+- [x] Son flujos **independientes** (semanal interno vs mensual al concilio) — *default MVP*  
 - [ ] El módulo semanal **alimenta** una línea del CEAD (acumulado del mes)
 
 ### Configuración
 
-- [ ] Porcentajes fijos por iglesia (editables por tesorero/admin)  
+- [x] Porcentajes fijos por iglesia (editables por tesorero/admin) — *default MVP*  
 - [ ] ¿Historial de cambios de %? (sí / no)  
-- [ ] ¿Plantilla por defecto 70/15/15 al activar el módulo?
+- [x] ¿Plantilla por defecto 70/15/15 al activar el módulo? — *sí, default MVP*
 
 ### Destinos del reparto
 
@@ -100,8 +100,8 @@ Marcar decisión cuando se debata:
 
 ### Permisos
 
-- [ ] Quién configura reglas: solo admin / tesorero / pastor  
-- [ ] Quién cierra el período semanal: tesorero
+- [x] Quién configura reglas: tesorero/admin vía `settings:discount_templates:write` — *default MVP*  
+- [x] Quién cierra el período semanal: tesorero (`finances:tithe_close:write`) — *default MVP*
 
 ---
 
@@ -184,9 +184,9 @@ No implementar marketplace ni tiers en el MVP del diezmo.
 
 ## Siguiente paso tras el debate
 
-1. Completar checkboxes de este documento en reunión con tesorero/pastor  
-2. Crear `mejoras/AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md` con alcance acordado  
-3. Implementar en rama `feat/tithe-weekly-allocation` después de merge Fase 2 miembros  
+1. Completar checkboxes de este documento en reunión con tesorero/pastor (defaults `[x]` arriba sirven hasta entonces)  
+2. ✅ [AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md](./AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md) — prompt de implementación cierre semanal  
+3. Implementar en rama `feat/tithe-weekly-allocation` (paralelo a Fase 2 miembros si no hay conflicto de archivos)  
 
 ---
 
