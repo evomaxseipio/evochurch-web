@@ -192,7 +192,7 @@ export function applyStandardPermissionRules(
   key: PermissionKey,
   checked: boolean,
 ): void {
-  const module = key.split(":")[0];
+  const moduleKey = key.split(":")[0];
   const crudModules = ["members", "eventos", "comunicacion"];
   const settingsCatalogResources = ["expense_types", "income_types", "church"] as const;
 
@@ -232,16 +232,16 @@ export function applyStandardPermissionRules(
       if (
         key.endsWith(":write") ||
         key.endsWith(":delete") ||
-        (module === "eventos" && key.endsWith(":write_own"))
+        (moduleKey === "eventos" && key.endsWith(":write_own"))
       ) {
-        draft.add(`${module}:read` as PermissionKey);
+        draft.add(`${moduleKey}:read` as PermissionKey);
       }
       return;
     }
     if (key.endsWith(":read")) {
-      draft.delete(`${module}:write` as PermissionKey);
-      draft.delete(`${module}:delete` as PermissionKey);
-      if (module === "eventos") {
+      draft.delete(`${moduleKey}:write` as PermissionKey);
+      draft.delete(`${moduleKey}:delete` as PermissionKey);
+      if (moduleKey === "eventos") {
         draft.delete("eventos:write_own" as PermissionKey);
       }
     }
@@ -278,12 +278,12 @@ export function sanitizePermissionDraftForSave(
 ): PermissionKey[] {
   const set = new Set(keys);
 
-  for (const module of CRUD_MODULES) {
-    const readKey = `${module}:read` as PermissionKey;
+  for (const moduleKey of CRUD_MODULES) {
+    const readKey = `${moduleKey}:read` as PermissionKey;
     if (!set.has(readKey)) {
-      set.delete(`${module}:write` as PermissionKey);
-      set.delete(`${module}:delete` as PermissionKey);
-      if (module === "eventos") {
+      set.delete(`${moduleKey}:write` as PermissionKey);
+      set.delete(`${moduleKey}:delete` as PermissionKey);
+      if (moduleKey === "eventos") {
         set.delete("eventos:write_own");
       }
     }

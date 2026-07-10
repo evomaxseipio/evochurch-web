@@ -12,29 +12,27 @@ export default async function DiscountTemplatesPage() {
   const session = await requirePageAccess("/settings/discount-templates");
 
   const supabase = await createClient();
-  let templates: Awaited<ReturnType<typeof fetchDiscountTemplates>> = [];
   let error: string | null = null;
+  let viewProps: {
+    templates: Awaited<ReturnType<typeof fetchDiscountTemplates>>;
+    canWrite: boolean;
+    linkableReports: ReturnType<typeof getDiscountLinkableReportEntries>;
+  } | null = null;
 
   try {
     const [fetchedTemplates, reportDefinitions] = await Promise.all([
       fetchDiscountTemplates(supabase, session.churchId),
       fetchChurchReportDefinitions(supabase, session.churchId),
     ]);
-    templates = fetchedTemplates;
 
-    const canWrite = hasPermission(session, "settings:discount_templates:write");
-    const linkableReports = getDiscountLinkableReportEntries(
-      session,
-      reportDefinitions,
-    );
-
-    return (
-      <DiscountTemplatesListView
-        templates={templates}
-        canWrite={canWrite}
-        linkableReports={linkableReports}
-      />
-    );
+    viewProps = {
+      templates: fetchedTemplates,
+      canWrite: hasPermission(session, "settings:discount_templates:write"),
+      linkableReports: getDiscountLinkableReportEntries(
+        session,
+        reportDefinitions,
+      ),
+    };
   } catch (e) {
     error =
       e instanceof Error ? e.message : tErrors("loadFailed");
@@ -48,6 +46,16 @@ export default async function DiscountTemplatesPage() {
       >
         {error}
       </p>
+    );
+  }
+
+  if (viewProps) {
+    return (
+      <DiscountTemplatesListView
+        templates={viewProps.templates}
+        canWrite={viewProps.canWrite}
+        linkableReports={viewProps.linkableReports}
+      />
     );
   }
 
