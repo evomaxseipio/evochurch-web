@@ -1650,6 +1650,8 @@
         "contributionsByCategory": "Contribuciones por categoría",
         "donations": "Donaciones",
         "total": "Total",
+        "councilSends": "Envíos al concilio",
+        "councilSendsTotal": "Total envíos al concilio",
         "footerNote": "KPIs calculados con las mismas agregaciones del dashboard. Asistencia y eventos: Próximamente."
       },
       "financialIncomeExpense": {

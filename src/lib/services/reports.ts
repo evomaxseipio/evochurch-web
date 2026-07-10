@@ -11,6 +11,7 @@ import { filterMembers, memberStats } from "@/lib/members/filters";
 import type { MemberFilterKey, MembersListStats } from "@/lib/members/types";
 import { CATECHUMEN_ROLE_CODE, findMemberRoleByCode } from "@/lib/members/roles";
 import { monthBounds, formatReportPeriodLabel, type MonthPeriod } from "@/lib/reports/period";
+import { applyDiscountAllocationToConcilioF001 } from "@/lib/reports/templates/concilio/f001-discount";
 import { buildConcilioF001MockPayload } from "@/lib/reports/templates/concilio/f001-mock";
 import type { ConcilioF001Payload } from "@/lib/reports/templates/concilio/f001-types";
 import { buildCeadFinancialMonthlyData } from "@/lib/reports/templates/cead/financial-monthly";
@@ -78,6 +79,12 @@ export type ExecutiveMonthlyKpi = {
   delta?: string;
 };
 
+export type ExecutiveCouncilSendLine = {
+  label: string;
+  amount: number;
+  formula?: string;
+};
+
 export type ExecutiveMonthlyPayload = ReportChurchMeta & {
   churchId: number;
   period: MonthPeriod;
@@ -89,6 +96,7 @@ export type ExecutiveMonthlyPayload = ReportChurchMeta & {
     donation: number;
     total: number;
   };
+  councilLines: ExecutiveCouncilSendLine[];
   pendingAuthorizations: number;
   generatedAt: string;
 };
@@ -357,12 +365,29 @@ export async function fetchExecutiveMonthlyPayload(
   const prev = shiftYearMonth({ year: period.year, month: period.month }, -1);
   const wideFrom = monthBounds({ kind: "month", ...prev }).from;
 
-  const [membersPage, funds, contributions, ledgerEntries] = await Promise.all([
-    fetchMembersPage(supabase, { churchId, page: 1, pageSize: null }),
-    fetchFunds(supabase, churchId),
-    fetchContributionsForPeriod(supabase, churchId, wideFrom, bounds.to),
-    fetchLedgerForPeriod(supabase, churchId, wideFrom, bounds.to),
-  ]);
+  const [membersPage, funds, contributions, ledgerEntries, linkedTemplateId] =
+    await Promise.all([
+      fetchMembersPage(supabase, { churchId, page: 1, pageSize: null }),
+      fetchFunds(supabase, churchId),
+      fetchContributionsForPeriod(supabase, churchId, wideFrom, bounds.to),
+      fetchLedgerForPeriod(supabase, churchId, wideFrom, bounds.to),
+      fetchLinkedTemplateIdForReport(
+        supabase,
+        churchId,
+        "executive-monthly-summary",
+        "council_sends",
+      ),
+    ]);
+
+  const discountAllocation = linkedTemplateId
+    ? await computeDiscountAllocation(
+        supabase,
+        churchId,
+        linkedTemplateId,
+        bounds.from,
+        bounds.to,
+      )
+    : null;
 
   const contributionMonthlyTotals = buildContributionMonthlyTotals(
     contributions,
@@ -409,12 +434,22 @@ export async function fetchExecutiveMonthlyPayload(
     value: String(pendingAuthorizations),
   });
 
+  const councilLines: ExecutiveCouncilSendLine[] =
+    discountAllocation && discountAllocation.lines.length > 0
+      ? discountAllocation.lines.map((line) => ({
+          label: line.label,
+          amount: line.amount,
+          formula: `${line.percent}% × base (${discountAllocation.baseKind})`,
+        }))
+      : [];
+
   return {
     churchId,
     period,
     periodLabel: formatReportPeriodLabel(period),
     kpis: executiveKpis,
     contributionBreakdown,
+    councilLines,
     pendingAuthorizations,
     churchName: meta.churchName,
     pastorName: meta.pastorName,
@@ -555,11 +590,29 @@ export async function fetchConcilioF001Payload(
   period: MonthPeriod,
   meta: ReportChurchMeta = {},
 ): Promise<ConcilioF001ReportPayload> {
-  const [profileMeta, orgRules] = await Promise.all([
+  const bounds = monthBounds(period);
+  const [profileMeta, orgRules, linkedTemplateId] = await Promise.all([
     fetchChurchReportMeta(supabase, churchId, meta),
     fetchChurchOrgReportRules(supabase, churchId),
+    fetchLinkedTemplateIdForReport(
+      supabase,
+      churchId,
+      "financial-monthly-concilio-f001",
+      "council_sends",
+    ),
   ]);
-  return buildConcilioF001MockPayload(churchId, period, {
+
+  const discountAllocation = linkedTemplateId
+    ? await computeDiscountAllocation(
+        supabase,
+        churchId,
+        linkedTemplateId,
+        bounds.from,
+        bounds.to,
+      )
+    : null;
+
+  const base = buildConcilioF001MockPayload(churchId, period, {
     churchName: profileMeta.churchName,
     pastorName: meta.pastorName,
     presbyterio: profileMeta.presbyterio,
@@ -568,6 +621,8 @@ export async function fetchConcilioF001Payload(
     address: profileMeta.address,
     councilHeader: orgRules?.f001CouncilHeader ?? undefined,
   });
+
+  return applyDiscountAllocationToConcilioF001(base, discountAllocation);
 }
 
 function entryContributorLabel(profileId: string): string {

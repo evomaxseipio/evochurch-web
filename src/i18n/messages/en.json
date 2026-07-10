@@ -1650,6 +1650,8 @@
         "contributionsByCategory": "Contributions by category",
         "donations": "Donations",
         "total": "Total",
+        "councilSends": "Council remittances",
+        "councilSendsTotal": "Total council remittances",
         "footerNote": "KPIs are computed using the same dashboard aggregations. Attendance and events: coming soon."
       },
       "financialIncomeExpense": {

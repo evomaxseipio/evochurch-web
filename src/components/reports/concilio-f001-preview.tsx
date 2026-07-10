@@ -8,7 +8,7 @@ import { ConcilioF001FormPrint } from "@/components/reports/concilio-f001-form-p
 import { brandLogoForSurface } from "@/lib/brand";
 import { fmtRD } from "@/lib/format-currency";
 import { formatCurrency, formatDateTime } from "@/lib/i18n/format";
-import { f001LineI18nKey } from "@/lib/reports/templates/concilio/f001-label-keys";
+import { concilioLineDisplayLabel } from "@/lib/reports/templates/concilio/f001-label-keys";
 import type { ConcilioF001ReportPayload } from "@/lib/services/reports";
 import { useLocale, useTranslations } from "next-intl";
 import type { RefObject } from "react";
@@ -64,7 +64,7 @@ export function ConcilioF001Preview({
     minute: "2-digit",
   });
 
-  const lineLabel = (key: string) => t(f001LineI18nKey(key));
+  const lineLabel = (key: string) => concilioLineDisplayLabel(key, t);
 
   const councilTotal = payload.kpis.totalCouncilSends;
 

@@ -60,6 +60,24 @@ export async function generateExecutiveMonthlySummaryPdf(
   doc.text(`${tReports("exports.executiveMonthlySummary.donations")}: ${fmtRD(payload.contributionBreakdown.donation)}`);
   doc.text(`${tReports("exports.executiveMonthlySummary.total")}: ${fmtRD(payload.contributionBreakdown.total)}`);
 
+  if (payload.councilLines.length > 0) {
+    doc.moveDown(0.6);
+    doc.font("Helvetica-Bold").fontSize(11).text(tReports("exports.executiveMonthlySummary.councilSends"));
+    doc.moveDown(0.3);
+    doc.font("Helvetica").fontSize(10);
+    for (const line of payload.councilLines) {
+      const formula = line.formula ? ` (${line.formula})` : "";
+      doc.text(`${line.label}: ${fmtRD(line.amount)}${formula}`);
+      doc.moveDown(0.12);
+    }
+    const councilTotal = payload.councilLines.reduce((sum, line) => sum + line.amount, 0);
+    doc.moveDown(0.2);
+    doc.font("Helvetica-Bold").text(
+      `${tReports("exports.executiveMonthlySummary.councilSendsTotal")}: ${fmtRD(councilTotal)}`,
+    );
+    doc.font("Helvetica");
+  }
+
   doc.moveDown(0.6);
   doc.fontSize(9).fillColor("#666666").text(
     tReports("exports.executiveMonthlySummary.footerNote"),

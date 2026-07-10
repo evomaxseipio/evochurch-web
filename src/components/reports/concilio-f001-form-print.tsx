@@ -2,7 +2,7 @@
 
 import type { Locale } from "@/i18n/config";
 import { fmtRD } from "@/lib/format-currency";
-import { f001LineI18nKey } from "@/lib/reports/templates/concilio/f001-label-keys";
+import { concilioLineDisplayLabel } from "@/lib/reports/templates/concilio/f001-label-keys";
 import type { ConcilioF001ReportPayload } from "@/lib/services/reports";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -15,7 +15,7 @@ export function ConcilioF001FormPrint({
 }) {
   const t = useTranslations("reports");
   const locale = useLocale() as Locale;
-  const lineLabel = (key: string) => t(f001LineI18nKey(key));
+  const lineLabel = (key: string) => concilioLineDisplayLabel(key, t);
 
   const maxB = Math.max(
     payload.sectionB.generalIncome.length,

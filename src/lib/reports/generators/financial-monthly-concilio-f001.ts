@@ -16,7 +16,7 @@ import {
   createWorkbook,
   workbookToBuffer,
 } from "@/lib/reports/export/xlsx";
-import { f001LineI18nKey } from "@/lib/reports/templates/concilio/f001-label-keys";
+import { concilioLineDisplayLabel } from "@/lib/reports/templates/concilio/f001-label-keys";
 import type { ConcilioF001Payload } from "@/lib/reports/templates/concilio/f001-types";
 import type { ConcilioF001ReportPayload } from "@/lib/services/reports";
 import { getTranslations } from "next-intl/server";
@@ -28,7 +28,7 @@ type TranslateFn = (
 ) => string;
 
 function lineLabel(key: string, t: TranslateFn): string {
-  return t(f001LineI18nKey(key));
+  return concilioLineDisplayLabel(key, t);
 }
 
 function fmtAmount(value: number): string {

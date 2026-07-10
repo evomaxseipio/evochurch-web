@@ -1650,6 +1650,8 @@
         "contributionsByCategory": "Contributions par catégorie",
         "donations": "Dons",
         "total": "Total",
+        "councilSends": "Envois au concile",
+        "councilSendsTotal": "Total envois au concile",
         "footerNote": "KPI calculés avec les mêmes agrégations du tableau de bord. Présence et événements : bientôt."
       },
       "financialIncomeExpense": {

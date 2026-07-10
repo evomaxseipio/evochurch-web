@@ -69,3 +69,21 @@ export type F001LineKey =
 export function f001LineI18nKey(key: string): string {
   return `concilioF001.lines.${key}`;
 }
+
+const F001_I18N_KEYS = new Set<string>([
+  ...F001_GENERAL_INCOME_KEYS,
+  ...F001_MINISTRY_INCOME_KEYS,
+  ...F001_CHURCH_EXPENSE_KEYS,
+  ...F001_CHURCH_TO_COUNCIL_KEYS,
+  ...F001_MINISTRY_TO_NATIONAL_KEYS,
+  ...F001_SPECIAL_CONTRIBUTION_KEYS,
+]);
+
+/** Etiqueta de fila F.001: i18n para keys conocidas; texto literal para plantillas de descuento. */
+export function concilioLineDisplayLabel(
+  key: string,
+  t: (i18nKey: string) => string,
+): string {
+  if (!F001_I18N_KEYS.has(key)) return key;
+  return t(f001LineI18nKey(key));
+}
