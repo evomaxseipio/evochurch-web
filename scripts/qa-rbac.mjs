@@ -175,6 +175,11 @@ function pageHasTransactionsModule({ status, text }) {
   return /transactions-list|finances\/transactions|"Transacciones"/i.test(text);
 }
 
+function pageHasTitheCloseModule({ status, text }) {
+  if (status !== 200 || isNextErrorPage(text)) return false;
+  return /tithe-close|titheClose|Cierre de diezmos|Cierre semanal/i.test(text);
+}
+
 function pageHasMinistriesModule({ status, text }) {
   if (status !== 200 || isNextErrorPage(text)) return false;
   return /ministerios|Ministerios|addMinistry/i.test(text);
@@ -298,7 +303,12 @@ async function main() {
   const tesorero = await testSessionPermissions("TESORERO", "U-TESORERO", {
     ctxId: "CTX-03",
     ctxTitle: "U-TESORERO permisos",
-    mustHave: ["finances:transactions:read", "finances:transactions:authorize"],
+    mustHave: [
+      "finances:transactions:read",
+      "finances:transactions:authorize",
+      "finances:tithe_close:read",
+      "finances:tithe_close:write",
+    ],
     mustLack: ["admin_users:manage"],
   });
 
@@ -306,7 +316,11 @@ async function main() {
     ctxId: "CTX-04",
     ctxTitle: "U-LIDER permisos",
     mustHave: ["ministerios:read", "ministerios:write_own"],
-    mustLack: ["finances:funds:read", "ministerios:write"],
+    mustLack: [
+      "finances:funds:read",
+      "ministerios:write",
+      "finances:tithe_close:read",
+    ],
   });
 
   const norole = await testSessionPermissions("NOROLE", "U-NOROLE", {
@@ -416,6 +430,8 @@ async function main() {
       "PAGE-05",
       "PAGE-06",
       "PAGE-07",
+      "PAGE-08",
+      "PAGE-09",
     ]) {
       record(id, "Route guard HTTP", "BLOCKED", "npm run dev no responde :3000", "critical");
     }
@@ -475,9 +491,19 @@ async function main() {
         `status=${tx.status}`,
         "high",
       );
+
+      const titheClose = await fetchPage("/finances/tithe-close", tesorero.auth);
+      record(
+        "PAGE-08",
+        "U-TESORERO /finances/tithe-close",
+        pageHasTitheCloseModule(titheClose) ? "PASS" : "FAIL",
+        `status=${titheClose.status}`,
+        "high",
+      );
     } else {
       record("PAGE-04", "U-TESORERO /settings/users", "BLOCKED", "sin U-TESORERO", "critical");
       record("PAGE-05", "U-TESORERO /finances/transactions", "BLOCKED", "sin U-TESORERO", "high");
+      record("PAGE-08", "U-TESORERO /finances/tithe-close", "BLOCKED", "sin U-TESORERO", "high");
     }
 
     if (lider?.auth) {
@@ -498,9 +524,19 @@ async function main() {
         `status=${min.status}`,
         "high",
       );
+
+      const titheClose = await fetchPage("/finances/tithe-close", lider.auth);
+      record(
+        "PAGE-09",
+        "U-LIDER /finances/tithe-close",
+        pageAccessDenied(titheClose) ? "PASS" : "FAIL",
+        `status=${titheClose.status}`,
+        "high",
+      );
     } else {
       record("PAGE-06", "U-LIDER /finances", "BLOCKED", "sin U-LIDER", "high");
       record("PAGE-07", "U-LIDER /ministerios", "BLOCKED", "sin U-LIDER", "high");
+      record("PAGE-09", "U-LIDER /finances/tithe-close", "BLOCKED", "sin U-LIDER", "high");
     }
   }
 
