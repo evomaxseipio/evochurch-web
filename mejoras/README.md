@@ -38,9 +38,9 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | Módulos core (auth, miembros, finanzas, ministerios, settings, reportes) | ✅ | Merge rama `feat/ministerios-fondos` + migraciones SQL |
 | Sprint performance 1–3 | ✅ cerrado | — |
 | Sprint performance 4 | ⚙️ | Captura manual baselines (ver abajo) |
-| Sprint RBAC | ✅ QA funcional | `npm run qa:rbac:full --skip-lint` (lint legacy 304 errores — no bloqueante funcional) |
+| Sprint RBAC | ✅ | `npm run qa:rbac:full` (lint 0 errores) |
 | Módulo reportes REP-0…6 | ✅ | Descargas manuales R-04…08; `npm run qa:reports` |
-| i18n es/en/fr | ⚙️ ~95% | Auditoría strings + I18N-QA manual |
+| i18n es/en/fr | ✅ | 1624 claves × 3 locales; `npm run qa:i18n` |
 | Placeholders post-MVP | — | `/eventos`, `/comunicacion`, KPIs mock dashboard |
 
 **Orden recomendado restante:** migraciones ministerios-fondos → `npm run build` → `npm run qa:reports` → QA RBAC → I18N-QA → baselines Sprint 4.
