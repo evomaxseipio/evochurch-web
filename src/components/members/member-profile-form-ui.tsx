@@ -66,6 +66,7 @@ export function ProfileField({
   placeholder,
   span = 1,
   defaultValue,
+  embedded = false,
 }: {
   label: string;
   name: string;
@@ -75,6 +76,7 @@ export function ProfileField({
   placeholder?: string;
   span?: number;
   defaultValue?: string;
+  embedded?: boolean;
 }) {
   const selectOptions: SelectOption[] = options
     ? options.map((o) =>
@@ -83,7 +85,10 @@ export function ProfileField({
     : [];
 
   return (
-    <div className="field" style={{ gridColumn: `span ${span}` }}>
+    <div
+      className="field"
+      style={embedded ? undefined : { gridColumn: `span ${span}` }}
+    >
       <label htmlFor={name}>
         {label}
         {required ? (

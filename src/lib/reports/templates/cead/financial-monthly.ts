@@ -143,7 +143,20 @@ export function buildCeadCouncilSends(
   incomeLines: CeadLineAmount[],
   expenseLines: CeadLineAmount[],
   orgRules?: ParsedOrgReportRules | null,
+  discountAllocation?: {
+    baseAmount: number;
+    baseKind: string;
+    lines: { label: string; percent: number; amount: number }[];
+  } | null,
 ): CeadCouncilSendLine[] {
+  if (discountAllocation && discountAllocation.lines.length > 0) {
+    return discountAllocation.lines.map((line) => ({
+      label: line.label,
+      amount: line.amount,
+      formula: `${line.percent}% × base (${discountAllocation.baseKind})`,
+    }));
+  }
+
   const totalIncome = incomeLines.reduce((sum, line) => sum + line.amount, 0);
   const pastoral =
     expenseLines.find((line) => line.label === "Asignación Pastoral")?.amount ??
@@ -187,17 +200,29 @@ export function buildCeadFinancialMonthlyData(
   contributions: Contribution[],
   ledgerEntries: LedgerEntry[],
   orgRules?: ParsedOrgReportRules | null,
+  discountAllocation?: {
+    baseAmount: number;
+    baseKind: string;
+    lines: { label: string; percent: number; amount: number }[];
+  } | null,
 ): CeadFinancialMonthlyData {
   const incomeLines = mapContributionsToCeadIncome(contributions);
   const expenseLines = mapExpensesToCeadLines(ledgerEntries);
   const totalIncome = incomeLines.reduce((sum, line) => sum + line.amount, 0);
   const totalExpense = expenseLines.reduce((sum, line) => sum + line.amount, 0);
-  const councilLines = buildCeadCouncilSends(incomeLines, expenseLines, orgRules);
+  const councilLines = buildCeadCouncilSends(
+    incomeLines,
+    expenseLines,
+    orgRules,
+    discountAllocation,
+  );
 
   const notes = [
-    orgRules?.organizationName
-      ? `Reglas de cálculo del concilio ${orgRules.organizationName}.`
-      : "Envíos al concilio calculados con reglas v1 documentadas en EvoChurch.",
+    discountAllocation
+      ? "Envíos calculados con plantilla de descuentos vinculada al reporte."
+      : orgRules?.organizationName
+        ? `Reglas de cálculo del concilio ${orgRules.organizationName}.`
+        : "Envíos al concilio calculados con reglas v1 documentadas en EvoChurch.",
   ];
 
   return {

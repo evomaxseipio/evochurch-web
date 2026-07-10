@@ -7,15 +7,15 @@ import {
 } from "@/app/(app)/members/actions";
 import { Icons } from "@/components/icons";
 import { MemberFinancesTab } from "@/components/members/member-finances-tab";
-import { MemberHealthTab } from "@/components/members/member-health-tab";
-import { MemberProfessionsTab } from "@/components/members/member-professions-tab";
-import { MemberEmploymentTab } from "@/components/members/member-employment-tab";
+import { MemberLaborTab } from "@/components/members/member-labor-tab";
 import {
   MembershipStatusField,
   ProfileField,
   ProfileSectionCard,
   YesNoField,
 } from "@/components/members/member-profile-form-ui";
+import { TagListInput } from "@/components/ui/tag-list-input";
+import { BLOOD_TYPE_VALUES } from "@/lib/members/catalogs";
 import { MembershipHistorySection } from "@/components/members/member-membership-history";
 import {
   MEMBERSHIP_FORM_ID,
@@ -51,9 +51,7 @@ const PROFILE_TABS: {
 }[] = [
   { id: "profile", labelKey: "tabProfile", icon: "users" },
   { id: "membership", labelKey: "tabMembership", icon: "cross" },
-  { id: "health", labelKey: "tabHealth", icon: "shield" },
-  { id: "professions", labelKey: "tabProfessions", icon: "star" },
-  { id: "employment", labelKey: "tabEmployment", icon: "pin" },
+  { id: "labor", labelKey: "tabLabor", icon: "star" },
   { id: "finances", labelKey: "tabFinances", icon: "wallet" },
   { id: "delete", labelKey: "deleteAccount", icon: "trash", isDanger: true },
 ];
@@ -98,9 +96,7 @@ export function MemberProfileView({
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
   const [membershipPending, setMembershipPending] = useState(false);
-  const [healthPending, setHealthPending] = useState(false);
-  const [professionsPending, setProfessionsPending] = useState(false);
-  const [employmentPending, setEmploymentPending] = useState(false);
+  const [laborPending, setLaborPending] = useState(false);
 
   const active =
     PROFILE_TABS.find((t) => t.id === tab) ?? PROFILE_TABS[0];
@@ -155,9 +151,7 @@ export function MemberProfileView({
           tab={tab}
           profilePending={profilePending}
           membershipPending={membershipPending}
-          healthPending={healthPending}
-          professionsPending={professionsPending}
-          employmentPending={employmentPending}
+          laborPending={laborPending}
           canWriteMembers={canWriteMembers}
         />
       </div>
@@ -291,26 +285,10 @@ export function MemberProfileView({
               readOnly={!canWriteMembers}
             />
           ) : null}
-          {tab === "health" ? (
-            <MemberHealthTab
+          {tab === "labor" ? (
+            <MemberLaborTab
               member={member}
-              onPending={setHealthPending}
-              onMemberUpdated={onMemberUpdated}
-              readOnly={!canWriteMembers}
-            />
-          ) : null}
-          {tab === "professions" ? (
-            <MemberProfessionsTab
-              member={member}
-              onPending={setProfessionsPending}
-              onMemberUpdated={onMemberUpdated}
-              readOnly={!canWriteMembers}
-            />
-          ) : null}
-          {tab === "employment" ? (
-            <MemberEmploymentTab
-              member={member}
-              onPending={setEmploymentPending}
+              onPending={setLaborPending}
               onMemberUpdated={onMemberUpdated}
               readOnly={!canWriteMembers}
             />
@@ -377,6 +355,11 @@ function ProfileTab({
   const [state, formAction] = useActionState(updateMemberAction, null);
   const formKey = useMemo(() => profileFormKey(member), [member]);
 
+  const bloodOptions = BLOOD_TYPE_VALUES.map((value) => ({
+    value,
+    label: value ? (value === "Unknown" ? t("bloodTypeUnknown") : value) : t("bloodTypeUnset"),
+  }));
+
   useActionToast(state, {
     successMessage: t("profileSaved"),
     resolveError: (errorKey) => {
@@ -396,7 +379,7 @@ function ProfileTab({
       id={PROFILE_FORM_ID}
       key={formKey}
       action={formAction}
-      className="col gap-md"
+      className="profile-section-stack"
     >
       <FormPendingReporter onPending={onPending} />
       <input type="hidden" name="memberId" value={member.memberId} />
@@ -407,6 +390,7 @@ function ProfileTab({
       <fieldset
         disabled={readOnly}
         style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+        className="profile-section-stack"
       >
       <ProfileSectionCard
         eyebrow={t("personalData")}
@@ -468,6 +452,24 @@ function ProfileTab({
             name="idNumber"
             defaultValue={member.idNumber}
           />
+          <div className="profile-health-row">
+            <ProfileField
+              label={t("bloodType")}
+              name="bloodType"
+              type="select"
+              options={bloodOptions}
+              defaultValue={member.bloodType || ""}
+              embedded
+            />
+            <TagListInput
+              name="allergies"
+              label={t("allergies")}
+              defaultValue={member.allergies}
+              disabled={readOnly}
+              placeholder={t("allergiesPlaceholder")}
+              embedded
+            />
+          </div>
         </div>
       </ProfileSectionCard>
 
@@ -598,7 +600,7 @@ function MembershipTab({
       id={MEMBERSHIP_FORM_ID}
       key={formKey}
       action={formAction}
-      className="col gap-md"
+      className="profile-section-stack"
     >
       <FormPendingReporter onPending={onPending} />
       <input type="hidden" name="profileId" value={member.memberId} />
@@ -606,6 +608,7 @@ function MembershipTab({
       <fieldset
         disabled={readOnly}
         style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+        className="profile-section-stack"
       >
       <ProfileSectionCard
         eyebrow={t("membership")}
@@ -704,7 +707,7 @@ function DeleteTab({ member }: { member: Member }) {
   });
 
   return (
-    <>
+    <div className="profile-section-stack">
       <ProfileSectionCard
         eyebrow={t("dangerZone")}
         title={t("deleteAccount")}
@@ -862,7 +865,7 @@ function DeleteTab({ member }: { member: Member }) {
           </button>
         </div>
       </ProfileSectionCard>
-    </>
+    </div>
   );
 }
 

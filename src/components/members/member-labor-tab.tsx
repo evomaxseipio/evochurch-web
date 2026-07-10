@@ -1,11 +1,12 @@
 "use client";
 
-import { saveMemberEmploymentAction } from "@/app/(app)/members/profile/actions";
+import { saveMemberLaborAction } from "@/app/(app)/members/profile/actions";
 import {
   ProfileField,
   ProfileSectionCard,
 } from "@/components/members/member-profile-form-ui";
-import { EMPLOYMENT_FORM_ID } from "@/components/members/member-profile-toolbar";
+import { LABOR_FORM_ID } from "@/components/members/member-profile-toolbar";
+import { TagListInput } from "@/components/ui/tag-list-input";
 import { Icons } from "@/components/icons";
 import type { Member, ProfileEmployment } from "@/lib/members/types";
 import { useActionToast } from "@/hooks/use-action-toast";
@@ -13,12 +14,16 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { saveMemberEmploymentAction } from "@/app/(app)/members/profile/actions";
 
-function employmentFormKey(member: Member): string {
-  return JSON.stringify(member.employment);
+function laborFormKey(member: Member): string {
+  return JSON.stringify({
+    professions: member.professions,
+    employment: member.employment,
+  });
 }
 
-export function MemberEmploymentTab({
+export function MemberLaborTab({
   member,
   onPending,
   onMemberUpdated,
@@ -33,14 +38,14 @@ export function MemberEmploymentTab({
   const tErrors = useTranslations("errors");
   const tValidation = useTranslations("validation");
   const router = useRouter();
-  const [state, formAction] = useActionState(saveMemberEmploymentAction, null);
+  const [state, formAction] = useActionState(saveMemberLaborAction, null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const primary = member.primaryEmployment;
   const history = member.employment.filter((e) => !e.isPrimary);
-  const formKey = useMemo(() => employmentFormKey(member), [member]);
+  const formKey = useMemo(() => laborFormKey(member), [member]);
 
   useActionToast(state, {
-    successMessage: t("employmentSaved"),
+    successMessage: t("laborSaved"),
     resolveError: (errorKey) => {
       if (!errorKey) return tErrors("serverError");
       if (errorKey.startsWith("validation.")) return tValidation(errorKey.slice(11));
@@ -54,16 +59,15 @@ export function MemberEmploymentTab({
   });
 
   return (
-    <div className="col gap-md">
+    <div className="profile-section-stack">
       <form
-        id={EMPLOYMENT_FORM_ID}
+        id={LABOR_FORM_ID}
         key={formKey}
         action={formAction}
-        className="col gap-md"
+        className="profile-section-stack"
       >
         <FormPendingReporter onPending={onPending} />
         <input type="hidden" name="profileId" value={member.memberId} />
-        <input type="hidden" name="employmentAction" value="upsert_primary" />
         {primary?.id ? (
           <input type="hidden" name="employmentId" value={primary.id} />
         ) : null}
@@ -71,11 +75,29 @@ export function MemberEmploymentTab({
         <fieldset
           disabled={readOnly}
           style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+          className="profile-section-stack"
         >
+          <ProfileSectionCard
+            eyebrow={t("professionsEyebrow")}
+            title={t("professionsTitle")}
+            sub={t("professionsHint")}
+          >
+            <div className="form-grid">
+              <TagListInput
+                name="professions"
+                label={t("professions")}
+                hint={t("professionsInputHint")}
+                defaultValue={member.professions}
+                disabled={readOnly}
+                placeholder={t("professionsPlaceholder")}
+              />
+            </div>
+          </ProfileSectionCard>
+
           <ProfileSectionCard
             eyebrow={t("employmentEyebrow")}
             title={t("primaryEmploymentTitle")}
-            sub={t("employmentHint")}
+            sub={t("employmentOptionalHint")}
           >
             <div className="form-grid">
               <ProfileField
@@ -202,7 +224,9 @@ function EmploymentHistoryRow({
     },
   });
 
-  const label = [item.jobTitle, item.employerName].filter(Boolean).join(" · ") || t("previousEmployment");
+  const label =
+    [item.jobTitle, item.employerName].filter(Boolean).join(" · ") ||
+    t("previousEmployment");
 
   return (
     <div
@@ -228,7 +252,11 @@ function EmploymentHistoryRow({
           <input type="hidden" name="profileId" value={member.memberId} />
           <input type="hidden" name="employmentId" value={item.id} />
           <input type="hidden" name="employmentAction" value="delete" />
-          <button type="submit" className="btn ghost sm" style={{ color: "var(--danger)" }}>
+          <button
+            type="submit"
+            className="btn ghost sm"
+            style={{ color: "var(--danger)" }}
+          >
             <Icons.trash size={14} /> {t("deleteAction")}
           </button>
         </form>

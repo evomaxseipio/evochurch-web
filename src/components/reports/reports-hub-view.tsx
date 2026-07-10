@@ -1,6 +1,6 @@
 "use client";
 
-import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewMembershipDirectoryAction, previewReportAction, submitConcilioReportAction } from "@/app/(app)/reports/actions";
+import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewMembershipDirectoryAction, previewReportAction, submitConcilioReportAction, toggleReportTemplateAction } from "@/app/(app)/reports/actions";
 import { ReportActionMenu } from "@/components/reports/report-action-menu";
 import { ReportCard } from "@/components/reports/report-card";
 import { ReportPeriodFilter } from "@/components/reports/report-period-filter";
@@ -14,10 +14,13 @@ import {
   filterCatalogByCategory,
   formatLabelForEntry,
   periodForCatalogEntry,
+  reportPlatformSupportsDiscountTemplates,
   REPORT_CATEGORY_FILTERS,
   type ReportCatalogEntry,
   type ReportCategoryFilter,
 } from "@/lib/reports/catalog";
+import type { ChurchReportDefinition } from "@/lib/services/report-definitions";
+import { reportDefinitionsById } from "@/lib/services/report-definitions";
 import {
   base64ToBlobUrl,
   downloadBase64File,
@@ -73,6 +76,8 @@ export function ReportsHubView({
   initialReportId,
   autoOpenReport = false,
   councilAffiliated = false,
+  reportDefinitions = [],
+  canManageReportTemplates = false,
 }: {
   catalog: ReportCatalogEntry[];
   exportableReportIds: ReportId[];
@@ -81,6 +86,8 @@ export function ReportsHubView({
   initialReportId?: ReportId | null;
   autoOpenReport?: boolean;
   councilAffiliated?: boolean;
+  reportDefinitions?: ChurchReportDefinition[];
+  canManageReportTemplates?: boolean;
 }) {
   const tCommon = useTranslations("common");
   const tReports = useTranslations("reports");
@@ -103,6 +110,14 @@ export function ReportsHubView({
     null,
   );
   const [submittingToCouncil, setSubmittingToCouncil] = useState(false);
+  const [templateToggleId, setTemplateToggleId] = useState<ReportId | null>(null);
+  const [templateEnabledById, setTemplateEnabledById] = useState<
+    Partial<Record<ReportId, boolean>>
+  >(() =>
+    Object.fromEntries(
+      reportDefinitions.map((def) => [def.reportId, def.templateEnabled]),
+    ),
+  );
   const autoOpenedRef = useRef(false);
   const handlePreviewRef = useRef<(entry: ReportCatalogEntry) => Promise<void>>(
     async () => {},
@@ -116,6 +131,49 @@ export function ReportsHubView({
     () => new Set(exportableReportIds),
     [exportableReportIds],
   );
+
+  const definitionMap = useMemo(
+    () => reportDefinitionsById(reportDefinitions),
+    [reportDefinitions],
+  );
+
+  useEffect(() => {
+    setTemplateEnabledById(
+      Object.fromEntries(
+        reportDefinitions.map((def) => [def.reportId, def.templateEnabled]),
+      ),
+    );
+  }, [reportDefinitions]);
+
+  async function handleTemplateToggle(reportId: ReportId, enabled: boolean) {
+    const previous = templateEnabledById[reportId] ?? false;
+    setTemplateEnabledById((current) => ({ ...current, [reportId]: enabled }));
+    setTemplateToggleId(reportId);
+    try {
+      const result = await toggleReportTemplateAction(reportId, enabled);
+      if (!result.ok) {
+        setTemplateEnabledById((current) => ({
+          ...current,
+          [reportId]: previous,
+        }));
+        toast.error(result.error);
+        return;
+      }
+      toast.success(
+        enabled
+          ? tReports("templateToggleEnabled")
+          : tReports("templateToggleDisabled"),
+      );
+    } catch {
+      setTemplateEnabledById((current) => ({
+        ...current,
+        [reportId]: previous,
+      }));
+      toast.error(tReports("templateToggleFailed"));
+    } finally {
+      setTemplateToggleId(null);
+    }
+  }
 
   const availableFilters = useMemo(
     () =>
@@ -402,7 +460,12 @@ export function ReportsHubView({
         </div>
       ) : listView === "grid" ? (
         <div className="grid-12">
-          {filteredEntries.map((entry) => (
+          {filteredEntries.map((entry) => {
+            const definition = definitionMap.get(entry.id);
+            const showTemplateToggle =
+              canManageReportTemplates &&
+              reportPlatformSupportsDiscountTemplates(entry.id, reportDefinitions);
+            return (
               <div key={entry.id} className="span-4">
                 <ReportCard
                   entry={entry}
@@ -415,9 +478,20 @@ export function ReportsHubView({
                   onMemberFilterChange={setMemberFilter}
                   onPreview={() => handlePreview(entry)}
                   onExport={handleExport}
+                  showTemplateToggle={showTemplateToggle}
+                  templateEnabled={
+                    templateEnabledById[entry.id] ??
+                    definition?.templateEnabled ??
+                    false
+                  }
+                  templateToggleLoading={templateToggleId === entry.id}
+                  onTemplateToggle={(enabled) =>
+                    void handleTemplateToggle(entry.id, enabled)
+                  }
                 />
               </div>
-            ))}
+            );
+          })}
         </div>
       ) : (
         <DataTable

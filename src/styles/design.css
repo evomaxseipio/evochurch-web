@@ -702,6 +702,54 @@ body {
 .field .help { font-size: 11.5px; color: var(--muted); }
 .field .help.error { color: var(--danger); }
 
+/* Tag list input (allergies, professions) */
+.tag-list-input__wrap {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+}
+.tag-list-input:not(.tag-list-input--embedded) .tag-list-input__wrap {
+  min-height: 44px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.tag-list-input__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tag-list-input__chip-remove {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.tag-list-input__text {
+  flex: 1;
+  min-width: 80px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  padding: 9px 0;
+  font-size: 13px;
+  line-height: 1.25;
+  color: var(--fg);
+}
+.tag-list-input__text::placeholder {
+  color: var(--dim);
+}
+.tag-list-input--embedded .tag-list-input__wrap {
+  flex-wrap: wrap;
+  min-height: 35px;
+}
+.tag-list-input--embedded .tag-list-input__chip {
+  flex-shrink: 0;
+}
+
 /* Login / auth — texto legible y autofill en dark y light */
 .login .field label {
   color: var(--fg-dim);
@@ -1535,6 +1583,33 @@ body {
 .row.wrap { flex-wrap: wrap; }
 .col { display: flex; flex-direction: column; gap: 10px; }
 .gap-sm { gap: 6px; } .gap-md { gap: 14px; } .gap-lg { gap: 20px; }
+
+/** Vertical rhythm between profile section cards (health, address, labor, etc.). */
+.profile-section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/** Blood type + allergies share one row inside personal info. */
+.profile-health-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 2fr;
+  gap: 14px;
+  align-items: start;
+}
+.profile-health-row > .field {
+  min-width: 0;
+}
+.profile-health-row .input-wrap {
+  min-height: 35px;
+}
+@media (max-width: 700px) {
+  .profile-health-row {
+    grid-template-columns: 1fr;
+  }
+}
 .muted { color: var(--muted); }
 .dim { color: var(--dim); }
 .tiny { font-size: 11.5px; }

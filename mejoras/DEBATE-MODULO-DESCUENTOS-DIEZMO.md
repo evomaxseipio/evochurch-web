@@ -2,7 +2,7 @@
 
 Documento de producto para decidir **antes** de implementar. Fase 2 (miembros) corre en paralelo; este módulo sería **Fase 2b o Fase 3 financiera**.
 
-**Estado:** 🟡 En debate  
+**Estado:** 🟢 MVP implementado (rama `feat/discount-templates`) — plantillas + vínculo a reportes; CEAD aplica si hay link.
 **Última actualización:** Jul 2026
 
 ---

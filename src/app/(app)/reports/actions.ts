@@ -29,6 +29,8 @@ import {
   type ConcilioF001ReportPayload,
   type MembershipDirectoryPayload,
 } from "@/lib/services/reports";
+import { fetchChurchReportDefinitions } from "@/lib/services/report-definitions";
+import { maintainChurchReportTemplateSetting } from "@/lib/services/report-definitions";
 import { submitConcilioReport } from "@/lib/services/org-portal";
 import type { MonthPeriod } from "@/lib/reports/period";
 import { getTranslations } from "next-intl/server";
@@ -66,6 +68,18 @@ async function runReportGeneration(
   if (!canReadReport(session, reportId)) {
     return { ok: false, error: tReports("errors.noReadPermission") };
   }
+
+  const reportDefinitions = await fetchChurchReportDefinitions(
+    supabase,
+    session.churchId,
+  );
+  const reportDefinition = reportDefinitions.find(
+    (def) => def.reportId === reportId,
+  );
+  if (reportDefinition && !reportDefinition.isActive) {
+    return { ok: false, error: tReports("errors.reportInactive") };
+  }
+
   if (access === "export") {
     if (!canExportReport(session, reportId)) {
       return { ok: false, error: tReports("errors.noExportPermission") };
@@ -370,6 +384,49 @@ export async function submitConcilioReportAction(
         e instanceof Error
           ? e.message
           : tReports("errors.submitCouncilFailed"),
+    };
+  }
+}
+
+import { revalidatePath } from "next/cache";
+
+export type ToggleReportTemplateResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+export async function toggleReportTemplateAction(
+  reportId: ReportId,
+  templateEnabled: boolean,
+): Promise<ToggleReportTemplateResult> {
+  const tReports = await getTranslations("reports");
+  try {
+    if (!isReportId(reportId)) {
+      return { ok: false, error: tReports("errors.unknownReport") };
+    }
+
+    const { supabase, session } = await getActionSession();
+    if (!session.churchId) {
+      const tErrors = await getTranslations("errors");
+      return { ok: false, error: tErrors("noChurch") };
+    }
+
+    requirePermission(session, "settings:discount_templates:write");
+
+    await maintainChurchReportTemplateSetting(
+      supabase,
+      session.churchId,
+      reportId,
+      templateEnabled,
+    );
+
+    revalidatePath("/reports");
+    revalidatePath("/settings/discount-templates");
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error:
+        e instanceof Error ? e.message : tReports("templateToggleFailed"),
     };
   }
 }

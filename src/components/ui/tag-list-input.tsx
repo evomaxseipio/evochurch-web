@@ -11,6 +11,8 @@ export function TagListInput({
   defaultValue = [],
   disabled = false,
   placeholder,
+  span,
+  embedded = false,
 }: {
   name: string;
   label: string;
@@ -18,6 +20,10 @@ export function TagListInput({
   defaultValue?: string[];
   disabled?: boolean;
   placeholder?: string;
+  /** Grid columns to span inside `.form-grid` (default: full row). */
+  span?: number;
+  /** When true, omits grid placement (for nested rows like blood type + allergies). */
+  embedded?: boolean;
 }) {
   const t = useTranslations("members");
   const inputId = useId();
@@ -49,7 +55,14 @@ export function TagListInput({
   }
 
   return (
-    <div className="field" style={{ gridColumn: "1 / -1" }}>
+    <div
+      className={`field tag-list-input${embedded ? " tag-list-input--embedded" : ""}`}
+      style={
+        embedded
+          ? undefined
+          : { gridColumn: span ? `span ${span}` : "1 / -1" }
+      }
+    >
       <label htmlFor={inputId}>{label}</label>
       {hint ? (
         <div className="tiny muted" style={{ marginBottom: 8 }}>
@@ -59,22 +72,11 @@ export function TagListInput({
 
       <input type="hidden" name={name} value={JSON.stringify(tags)} readOnly />
 
-      <div
-        className="input-wrap"
-        style={{
-          minHeight: 44,
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 6,
-          alignItems: "center",
-          padding: "6px 10px",
-        }}
-      >
+      <div className="input-wrap tag-list-input__wrap">
         {tags.map((tag, index) => (
           <span
             key={`${tag}-${index}`}
-            className="chip violet"
-            style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+            className="chip violet tag-list-input__chip"
           >
             {tag}
             {!disabled ? (
@@ -82,15 +84,7 @@ export function TagListInput({
                 type="button"
                 onClick={() => removeTag(index)}
                 aria-label={t("removeTag", { tag })}
-                style={{
-                  border: 0,
-                  background: "transparent",
-                  color: "inherit",
-                  cursor: "pointer",
-                  padding: 0,
-                  display: "grid",
-                  placeItems: "center",
-                }}
+                className="tag-list-input__chip-remove"
               >
                 <Icons.x size={12} />
               </button>
@@ -100,6 +94,7 @@ export function TagListInput({
         {!disabled ? (
           <input
             id={inputId}
+            className="tag-list-input__text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -114,14 +109,6 @@ export function TagListInput({
               if (draft.trim()) addTag(draft);
             }}
             placeholder={placeholder ?? t("tagInputPlaceholder")}
-            style={{
-              border: 0,
-              outline: "none",
-              background: "transparent",
-              flex: 1,
-              minWidth: 120,
-              fontSize: 14,
-            }}
           />
         ) : null}
       </div>

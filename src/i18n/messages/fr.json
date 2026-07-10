@@ -99,6 +99,7 @@
     "expenseTypes": "Types de dépenses",
     "incomeTypes": "Types de revenus",
     "churchProfile": "Profil de l'église",
+    "discountTemplates": "Modèles de répartition",
     "network": "Réseau d'églises",
     "adminUsers": "Utilisateurs système",
     "roles": "Rôles et permissions",
@@ -381,11 +382,9 @@
     "deleteAccount": "Delete account",
     "backToList": "Back to list",
     "tabProfile": "Profile",
-    "tabMembership": "Membership",
+    "tabMembership": "Adhésion",
+    "tabLabor": "Professionnel",
     "tabFinances": "Finances",
-    "tabHealth": "Santé",
-    "tabProfessions": "Métiers",
-    "tabEmployment": "Emploi",
     "personalInfo": "Personal information",
     "addressInfo": "Address",
     "contactInfo": "Contact",
@@ -515,6 +514,7 @@
     "healthTitle": "Informations de santé",
     "healthHint": "Groupe sanguin et allergies connues (optionnel).",
     "healthSaved": "Informations de santé enregistrées.",
+    "laborSaved": "Informations professionnelles enregistrées.",
     "bloodType": "Groupe sanguin",
     "bloodTypeUnset": "Non précisé",
     "bloodTypeUnknown": "Inconnu",
@@ -531,6 +531,7 @@
     "employmentEyebrow": "Emploi",
     "primaryEmploymentTitle": "Emploi principal",
     "employmentHint": "Optionnel. Un seul emploi principal actif par membre.",
+    "employmentOptionalHint": "Optionnel. Enregistrez l'emploi principal du membre si applicable.",
     "employmentSaved": "Emploi enregistré.",
     "employmentDeleted": "Emploi supprimé.",
     "employerName": "Employeur",
@@ -1077,6 +1078,53 @@
     "userCreated": "Utilisateur créé",
     "userUpdated": "Utilisateur mis à jour"
   },
+  "discountTemplates": {
+    "title": "Modèles de répartition",
+    "subtitle": "Définissez les postes et pourcentages. Liez-les aux rapports pour les appliquer à l'export.",
+    "configLabel": "Configuration · Finances",
+    "newTemplate": "Nouveau modèle",
+    "editTemplate": "Modifier le modèle",
+    "emptyTitle": "Aucun modèle",
+    "emptyHint": "Créez un modèle avec les postes de votre église (pastoral, éducation, missions, concile, etc.).",
+    "baseKind": "Base de calcul",
+    "baseKinds": {
+      "tithe": "Dîmes",
+      "offering": "Offrandes",
+      "donation": "Dons",
+      "total_income": "Revenus totaux"
+    },
+    "linesTitle": "Postes (max. 100 %)",
+    "lineLabel": "Poste",
+    "lineLabelPlaceholder": "Ex. Soutien pastoral",
+    "addLine": "Ajouter",
+    "removeLine": "Retirer le poste",
+    "percentTotal": "Total : {total} %",
+    "linesRequired": "Ajoutez au moins un poste.",
+    "linesAddHint": "Saisissez chaque ligne et cliquez sur « Ajouter » (ou Entrée). Les lignes en cours sont incluses à l'enregistrement si elles sont complètes.",
+    "lineDraftIncomplete": "Complétez le libellé et le pourcentage, ou cliquez sur Ajouter.",
+    "saveValidationFailed": "Vérifiez le formulaire avant d'enregistrer.",
+    "percentMust100": "Les pourcentages doivent totaliser 100 %.",
+    "percentMax100": "Les pourcentages ne peuvent pas dépasser 100 %.",
+    "percentExceeds100": "Ce poste dépasserait le total de 100 %.",
+    "percentUnallocated": "{rest} % reste dans le fonds de l'église",
+    "unallocatedHint": "Il n'est pas obligatoire d'atteindre 100 %. Le pourcentage non attribué reste dans le fonds de l'église.",
+    "reportLinkLabel": "Rapport lié",
+    "reportLinkHint": "Un modèle s'applique à un seul rapport activé dans le catalogue.",
+    "reportLinkNone": "Non lié",
+    "linkedReport": "Rapport lié",
+    "noLinkableReports": "Aucun rapport activé pour les modèles (vérifiez les permissions ou le catalogue).",
+    "activeHint": "Les modèles inactifs ne sont pas utilisés dans les rapports.",
+    "reportLinksTitle": "Lier aux rapports",
+    "reportLinksHint": "Seuls les rapports cochés appliqueront ce modèle.",
+    "linkedReports": "Rapports liés",
+    "noReportLinks": "Aucun lien — n'affecte aucun rapport",
+    "saved": "Modèle enregistré.",
+    "deleted": "Modèle supprimé.",
+    "linkSaved": "Rapport lié.",
+    "linkRemoved": "Lien supprimé.",
+    "deleteTitle": "Supprimer le modèle",
+    "deleteMessage": "Supprimer « {name} » ? Les liens aux rapports seront aussi supprimés."
+  },
   "catalogs": {
     "incomeTypes": "Tipos de ingreso",
     "expenseTypes": "Tipos de gasto",
@@ -1232,6 +1280,9 @@
         "church": {
           "read": "Voir le profil de l'église",
           "write": "Modifier le profil de l'église"
+        },
+        "discount_templates": {
+          "write": "Configurer les modèles de remise et les rapports liés"
         }
       },
       "network": {
@@ -1282,12 +1333,15 @@
       "settings": "Configuration",
       "admin_users": "Utilisateurs système",
       "roles": "Rôles",
-      "auth": "Authentification"
+      "auth": "Authentification",
+      "reports": "Rapports"
     },
     "actions": {
       "create": "A créé",
       "update": "A modifié",
       "delete": "A supprimé",
+      "activate": "A activé",
+      "deactivate": "A désactivé",
       "authorize": "A autorisé",
       "reject": "A rejeté",
       "login": "S'est connecté",
@@ -1346,7 +1400,20 @@
         "church_profile": {
           "update": "A mis à jour le profil de l'église : {name}",
           "logo": "A mis à jour le logo de l'église"
+        },
+        "discount_template": {
+          "create": "A créé le modèle de remise : {name}",
+          "update": "A modifié le modèle de remise : {name}",
+          "delete": "A supprimé le modèle de remise : {name}",
+          "activate": "A activé le modèle de remise : {name}",
+          "deactivate": "A désactivé le modèle de remise : {name}"
         }
+      },
+      "reports": {
+        "activate": "A activé le rapport : {reportId}",
+        "deactivate": "A désactivé le rapport : {reportId}",
+        "template_enable": "A activé les modèles pour le rapport : {reportId}",
+        "template_disable": "A désactivé les modèles pour le rapport : {reportId}"
       }
     },
     "filters": {
@@ -1397,7 +1464,12 @@
     "noReportsForRole": "No reports available for your role.",
     "noReportsMatch": "No reports match the filters.",
     "generating": "Generating…",
-    "previewOnly": "Your role can preview but not download files.",
+    "previewOnly": "Votre rôle peut prévisualiser mais pas télécharger les fichiers.",
+    "templateToggleLabel": "Utiliser avec les modèles de remise",
+    "templateToggleSaving": "Enregistrement…",
+    "templateToggleEnabled": "Rapport activé pour les modèles.",
+    "templateToggleDisabled": "Rapport désactivé pour les modèles.",
+    "templateToggleFailed": "Impossible de mettre à jour la configuration du rapport.",
     "previewOnlyShort": "Your role can preview but not download.",
     "closePreview": "Close preview",
     "downloadReady": "Download ready",
@@ -1783,6 +1855,7 @@
       "previewFailed": "Impossible d'afficher l'aperçu",
       "retry": "Réessayez.",
       "noReadPermission": "Vous n'avez pas la permission de voir ce rapport.",
+      "reportInactive": "Ce rapport est désactivé pour votre église.",
       "noExportPermission": "Vous n'avez pas la permission d'exporter ce rapport.",
       "unknownReport": "Rapport non reconnu.",
       "generateFailedGeneric": "Impossible de générer le rapport.",

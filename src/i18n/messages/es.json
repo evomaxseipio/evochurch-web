@@ -99,6 +99,7 @@
     "expenseTypes": "Tipos de gasto",
     "incomeTypes": "Tipos de ingreso",
     "churchProfile": "Perfil de iglesia",
+    "discountTemplates": "Plantillas de descuento",
     "network": "Red de iglesias",
     "adminUsers": "Usuarios sistema",
     "roles": "Roles y permisos",
@@ -382,10 +383,8 @@
     "backToList": "Volver al listado",
     "tabProfile": "Perfil",
     "tabMembership": "Membresía",
+    "tabLabor": "Laboral",
     "tabFinances": "Finanzas",
-    "tabHealth": "Salud",
-    "tabProfessions": "Oficios",
-    "tabEmployment": "Empleo",
     "personalInfo": "Información personal",
     "addressInfo": "Dirección",
     "contactInfo": "Contacto",
@@ -515,6 +514,7 @@
     "healthTitle": "Información de salud",
     "healthHint": "Tipo de sangre y alergias conocidas (opcional).",
     "healthSaved": "Información de salud guardada.",
+    "laborSaved": "Información laboral guardada.",
     "bloodType": "Tipo de sangre",
     "bloodTypeUnset": "Sin especificar",
     "bloodTypeUnknown": "Desconocido",
@@ -531,6 +531,7 @@
     "employmentEyebrow": "Empleo",
     "primaryEmploymentTitle": "Empleo principal",
     "employmentHint": "Opcional. Solo puede haber un empleo principal activo.",
+    "employmentOptionalHint": "Opcional. Registra el empleo principal del hermano si aplica.",
     "employmentSaved": "Empleo guardado correctamente.",
     "employmentDeleted": "Empleo eliminado.",
     "employerName": "Empresa",
@@ -1077,6 +1078,53 @@
     "userCreated": "Usuario creado",
     "userUpdated": "Usuario actualizado"
   },
+  "discountTemplates": {
+    "title": "Plantillas de descuento",
+    "subtitle": "Define partidas y porcentajes para repartir ingresos. Vincúlalas a reportes para que se apliquen al exportar.",
+    "configLabel": "Configuración · Finanzas",
+    "newTemplate": "Nueva plantilla",
+    "editTemplate": "Editar plantilla",
+    "emptyTitle": "Sin plantillas",
+    "emptyHint": "Crea una plantilla con las partidas de tu iglesia (pastoral, educación, misiones, concilio, etc.).",
+    "baseKind": "Base de cálculo",
+    "baseKinds": {
+      "tithe": "Diezmos",
+      "offering": "Ofrendas",
+      "donation": "Donaciones",
+      "total_income": "Total ingresos"
+    },
+    "linesTitle": "Partidas (máximo 100%)",
+    "lineLabel": "Partida",
+    "lineLabelPlaceholder": "Ej. Asignación pastoral",
+    "addLine": "Agregar",
+    "removeLine": "Quitar partida",
+    "percentTotal": "Total: {total}%",
+    "linesRequired": "Agrega al menos una partida.",
+    "linesAddHint": "Escribe cada partida y pulsa «Agregar» (o Enter). Al guardar se incluye la fila pendiente si está completa.",
+    "lineDraftIncomplete": "Completa el nombre y el porcentaje de la partida, o pulsa Agregar.",
+    "saveValidationFailed": "Revisa los campos antes de guardar.",
+    "percentMust100": "Los porcentajes deben sumar 100%.",
+    "percentMax100": "Los porcentajes no pueden superar 100%.",
+    "percentExceeds100": "Esta partida superaría el 100% total.",
+    "percentUnallocated": "{rest}% queda en el fondo de la iglesia",
+    "unallocatedHint": "No es obligatorio llegar al 100%. El porcentaje no asignado permanece en el fondo de la iglesia.",
+    "reportLinkLabel": "Reporte vinculado",
+    "reportLinkHint": "Una plantilla se aplica a un solo reporte habilitado en el catálogo.",
+    "reportLinkNone": "Sin vincular",
+    "linkedReport": "Reporte vinculado",
+    "noLinkableReports": "No hay reportes habilitados para plantillas (revisa permisos o catálogo).",
+    "activeHint": "Las plantillas inactivas no se usan en reportes.",
+    "reportLinksTitle": "Vincular a reportes",
+    "reportLinksHint": "Solo los reportes marcados aplicarán esta plantilla al generar el informe.",
+    "linkedReports": "Reportes vinculados",
+    "noReportLinks": "Sin vínculos — no afecta ningún reporte",
+    "saved": "Plantilla guardada.",
+    "deleted": "Plantilla eliminada.",
+    "linkSaved": "Reporte vinculado.",
+    "linkRemoved": "Vínculo eliminado.",
+    "deleteTitle": "Eliminar plantilla",
+    "deleteMessage": "¿Eliminar \"{name}\"? Los vínculos a reportes también se quitarán."
+  },
   "catalogs": {
     "incomeTypes": "Tipos de ingreso",
     "expenseTypes": "Tipos de gasto",
@@ -1232,6 +1280,9 @@
         "church": {
           "read": "Ver perfil de iglesia",
           "write": "Editar perfil de iglesia"
+        },
+        "discount_templates": {
+          "write": "Configurar plantillas de descuento y reportes vinculados"
         }
       },
       "network": {
@@ -1282,12 +1333,15 @@
       "settings": "Configuración",
       "admin_users": "Usuarios sistema",
       "roles": "Roles",
-      "auth": "Autenticación"
+      "auth": "Autenticación",
+      "reports": "Reportes"
     },
     "actions": {
       "create": "Creó",
       "update": "Editó",
       "delete": "Eliminó",
+      "activate": "Activó",
+      "deactivate": "Desactivó",
       "authorize": "Autorizó",
       "reject": "Rechazó",
       "login": "Inició sesión",
@@ -1346,7 +1400,20 @@
         "church_profile": {
           "update": "Actualizó perfil de iglesia: {name}",
           "logo": "Actualizó logo de iglesia"
+        },
+        "discount_template": {
+          "create": "Creó plantilla de descuento: {name}",
+          "update": "Editó plantilla de descuento: {name}",
+          "delete": "Eliminó plantilla de descuento: {name}",
+          "activate": "Activó plantilla de descuento: {name}",
+          "deactivate": "Desactivó plantilla de descuento: {name}"
         }
+      },
+      "reports": {
+        "activate": "Activó reporte: {reportId}",
+        "deactivate": "Desactivó reporte: {reportId}",
+        "template_enable": "Activó plantillas en reporte: {reportId}",
+        "template_disable": "Desactivó plantillas en reporte: {reportId}"
       }
     },
     "filters": {
@@ -1398,6 +1465,11 @@
     "noReportsMatch": "No hay reportes que coincidan con los filtros.",
     "generating": "Generando…",
     "previewOnly": "Tu rol puede previsualizar pero no descargar archivos.",
+    "templateToggleLabel": "Usar con plantillas de descuento",
+    "templateToggleSaving": "Guardando…",
+    "templateToggleEnabled": "Reporte habilitado para plantillas.",
+    "templateToggleDisabled": "Reporte deshabilitado para plantillas.",
+    "templateToggleFailed": "No se pudo actualizar la configuración del reporte.",
     "previewOnlyShort": "Tu rol puede previsualizar pero no descargar.",
     "closePreview": "Cerrar vista previa",
     "downloadReady": "Descarga lista",
@@ -1783,6 +1855,7 @@
       "previewFailed": "No se pudo previsualizar",
       "retry": "Intenta de nuevo.",
       "noReadPermission": "No tienes permiso para ver este reporte.",
+      "reportInactive": "Este reporte está desactivado para tu iglesia.",
       "noExportPermission": "No tienes permiso para exportar este reporte.",
       "unknownReport": "Reporte no reconocido.",
       "generateFailedGeneric": "No se pudo generar el reporte.",

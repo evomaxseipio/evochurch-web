@@ -16,6 +16,7 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/settings/income-types": "settings:income_types:read",
   "/settings/roles": "roles:manage",
   "/settings/church": "settings:church:read",
+  "/settings/discount-templates": "settings:church:read",
   "/network": "network:churches:read",
   "/settings": "settings:read",
 };

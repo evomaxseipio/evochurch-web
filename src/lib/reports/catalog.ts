@@ -1,8 +1,10 @@
-import type { PermissionKey } from "@/lib/auth/permission-keys";
+import type { ReportDiscountSectionKey } from "@/lib/discounts/types";
 import type { AppSession } from "@/lib/auth/app-session";
 import { canReadReport } from "@/lib/reports/permissions";
 import type { MonthPeriod, YearPeriod } from "@/lib/reports/period";
 import type { ReportFormat, ReportId, ReportPeriod } from "@/lib/reports/types";
+import type { ChurchReportDefinition } from "@/lib/services/report-definitions";
+import { reportDefinitionsById } from "@/lib/services/report-definitions";
 
 export type ReportCategory = "financial" | "membership" | "executive";
 
@@ -131,12 +133,33 @@ export const REPORT_CATEGORY_FILTERS: {
   { key: "executive", label: REPORT_CATEGORY_LABELS.executive },
 ];
 
-/** Catálogo visible según permisos granulares por reporte. */
+function definitionForReport(
+  reportId: ReportId,
+  definitions?: ChurchReportDefinition[],
+): ChurchReportDefinition | undefined {
+  if (!definitions?.length) return undefined;
+  return reportDefinitionsById(definitions).get(reportId);
+}
+
+function isReportActiveInRegistry(
+  reportId: ReportId,
+  definitions?: ChurchReportDefinition[],
+): boolean {
+  const def = definitionForReport(reportId, definitions);
+  return def ? def.isActive : true;
+}
+
+/** Catálogo visible según permisos granulares por reporte y registro en BD. */
 export function filterCatalogForSession(
   session: AppSession,
   entries: ReportCatalogEntry[] = REPORT_CATALOG,
+  definitions?: ChurchReportDefinition[],
 ): ReportCatalogEntry[] {
-  return entries.filter((entry) => canReadReport(session, entry.id));
+  return entries.filter(
+    (entry) =>
+      canReadReport(session, entry.id) &&
+      isReportActiveInRegistry(entry.id, definitions),
+  );
 }
 
 export function filterCatalogByCategory(
@@ -169,4 +192,41 @@ export function formatLabelForEntry(
 
 export function catalogEntryById(id: ReportId): ReportCatalogEntry | undefined {
   return REPORT_CATALOG.find((entry) => entry.id === id);
+}
+
+export function reportPlatformSupportsDiscountTemplates(
+  reportId: ReportId,
+  definitions?: ChurchReportDefinition[],
+): boolean {
+  const def = definitionForReport(reportId, definitions);
+  return def?.platformSupportsDiscountTemplates === true;
+}
+
+export function reportSupportsDiscountTemplates(
+  reportId: ReportId,
+  definitions?: ChurchReportDefinition[],
+): boolean {
+  const def = definitionForReport(reportId, definitions);
+  if (def) return def.supportsDiscountTemplates && def.isActive;
+  return false;
+}
+
+export function reportDiscountSectionKey(
+  reportId: ReportId,
+  definitions?: ChurchReportDefinition[],
+): ReportDiscountSectionKey {
+  const def = definitionForReport(reportId, definitions);
+  return def?.discountSectionKey ?? "council_sends";
+}
+
+/** Reports flagged for discount templates in BD, filtered by permissions and is_active. */
+export function getDiscountLinkableReportEntries(
+  session?: Pick<AppSession, "permissions"> | null,
+  definitions?: ChurchReportDefinition[],
+): ReportCatalogEntry[] {
+  return REPORT_CATALOG.filter((entry) => {
+    if (!reportSupportsDiscountTemplates(entry.id, definitions)) return false;
+    if (!session) return true;
+    return canReadReport(session as AppSession, entry.id);
+  });
 }

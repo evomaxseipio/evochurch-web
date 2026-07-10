@@ -85,6 +85,11 @@ export const SETTINGS_RESOURCE_DEFS = [
     label: "Perfil de iglesia",
     actions: ["read", "write"],
   },
+  {
+    key: "discount_templates",
+    label: "Plantillas de descuento",
+    actions: ["write"],
+  },
 ] as const;
 
 /** Módulos con una fila y acciones en columnas (como finanzas). */

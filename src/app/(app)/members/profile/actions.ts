@@ -65,6 +65,72 @@ function toErrorKey(error: unknown, fallback: string): string {
   return fallback;
 }
 
+export async function saveMemberLaborAction(
+  _prev: ActionResult | null,
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    const { supabase, session } = await getActionSessionWith("members:write");
+    const profileId = String(formData.get("profileId") ?? "").trim();
+    if (!profileId) {
+      return { ok: false, errorKey: "validation.invalidProfileId" };
+    }
+
+    const before = await fetchMemberById(supabase, session.churchId, profileId);
+    if (!before) {
+      return { ok: false, errorKey: "errors.memberNotFound" };
+    }
+
+    const professions = parseTagsJson(String(formData.get("professions") ?? "[]"));
+    const profileInput: MemberProfileInput = {
+      ...memberToProfileInput(before),
+      professions,
+    };
+    await updateMember(supabase, profileId, profileInput);
+
+    const employmentInput: ProfileEmploymentInput = {
+      profileId,
+      employmentId: String(formData.get("employmentId") ?? "").trim() || undefined,
+      employerName: String(formData.get("employerName") ?? "").trim(),
+      jobTitle: String(formData.get("jobTitle") ?? "").trim(),
+      sector: String(formData.get("sector") ?? "").trim(),
+      workPhone: String(formData.get("workPhone") ?? "").trim(),
+      workEmail: String(formData.get("workEmail") ?? "").trim(),
+      startDate: String(formData.get("startDate") ?? "").trim(),
+      notes: String(formData.get("notes") ?? "").trim(),
+    };
+
+    const hasEmploymentData =
+      employmentInput.employerName ||
+      employmentInput.jobTitle ||
+      employmentInput.sector ||
+      employmentInput.workPhone ||
+      employmentInput.workEmail ||
+      employmentInput.startDate ||
+      employmentInput.notes ||
+      employmentInput.employmentId;
+
+    if (hasEmploymentData) {
+      await maintainProfileEmployment(
+        supabase,
+        session.churchId,
+        "upsert_primary",
+        employmentInput,
+      );
+    }
+
+    revalidatePath("/members", "page");
+    revalidatePath("/members/profile", "page");
+
+    const refreshed = await fetchMemberById(supabase, session.churchId, profileId);
+    let member = mergeMemberFromInput(refreshed ?? before, profileInput);
+    if (refreshed) member = refreshed;
+    return { ok: true, member };
+  } catch (e) {
+    return { ok: false, errorKey: toErrorKey(e, "errors.saveFailed") };
+  }
+}
+
 export async function saveMemberHealthAction(
   _prev: ActionResult | null,
   formData: FormData,

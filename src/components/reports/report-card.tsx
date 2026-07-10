@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons } from "@/components/icons";
+import { CrudSwitch } from "@/components/ui/crud-switch";
 import {
   formatLabelForEntry,
   type ReportCatalogEntry,
@@ -29,6 +30,10 @@ export function ReportCard({
   onMemberFilterChange,
   onPreview,
   onExport,
+  showTemplateToggle = false,
+  templateEnabled = false,
+  templateToggleLoading = false,
+  onTemplateToggle,
 }: {
   entry: ReportCatalogEntry;
   monthPeriod: MonthPeriod;
@@ -43,6 +48,10 @@ export function ReportCard({
     reportId: ReportCatalogEntry["id"],
     format: ReportFormat,
   ) => void;
+  showTemplateToggle?: boolean;
+  templateEnabled?: boolean;
+  templateToggleLoading?: boolean;
+  onTemplateToggle?: (enabled: boolean) => void;
 }) {
   const tCommon = useTranslations("common");
   const tReports = useTranslations("reports");
@@ -86,6 +95,29 @@ export function ReportCard({
           <span className="tiny muted">{entry.rolesHint}</span>
         ) : null}
       </div>
+
+      {showTemplateToggle ? (
+        <div
+          className="row"
+          style={{
+            gap: 10,
+            alignItems: "center",
+            flexWrap: "wrap",
+            opacity: templateToggleLoading ? 0.65 : 1,
+            pointerEvents: templateToggleLoading ? "none" : "auto",
+          }}
+        >
+          <CrudSwitch
+            on={templateEnabled}
+            onChange={(enabled) => onTemplateToggle?.(enabled)}
+          />
+          <span className="tiny" style={{ lineHeight: 1.4 }}>
+            {templateToggleLoading
+              ? tReports("templateToggleSaving")
+              : tReports("templateToggleLabel")}
+          </span>
+        </div>
+      ) : null}
 
       {showMemberFilter ? (
         <select

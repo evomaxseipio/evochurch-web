@@ -121,6 +121,8 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "settings:income_types:delete": "Eliminar tipos de ingreso",
   "settings:church:read": "Ver perfil de iglesia",
   "settings:church:write": "Editar perfil de iglesia",
+  "settings:discount_templates:write":
+    "Configurar plantillas de descuento y reportes vinculados",
   "network:churches:read": "Ver red de sucursales",
   "admin_users:manage": "Gestionar usuarios del sistema",
   "roles:manage": "Editar roles y permisos por iglesia",
@@ -166,6 +168,8 @@ const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
   "settings:income_types:delete": "permissions.settings.income_types.delete",
   "settings:church:read": "permissions.settings.church.read",
   "settings:church:write": "permissions.settings.church.write",
+  "settings:discount_templates:write":
+    "permissions.settings.discount_templates.write",
   "network:churches:read": "permissions.network.churches.read",
   "admin_users:manage": "permissions.admin_users.manage",
   "roles:manage": "permissions.roles.manage",

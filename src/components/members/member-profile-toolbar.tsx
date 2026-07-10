@@ -6,42 +6,32 @@ import { useTranslations } from "next-intl";
 
 export const PROFILE_FORM_ID = "member-profile-form";
 export const MEMBERSHIP_FORM_ID = "member-membership-form";
-export const HEALTH_FORM_ID = "member-health-form";
-export const PROFESSIONS_FORM_ID = "member-professions-form";
-export const EMPLOYMENT_FORM_ID = "member-employment-form";
+export const LABOR_FORM_ID = "member-labor-form";
 
 export type ProfileTabId =
   | "profile"
   | "membership"
-  | "health"
-  | "professions"
-  | "employment"
+  | "labor"
   | "finances"
   | "delete";
 
 const TAB_FORM_IDS: Partial<Record<ProfileTabId, string>> = {
   profile: PROFILE_FORM_ID,
   membership: MEMBERSHIP_FORM_ID,
-  health: HEALTH_FORM_ID,
-  professions: PROFESSIONS_FORM_ID,
-  employment: EMPLOYMENT_FORM_ID,
+  labor: LABOR_FORM_ID,
 };
 
 export function MemberProfileToolbar({
   tab,
   profilePending,
   membershipPending,
-  healthPending = false,
-  professionsPending = false,
-  employmentPending = false,
+  laborPending = false,
   canWriteMembers,
 }: {
   tab: ProfileTabId;
   profilePending: boolean;
   membershipPending: boolean;
-  healthPending?: boolean;
-  professionsPending?: boolean;
-  employmentPending?: boolean;
+  laborPending?: boolean;
   canWriteMembers: boolean;
 }) {
   const t = useTranslations("members");
@@ -49,9 +39,7 @@ export function MemberProfileToolbar({
   const pendingByTab: Partial<Record<ProfileTabId, boolean>> = {
     profile: profilePending,
     membership: membershipPending,
-    health: healthPending,
-    professions: professionsPending,
-    employment: employmentPending,
+    labor: laborPending,
   };
   const pending = pendingByTab[tab] ?? false;
   const formId = TAB_FORM_IDS[tab] ?? null;
@@ -78,11 +66,8 @@ export function MemberProfileToolbar({
           disabled={pending}
           className="btn primary"
         >
-          <Icons.check size={16} />
           {pending ? tCommon("saving") : tCommon("saveChanges")}
         </button>
-      ) : formId ? (
-        <span className="tiny muted">{tCommon("readOnly")}</span>
       ) : null}
     </div>
   );

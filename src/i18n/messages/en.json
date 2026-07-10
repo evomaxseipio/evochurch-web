@@ -99,6 +99,7 @@
     "expenseTypes": "Expense types",
     "incomeTypes": "Income types",
     "churchProfile": "Church profile",
+    "discountTemplates": "Discount templates",
     "network": "Church network",
     "adminUsers": "System users",
     "roles": "Roles & permissions",
@@ -382,10 +383,8 @@
     "backToList": "Back to list",
     "tabProfile": "Profile",
     "tabMembership": "Membership",
+    "tabLabor": "Work",
     "tabFinances": "Finances",
-    "tabHealth": "Health",
-    "tabProfessions": "Trades",
-    "tabEmployment": "Employment",
     "personalInfo": "Personal information",
     "addressInfo": "Address",
     "contactInfo": "Contact",
@@ -515,6 +514,7 @@
     "healthTitle": "Health information",
     "healthHint": "Blood type and known allergies (optional).",
     "healthSaved": "Health information saved.",
+    "laborSaved": "Work information saved.",
     "bloodType": "Blood type",
     "bloodTypeUnset": "Not specified",
     "bloodTypeUnknown": "Unknown",
@@ -531,6 +531,7 @@
     "employmentEyebrow": "Employment",
     "primaryEmploymentTitle": "Primary employment",
     "employmentHint": "Optional. Only one active primary job per member.",
+    "employmentOptionalHint": "Optional. Record the member's primary job if applicable.",
     "employmentSaved": "Employment saved successfully.",
     "employmentDeleted": "Employment removed.",
     "employerName": "Employer",
@@ -1077,6 +1078,53 @@
     "userCreated": "User created",
     "userUpdated": "User updated"
   },
+  "discountTemplates": {
+    "title": "Discount templates",
+    "subtitle": "Define line items and percentages to split income. Link them to reports to apply on export.",
+    "configLabel": "Settings · Finances",
+    "newTemplate": "New template",
+    "editTemplate": "Edit template",
+    "emptyTitle": "No templates",
+    "emptyHint": "Create a template with your church line items (pastoral, education, missions, council, etc.).",
+    "baseKind": "Calculation base",
+    "baseKinds": {
+      "tithe": "Tithes",
+      "offering": "Offerings",
+      "donation": "Donations",
+      "total_income": "Total income"
+    },
+    "linesTitle": "Line items (max 100%)",
+    "lineLabel": "Line item",
+    "lineLabelPlaceholder": "e.g. Pastoral support",
+    "addLine": "Add",
+    "removeLine": "Remove line",
+    "percentTotal": "Total: {total}%",
+    "linesRequired": "Add at least one line item.",
+    "linesAddHint": "Enter each line and click «Add» (or press Enter). Pending rows are included on save when complete.",
+    "lineDraftIncomplete": "Complete the line name and percent, or click Add.",
+    "saveValidationFailed": "Check the form before saving.",
+    "percentMust100": "Percentages must total 100%.",
+    "percentMax100": "Percentages cannot exceed 100%.",
+    "percentExceeds100": "This line would exceed 100% total.",
+    "percentUnallocated": "{rest}% stays in the church fund",
+    "unallocatedHint": "You do not need to reach 100%. Unallocated percent stays in the church fund.",
+    "reportLinkLabel": "Linked report",
+    "reportLinkHint": "One template applies to one catalog-enabled report.",
+    "reportLinkNone": "Not linked",
+    "linkedReport": "Linked report",
+    "noLinkableReports": "No reports are enabled for templates (check permissions or catalog).",
+    "activeHint": "Inactive templates are not used in reports.",
+    "reportLinksTitle": "Link to reports",
+    "reportLinksHint": "Only checked reports will apply this template when generated.",
+    "linkedReports": "Linked reports",
+    "noReportLinks": "No links — does not affect any report",
+    "saved": "Template saved.",
+    "deleted": "Template deleted.",
+    "linkSaved": "Report linked.",
+    "linkRemoved": "Link removed.",
+    "deleteTitle": "Delete template",
+    "deleteMessage": "Delete \"{name}\"? Report links will be removed too."
+  },
   "catalogs": {
     "incomeTypes": "Tipos de ingreso",
     "expenseTypes": "Tipos de gasto",
@@ -1232,6 +1280,9 @@
         "church": {
           "read": "View church profile",
           "write": "Edit church profile"
+        },
+        "discount_templates": {
+          "write": "Configure discount templates and linked reports"
         }
       },
       "network": {
@@ -1282,12 +1333,15 @@
       "settings": "Settings",
       "admin_users": "System users",
       "roles": "Roles",
-      "auth": "Authentication"
+      "auth": "Authentication",
+      "reports": "Reports"
     },
     "actions": {
       "create": "Created",
       "update": "Updated",
       "delete": "Deleted",
+      "activate": "Activated",
+      "deactivate": "Deactivated",
       "authorize": "Authorized",
       "reject": "Rejected",
       "login": "Signed in",
@@ -1346,7 +1400,20 @@
         "church_profile": {
           "update": "Updated church profile: {name}",
           "logo": "Updated church logo"
+        },
+        "discount_template": {
+          "create": "Created discount template: {name}",
+          "update": "Updated discount template: {name}",
+          "delete": "Deleted discount template: {name}",
+          "activate": "Activated discount template: {name}",
+          "deactivate": "Deactivated discount template: {name}"
         }
+      },
+      "reports": {
+        "activate": "Activated report: {reportId}",
+        "deactivate": "Deactivated report: {reportId}",
+        "template_enable": "Enabled templates for report: {reportId}",
+        "template_disable": "Disabled templates for report: {reportId}"
       }
     },
     "filters": {
@@ -1398,6 +1465,11 @@
     "noReportsMatch": "No reports match the filters.",
     "generating": "Generating…",
     "previewOnly": "Your role can preview but not download files.",
+    "templateToggleLabel": "Use with discount templates",
+    "templateToggleSaving": "Saving…",
+    "templateToggleEnabled": "Report enabled for templates.",
+    "templateToggleDisabled": "Report disabled for templates.",
+    "templateToggleFailed": "Could not update report template settings.",
     "previewOnlyShort": "Your role can preview but not download.",
     "closePreview": "Close preview",
     "downloadReady": "Download ready",
@@ -1783,6 +1855,7 @@
       "previewFailed": "Could not preview",
       "retry": "Try again.",
       "noReadPermission": "You do not have permission to view this report.",
+      "reportInactive": "This report is disabled for your church.",
       "noExportPermission": "You do not have permission to export this report.",
       "unknownReport": "Unknown report.",
       "generateFailedGeneric": "Could not generate report.",

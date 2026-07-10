@@ -79,6 +79,17 @@ async function sessionContext() {
   return { supabase, churchId: session.churchId };
 }
 
+function parseTagsJson(raw: string): string[] {
+  if (!raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((v) => String(v).trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 function parseProfileInput(
   formData: FormData,
   roles: MemberRoleCatalog[] = [],
@@ -109,6 +120,8 @@ function parseProfileInput(
     phone: String(formData.get("phone") ?? "").trim(),
     mobilePhone: String(formData.get("mobilePhone") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim(),
+    bloodType: String(formData.get("bloodType") ?? "").trim(),
+    allergies: parseTagsJson(String(formData.get("allergies") ?? "[]")),
   };
 }
 

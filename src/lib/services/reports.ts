@@ -35,6 +35,10 @@ import {
   churchProfileToReportMeta,
   fetchChurchProfile,
 } from "@/lib/services/church-profile";
+import {
+  computeDiscountAllocation,
+  fetchLinkedTemplateIdForReport,
+} from "@/lib/services/discount-templates";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type ReportChurchMeta = {
@@ -231,11 +235,28 @@ export async function fetchFinancialMonthlyPayload(
   meta: ReportChurchMeta = {},
 ): Promise<FinancialMonthlyPayload> {
   const bounds = monthBounds(period);
-  const [contributions, ledgerEntries, orgRules] = await Promise.all([
-    fetchContributionsForPeriod(supabase, churchId, bounds.from, bounds.to),
-    fetchLedgerForPeriod(supabase, churchId, bounds.from, bounds.to),
-    fetchChurchOrgReportRules(supabase, churchId),
-  ]);
+  const [contributions, ledgerEntries, orgRules, linkedTemplateId] =
+    await Promise.all([
+      fetchContributionsForPeriod(supabase, churchId, bounds.from, bounds.to),
+      fetchLedgerForPeriod(supabase, churchId, bounds.from, bounds.to),
+      fetchChurchOrgReportRules(supabase, churchId),
+      fetchLinkedTemplateIdForReport(
+        supabase,
+        churchId,
+        "financial-monthly-cead",
+        "council_sends",
+      ),
+    ]);
+
+  const discountAllocation = linkedTemplateId
+    ? await computeDiscountAllocation(
+        supabase,
+        churchId,
+        linkedTemplateId,
+        bounds.from,
+        bounds.to,
+      )
+    : null;
 
   return {
     churchId,
@@ -245,6 +266,7 @@ export async function fetchFinancialMonthlyPayload(
       contributions,
       ledgerEntries,
       orgRules,
+      discountAllocation,
     ),
     presbyterio: meta.presbyterio ?? "N/D",
     churchName: meta.churchName,

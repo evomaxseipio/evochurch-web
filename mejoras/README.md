@@ -18,7 +18,7 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | [AGENT-PROMPT-AUDIT-LOG.md](./AGENT-PROMPT-AUDIT-LOG.md) | **Audit log** — bitácora por iglesia, dashboard + reporte `/reports` |
 | [AGENT-PROMPT-FASE-1-REUNION.md](./AGENT-PROMPT-FASE-1-REUNION.md) | **Fase 1 reunión** — dashboard montos completos, fecha transacciones, estatus miembros |
 | [AGENT-PROMPT-FASE-2-REUNION.md](./AGENT-PROMPT-FASE-2-REUNION.md) | **Fase 2 reunión** — salud (sangre + alergias), oficios tags, empleo principal |
-| [DEBATE-MODULO-DESCUENTOS-DIEZMO.md](./DEBATE-MODULO-DESCUENTOS-DIEZMO.md) | **Debate** — reparto diezmo 70/15/15 y módulo de descuentos (pre-implementación) |
+| [DEBATE-MODULO-DESCUENTOS-DIEZMO.md](./DEBATE-MODULO-DESCUENTOS-DIEZMO.md) | **Debate + MVP** — plantillas descuento vinculadas a reportes |
 
 ## Cómo usar
 

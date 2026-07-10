@@ -5,19 +5,26 @@ import type { ProfileTabId } from "@/components/members/member-profile-toolbar";
 import type { MemberRoleCatalog } from "@/lib/members/roles";
 import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const TABS: ProfileTabId[] = [
   "profile",
   "membership",
-  "health",
-  "professions",
-  "employment",
+  "labor",
   "finances",
   "delete",
 ];
 
+const LEGACY_TAB_MAP: Record<string, ProfileTabId> = {
+  health: "profile",
+  professions: "labor",
+  employment: "labor",
+};
+
 function parseTab(value: string | null): ProfileTabId {
+  if (value && LEGACY_TAB_MAP[value]) {
+    return LEGACY_TAB_MAP[value];
+  }
   if (value && TABS.includes(value as ProfileTabId)) {
     return value as ProfileTabId;
   }
@@ -54,6 +61,18 @@ export function MemberProfileShell({
     useState(memberFromServer);
   const [prevMembershipFromServer, setPrevMembershipFromServer] =
     useState(membershipFromServer);
+
+  useEffect(() => {
+    const raw = searchParams.get("tab");
+    if (!raw || !LEGACY_TAB_MAP[raw]) return;
+    const next = LEGACY_TAB_MAP[raw];
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "profile") params.delete("tab");
+    else params.set("tab", next);
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : "?", { scroll: false });
+    setTab(next);
+  }, [searchParams, router]);
 
   if (memberFromServer !== prevMemberFromServer) {
     setPrevMemberFromServer(memberFromServer);
