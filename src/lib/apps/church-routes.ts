@@ -10,6 +10,7 @@ const LEGACY_CHURCH_ROOTS = [
   "/ministerios",
   "/finances",
   "/eventos",
+  "/attendance",
   "/comunicacion",
   "/settings",
   "/network",

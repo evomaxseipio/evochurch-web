@@ -118,7 +118,8 @@
     "crumbConfigUsers": "User settings",
     "searchPlaceholder": "Search members, transactions, events…",
     "membersAdults": "Members & visitors",
-    "childrenRegistry": "Children registry"
+    "childrenRegistry": "Children registry",
+    "attendance": "Attendance"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -1348,7 +1349,8 @@
       "admin_users": "Usuarios con acceso a la consola web",
       "roles": "Church roles and permissions matrix",
       "audit": "Administrative activity log",
-      "reports": "Financial, membership and executive reports"
+      "reports": "Financial, membership and executive reports",
+      "attendance": "Sessions and attendance roll by ministry"
     },
     "financeResources": {
       "funds": "Fondos",
@@ -1450,6 +1452,10 @@
       "audit": {
         "read": "View activity log",
         "export": "Export activity log"
+      },
+      "attendance": {
+        "read": "View attendance",
+        "write": "Create sessions and mark attendance"
       }
     },
     "notes": {
@@ -1485,7 +1491,8 @@
       "admin_users": "System users",
       "roles": "Roles",
       "auth": "Authentication",
-      "reports": "Reports"
+      "reports": "Reports",
+      "attendance": "Attendance"
     },
     "actions": {
       "create": "Created",
@@ -1586,6 +1593,16 @@
         "deactivate": "Deactivated report: {reportId}",
         "template_enable": "Enabled templates for report: {reportId}",
         "template_disable": "Disabled templates for report: {reportId}"
+      },
+      "attendance": {
+        "session": {
+          "create": "Created attendance session ({activity_type})",
+          "update": "Updated attendance session ({activity_type})",
+          "delete": "Deleted attendance session"
+        },
+        "records": {
+          "update": "Updated attendance records ({count})"
+        }
       }
     },
     "filters": {
@@ -2232,5 +2249,70 @@
     "notes": "Notes",
     "notesHint": "Pastoral or logistical information for the team.",
     "notesPlaceholder": "e.g. dietary restrictions, medication, parent instructions…"
+  },
+  "attendance": {
+    "eyebrow": "Operations",
+    "title": "Attendance",
+    "subtitle": "Record who was present for house groups, Bible studies, or other ministry activities.",
+    "newSession": "New session",
+    "editSession": "Edit session",
+    "sessionDetails": "Session details",
+    "sessionCreated": "Session created",
+    "sessionUpdated": "Session updated",
+    "sessionDeleted": "Session deleted",
+    "recordsSaved": "Attendance saved",
+    "openChecklist": "Take roll",
+    "backToList": "Back to attendance",
+    "checklistEyebrow": "Roll call",
+    "markAllPresent": "Mark all present",
+    "saveRecords": "Save attendance",
+    "empty": "No sessions yet. Create a house or study session to get started.",
+    "emptyRoster": "This ministry has no members on its roster. Add them in Ministries and come back.",
+    "searchDisabled": "Filter by type",
+    "filterType": "Type",
+    "deleteConfirmTitle": "Delete session?",
+    "deleteConfirmBody": "The session and all attendance records will be removed.",
+    "presets": {
+      "house_group": "House session",
+      "bible_study": "Study session"
+    },
+    "activityType": {
+      "house_group": "House group",
+      "bible_study": "Bible study",
+      "children": "Children",
+      "service": "Service"
+    },
+    "status": {
+      "present": "Present",
+      "absent": "Absent",
+      "late": "Late"
+    },
+    "fields": {
+      "date": "Date",
+      "activityType": "Activity type",
+      "ministry": "Ministry / group",
+      "title": "Title",
+      "titlePlaceholder": "Optional, e.g. North house — week 12",
+      "notes": "Notes"
+    },
+    "columns": {
+      "date": "Date",
+      "type": "Type",
+      "ministry": "Ministry",
+      "title": "Title",
+      "present": "Present",
+      "marked": "Marked",
+      "member": "Person",
+      "status": "Status"
+    },
+    "errors": {
+      "invalidForm": "Check date, type, and ministry.",
+      "saveFailed": "Could not save the session.",
+      "deleteFailed": "Could not delete the session.",
+      "saveRecordsFailed": "Could not save attendance.",
+      "emptyRecords": "No records to save.",
+      "ministryRequired": "Select the ministry or group.",
+      "dateRequired": "Date is required."
+    }
   }
 }

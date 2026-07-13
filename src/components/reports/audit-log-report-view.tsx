@@ -27,6 +27,7 @@ const MODULE_OPTIONS = [
   "members",
   "finances",
   "eventos",
+  "attendance",
   "settings",
   "admin_users",
   "roles",

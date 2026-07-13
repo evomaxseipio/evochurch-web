@@ -114,6 +114,13 @@ export const MAIN_NAV: NavEntry[] = [
     permission: "eventos:read",
   },
   {
+    id: "asistencia",
+    href: churchPath("/attendance"),
+    labelKey: "attendance",
+    icon: "check",
+    permission: "attendance:read",
+  },
+  {
     id: "comunicacion",
     href: churchPath("/comunicacion"),
     labelKey: "comunicacion",
@@ -308,6 +315,7 @@ export const BREADCRUMB_KEYS: Record<string, [string, string]> = {
   transacciones: ["crumbFinances", "transactions"],
   contribuciones: ["crumbFinances", "contributions"],
   eventos: ["crumbAgenda", "eventos"],
+  asistencia: ["crumbAgenda", "attendance"],
   comunicacion: ["crumbConnection", "comunicacion"],
   gastos: ["crumbConfigSystem", "expenseTypes"],
   "ingresos-tipos": ["crumbConfigSystem", "incomeTypes"],
@@ -330,6 +338,7 @@ export function navIdFromPath(pathname: string): string {
   if (path.startsWith("/finances/contributions")) return "contribuciones";
   if (path.startsWith("/finances")) return "fondos";
   if (path.startsWith("/eventos")) return "eventos";
+  if (path.startsWith("/attendance")) return "asistencia";
   if (path.startsWith("/comunicacion")) return "comunicacion";
   if (path.startsWith("/reports")) return "reportes";
   if (path.startsWith("/network")) return "red";

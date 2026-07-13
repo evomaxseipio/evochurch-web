@@ -118,7 +118,8 @@
     "crumbConfigUsers": "User settings",
     "searchPlaceholder": "Rechercher membres, transactions, événements…",
     "membersAdults": "Membres et visiteurs",
-    "childrenRegistry": "Registre des enfants"
+    "childrenRegistry": "Registre des enfants",
+    "attendance": "Présences"
   },
   "auth": {
     "welcomeBack": "Bon retour",
@@ -1348,7 +1349,8 @@
       "admin_users": "Usuarios con acceso a la consola web",
       "roles": "Matrice des rôles et permissions par église",
       "audit": "Journal d'activité administrative",
-      "reports": "Rapports financiers, adhésion et exécutifs"
+      "reports": "Rapports financiers, adhésion et exécutifs",
+      "attendance": "Sessions et présences par ministère"
     },
     "financeResources": {
       "funds": "Fondos",
@@ -1450,6 +1452,10 @@
       "audit": {
         "read": "Voir le journal d'activité",
         "export": "Exporter le journal"
+      },
+      "attendance": {
+        "read": "Voir les présences",
+        "write": "Créer des sessions et marquer les présences"
       }
     },
     "notes": {
@@ -1485,7 +1491,8 @@
       "admin_users": "Utilisateurs système",
       "roles": "Rôles",
       "auth": "Authentification",
-      "reports": "Rapports"
+      "reports": "Rapports",
+      "attendance": "Présences"
     },
     "actions": {
       "create": "A créé",
@@ -1582,6 +1589,16 @@
         "deactivate": "A désactivé le rapport : {reportId}",
         "template_enable": "A activé les modèles pour le rapport : {reportId}",
         "template_disable": "A désactivé les modèles pour le rapport : {reportId}"
+      },
+      "attendance": {
+        "session": {
+          "create": "A créé une session de présence ({activity_type})",
+          "update": "A mis à jour une session de présence ({activity_type})",
+          "delete": "A supprimé une session de présence"
+        },
+        "records": {
+          "update": "A mis à jour les présences ({count})"
+        }
       }
     },
     "filters": {
@@ -2228,5 +2245,70 @@
     "notes": "Notes",
     "notesHint": "Informations pastorales ou logistiques pour l'équipe.",
     "notesPlaceholder": "Ex. restrictions alimentaires, médication, consignes des parents…"
+  },
+  "attendance": {
+    "eyebrow": "Opérations",
+    "title": "Présences",
+    "subtitle": "Enregistrez qui était présent pour les maisons, études bibliques ou autres activités.",
+    "newSession": "Nouvelle session",
+    "editSession": "Modifier la session",
+    "sessionDetails": "Détails de la session",
+    "sessionCreated": "Session créée",
+    "sessionUpdated": "Session mise à jour",
+    "sessionDeleted": "Session supprimée",
+    "recordsSaved": "Présences enregistrées",
+    "openChecklist": "Faire l'appel",
+    "backToList": "Retour aux présences",
+    "checklistEyebrow": "Appel",
+    "markAllPresent": "Tous présents",
+    "saveRecords": "Enregistrer",
+    "empty": "Aucune session pour le moment. Créez une session de maison ou d'étude.",
+    "emptyRoster": "Ce ministère n'a pas de membres. Ajoutez-les dans Ministères.",
+    "searchDisabled": "Filtrer par type",
+    "filterType": "Type",
+    "deleteConfirmTitle": "Supprimer la session ?",
+    "deleteConfirmBody": "La session et tous les enregistrements seront supprimés.",
+    "presets": {
+      "house_group": "Session maison",
+      "bible_study": "Session étude"
+    },
+    "activityType": {
+      "house_group": "Maison",
+      "bible_study": "Étude biblique",
+      "children": "Enfants",
+      "service": "Culte"
+    },
+    "status": {
+      "present": "Présent",
+      "absent": "Absent",
+      "late": "En retard"
+    },
+    "fields": {
+      "date": "Date",
+      "activityType": "Type d'activité",
+      "ministry": "Ministère / groupe",
+      "title": "Titre",
+      "titlePlaceholder": "Optionnel",
+      "notes": "Notes"
+    },
+    "columns": {
+      "date": "Date",
+      "type": "Type",
+      "ministry": "Ministère",
+      "title": "Titre",
+      "present": "Présents",
+      "marked": "Marqués",
+      "member": "Personne",
+      "status": "Statut"
+    },
+    "errors": {
+      "invalidForm": "Vérifiez la date, le type et le ministère.",
+      "saveFailed": "Impossible d'enregistrer la session.",
+      "deleteFailed": "Impossible de supprimer la session.",
+      "saveRecordsFailed": "Impossible d'enregistrer les présences.",
+      "emptyRecords": "Aucun enregistrement à sauver.",
+      "ministryRequired": "Choisissez le ministère ou groupe.",
+      "dateRequired": "La date est obligatoire."
+    }
   }
 }
