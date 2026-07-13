@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchContributionCatalogAction } from "@/app/(app)/members/actions";
+import { fetchContributionCatalogAction } from "@/app/apps/church/(console)/members/actions";
 import type { PresetContributor } from "@/components/contributions/contribution-form-drawer";
 import { SectionCard } from "@/components/members/member-ui";
 import { FundsKpi } from "@/components/funds/funds-kpi";

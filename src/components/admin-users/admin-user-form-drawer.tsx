@@ -3,7 +3,7 @@
 import {
   saveAdminUserAction,
   type AdminUserActionResult,
-} from "@/app/(app)/settings/users/actions";
+} from "@/app/apps/church/(console)/settings/users/actions";
 import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { generateTempPassword } from "@/lib/admin-users/temp-password";

@@ -1,5 +1,6 @@
 import { LoginForm } from "@/components/auth/login-form";
 import { Icons } from "@/components/icons";
+import { orgPath } from "@/lib/apps/org-routes";
 import { getOrgSession } from "@/lib/auth/org-session";
 import { getVerifiedUser } from "@/lib/supabase/session";
 import { getTranslations } from "next-intl/server";
@@ -12,7 +13,7 @@ export default async function OrgLoginPage({
 }) {
   const session = await getOrgSession();
   if (session) {
-    redirect("/org/dashboard");
+    redirect(orgPath("dashboard"));
   }
 
   const user = await getVerifiedUser();
@@ -46,7 +47,7 @@ export default async function OrgLoginPage({
           </p>
         ) : (
           <LoginForm
-            next={next ?? "/org/dashboard"}
+            next={next ?? orgPath("dashboard")}
             email={email}
             loginError={error}
           />

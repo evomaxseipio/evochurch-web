@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EvoChurch · Reporte de familia (mockup P-family-report)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #faf7fb; --bg-1: #fff; --bg-2: #f4f0f8; --bg-3: #ebe4f4;
+      --line: #e2dcef; --hairline: #ebe4f4;
+      --fg: #1a1225; --muted: #7c6f8f; --dim: #a89bb8;
+      --accent: #5B21B6; --accent-strong: #4C1D95;
+      --accent-soft: color-mix(in oklab, #5B21B6 14%, transparent);
+      --primary-50: #f5f3ff;
+      --green: #059669; --green-bg: #d1fae5;
+      --amber: #b45309; --amber-bg: #fef3c7;
+      --danger: #dc2626; --danger-bg: #fee2e2;
+      --radius: 10px; --radius-lg: 14px;
+      --font: 'Geist', system-ui, sans-serif;
+      --sidebar-w: 248px;
+    }
+    [data-theme="dark"] {
+      --bg: #0b0d12; --bg-1: #10131a; --bg-2: #161b24; --bg-3: #1d2330;
+      --line: #262d3b; --hairline: #262d3b;
+      --fg: #e8ecf3; --muted: #828ca0; --dim: #5a6478;
+      --primary-50: color-mix(in oklab, #5B21B6 12%, #10131a);
+      --green-bg: color-mix(in oklab, #34d399 16%, transparent);
+      --amber-bg: color-mix(in oklab, #fbbf24 16%, transparent);
+      --danger-bg: color-mix(in oklab, #f87171 14%, transparent);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--fg); font-size: 14px; height: 100vh; overflow: hidden; }
+    button, a { font-family: inherit; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    .shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; height: 100vh; }
+    .shell.print-mode { grid-template-columns: 1fr; }
+    .shell.print-mode .sidebar { display: none; }
+    .sidebar { background: var(--bg-1); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 18px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+    .mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-strong), var(--accent)); }
+    .sidebar-logo .name { font-weight: 700; font-size: 14px; }
+    .sidebar-logo .sub { font-size: 11px; color: var(--muted); }
+    .nav-section { padding: 12px 8px; flex: 1; overflow-y: auto; }
+    .nav-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); padding: 4px 10px 8px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius); color: var(--muted); font-size: 13px; }
+    .nav-item.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+    .nav-item:hover { background: var(--bg-2); color: var(--fg); }
+    .nav-item.active:hover { background: var(--accent-soft); color: var(--accent); }
+    .nav-group { margin-bottom: 4px; }
+    .nav-parent { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius); font-weight: 600; font-size: 13px; background: var(--accent-soft); color: var(--accent); }
+    .nav-children { padding-left: 22px; margin: 2px 0 6px; border-left: 1px solid var(--hairline); margin-left: 22px; }
+    .nav-child { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius); font-size: 13px; color: var(--muted); }
+    .nav-child.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+    .nav-child .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .5; }
+    .nav-child.active .dot { opacity: 1; }
+
+    .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+    .topbar { height: 52px; border-bottom: 1px solid var(--line); background: var(--bg-1); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
+    .crumb { font-size: 13px; color: var(--muted); flex: 1; }
+    .crumb b { color: var(--fg); }
+    .content { flex: 1; overflow-y: auto; padding: 20px 24px 80px; }
+    .shell.print-mode .content { padding: 28px 32px 90px; background: var(--bg-2); }
+
+    .mock-bar {
+      position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; z-index: 100;
+      background: var(--bg-1); border-top: 1px solid var(--line); padding: 10px 16px;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .shell.print-mode ~ .mock-bar, .shell.print-mode + .mock-bar { left: 0; }
+    .mock-bar .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-right: 8px; }
+    .mock-btn { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg-2); font-size: 12px; font-weight: 600; color: var(--muted); }
+    .mock-btn:hover { background: var(--bg-3); color: var(--fg); }
+    .mock-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .theme-toggle { margin-left: auto; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .display { font-weight: 700; letter-spacing: -.02em; }
+    .muted { color: var(--muted); }
+    .tiny { font-size: 12px; }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .between { justify-content: space-between; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: var(--radius); font-weight: 600; font-size: 13px; border: none; }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.outline { background: transparent; border: 1px solid var(--line); color: var(--fg); }
+    .btn.ghost { background: transparent; color: var(--muted); }
+    .btn.sm { padding: 6px 11px; font-size: 12px; }
+    .card { background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .chip.violet { background: var(--accent-soft); color: var(--accent); }
+    .chip.green { background: var(--green-bg); color: var(--green); }
+    .chip.amber { background: var(--amber-bg); color: var(--amber); }
+    .chip.muted { background: var(--bg-3); color: var(--muted); }
+    .avatar { display: grid; place-items: center; font-weight: 700; color: #fff; background: var(--accent); flex-shrink: 0; }
+    .avatar.md { width: 48px; height: 48px; border-radius: 12px; font-size: 15px; }
+    .avatar.sm { width: 36px; height: 36px; border-radius: 9px; font-size: 12px; }
+    .avatar.xs { width: 28px; height: 28px; border-radius: 7px; font-size: 10px; }
+    .avatar.soft { background: var(--accent-soft); color: var(--accent); }
+
+    .spec-note {
+      background: color-mix(in oklab, var(--accent) 8%, var(--bg-1));
+      border: 1px dashed color-mix(in oklab, var(--accent) 35%, transparent);
+      border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: var(--muted);
+    }
+    .spec-note strong { color: var(--accent); }
+    .spec-note code { font-size: 11px; background: var(--bg-2); padding: 1px 5px; border-radius: 4px; }
+
+    .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+    .page-head h1 { font-size: 22px; letter-spacing: -.02em; }
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .kpi { padding: 14px 16px; }
+    .kpi .val { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-top: 4px; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+    .filter-input, .filter-select {
+      background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 9px 12px; font: inherit; color: inherit; min-width: 180px;
+    }
+    .filter-input { flex: 1; min-width: 220px; }
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-chip {
+      padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--bg-1); font-size: 12px; font-weight: 600; color: var(--muted);
+    }
+    .filter-chip.active { background: var(--accent-soft); color: var(--accent); border-color: color-mix(in oklab, var(--accent) 40%, transparent); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13px; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--bg-2); }
+    tr.clickable { cursor: pointer; }
+    tr.clickable:hover td { background: var(--bg-2); }
+    .family-name { font-weight: 600; }
+    .alert-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); display: inline-block; margin-right: 6px; }
+
+    .section-card { padding: 0; margin-bottom: 16px; overflow: hidden; }
+    .section-head { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .section-body { padding: 16px 18px; }
+
+    .person-row {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+      padding: 12px 14px; border-radius: var(--radius); background: var(--bg-2); margin-bottom: 8px;
+    }
+    .person-row:last-child { margin-bottom: 0; }
+    .person-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+    .linkish { color: var(--accent); font-weight: 600; font-size: 12px; }
+
+    .family-tree {
+      display: flex; flex-direction: column; align-items: center; gap: 0; padding: 20px 12px;
+    }
+    .tree-couple {
+      display: flex; align-items: center; gap: 16px; position: relative;
+    }
+    .tree-node {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      min-width: 100px; text-align: center;
+    }
+    .tree-node .label { font-size: 12px; font-weight: 600; }
+    .tree-node .sub { font-size: 11px; color: var(--muted); }
+    .tree-link {
+      width: 40px; height: 2px; background: var(--line); flex-shrink: 0;
+    }
+    .tree-stem {
+      width: 2px; height: 24px; background: var(--line); margin: 0 auto;
+    }
+    .tree-bar {
+      height: 2px; background: var(--line); width: min(420px, 90%);
+      position: relative;
+    }
+    .tree-kids {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+      margin-top: 0; padding-top: 24px; position: relative;
+    }
+    .tree-kids::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: min(420px, 90%); height: 2px; background: var(--line);
+    }
+    .tree-kid {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      position: relative; min-width: 88px; text-align: center;
+    }
+    .tree-kid::before {
+      content: ''; position: absolute; top: -24px; left: 50%; width: 2px; height: 24px;
+      background: var(--line); transform: translateX(-50%);
+    }
+
+    .notes-box {
+      background: var(--bg-2); border: 1px dashed var(--line); border-radius: var(--radius);
+      padding: 14px 16px; color: var(--muted); font-size: 13px; min-height: 72px;
+    }
+
+    .empty-state { text-align: center; padding: 56px 28px; max-width: 480px; margin: 40px auto; }
+    .empty-state .icon-wrap {
+      width: 64px; height: 64px; border-radius: 16px; margin: 0 auto 16px;
+      background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 28px;
+    }
+    .empty-state h2 { font-size: 18px; margin-bottom: 8px; }
+    .empty-state p { color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+
+    /* Print sheet (Vista D) */
+    .print-sheet {
+      max-width: 794px; margin: 0 auto; background: var(--bg-1);
+      border: 1px solid var(--line); border-radius: 4px; padding: 36px 40px 44px;
+      box-shadow: 0 8px 28px rgba(26, 18, 37, .06);
+    }
+    .print-brand { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 2px solid var(--fg); }
+    .print-brand .church { font-weight: 700; font-size: 15px; }
+    .print-brand .doc-meta { text-align: right; font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .print-title { font-size: 26px; font-weight: 700; letter-spacing: -.03em; margin-bottom: 4px; }
+    .print-summary { color: var(--muted); margin-bottom: 28px; font-size: 13px; }
+    .print-block { margin-bottom: 24px; }
+    .print-block h3 {
+      font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+    }
+    .print-person {
+      display: flex; justify-content: space-between; gap: 12px; padding: 8px 0;
+      border-bottom: 1px solid var(--hairline); font-size: 13px;
+    }
+    .print-person:last-child { border-bottom: 0; }
+    .print-tree {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); margin-top: 8px;
+    }
+    .print-tree .couple { font-weight: 600; }
+    .print-tree .kids { font-size: 13px; color: var(--muted); text-align: center; }
+    .print-footer {
+      margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line);
+      display: flex; justify-content: space-between; font-size: 11px; color: var(--dim);
+    }
+
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .mock-bar { left: 0; }
+      .kpis { grid-template-columns: 1fr 1fr; }
+      .print-sheet { padding: 24px 20px; }
+    }
+    @media (max-width: 640px) {
+      .kpis { grid-template-columns: 1fr; }
+      table .hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell" id="shell">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="mark"></div>
+        <div>
+          <div class="name">Iglesia Renacer</div>
+          <div class="sub">Consola web</div>
+        </div>
+      </div>
+      <nav class="nav-section">
+        <div class="nav-eyebrow">Principal</div>
+        <div class="nav-item">Dashboard</div>
+        <div class="nav-group">
+          <div class="nav-item">👥 Miembros</div>
+        </div>
+        <div class="nav-item">Ministerios</div>
+        <div class="nav-item">Finanzas</div>
+        <div class="nav-group">
+          <div class="nav-parent">📊 Reportes</div>
+          <div class="nav-children">
+            <div class="nav-child active"><span class="dot"></span> Familias</div>
+            <div class="nav-child"><span class="dot"></span> Auditoría</div>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="topbar" id="topbar">
+        <div class="crumb">Reportes / <b id="crumb-title">Familias</b></div>
+        <button class="btn outline sm theme-toggle" type="button" onclick="toggleTheme()">🌓 Tema</button>
+      </header>
+
+      <div class="content">
+
+        <!-- ═══════════════ VISTA A · Listado / hub ═══════════════ -->
+        <div id="screen-list" class="screen active">
+          <div class="spec-note">
+            <strong>P-family-report · A</strong> — Hub CRM pastoral en <code>/apps/church/reports</code>.
+            Agrupa hogares desde <code>profile_spouse</code> + <code>profile_parent_child</code> (+ menores <code>is_child</code>).
+            MVP: listar, filtrar, abrir ficha e imprimir/exportar.
+          </div>
+
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Reportes pastorales</div>
+              <h1 class="display">Familias</h1>
+              <p class="muted tiny" style="margin-top:4px;">Hogares derivados de vínculos familiares en perfiles</p>
+            </div>
+            <div class="row" style="flex-wrap:wrap;">
+              <button class="btn outline sm" type="button">↑ Exportar CSV</button>
+              <button class="btn outline sm" type="button">🖨 Imprimir listado</button>
+            </div>
+          </div>
+
+          <div class="kpis">
+            <div class="card kpi">
+              <div class="eyebrow">Hogares</div>
+              <div class="val">24</div>
+            </div>
+            <div class="card kpi">
+              <div class="eyebrow">Completas</div>
+              <div class="val">18</div>
+            </div>
+            <div class="card kpi">
+              <div class="eyebrow">Con alertas</div>
+              <div class="val">4</div>
+            </div>
+            <div class="card kpi">
+              <div class="eyebrow">Con infantiles</div>
+              <div class="val">7</div>
+            </div>
+          </div>
+
+          <div class="filters">
+            <input class="filter-input" type="search" placeholder="Buscar por apellido o nombre…" value="" />
+            <div class="filter-chips">
+              <button class="filter-chip active" type="button">Todas</button>
+              <button class="filter-chip" type="button">Completa</button>
+              <button class="filter-chip" type="button">Incompleta</button>
+              <button class="filter-chip" type="button">Solo adultos</button>
+              <button class="filter-chip" type="button">Con menores infantiles</button>
+            </div>
+          </div>
+
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Familia</th>
+                  <th>Miembros</th>
+                  <th class="hide-sm">Hijos</th>
+                  <th class="hide-sm">Cónyuge</th>
+                  <th>Estatus</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="clickable" onclick="showScreen('screen-detail')">
+                  <td>
+                    <div class="family-name">Familia Pérez</div>
+                    <div class="tiny muted">Juan Pérez · María Pérez</div>
+                  </td>
+                  <td>4</td>
+                  <td class="hide-sm">3</td>
+                  <td class="hide-sm"><span class="chip green">Sí</span></td>
+                  <td><span class="chip green">Completa</span></td>
+                  <td><span class="linkish">Ver →</span></td>
+                </tr>
+                <tr class="clickable" onclick="showScreen('screen-detail')">
+                  <td>
+                    <div class="family-name">Familia Gómez</div>
+                    <div class="tiny muted">Carlos Gómez · —</div>
+                  </td>
+                  <td>3</td>
+                  <td class="hide-sm">2</td>
+                  <td class="hide-sm"><span class="chip muted">No</span></td>
+                  <td>
+                    <span class="chip amber"><span class="alert-dot"></span>Incompleta</span>
+                  </td>
+                  <td><span class="linkish">Ver →</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="family-name">Familia Rodríguez</div>
+                    <div class="tiny muted">Pedro Rodríguez · Laura Rodríguez</div>
+                  </td>
+                  <td>5</td>
+                  <td class="hide-sm">3</td>
+                  <td class="hide-sm"><span class="chip green">Sí</span></td>
+                  <td><span class="chip violet">Con infantiles</span></td>
+                  <td><span class="linkish">Ver →</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="family-name">Familia Santos</div>
+                    <div class="tiny muted">Ana Santos · Miguel Torres</div>
+                  </td>
+                  <td>2</td>
+                  <td class="hide-sm">0</td>
+                  <td class="hide-sm"><span class="chip green">Sí</span></td>
+                  <td><span class="chip muted">Solo adultos</span></td>
+                  <td><span class="linkish">Ver →</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ═══════════════ VISTA B · Ficha detallada ═══════════════ -->
+        <div id="screen-detail" class="screen">
+          <div class="spec-note">
+            <strong>P-family-report · B</strong> — Ficha de hogar lista para pastoral / impresión.
+            Tree visual simple (cónyuges arriba, hijos abajo). Enlaces conceptuales a perfiles.
+            Datos mock: Familia Pérez (4 adultos + 0 infantiles).
+          </div>
+
+          <div class="row between" style="margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+            <button class="btn outline sm" type="button" onclick="showScreen('screen-list')">← Volver al listado</button>
+            <div class="row" style="flex-wrap:wrap;">
+              <button class="btn outline sm" type="button" onclick="showScreen('screen-print')">🖨 Imprimir</button>
+              <button class="btn primary sm" type="button" onclick="showScreen('screen-print')">Exportar PDF</button>
+            </div>
+          </div>
+
+          <div class="page-head" style="margin-bottom:20px;">
+            <div>
+              <div class="eyebrow">Hogar familiar</div>
+              <h1 class="display">Familia Pérez</h1>
+              <div class="row" style="margin-top:8px; flex-wrap:wrap; gap:8px;">
+                <span class="chip violet">4 adultos</span>
+                <span class="chip muted">0 infantiles</span>
+                <span class="chip green">Completa</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Padres / cónyuges -->
+          <div class="card section-card">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Vínculos</div>
+                <div style="font-weight:600; margin-top:2px;">Padres / cónyuges</div>
+              </div>
+              <span class="chip violet">profile_spouse</span>
+            </div>
+            <div class="section-body">
+              <div class="person-row">
+                <div class="avatar md">JP</div>
+                <div>
+                  <div style="font-weight:600;">Juan Pérez</div>
+                  <div class="person-meta">
+                    <span class="chip violet">Padre</span>
+                    <span class="chip green">Diácono</span>
+                    <span class="chip muted">Miembro</span>
+                  </div>
+                  <div class="tiny muted" style="margin-top:4px;">Tel. +1 809 555 0101</div>
+                </div>
+                <a class="linkish" href="#">Ver perfil →</a>
+              </div>
+              <div class="person-row">
+                <div class="avatar md soft">MP</div>
+                <div>
+                  <div style="font-weight:600;">María Pérez</div>
+                  <div class="person-meta">
+                    <span class="chip violet">Cónyuge</span>
+                    <span class="chip muted">Miembro</span>
+                  </div>
+                  <div class="tiny muted" style="margin-top:4px;">Tel. +1 809 555 0102</div>
+                </div>
+                <a class="linkish" href="#">Ver perfil →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hijos -->
+          <div class="card section-card">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Descendientes</div>
+                <div style="font-weight:600; margin-top:2px;">Hijos</div>
+              </div>
+              <span class="chip violet">profile_parent_child</span>
+            </div>
+            <div class="section-body">
+              <div class="person-row">
+                <div class="avatar sm">Jo</div>
+                <div>
+                  <div style="font-weight:600;">José Pérez · 30</div>
+                  <div class="person-meta">
+                    <span class="chip green">Miembro</span>
+                  </div>
+                </div>
+                <a class="linkish" href="#">Ver perfil →</a>
+              </div>
+              <div class="person-row">
+                <div class="avatar sm soft">An</div>
+                <div>
+                  <div style="font-weight:600;">Ana Pérez · 23</div>
+                  <div class="person-meta">
+                    <span class="chip amber">Visita</span>
+                  </div>
+                </div>
+                <a class="linkish" href="#">Ver perfil →</a>
+              </div>
+              <div class="person-row">
+                <div class="avatar sm">Lu</div>
+                <div>
+                  <div style="font-weight:600;">Luis Pérez · 17</div>
+                  <div class="person-meta">
+                    <span class="chip green">Miembro joven</span>
+                  </div>
+                </div>
+                <a class="linkish" href="#">Ver perfil →</a>
+              </div>
+              <div class="person-row" style="opacity:.85;">
+                <div class="avatar xs soft">So</div>
+                <div>
+                  <div style="font-weight:600;">Sofía Pérez · 4</div>
+                  <div class="person-meta">
+                    <span class="chip violet">Infantil</span>
+                    <span class="tiny muted">is_child · opcional en mock</span>
+                  </div>
+                </div>
+                <a class="linkish" href="#">Ver ficha →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tree -->
+          <div class="card section-card">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Estructura</div>
+                <div style="font-weight:600; margin-top:2px;">Mapa familiar</div>
+              </div>
+            </div>
+            <div class="section-body">
+              <div class="family-tree">
+                <div class="tree-couple">
+                  <div class="tree-node">
+                    <div class="avatar sm">JP</div>
+                    <div class="label">Juan</div>
+                    <div class="sub">Padre</div>
+                  </div>
+                  <div class="tree-link"></div>
+                  <div class="tree-node">
+                    <div class="avatar sm soft">MP</div>
+                    <div class="label">María</div>
+                    <div class="sub">Cónyuge</div>
+                  </div>
+                </div>
+                <div class="tree-stem"></div>
+                <div class="tree-kids">
+                  <div class="tree-kid">
+                    <div class="avatar xs">Jo</div>
+                    <div class="label" style="font-size:11px;font-weight:600;">José</div>
+                    <div class="sub">30</div>
+                  </div>
+                  <div class="tree-kid">
+                    <div class="avatar xs soft">An</div>
+                    <div class="label" style="font-size:11px;font-weight:600;">Ana</div>
+                    <div class="sub">23</div>
+                  </div>
+                  <div class="tree-kid">
+                    <div class="avatar xs">Lu</div>
+                    <div class="label" style="font-size:11px;font-weight:600;">Luis</div>
+                    <div class="sub">17</div>
+                  </div>
+                  <div class="tree-kid">
+                    <div class="avatar xs soft">So</div>
+                    <div class="label" style="font-size:11px;font-weight:600;">Sofía</div>
+                    <div class="sub">4 · inf.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notas pastorales -->
+          <div class="card section-card">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Pastoral</div>
+                <div style="font-weight:600; margin-top:2px;">Notas (opcional)</div>
+              </div>
+              <span class="chip muted">Placeholder MVP</span>
+            </div>
+            <div class="section-body">
+              <div class="notes-box">
+                Sin notas pastorales aún. En producto: notas privadas del pastor sobre este hogar (visitas, acompañamiento, etc.).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══════════════ VISTA C · Vacío ═══════════════ -->
+        <div id="screen-empty" class="screen">
+          <div class="spec-note">
+            <strong>P-family-report · C</strong> — Estado vacío: la iglesia aún no tiene vínculos familiares documentados.
+            CTA hacia perfiles para cargar cónyuge / hijos / infantiles (P1.2–P1.4).
+          </div>
+
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Reportes pastorales</div>
+              <h1 class="display">Familias</h1>
+            </div>
+          </div>
+
+          <div class="card empty-state">
+            <div class="icon-wrap">👨‍👩‍👧</div>
+            <h2>Aún no hay familias vinculadas</h2>
+            <p>
+              Cuando documentes cónyuges e hijos en los perfiles de miembros,
+              aparecerán aquí como hogares para el seguimiento pastoral.
+            </p>
+            <div class="row" style="justify-content:center; flex-wrap:wrap;">
+              <button class="btn primary" type="button">Ir a miembros</button>
+              <button class="btn outline" type="button">Ver guía de vínculos</button>
+            </div>
+            <p class="tiny muted" style="margin-top:20px;">
+              Tip: en el perfil → pestaña Familia (cónyuge + hijos) o Registro de niños.
+            </p>
+          </div>
+        </div>
+
+        <!-- ═══════════════ VISTA D · Imprimible ═══════════════ -->
+        <div id="screen-print" class="screen">
+          <div class="spec-note" style="max-width:794px; margin-left:auto; margin-right:auto;">
+            <strong>P-family-report · D</strong> — Layout A4-like sin sidebar: lo que el pastor ve al imprimir / exportar PDF.
+            Sin cromo de consola; solo contenido del reporte.
+          </div>
+
+          <div class="print-sheet">
+            <div class="print-brand">
+              <div>
+                <div class="church">Iglesia Renacer</div>
+                <div class="tiny muted">EvoChurch · Reporte pastoral</div>
+              </div>
+              <div class="doc-meta">
+                Reporte de familia<br />
+                Generado: 13 jul 2026<br />
+                Confidencial
+              </div>
+            </div>
+
+            <div class="print-title">Familia Pérez</div>
+            <div class="print-summary">4 adultos · 0 infantiles registrados · Estatus: completa</div>
+
+            <div class="print-block">
+              <h3>Padres / cónyuges</h3>
+              <div class="print-person">
+                <div>
+                  <strong>Juan Pérez</strong>
+                  <span class="muted"> · Padre · Diácono · Miembro</span>
+                </div>
+                <div class="muted">+1 809 555 0101</div>
+              </div>
+              <div class="print-person">
+                <div>
+                  <strong>María Pérez</strong>
+                  <span class="muted"> · Cónyuge · Miembro</span>
+                </div>
+                <div class="muted">+1 809 555 0102</div>
+              </div>
+            </div>
+
+            <div class="print-block">
+              <h3>Hijos</h3>
+              <div class="print-person">
+                <div><strong>José Pérez</strong> · 30 años</div>
+                <div class="muted">Miembro</div>
+              </div>
+              <div class="print-person">
+                <div><strong>Ana Pérez</strong> · 23 años</div>
+                <div class="muted">Visita</div>
+              </div>
+              <div class="print-person">
+                <div><strong>Luis Pérez</strong> · 17 años</div>
+                <div class="muted">Miembro joven</div>
+              </div>
+            </div>
+
+            <div class="print-block">
+              <h3>Mapa familiar</h3>
+              <div class="print-tree">
+                <div class="couple">Juan Pérez — María Pérez</div>
+                <div style="color:var(--dim); font-size:12px;">│</div>
+                <div class="kids">José (30) · Ana (23) · Luis (17)</div>
+              </div>
+            </div>
+
+            <div class="print-block">
+              <h3>Notas pastorales</h3>
+              <div class="muted" style="font-size:13px; line-height:1.5;">
+                — Sin notas —
+              </div>
+            </div>
+
+            <div class="print-footer">
+              <span>EvoChurch · Consola church</span>
+              <span>Página 1 de 1</span>
+            </div>
+          </div>
+
+          <div class="row" style="max-width:794px; margin:16px auto 0; justify-content:flex-end; gap:8px;">
+            <button class="btn outline sm" type="button" onclick="showScreen('screen-detail')">← Volver a ficha</button>
+            <button class="btn primary sm" type="button">Imprimir ahora</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <nav class="mock-bar" id="mock-bar" aria-label="Vistas del mockup">
+    <span class="label">Vistas P-family-report</span>
+    <button class="mock-btn active" data-screen="screen-list" type="button">A · Listado</button>
+    <button class="mock-btn" data-screen="screen-detail" type="button">B · Ficha Pérez</button>
+    <button class="mock-btn" data-screen="screen-empty" type="button">C · Vacío</button>
+    <button class="mock-btn" data-screen="screen-print" type="button">D · Imprimible</button>
+  </nav>
+
+  <script>
+    const crumbs = {
+      'screen-list': 'Familias',
+      'screen-detail': 'Familia Pérez',
+      'screen-empty': 'Familias (vacío)',
+      'screen-print': 'Imprimir · Familia Pérez',
+    };
+
+    function showScreen(id) {
+      document.querySelectorAll('.content .screen').forEach((el) => el.classList.remove('active'));
+      const screen = document.getElementById(id);
+      if (screen) screen.classList.add('active');
+
+      document.getElementById('crumb-title').textContent = crumbs[id] || 'Mockup';
+      document.querySelectorAll('.mock-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.screen === id);
+      });
+
+      const shell = document.getElementById('shell');
+      const bar = document.getElementById('mock-bar');
+      if (id === 'screen-print') {
+        shell.classList.add('print-mode');
+        bar.style.left = '0';
+      } else {
+        shell.classList.remove('print-mode');
+        bar.style.left = '';
+      }
+    }
+
+    document.querySelectorAll('.mock-btn').forEach((btn) => {
+      btn.addEventListener('click', () => showScreen(btn.dataset.screen));
+    });
+
+    document.querySelectorAll('.filter-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+      });
+    });
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    }
+  </script>
+</body>
+</html>

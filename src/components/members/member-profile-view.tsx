@@ -1,12 +1,15 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import {
   deleteMemberAction,
   saveMembershipAction,
   updateMemberAction,
-} from "@/app/(app)/members/actions";
+} from "@/app/apps/church/(console)/members/actions";
 import { Icons } from "@/components/icons";
 import { MemberFinancesTab } from "@/components/members/member-finances-tab";
+import { MemberFamilyTab } from "@/components/members/member-family-tab";
+import { MemberFamilyTabSkeleton } from "@/components/members/member-family-tab-skeleton";
 import { MemberLaborTab } from "@/components/members/member-labor-tab";
 import {
   MembershipStatusField,
@@ -36,6 +39,9 @@ import {
 import { memberFullName } from "@/lib/members/parse";
 import type { MemberRoleCatalog } from "@/lib/members/roles";
 import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
+import type { PastoralEvent } from "@/lib/members/pastoral-events";
+import type { ChildListItem } from "@/lib/children/types";
+import type { MemberFamilyData } from "@/lib/members/family";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -53,6 +59,7 @@ const PROFILE_TABS: {
   { id: "membership", labelKey: "tabMembership", icon: "cross" },
   { id: "labor", labelKey: "tabLabor", icon: "star" },
   { id: "finances", labelKey: "tabFinances", icon: "wallet" },
+  { id: "family", labelKey: "tabFamily", icon: "home" },
   { id: "delete", labelKey: "deleteAccount", icon: "trash", isDanger: true },
 ];
 
@@ -73,6 +80,10 @@ export function MemberProfileView({
   onMemberUpdated,
   onMembershipUpdated,
   finances = null,
+  pastoralEvents = [],
+  family = null,
+  adultMembers = [],
+  ministryChildren = [],
   canWriteMembers,
   canDeleteMembers,
   canReadMemberFinances,
@@ -86,6 +97,10 @@ export function MemberProfileView({
   onMemberUpdated: (member: Member) => void;
   onMembershipUpdated: (membership: MembershipRecord | null) => void;
   finances?: MemberFinanceData | null;
+  pastoralEvents?: PastoralEvent[];
+  family?: MemberFamilyData | null;
+  adultMembers?: Member[];
+  ministryChildren?: ChildListItem[];
   canWriteMembers: boolean;
   canDeleteMembers: boolean;
   canReadMemberFinances: boolean;
@@ -279,6 +294,7 @@ export function MemberProfileView({
               member={member}
               membership={membership}
               roles={roles}
+              pastoralEvents={pastoralEvents}
               onPending={setMembershipPending}
               onMemberUpdated={onMemberUpdated}
               onMembershipUpdated={onMembershipUpdated}
@@ -299,6 +315,20 @@ export function MemberProfileView({
               initialFinances={finances}
               canWriteContributions={canWriteContributions}
             />
+          ) : null}
+          {tab === "family" ? (
+            family ? (
+              <MemberFamilyTab
+                member={member}
+                family={family}
+                adultMembers={adultMembers}
+                ministryChildren={ministryChildren}
+                roles={roles}
+                canWrite={canWriteMembers}
+              />
+            ) : (
+              <MemberFamilyTabSkeleton />
+            )
           ) : null}
           {tab === "delete" ? <DeleteTab member={member} /> : null}
         </div>
@@ -547,6 +577,7 @@ function MembershipTab({
   member,
   membership,
   roles,
+  pastoralEvents,
   onPending,
   onMemberUpdated,
   onMembershipUpdated,
@@ -555,6 +586,7 @@ function MembershipTab({
   member: Member;
   membership: MembershipRecord | null;
   roles: MemberRoleCatalog[];
+  pastoralEvents: PastoralEvent[];
   onPending: (pending: boolean) => void;
   onMemberUpdated: (member: Member) => void;
   onMembershipUpdated: (membership: MembershipRecord | null) => void;
@@ -674,7 +706,12 @@ function MembershipTab({
         </div>
       </ProfileSectionCard>
 
-      <MembershipHistorySection membership={m} />
+      <MembershipHistorySection
+        membership={m}
+        pastoralEvents={pastoralEvents}
+        profileId={member.memberId}
+        readOnly={readOnly}
+      />
       </fieldset>
     </form>
   );
@@ -701,7 +738,7 @@ function DeleteTab({ member }: { member: Member }) {
       return tErrors("serverError");
     },
     onSuccess: () => {
-      router.push("/members");
+      router.push(churchPath("/members"));
       router.refresh();
     },
   });
@@ -823,7 +860,7 @@ function DeleteTab({ member }: { member: Member }) {
               </div>
             </div>
             <div className="row" style={{ gap: 8, marginTop: 14 }}>
-              <Link href="/members" className="btn outline">
+              <Link href={churchPath("/members")} className="btn outline">
                 {tCommon("cancel")}
               </Link>
               <button

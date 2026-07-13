@@ -1,5 +1,6 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -13,6 +14,7 @@ export type ProfileTabId =
   | "membership"
   | "labor"
   | "finances"
+  | "family"
   | "delete";
 
 const TAB_FORM_IDS: Partial<Record<ProfileTabId, string>> = {
@@ -46,7 +48,7 @@ export function MemberProfileToolbar({
 
   return (
     <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
-      <Link href="/members" className="btn outline sm">
+      <Link href={churchPath("/members")} className="btn outline sm">
         <span style={{ display: "inline-block", transform: "rotate(90deg)" }}>
           <Icons.arrowDn size={12} />
         </span>

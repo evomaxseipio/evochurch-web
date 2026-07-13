@@ -4,7 +4,8 @@ import {
   deleteFundAction,
   setPrimaryFundAction,
   type FundActionResult,
-} from "@/app/(app)/finances/funds/actions";
+} from "@/app/apps/church/(console)/finances/funds/actions";
+import { churchPath } from "@/lib/apps/church-routes";
 import { FundCard } from "@/components/funds/fund-card";
 import { FundFormDrawer } from "@/components/funds/fund-form-drawer";
 import { FundsKpi } from "@/components/funds/funds-kpi";
@@ -148,7 +149,7 @@ export function FundsListView({
       fund: f,
       onEdit: () => setFormState({ mode: "edit", fund: f }),
       onAddTx: () => {
-        router.push(fundUrl("/finances/transactions", f.fundId));
+        router.push(fundUrl(churchPath("/finances/transactions"), f.fundId));
         toast.info(tFinances("newTransaction"), f.name);
       },
       onMakePrimary: () => {
@@ -156,9 +157,9 @@ export function FundsListView({
         fd.set("fundId", f.fundId);
         startTransition(() => primaryAction(fd));
       },
-      onViewTx: () => router.push(fundUrl("/finances/transactions", f.fundId)),
+      onViewTx: () => router.push(fundUrl(churchPath("/finances/transactions"), f.fundId)),
       onViewContrib: () =>
-        router.push(fundUrl("/finances/contributions", f.fundId)),
+        router.push(fundUrl(churchPath("/finances/contributions"), f.fundId)),
       onDelete: canDeleteFund(f) ? () => setDeleteTarget(f) : undefined,
       canViewTransactions,
       canViewContributions,

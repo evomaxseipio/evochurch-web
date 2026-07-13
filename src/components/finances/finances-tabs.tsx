@@ -1,23 +1,24 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 const TABS = [
-  { id: "fondos", href: "/finances/funds", labelKey: "tabs.funds" },
+  { id: "fondos", href: churchPath("/finances/funds"), labelKey: "tabs.funds" },
   {
     id: "transacciones",
-    href: "/finances/transactions",
+    href: churchPath("/finances/transactions"),
     labelKey: "tabs.transactions",
   },
   {
     id: "contribuciones",
-    href: "/finances/contributions",
+    href: churchPath("/finances/contributions"),
     labelKey: "tabs.contributions",
   },
   {
     id: "tithe-close",
-    href: "/finances/tithe-close",
+    href: churchPath("/finances/tithe-close"),
     labelKey: "tabs.titheClose",
   },
 ] as const;

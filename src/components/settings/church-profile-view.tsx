@@ -5,7 +5,7 @@ import {
   saveChurchProfileAction,
   uploadChurchLogoAction,
   type ChurchProfileActionResult,
-} from "@/app/(app)/settings/church/actions";
+} from "@/app/apps/church/(console)/settings/church/actions";
 import { normalizeChurchHexColor } from "@/lib/brand/church-defaults";
 import type { ChurchProfile } from "@/lib/services/church-profile";
 import { useTranslations } from "next-intl";

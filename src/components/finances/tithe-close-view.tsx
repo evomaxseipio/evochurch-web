@@ -1,11 +1,12 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import Link from "next/link";
 import {
   closeTitheWeekAction,
   exportTitheClosePdfAction,
   seedDefaultTitheTemplateAction,
-} from "@/app/(app)/finances/tithe-close/actions";
+} from "@/app/apps/church/(console)/finances/tithe-close/actions";
 import { FinancesTabs } from "@/components/finances/finances-tabs";
 import { FinPageHeader } from "@/components/finances/fin-page-header";
 import { formatWeekLabel, shiftSundayWeek } from "@/lib/discounts/week-period";
@@ -174,7 +175,7 @@ export function TitheCloseView({
                 >
                   {t("seedDefault")}
                 </button>
-                <Link href="/settings/discount-templates" className="btn outline sm">
+                <Link href={churchPath("/settings/discount-templates")} className="btn outline sm">
                   {t("goTemplates")}
                 </Link>
               </div>

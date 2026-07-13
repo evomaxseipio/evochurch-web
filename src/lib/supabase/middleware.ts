@@ -1,9 +1,16 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  CHURCH_DASHBOARD_PATH,
+  isChurchAppPath,
+  legacyChurchRedirect,
+} from "@/lib/apps/church-routes";
+import { isBackofficeAppPath } from "@/lib/apps/backoffice-routes";
 import { resolveSessionRequiresPasswordChange } from "@/lib/auth/fetch-session-password-gate";
 import { UPDATE_PASSWORD_PATH } from "@/lib/auth/temp-password-flow";
 import {
   isOrgAppPath,
+  isOrgPathPrefixAllowed,
   isOrgPortalHost,
   ORG_ROUTE_PREFIX,
 } from "@/lib/org/host";
@@ -15,12 +22,50 @@ function hasSupabaseSessionCookie(request: NextRequest): boolean {
     .some(({ name }) => name.includes("-auth-token"));
 }
 
+function isLegacyChurchProtectedPath(pathname: string): boolean {
+  const path = pathname.split("?")[0] ?? pathname;
+  return (
+    path.startsWith("/dashboard") ||
+    path.startsWith("/members") ||
+    path.startsWith("/ministerios") ||
+    path.startsWith("/finances") ||
+    path.startsWith("/eventos") ||
+    path.startsWith("/comunicacion") ||
+    path.startsWith("/settings") ||
+    path.startsWith("/network") ||
+    path.startsWith("/reports")
+  );
+}
+
+function isChurchProtectedPath(pathname: string): boolean {
+  if (isLegacyChurchProtectedPath(pathname)) return true;
+  if (!isChurchAppPath(pathname)) return false;
+  const suffix = pathname.slice("/apps/church".length);
+  return suffix.length > 0;
+}
+
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const orgHost = isOrgPortalHost(request.headers.get("host"));
   const orgPath = isOrgAppPath(pathname);
+  const churchAppPath = isChurchAppPath(pathname);
+  const backofficeAppPath = isBackofficeAppPath(pathname);
 
-  if (orgHost && !orgPath && !pathname.startsWith("/auth")) {
+  const legacyRedirect = legacyChurchRedirect(pathname);
+  if (legacyRedirect && !orgHost && !orgPath) {
+    const url = request.nextUrl.clone();
+    const [redirectPath, redirectSearch = ""] = legacyRedirect.split("?");
+    url.pathname = redirectPath;
+    // Preserve ?id=… and other query params from the original request.
+    if (redirectSearch) {
+      url.search = redirectSearch.startsWith("?")
+        ? redirectSearch.slice(1)
+        : redirectSearch;
+    }
+    return NextResponse.redirect(url);
+  }
+
+  if (orgHost && !orgPath && !pathname.startsWith("/auth") && !churchAppPath) {
     const url = request.nextUrl.clone();
     if (pathname === "/" || pathname === "/login" || pathname.startsWith("/login/")) {
       url.pathname =
@@ -29,25 +74,23 @@ export async function updateSession(request: NextRequest) {
           : `${ORG_ROUTE_PREFIX}${pathname}`;
       return NextResponse.redirect(url);
     }
-    if (
-      pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/members") ||
-      pathname.startsWith("/finances") ||
-      pathname.startsWith("/settings")
-    ) {
+    if (isLegacyChurchProtectedPath(pathname) || churchAppPath) {
       const url = request.nextUrl.clone();
       url.pathname = `${ORG_ROUTE_PREFIX}/dashboard`;
       return NextResponse.redirect(url);
     }
   }
 
-  if (!orgHost && orgPath && pathname !== `${ORG_ROUTE_PREFIX}/login`) {
+  if (
+    !isOrgPathPrefixAllowed(request.headers.get("host")) &&
+    orgPath &&
+    pathname !== `${ORG_ROUTE_PREFIX}/login`
+  ) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = CHURCH_DASHBOARD_PATH;
     return NextResponse.redirect(url);
   }
 
-  // Visitantes anónimos al login: sin round-trip a Supabase Auth.
   const loginPath = orgPath ? `${ORG_ROUTE_PREFIX}/login` : "/login";
   if (pathname.startsWith(loginPath) && !hasSupabaseSessionCookie(request)) {
     return NextResponse.next({ request });
@@ -87,15 +130,8 @@ export async function updateSession(request: NextRequest) {
   const isUpdatePasswordRoute = pathname === UPDATE_PASSWORD_PATH;
 
   const isProtected =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/members") ||
-    pathname.startsWith("/ministerios") ||
-    pathname.startsWith("/finances") ||
-    pathname.startsWith("/eventos") ||
-    pathname.startsWith("/comunicacion") ||
-    pathname.startsWith("/settings") ||
-    pathname.startsWith("/network") ||
-    pathname.startsWith("/reports") ||
+    isChurchProtectedPath(pathname) ||
+    backofficeAppPath ||
     (orgPath && pathname !== `${ORG_ROUTE_PREFIX}/login`);
 
   if (!user && isProtected) {
@@ -120,7 +156,7 @@ export async function updateSession(request: NextRequest) {
 
     if (!mustChangePassword && isUpdatePasswordRoute) {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = CHURCH_DASHBOARD_PATH;
       url.search = "";
       return NextResponse.redirect(url);
     }
@@ -129,7 +165,8 @@ export async function updateSession(request: NextRequest) {
   if (user && isAuthRoute && !isUpdatePasswordRoute) {
     if (pathname !== `${ORG_ROUTE_PREFIX}/login`) {
       const url = request.nextUrl.clone();
-      url.pathname = orgPath || orgHost ? `${ORG_ROUTE_PREFIX}/dashboard` : "/dashboard";
+      url.pathname =
+        orgPath || orgHost ? `${ORG_ROUTE_PREFIX}/dashboard` : CHURCH_DASHBOARD_PATH;
       return NextResponse.redirect(url);
     }
   }
@@ -139,7 +176,7 @@ export async function updateSession(request: NextRequest) {
     if (orgHost) {
       url.pathname = `${ORG_ROUTE_PREFIX}/dashboard`;
     } else {
-      url.pathname = user ? "/dashboard" : "/login";
+      url.pathname = user ? CHURCH_DASHBOARD_PATH : "/login";
     }
     return NextResponse.redirect(url);
   }

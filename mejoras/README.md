@@ -18,6 +18,10 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | [AGENT-PROMPT-AUDIT-LOG.md](./AGENT-PROMPT-AUDIT-LOG.md) | **Audit log** — bitácora por iglesia, dashboard + reporte `/reports` |
 | [AGENT-PROMPT-FASE-1-REUNION.md](./AGENT-PROMPT-FASE-1-REUNION.md) | **Fase 1 reunión** — dashboard montos completos, fecha transacciones, estatus miembros |
 | [AGENT-PROMPT-FASE-2-REUNION.md](./AGENT-PROMPT-FASE-2-REUNION.md) | **Fase 2 reunión** — salud (sangre + alergias), oficios tags, empleo principal |
+| [BACKLOG-POST-REUNION-JUL2026.md](./BACKLOG-POST-REUNION-JUL2026.md) | **Backlog post-reunión** — P0–P5 priorizado (operar ahora) |
+| [AGENT-PROMPT-PASTORAL-EVENTS.md](./AGENT-PROMPT-PASTORAL-EVENTS.md) | **P0** — eventos pastorales del miembro (timeline) |
+| [AGENT-PROMPT-CHILDREN-REGISTRY.md](./AGENT-PROMPT-CHILDREN-REGISTRY.md) | **P1** — registro de niños + tutores |
+| [ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md](./ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md) | **P2** — análisis + ejecución motor de asistencia *(siguiente)* |
 | [DEBATE-MODULO-DESCUENTOS-DIEZMO.md](./DEBATE-MODULO-DESCUENTOS-DIEZMO.md) | **Debate + MVP** — plantillas descuento vinculadas a reportes |
 | [AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md](./AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md) | **Fase 3 diezmo semanal** — cierre domingo–domingo, PDF, snapshot (`feat/tithe-weekly-allocation`) |
 

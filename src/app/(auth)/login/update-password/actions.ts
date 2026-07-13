@@ -1,5 +1,6 @@
 "use server";
 
+import { CHURCH_DASHBOARD_PATH } from "@/lib/apps/church-routes";
 import { getAppSession } from "@/lib/auth/app-session";
 import { syncAuthAppMetadata } from "@/lib/auth/sync-app-metadata";
 import {
@@ -41,7 +42,7 @@ export async function changeTempPasswordAction(
   }
 
   if (!sessionRequiresPasswordChange(session)) {
-    redirect("/dashboard");
+    redirect(CHURCH_DASHBOARD_PATH);
   }
 
   const { error: updateError } = await supabase.auth.updateUser({ password });
@@ -70,5 +71,5 @@ export async function changeTempPasswordAction(
 
   await syncAuthAppMetadata(session, supabase);
   await supabase.auth.refreshSession();
-  redirect("/dashboard");
+  redirect(CHURCH_DASHBOARD_PATH);
 }

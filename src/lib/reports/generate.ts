@@ -277,6 +277,10 @@ export async function generateReport(
       resolvedPeriod = undefined;
       break;
     }
+    case "family-households":
+      throw new Error(
+        "El reporte de familias se abre desde Reportes → Familias (ruta dedicada).",
+      );
     default:
       throw new Error("Reporte no implementado.");
   }

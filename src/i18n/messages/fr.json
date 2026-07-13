@@ -116,7 +116,9 @@
     "crumbOperation": "Opérations",
     "crumbConfigSystem": "System settings",
     "crumbConfigUsers": "User settings",
-    "searchPlaceholder": "Rechercher membres, transactions, événements…"
+    "searchPlaceholder": "Rechercher membres, transactions, événements…",
+    "membersAdults": "Membres et visiteurs",
+    "childrenRegistry": "Registre des enfants"
   },
   "auth": {
     "welcomeBack": "Bon retour",
@@ -386,7 +388,9 @@
     "tabProfile": "Profile",
     "tabMembership": "Adhésion",
     "tabLabor": "Professionnel",
+    "tabPastoral": "Pastoral",
     "tabFinances": "Finances",
+    "tabFamily": "Famille",
     "personalInfo": "Personal information",
     "addressInfo": "Address",
     "contactInfo": "Contact",
@@ -488,6 +492,37 @@
     "hasCredential": "A une accréditation ?",
     "pastoralNotes": "Notes pastorales",
     "pastoralNotesPlaceholder": "Notes, anniversaires, prière…",
+    "pastoralEyebrow": "CRM pastoral",
+    "pastoralTitle": "Événements pertinents",
+    "pastoralHint": "Maladies, urgences, collectes et autres moments importants dans la vie du membre.",
+    "pastoralIntro": "Documentez les situations pastorales pour le suivi et le contexte historique.",
+    "pastoralAddEvent": "Enregistrer un événement",
+    "pastoralEditEvent": "Modifier l'événement",
+    "pastoralDeleteTitle": "Supprimer l'événement",
+    "pastoralDeleteBody": "Cet événement sera retiré de l'historique du membre. Cette action est irréversible.",
+    "pastoralEmpty": "Aucun événement enregistré pour ce membre.",
+    "pastoralEventDate": "Date de l'événement",
+    "pastoralEventTypeLabel": "Type",
+    "pastoralEventTitle": "Titre (optionnel)",
+    "pastoralEventTitlePlaceholder": "Ex. Collecte après incendie au domicile",
+    "pastoralEventDescription": "Description",
+    "pastoralEventDescriptionPlaceholder": "Détails, actions entreprises, suivi…",
+    "pastoralNeedsFollowUp": "Nécessite un suivi",
+    "pastoralFollowUpBadge": "Suivi",
+    "pastoralEventCreated": "Événement pastoral enregistré.",
+    "pastoralEventUpdated": "Événement pastoral mis à jour.",
+    "pastoralEventDeleted": "Événement pastoral supprimé.",
+    "pastoralEventType": {
+      "illness": "Maladie",
+      "accident": "Accident",
+      "family_loss": "Deuil familial",
+      "financial_aid": "Aide financière",
+      "emergency": "Urgence",
+      "collection": "Collecte",
+      "recognition": "Reconnaissance",
+      "discipleship": "Discipulat",
+      "other": "Autre"
+    },
     "deleteWarning": "Cette action est irréversible. Le membre sera retiré de la liste avec ses liens aux ministères.",
     "deleteConfirmWord": "SUPPRIMER",
     "deleteMemberTitle": "Supprimer {name}",
@@ -564,7 +599,64 @@
     "searchContributionsPlaceholder": "Rechercher par type, montant, date…",
     "noContributionsMatchSearch": "Aucun enregistrement ne correspond à la recherche.",
     "catalogLoadFailed": "Impossible de charger les catalogues.",
-    "otherType": "Autre"
+    "otherType": "Autre",
+    "childrenRegistry": "Registre des enfants",
+    "family": {
+      "eyebrow": "Famille",
+      "emptyTitle": "Aucune famille liée",
+      "emptyHint": "Liez conjoint et enfants (membres adultes, jeunes ou mineurs du ministère enfants).",
+      "unionEyebrow": "Union",
+      "spouseTitle": "Conjoint",
+      "noSpouse": "Aucun conjoint lié.",
+      "linkSpouse": "Lier le conjoint",
+      "changeSpouse": "Modifier",
+      "unlinkSpouse": "Retirer le lien",
+      "selectSpouse": "Sélectionner un membre",
+      "selectSpousePlaceholder": "Choisir un adulte de l'église…",
+      "spouseLinked": "Conjoint lié.",
+      "spouseUnlinked": "Conjoint délié.",
+      "viewProfile": "Voir le profil →",
+      "childrenEyebrow": "Ministère enfants",
+      "childrenTitle": "Enfants enregistrés ({count})",
+      "childrenHint": "Enfants liés à ce membre ou à son conjoint (tout âge).",
+      "noChildren": "Aucun enfant enregistré au ministère enfants.",
+      "registerChild": "Enregistrer un enfant",
+      "viewChild": "Voir",
+      "noAllergies": "Sans allergies",
+      "allergiesLabel": "Allergies : {list}",
+      "emptyReadOnly": "Aucun conjoint ni enfant n'est encore lié à ce profil.",
+      "childrenSectionEyebrow": "Enfants",
+      "linkExistingChild": "Lier un enfant existant",
+      "registerMinor": "Enregistrer un mineur (ministère enfants)",
+      "registerMemberChild": "Enregistrer membre/visite",
+      "selectChild": "Sélectionner un profil",
+      "selectChildPlaceholder": "Choisir un membre ou enfant existant…",
+      "relationshipLabel": "Relation",
+      "relationship": {
+        "son": "Fils",
+        "daughter": "Fille",
+        "child": "Enfant",
+        "other": "Autre"
+      },
+      "childLinked": "Enfant lié.",
+      "childUnlinked": "Lien familial retiré.",
+      "unlinkChild": "Retirer le lien",
+      "ministryChild": "Ministère enfants",
+      "noSearchResults": "Aucun résultat",
+      "parentsEyebrow": "Parents",
+      "parentsTitle": "Parents / tuteurs ({count})",
+      "parentsHint": "Personnes qui vous ont comme enfant, y compris le conjoint d'un parent.",
+      "parentRole": {
+        "father": "Père",
+        "mother": "Mère",
+        "parent": "Parent"
+      },
+      "parentViaSpouse": "via le conjoint",
+      "actionsLinkLabel": "Lier un profil existant",
+      "actionsCreateLabel": "Créer un nouveau profil",
+      "addChild": "Ajouter un enfant",
+      "viewInReport": "Voir dans le rapport familles →"
+    }
   },
   "finances": {
     "stewardship": "Stewardship · Finances",
@@ -945,10 +1037,19 @@
     "eyebrow": "Concile",
     "nav": {
       "portalLabel": "Portail d'audit",
+      "sectionMain": "Opérations",
+      "sectionAdmin": "Administration",
+      "searchPlaceholder": "Rechercher dans le concile…",
+      "churchPortalLink": "Aller au portail église",
       "dashboard": "Tableau de bord",
       "churches": "Églises",
       "reports": "Rapports",
-      "settings": "Intégrations"
+      "settings": "Intégrations",
+      "roles": {
+        "council_admin": "Administrateur du concile",
+        "district_auditor": "Auditeur de district",
+        "org_viewer": "Lecture seule"
+      }
     },
     "login": {
       "title": "Portail du concile",
@@ -1398,7 +1499,21 @@
       "logout": "S'est déconnecté",
       "members": {
         "create": "A créé le membre {name}",
-        "update": "A modifié le membre {name}"
+        "update": "A modifié le membre {name}",
+        "pastoral_event": {
+          "create": "A enregistré un événement pastoral ({event_type})",
+          "update": "A modifié un événement pastoral ({event_type})",
+          "delete": "A supprimé un événement pastoral"
+        },
+        "child": {
+          "create": "A enregistré un enfant",
+          "update": "A mis à jour le dossier de l'enfant",
+          "delete": "A supprimé le dossier de l'enfant"
+        },
+        "family_child": {
+          "link": "A lié un enfant",
+          "unlink": "A délié un enfant"
+        }
       },
       "finances": {
         "transaction": {
@@ -1584,6 +1699,92 @@
         "title": "Journal d'activité",
         "description": "Journal d'activité administrative avec filtres et export.",
         "rolesHint": "Pasteur, Admin"
+      },
+      "family-households": {
+        "title": "Familles",
+        "description": "Foyers dérivés des liens familiaux (conjoint et enfants) pour le suivi pastoral et l'impression.",
+        "rolesHint": "Secrétaire, Pasteur, Admin"
+      }
+    },
+    "families": {
+      "eyebrow": "Rapports pastoraux",
+      "title": "Familles",
+      "subtitle": "Foyers dérivés des liens familiaux des profils",
+      "subtitleWithChurch": "{churchName} — foyers dérivés des liens familiaux",
+      "searchPlaceholder": "Rechercher par nom ou prénom…",
+      "exportCsv": "Exporter CSV",
+      "printList": "Imprimer la liste",
+      "print": "Imprimer",
+      "exportPdf": "Exporter PDF",
+      "view": "Voir",
+      "yes": "Oui",
+      "no": "Non",
+      "member": "Membre",
+      "phone": "Tél. {phone}",
+      "viewProfile": "Voir le profil →",
+      "viewChild": "Voir la fiche →",
+      "backToList": "Retour à la liste",
+      "detailEyebrow": "Foyer familial",
+      "linksEyebrow": "Liens",
+      "parentsTitle": "Parents / conjoints",
+      "childrenEyebrow": "Descendants",
+      "childrenTitle": "Enfants",
+      "noChildren": "Aucun enfant lié.",
+      "ministryChild": "Ministère enfants",
+      "ministryShort": "enf.",
+      "treeEyebrow": "Structure",
+      "treeTitle": "Carte familiale",
+      "notesEyebrow": "Pastoral",
+      "notesTitle": "Notes (optionnel)",
+      "notesPlaceholderBadge": "Placeholder MVP",
+      "notesPlaceholder": "Pas encore de notes pastorales. En produit : notes privées du pasteur sur ce foyer.",
+      "spouseRole": "Conjoint(e)",
+      "adultsChip": "{count, plural, one {# adulte} other {# adultes}}",
+      "ministryChip": "{count, plural, one {# enfant} other {# enfants}}",
+      "parentRole": {
+        "father": "Père",
+        "mother": "Mère",
+        "parent": "Parent"
+      },
+      "householdNoun": "foyers",
+      "notFoundTitle": "Foyer introuvable",
+      "notFoundHint": "Ce profil n'a pas de foyer familial documenté (conjoint ou enfants).",
+      "printDocType": "Fiche familiale",
+      "printConfidential": "Usage pastoral interne",
+      "printSummary": "{adults, plural, one {# adulte} other {# adultes}} · {children, plural, one {# enfant} other {# enfants}}",
+      "printFooter": "Généré depuis EvoChurch",
+      "columns": {
+        "family": "Famille",
+        "members": "Membres",
+        "children": "Enfants",
+        "spouse": "Conjoint",
+        "status": "Statut"
+      },
+      "filters": {
+        "all": "Toutes",
+        "complete": "Complète",
+        "incomplete": "Incomplète",
+        "adults_only": "Adultes seulement",
+        "with_ministry_children": "Avec enfants du ministère"
+      },
+      "status": {
+        "complete": "Complète",
+        "incomplete": "Incomplète",
+        "alerts": "Avec alertes",
+        "ministry": "Avec enfants",
+        "adultsOnly": "Adultes seulement"
+      },
+      "kpi": {
+        "households": "Foyers",
+        "complete": "Complètes",
+        "incomplete": "Avec alertes",
+        "ministry": "Avec enfants"
+      },
+      "empty": {
+        "title": "Aucune famille documentée",
+        "hint": "Liez conjoints et enfants dans les profils membres pour construire la carte familiale.",
+        "cta": "Aller aux membres",
+        "filtered": "Aucun foyer ne correspond aux filtres."
       }
     },
     "xlsx": {
@@ -1956,11 +2157,76 @@
     "invalidMemberId": "ID de membre invalide.",
     "invalidProfileId": "ID de profil invalide.",
     "invalidEmploymentId": "ID d'emploi invalide.",
+    "invalidEventDate": "Date d'événement invalide.",
+    "invalidEventId": "ID d'événement invalide.",
     "passwordMismatch": "Les mots de passe ne correspondent pas.",
     "maxLength": "Maximum {max} caractères"
   },
   "placeholder": {
     "comingSoon": "Coming soon",
     "nextPhase": "This screen will be implemented in the next design phase."
+  },
+  "children": {
+    "eyebrow": "Ministère des enfants",
+    "title": "Registre des enfants",
+    "registeredCount": "{total, plural, =0 {Aucun enfant enregistré} one {# enfant enregistré} other {# enfants enregistrés}}",
+    "backToMembers": "Retour aux membres",
+    "backToList": "Retour à la liste",
+    "addChild": "Enregistrer un enfant",
+    "editChild": "Modifier l'enfant",
+    "viewChild": "Voir le profil",
+    "deleteChild": "Supprimer l'enfant",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "dateOfBirth": "Date de naissance",
+    "allergies": "Allergies",
+    "allergiesPlaceholder": "Ex. Pénicilline, Arachides…",
+    "emergencyContactName": "Contact d'urgence",
+    "emergencyContactPhone": "Téléphone d'urgence",
+    "guardiansLabel": "Tuteurs / parents",
+    "guardiansHint": "Sélectionnez au moins un adulte de l'église comme tuteur.",
+    "relationshipLabel": "Relation",
+    "primaryGuardian": "Tuteur principal",
+    "removeGuardian": "Retirer le tuteur",
+    "searchGuardian": "Rechercher des adultes…",
+    "guardiansSelected": "{count, plural, one {# tuteur sélectionné} other {# tuteurs sélectionnés}} · chercher plus…",
+    "searchPlaceholder": "Rechercher par nom ou tuteur…",
+    "empty": "Aucun enfant enregistré.",
+    "columnName": "Nom",
+    "columnAge": "Âge",
+    "columnGuardians": "Tuteurs",
+    "columnAllergies": "Allergies",
+    "ageYears": "{age} ans",
+    "recordsNoun": "enfants",
+    "sectionHealth": "Santé",
+    "sectionEmergency": "Urgence",
+    "sectionGuardians": "Tuteurs",
+    "noGuardians": "Aucun tuteur assigné.",
+    "savedCreate": "Enfant enregistré avec succès.",
+    "savedUpdate": "Dossier mis à jour avec succès.",
+    "savedDelete": "Dossier de l'enfant supprimé.",
+    "deleteConfirmTitle": "Supprimer le dossier de l'enfant ?",
+    "deleteConfirmMessage": "Le profil de {name} et les liens avec les tuteurs seront supprimés.",
+    "relationship": {
+      "mother": "Mère",
+      "father": "Père",
+      "guardian": "Tuteur/trice",
+      "other": "Autre"
+    },
+    "errors": {
+      "invalidForm": "Complétez les champs obligatoires et assignez au moins un tuteur.",
+      "guardianRequired": "Vous devez assigner au moins un tuteur adulte.",
+      "invalidGuardian": "Un ou plusieurs tuteurs ne sont pas valides.",
+      "saveFailed": "Impossible d'enregistrer le dossier de l'enfant.",
+      "deleteFailed": "Impossible de supprimer le dossier de l'enfant."
+    },
+    "sectionIdentity": "Identité",
+    "sectionIdentityTitle": "Données de l'enfant",
+    "newChildName": "Nouveau dossier",
+    "ageScopeHint": "Ministère des enfants — mineurs sous tutelle (pas membres adultes).",
+    "sectionNotes": "Observations",
+    "notes": "Notes",
+    "notesHint": "Informations pastorales ou logistiques pour l'équipe.",
+    "notesPlaceholder": "Ex. restrictions alimentaires, médication, consignes des parents…"
   }
 }

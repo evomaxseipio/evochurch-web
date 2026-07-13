@@ -8,6 +8,7 @@ export const REPORT_IDS = [
   "financial-by-fund",
   "financial-by-member",
   "audit-activity-log",
+  "family-households",
 ] as const;
 
 export type ReportId = (typeof REPORT_IDS)[number];

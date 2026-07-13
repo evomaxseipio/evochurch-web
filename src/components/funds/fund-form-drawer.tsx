@@ -3,7 +3,7 @@
 import {
   saveFundAction,
   type FundActionResult,
-} from "@/app/(app)/finances/funds/actions";
+} from "@/app/apps/church/(console)/finances/funds/actions";
 import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { useActionToast } from "@/hooks/use-action-toast";

@@ -1,6 +1,6 @@
 "use client";
 
-import type { CatalogActionResult } from "@/app/(app)/settings/expenses/actions";
+import type { CatalogActionResult } from "@/app/apps/church/(console)/settings/expenses/actions";
 import { CatalogFormDrawer } from "@/components/catalog/catalog-form-drawer";
 import { CatalogStatusChip } from "@/components/catalog/catalog-status-chip";
 import { Icons } from "@/components/icons";

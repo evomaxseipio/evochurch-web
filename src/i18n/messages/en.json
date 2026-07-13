@@ -116,7 +116,9 @@
     "crumbOperation": "Operations",
     "crumbConfigSystem": "System settings",
     "crumbConfigUsers": "User settings",
-    "searchPlaceholder": "Search members, transactions, events…"
+    "searchPlaceholder": "Search members, transactions, events…",
+    "membersAdults": "Members & visitors",
+    "childrenRegistry": "Children registry"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -386,6 +388,7 @@
     "tabProfile": "Profile",
     "tabMembership": "Membership",
     "tabLabor": "Work",
+    "tabPastoral": "Pastoral",
     "tabFinances": "Finances",
     "personalInfo": "Personal information",
     "addressInfo": "Address",
@@ -488,6 +491,37 @@
     "hasCredential": "Has credential?",
     "pastoralNotes": "Pastoral notes",
     "pastoralNotesPlaceholder": "Notes, birthdays, prayer…",
+    "pastoralEyebrow": "Pastoral CRM",
+    "pastoralTitle": "Relevant events",
+    "pastoralHint": "Illness, emergencies, fundraisers, and other milestones in the member's life.",
+    "pastoralIntro": "Document pastoral situations for follow-up and historical context.",
+    "pastoralAddEvent": "Log event",
+    "pastoralEditEvent": "Edit event",
+    "pastoralDeleteTitle": "Delete event",
+    "pastoralDeleteBody": "This event will be removed from the member's history. This action cannot be undone.",
+    "pastoralEmpty": "No events recorded for this member yet.",
+    "pastoralEventDate": "Event date",
+    "pastoralEventTypeLabel": "Type",
+    "pastoralEventTitle": "Title (optional)",
+    "pastoralEventTitlePlaceholder": "E.g. Fundraiser after house fire",
+    "pastoralEventDescription": "Description",
+    "pastoralEventDescriptionPlaceholder": "Details, actions taken, follow-up…",
+    "pastoralNeedsFollowUp": "Needs follow-up",
+    "pastoralFollowUpBadge": "Follow-up",
+    "pastoralEventCreated": "Pastoral event logged.",
+    "pastoralEventUpdated": "Pastoral event updated.",
+    "pastoralEventDeleted": "Pastoral event deleted.",
+    "pastoralEventType": {
+      "illness": "Illness",
+      "accident": "Accident",
+      "family_loss": "Family loss",
+      "financial_aid": "Financial aid",
+      "emergency": "Emergency",
+      "collection": "Fundraiser",
+      "recognition": "Recognition",
+      "discipleship": "Discipleship",
+      "other": "Other"
+    },
     "deleteWarning": "This action is irreversible. The member will be removed from the list with ministry relationships.",
     "deleteConfirmWord": "DELETE",
     "deleteMemberTitle": "Delete {name}",
@@ -564,7 +598,65 @@
     "searchContributionsPlaceholder": "Search by type, amount, date…",
     "noContributionsMatchSearch": "No records match your search.",
     "catalogLoadFailed": "Could not load catalogs.",
-    "otherType": "Other"
+    "otherType": "Other",
+    "childrenRegistry": "Children registry",
+    "tabFamily": "Family",
+    "family": {
+      "eyebrow": "Family",
+      "emptyTitle": "No linked family",
+      "emptyHint": "Link spouse and children (adult members, youth, or children's ministry minors).",
+      "unionEyebrow": "Union",
+      "spouseTitle": "Spouse",
+      "noSpouse": "No linked spouse.",
+      "linkSpouse": "Link spouse",
+      "changeSpouse": "Change",
+      "unlinkSpouse": "Remove link",
+      "selectSpouse": "Select member",
+      "selectSpousePlaceholder": "Choose an adult in the church…",
+      "spouseLinked": "Spouse linked.",
+      "spouseUnlinked": "Spouse unlinked.",
+      "viewProfile": "View profile →",
+      "childrenEyebrow": "Children's ministry",
+      "childrenTitle": "Registered children ({count})",
+      "childrenHint": "Children linked to this member or their spouse (any age).",
+      "noChildren": "No children registered in children's ministry.",
+      "registerChild": "Register child",
+      "viewChild": "View",
+      "noAllergies": "No allergies",
+      "allergiesLabel": "Allergies: {list}",
+      "emptyReadOnly": "No spouse or children are linked to this profile yet.",
+      "childrenSectionEyebrow": "Children",
+      "linkExistingChild": "Link existing child",
+      "registerMinor": "Register minor (children's ministry)",
+      "registerMemberChild": "Register member/visit",
+      "selectChild": "Select profile",
+      "selectChildPlaceholder": "Choose an existing member or child…",
+      "relationshipLabel": "Relationship",
+      "relationship": {
+        "son": "Son",
+        "daughter": "Daughter",
+        "child": "Child",
+        "other": "Other"
+      },
+      "childLinked": "Child linked.",
+      "childUnlinked": "Family link removed.",
+      "unlinkChild": "Remove link",
+      "ministryChild": "Children's ministry",
+      "noSearchResults": "No results",
+      "parentsEyebrow": "Parents",
+      "parentsTitle": "Parents / guardians ({count})",
+      "parentsHint": "People who list you as their child, including a parent's spouse.",
+      "parentRole": {
+        "father": "Father",
+        "mother": "Mother",
+        "parent": "Parent"
+      },
+      "parentViaSpouse": "via spouse link",
+      "actionsLinkLabel": "Link existing",
+      "actionsCreateLabel": "Create new profile",
+      "addChild": "Add child",
+      "viewInReport": "View in families report →"
+    }
   },
   "finances": {
     "stewardship": "Stewardship · Finances",
@@ -945,10 +1037,19 @@
     "eyebrow": "Council",
     "nav": {
       "portalLabel": "Audit portal",
+      "sectionMain": "Operations",
+      "sectionAdmin": "Administration",
+      "searchPlaceholder": "Search council…",
+      "churchPortalLink": "Go to church portal",
       "dashboard": "Dashboard",
       "churches": "Churches",
       "reports": "Reports",
-      "settings": "Integrations"
+      "settings": "Integrations",
+      "roles": {
+        "council_admin": "Council administrator",
+        "district_auditor": "District auditor",
+        "org_viewer": "Read only"
+      }
     },
     "login": {
       "title": "Council portal",
@@ -1398,7 +1499,25 @@
       "logout": "Signed out",
       "members": {
         "create": "Created member {name}",
-        "update": "Updated member {name}"
+        "update": "Updated member {name}",
+        "pastoral_event": {
+          "create": "Recorded pastoral event ({event_type})",
+          "update": "Updated pastoral event ({event_type})",
+          "delete": "Deleted pastoral event"
+        },
+        "child": {
+          "create": "Registered child",
+          "update": "Updated child record",
+          "delete": "Deleted child record"
+        },
+        "spouse": {
+          "link": "Linked spouse",
+          "unlink": "Unlinked spouse"
+        },
+        "family_child": {
+          "link": "Linked child",
+          "unlink": "Unlinked child"
+        }
       },
       "finances": {
         "transaction": {
@@ -1584,6 +1703,92 @@
         "title": "Activity log",
         "description": "Administrative activity log with filters and export.",
         "rolesHint": "Pastor, Admin"
+      },
+      "family-households": {
+        "title": "Families",
+        "description": "Households derived from family links (spouse and children) for pastoral care and printing.",
+        "rolesHint": "Secretary, Pastor, Admin"
+      }
+    },
+    "families": {
+      "eyebrow": "Pastoral reports",
+      "title": "Families",
+      "subtitle": "Households derived from family links on profiles",
+      "subtitleWithChurch": "{churchName} — households derived from family links",
+      "searchPlaceholder": "Search by last or first name…",
+      "exportCsv": "Export CSV",
+      "printList": "Print list",
+      "print": "Print",
+      "exportPdf": "Export PDF",
+      "view": "View",
+      "yes": "Yes",
+      "no": "No",
+      "member": "Member",
+      "phone": "Tel. {phone}",
+      "viewProfile": "View profile →",
+      "viewChild": "View record →",
+      "backToList": "Back to list",
+      "detailEyebrow": "Family household",
+      "linksEyebrow": "Links",
+      "parentsTitle": "Parents / spouses",
+      "childrenEyebrow": "Descendants",
+      "childrenTitle": "Children",
+      "noChildren": "No children linked.",
+      "ministryChild": "Children ministry",
+      "ministryShort": "child",
+      "treeEyebrow": "Structure",
+      "treeTitle": "Family map",
+      "notesEyebrow": "Pastoral",
+      "notesTitle": "Notes (optional)",
+      "notesPlaceholderBadge": "MVP placeholder",
+      "notesPlaceholder": "No pastoral notes yet. In product: private pastor notes about this household.",
+      "spouseRole": "Spouse",
+      "adultsChip": "{count, plural, one {# adult} other {# adults}}",
+      "ministryChip": "{count, plural, one {# child ministry} other {# children ministry}}",
+      "parentRole": {
+        "father": "Father",
+        "mother": "Mother",
+        "parent": "Parent"
+      },
+      "householdNoun": "households",
+      "notFoundTitle": "Household not found",
+      "notFoundHint": "This profile has no documented family household (spouse or children).",
+      "printDocType": "Family sheet",
+      "printConfidential": "Internal pastoral use",
+      "printSummary": "{adults, plural, one {# adult} other {# adults}} · {children, plural, one {# child} other {# children}}",
+      "printFooter": "Generated from EvoChurch",
+      "columns": {
+        "family": "Family",
+        "members": "Members",
+        "children": "Children",
+        "spouse": "Spouse",
+        "status": "Status"
+      },
+      "filters": {
+        "all": "All",
+        "complete": "Complete",
+        "incomplete": "Incomplete",
+        "adults_only": "Adults only",
+        "with_ministry_children": "With child ministry minors"
+      },
+      "status": {
+        "complete": "Complete",
+        "incomplete": "Incomplete",
+        "alerts": "With alerts",
+        "ministry": "With child ministry",
+        "adultsOnly": "Adults only"
+      },
+      "kpi": {
+        "households": "Households",
+        "complete": "Complete",
+        "incomplete": "With alerts",
+        "ministry": "With child ministry"
+      },
+      "empty": {
+        "title": "No families documented yet",
+        "hint": "Link spouses and children on member profiles to build the church family map.",
+        "cta": "Go to members",
+        "filtered": "No households match the filters."
       }
     },
     "xlsx": {
@@ -1956,11 +2161,76 @@
     "invalidMemberId": "Invalid member ID.",
     "invalidProfileId": "Invalid profile ID.",
     "invalidEmploymentId": "Invalid employment ID.",
+    "invalidEventDate": "Invalid event date.",
+    "invalidEventId": "Invalid event ID.",
     "passwordMismatch": "Passwords do not match.",
     "maxLength": "Maximum {max} characters"
   },
   "placeholder": {
     "comingSoon": "Coming soon",
     "nextPhase": "This screen will be implemented in the next design phase."
+  },
+  "children": {
+    "eyebrow": "Children's ministry",
+    "title": "Children registry",
+    "registeredCount": "{total, plural, =0 {No children registered} one {# child registered} other {# children registered}}",
+    "backToMembers": "Back to members",
+    "backToList": "Back to list",
+    "addChild": "Register child",
+    "editChild": "Edit child",
+    "viewChild": "View profile",
+    "deleteChild": "Delete child",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "dateOfBirth": "Date of birth",
+    "allergies": "Allergies",
+    "allergiesPlaceholder": "e.g. Penicillin, Peanuts…",
+    "emergencyContactName": "Emergency contact",
+    "emergencyContactPhone": "Emergency phone",
+    "guardiansLabel": "Guardians / parents",
+    "guardiansHint": "Select at least one adult from the church as guardian.",
+    "relationshipLabel": "Relationship",
+    "primaryGuardian": "Primary guardian",
+    "removeGuardian": "Remove guardian",
+    "searchGuardian": "Search adults…",
+    "guardiansSelected": "{count, plural, one {# guardian selected} other {# guardians selected}} · search more…",
+    "searchPlaceholder": "Search by name or guardian…",
+    "empty": "No children registered.",
+    "columnName": "Name",
+    "columnAge": "Age",
+    "columnGuardians": "Guardians",
+    "columnAllergies": "Allergies",
+    "ageYears": "{age} years",
+    "recordsNoun": "children",
+    "sectionHealth": "Health",
+    "sectionEmergency": "Emergency",
+    "sectionGuardians": "Guardians",
+    "noGuardians": "No guardians assigned.",
+    "savedCreate": "Child registered successfully.",
+    "savedUpdate": "Record updated successfully.",
+    "savedDelete": "Child record deleted.",
+    "deleteConfirmTitle": "Delete child record?",
+    "deleteConfirmMessage": "The profile for {name} and guardian links will be removed.",
+    "relationship": {
+      "mother": "Mother",
+      "father": "Father",
+      "guardian": "Guardian",
+      "other": "Other"
+    },
+    "errors": {
+      "invalidForm": "Complete required fields and assign at least one guardian.",
+      "guardianRequired": "You must assign at least one adult guardian.",
+      "invalidGuardian": "One or more guardians are invalid.",
+      "saveFailed": "Could not save the child record.",
+      "deleteFailed": "Could not delete the child record."
+    },
+    "sectionIdentity": "Identity",
+    "sectionIdentityTitle": "Child details",
+    "newChildName": "New record",
+    "ageScopeHint": "Children's ministry — minors under guardianship (not adult members).",
+    "sectionNotes": "Notes",
+    "notes": "Notes",
+    "notesHint": "Pastoral or logistical information for the team.",
+    "notesPlaceholder": "e.g. dietary restrictions, medication, parent instructions…"
   }
 }

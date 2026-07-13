@@ -1,9 +1,10 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import {
   deleteMinistryAction,
   saveMinistryAction,
-} from "@/app/(app)/ministerios/actions";
+} from "@/app/apps/church/(console)/ministerios/actions";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
   canCreateMinistryWith,
@@ -185,7 +186,7 @@ export function MinistriesListView({
       onViewMembers: () => setMembersDialogTarget(ministry),
       onViewFunds: () => setFundsDialogTarget(ministry),
       onAssignLeader: editable ? () => setFormState({ mode: "edit", ministry }) : noop,
-      onViewEvents: () => router.push("/eventos"),
+      onViewEvents: () => router.push(churchPath("/eventos")),
       onDelete: editable ? () => setDeleteTarget(ministry) : noop,
     };
   };

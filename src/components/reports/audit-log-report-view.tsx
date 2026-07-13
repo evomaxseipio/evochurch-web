@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchAuditLogPageAction } from "@/app/(app)/reports/audit-log-actions";
+import { fetchAuditLogPageAction } from "@/app/apps/church/(console)/reports/audit-log-actions";
 import { DateRangeFilter } from "@/components/finance/date-range-filter";
 import { FundsKpi } from "@/components/funds/funds-kpi";
 import { Icons } from "@/components/icons";

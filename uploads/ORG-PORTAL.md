@@ -32,7 +32,9 @@ No reutilizar `fn_user_has_permission` de iglesia — usar permisos devueltos en
 
 ## Host portal web
 
-- Prefijos: `concilio.*`, `org.*` (env `ORG_PORTAL_HOST_PREFIXES`)
+- Prefijos producción: `concilio.*`, `org.*` (env `ORG_PORTAL_HOST_PREFIXES`)
+- Desarrollo: `http://localhost:3000/org/*` funciona sin subdominio
+- Producción mismo dominio (opcional): `ORG_PORTAL_ALLOW_PATH_PREFIX=1`
 - Rutas Next.js: `/org/login`, `/org/dashboard`, `/org/churches`, `/org/reports`
 
 Flutter puede implementar las mismas pantallas llamando los RPCs anteriores; no requiere route group `(org)` del host web.

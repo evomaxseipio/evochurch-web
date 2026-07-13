@@ -5,7 +5,7 @@ import {
   setChurchRolePermissionsAction,
   type DeactivateRoleActionResult,
   type RolePermissionsActionResult,
-} from "@/app/(app)/settings/roles/actions";
+} from "@/app/apps/church/(console)/settings/roles/actions";
 import { Icons } from "@/components/icons";
 import { RoleCardActionMenu } from "@/components/settings/role-card-action-menu";
 import { RoleFormDrawer } from "@/components/settings/role-form-drawer";

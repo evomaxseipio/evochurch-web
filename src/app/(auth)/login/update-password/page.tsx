@@ -1,3 +1,4 @@
+import { CHURCH_DASHBOARD_PATH } from "@/lib/apps/church-routes";
 import { UpdatePasswordForm } from "@/components/auth/update-password-form";
 import { LoginPreview } from "@/components/auth/login-preview";
 import { Icons } from "@/components/icons";
@@ -16,7 +17,7 @@ export default async function UpdatePasswordPage() {
 
   const session = await getAppSession();
   if (!sessionRequiresPasswordChange(session)) {
-    redirect("/dashboard");
+    redirect(CHURCH_DASHBOARD_PATH);
   }
 
   return (

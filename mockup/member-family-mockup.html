@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EvoChurch · Familia en perfil (mockup P1.2)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #faf7fb; --bg-1: #fff; --bg-2: #f4f0f8; --bg-3: #ebe4f4;
+      --line: #e2dcef; --hairline: #ebe4f4;
+      --fg: #1a1225; --muted: #7c6f8f; --dim: #a89bb8;
+      --accent: #5B21B6; --accent-strong: #4C1D95;
+      --accent-soft: color-mix(in oklab, #5B21B6 14%, transparent);
+      --primary-50: #f5f3ff;
+      --green: #059669; --green-bg: #d1fae5;
+      --danger: #dc2626; --danger-bg: #fee2e2;
+      --radius: 10px; --radius-lg: 14px;
+      --font: 'Geist', system-ui, sans-serif;
+      --sidebar-w: 248px;
+    }
+    [data-theme="dark"] {
+      --bg: #0b0d12; --bg-1: #10131a; --bg-2: #161b24; --bg-3: #1d2330;
+      --line: #262d3b; --hairline: #262d3b;
+      --fg: #e8ecf3; --muted: #828ca0; --dim: #5a6478;
+      --primary-50: color-mix(in oklab, #5B21B6 12%, #10131a);
+      --green-bg: color-mix(in oklab, #34d399 16%, transparent);
+      --danger-bg: color-mix(in oklab, #f87171 14%, transparent);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--fg); font-size: 14px; height: 100vh; overflow: hidden; }
+    button, a { font-family: inherit; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    .shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; height: 100vh; }
+    .sidebar { background: var(--bg-1); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+    .sidebar-logo { padding: 18px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+    .mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-strong), var(--accent)); }
+    .sidebar-logo .name { font-weight: 700; font-size: 14px; }
+    .sidebar-logo .sub { font-size: 11px; color: var(--muted); }
+    .nav-section { padding: 12px 8px; flex: 1; overflow-y: auto; }
+    .nav-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); padding: 4px 10px 8px; }
+    .nav-group { margin-bottom: 4px; }
+    .nav-parent { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius); font-weight: 600; font-size: 13px; background: var(--accent-soft); color: var(--accent); }
+    .nav-children { padding-left: 22px; margin: 2px 0 6px; border-left: 1px solid var(--hairline); margin-left: 22px; }
+    .nav-child { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius); font-size: 13px; color: var(--muted); }
+    .nav-child:hover { background: var(--bg-2); color: var(--fg); }
+    .nav-child.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+    .nav-child .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .5; }
+    .nav-child.active .dot { opacity: 1; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius); color: var(--muted); font-size: 13px; }
+
+    .main { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+    .topbar { height: 52px; border-bottom: 1px solid var(--line); background: var(--bg-1); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
+    .crumb { font-size: 13px; color: var(--muted); flex: 1; }
+    .crumb b { color: var(--fg); }
+    .content { flex: 1; overflow-y: auto; padding: 20px 24px 80px; }
+
+    .mock-bar {
+      position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; z-index: 100;
+      background: var(--bg-1); border-top: 1px solid var(--line); padding: 10px 16px;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .mock-bar .label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-right: 8px; }
+    .mock-btn { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg-2); font-size: 12px; font-weight: 600; color: var(--muted); }
+    .mock-btn:hover { background: var(--bg-3); color: var(--fg); }
+    .mock-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .theme-toggle { margin-left: auto; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+    .display { font-weight: 700; letter-spacing: -.02em; }
+    .muted { color: var(--muted); }
+    .tiny { font-size: 12px; }
+    .row { display: flex; align-items: center; gap: 10px; }
+    .between { justify-content: space-between; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: var(--radius); font-weight: 600; font-size: 13px; border: none; }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.outline { background: transparent; border: 1px solid var(--line); color: var(--fg); }
+    .btn.ghost { background: transparent; color: var(--muted); }
+    .btn.sm { padding: 6px 11px; font-size: 12px; }
+    .btn.danger { background: var(--danger-bg); color: var(--danger); border: 1px solid color-mix(in oklab, var(--danger) 30%, transparent); }
+    .card { background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .chip.violet { background: var(--accent-soft); color: var(--accent); }
+    .chip.green { background: var(--green-bg); color: var(--green); }
+    .avatar { display: grid; place-items: center; font-weight: 700; color: #fff; background: var(--accent); flex-shrink: 0; }
+    .avatar.md { width: 48px; height: 48px; border-radius: 12px; font-size: 15px; }
+    .avatar.sm { width: 32px; height: 32px; border-radius: 8px; font-size: 11px; }
+    .avatar.lg { width: 56px; height: 56px; border-radius: 14px; font-size: 18px; }
+
+    /* Profile header */
+    .profile-hero { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; }
+    .profile-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 20px; flex-wrap: wrap; }
+    .ptab { padding: 10px 14px; font-size: 13px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; background: none; border-top: 0; border-left: 0; border-right: 0; }
+    .ptab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .ptab.danger { color: var(--danger); }
+
+    .section-card { padding: 0; margin-bottom: 16px; overflow: hidden; }
+    .section-head { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .section-body { padding: 16px 18px; }
+
+    .spouse-row { display: flex; align-items: center; gap: 14px; }
+    .child-row {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+      padding: 12px 14px; border-radius: var(--radius); background: var(--bg-2); margin-bottom: 8px;
+    }
+    .child-row:last-child { margin-bottom: 0; }
+
+    .empty-family { text-align: center; padding: 40px 24px; }
+    .empty-family .icon { font-size: 32px; margin-bottom: 12px; opacity: .5; }
+
+    /* Drawer */
+    .drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0; width: min(480px, 100vw);
+      background: var(--bg-1); border-left: 1px solid var(--line); z-index: 201;
+      display: flex; flex-direction: column; box-shadow: -8px 0 32px rgba(0,0,0,.12);
+    }
+    .drawer-head { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+    .drawer-foot { padding: 14px 20px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 8px; }
+    .mf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
+    .input-wrap { background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 9px 12px; }
+    .input-wrap input, .input-wrap select, .input-wrap textarea {
+      width: 100%; border: 0; background: transparent; font: inherit; color: inherit; outline: 0;
+    }
+    .guardian-pill {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      background: var(--bg-2); border-radius: var(--radius); margin-bottom: 8px; border: 1px solid var(--hairline);
+    }
+
+    .spec-note {
+      background: color-mix(in oklab, var(--accent) 8%, var(--bg-1));
+      border: 1px dashed color-mix(in oklab, var(--accent) 35%, transparent);
+      border-radius: var(--radius); padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: var(--muted);
+    }
+    .spec-note strong { color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--line); font-size: 13px; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--bg-2); }
+    tr:hover td { background: var(--bg-2); }
+
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .mock-bar { left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="mark"></div>
+        <div>
+          <div class="name">Iglesia Renacer</div>
+          <div class="sub">Consola web</div>
+        </div>
+      </div>
+      <nav class="nav-section">
+        <div class="nav-eyebrow">Principal</div>
+        <div class="nav-item">Dashboard</div>
+        <div class="nav-group">
+          <div class="nav-parent">👥 Miembros</div>
+          <div class="nav-children">
+            <div class="nav-child"><span class="dot"></span> Hermanos y visitas</div>
+            <div class="nav-child"><span class="dot"></span> Registro de niños</div>
+          </div>
+        </div>
+        <div class="nav-item">Ministerios</div>
+        <div class="nav-item">Finanzas</div>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="crumb">Comunidad / <b id="crumb-title">Perfil · Familia</b></div>
+        <button class="btn outline sm theme-toggle" type="button" onclick="toggleTheme()">🌓 Tema</button>
+      </header>
+
+      <div class="content">
+        <!-- SCREEN 1: Familia tab (caso Pérez) -->
+        <div id="screen-family" class="screen active">
+          <div class="spec-note">
+            <strong>P1.2-A</strong> — Pestaña <em>Familia</em> en perfil de adulto (<code>members:read</code>).
+            Los hijos se derivan de <code>profile_child_guardian</code>; el cónyuge es vínculo nuevo.
+          </div>
+
+          <div class="row between" style="margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+            <div class="row" style="gap:8px;">
+              <button class="btn outline sm">← Volver</button>
+              <button class="btn outline sm">Imprimir</button>
+            </div>
+          </div>
+
+          <div class="profile-hero">
+            <div class="avatar lg">JP</div>
+            <div>
+              <div class="eyebrow">Miembro activo</div>
+              <div class="display" style="font-size:32px;">Juan Pérez</div>
+              <div class="row" style="margin-top:6px; gap:8px;">
+                <span class="chip green">Miembro</span>
+                <span class="chip violet">Diácono</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-tabs">
+            <button class="ptab">Perfil</button>
+            <button class="ptab">Membresía</button>
+            <button class="ptab">Laboral</button>
+            <button class="ptab">Finanzas</button>
+            <button class="ptab active">Familia</button>
+            <button class="ptab danger">Eliminar</button>
+          </div>
+
+          <div class="card section-card">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Unión</div>
+                <div style="font-weight:600; font-size:15px; margin-top:4px;">Cónyuge</div>
+              </div>
+              <button class="btn outline sm">Cambiar</button>
+            </div>
+            <div class="section-body">
+              <div class="spouse-row">
+                <div class="avatar md">MP</div>
+                <div style="flex:1;">
+                  <div style="font-weight:600;">María Pérez</div>
+                  <div class="tiny muted">Miembro · Casada · Cred. #2847</div>
+                </div>
+                <a class="btn outline sm" href="#" onclick="showScreen('screen-family');return false;">Ver perfil →</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="card section-card">
+            <div class="section-head">
+              <div>
+                <div class="eyebrow">Ministerio infantil</div>
+                <div style="font-weight:600; font-size:15px; margin-top:4px;">Hijos registrados (3)</div>
+                <div class="tiny muted" style="margin-top:4px;">Perfiles con <code>is_child = true</code> donde Juan o María son tutores.</div>
+              </div>
+              <button class="btn primary sm" onclick="showScreen('screen-drawer')">+ Registrar hijo</button>
+            </div>
+            <div class="section-body">
+              <div class="child-row">
+                <div class="avatar sm">JP</div>
+                <div>
+                  <div style="font-weight:600;">José Pérez</div>
+                  <div class="tiny muted">9 años · Tutor principal: Juan · Sin alergias</div>
+                </div>
+                <div class="row">
+                  <button class="btn ghost sm" onclick="showScreen('screen-child')">Ver</button>
+                  <button class="btn outline sm" onclick="showScreen('screen-drawer')">Editar</button>
+                </div>
+              </div>
+              <div class="child-row">
+                <div class="avatar sm">AP</div>
+                <div>
+                  <div style="font-weight:600;">Ana Pérez</div>
+                  <div class="tiny muted">7 años · Tutor principal: María · Alergias: maní</div>
+                </div>
+                <div class="row">
+                  <button class="btn ghost sm" onclick="showScreen('screen-child')">Ver</button>
+                  <button class="btn outline sm">Editar</button>
+                </div>
+              </div>
+              <div class="child-row">
+                <div class="avatar sm">LP</div>
+                <div>
+                  <div style="font-weight:600;">Luis Pérez</div>
+                  <div class="tiny muted">2 años · Tutor principal: Juan · Sin alergias</div>
+                </div>
+                <div class="row">
+                  <button class="btn ghost sm" onclick="showScreen('screen-child')">Ver</button>
+                  <button class="btn outline sm">Editar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN 2: Empty family -->
+        <div id="screen-empty" class="screen">
+          <div class="spec-note"><strong>P1.2-A</strong> — Estado vacío: adulto sin cónyuge ni hijos vinculados.</div>
+          <div class="profile-hero">
+            <div class="avatar lg">CR</div>
+            <div>
+              <div class="display" style="font-size:28px;">Carlos Rodríguez</div>
+              <div class="tiny muted">Visita</div>
+            </div>
+          </div>
+          <div class="profile-tabs">
+            <button class="ptab">Perfil</button>
+            <button class="ptab active">Familia</button>
+          </div>
+          <div class="card section-card">
+            <div class="section-body empty-family">
+              <div class="icon">👨‍👩‍👧</div>
+              <div style="font-weight:600; font-size:16px; margin-bottom:8px;">Sin familia vinculada</div>
+              <p class="muted tiny" style="max-width:360px; margin:0 auto 20px;">
+                Vincula cónyuge (si es miembro) y registra hijos del ministerio infantil desde aquí.
+              </p>
+              <div class="row" style="justify-content:center; gap:8px;">
+                <button class="btn outline sm">Vincular cónyuge</button>
+                <button class="btn primary sm" onclick="showScreen('screen-drawer')">+ Registrar hijo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN 3: Child detail -->
+        <div id="screen-child" class="screen">
+          <div class="spec-note"><strong>P1.2-B</strong> — Detalle niño (existente) + tutores clicables hacia perfil adulto.</div>
+          <p class="tiny muted" style="margin-bottom:12px;"><a href="#" onclick="showScreen('screen-family');return false;">← Volver al listado</a></p>
+          <div class="row between" style="margin-bottom:20px; flex-wrap:wrap;">
+            <div>
+              <div class="eyebrow">Ministerio de niños</div>
+              <div class="display" style="font-size:32px;">José Pérez</div>
+              <p class="muted" style="margin:4px 0 0;">9 años · Nac. 2017-03-14</p>
+            </div>
+            <button class="btn primary sm">Editar</button>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px;">
+            <div class="card" style="padding:18px;">
+              <div class="eyebrow">Salud</div>
+              <div style="font-weight:600; margin:8px 0;">Alergias</div>
+              <p class="muted tiny">—</p>
+            </div>
+            <div class="card" style="padding:18px;">
+              <div class="eyebrow">Emergencia</div>
+              <p style="margin:8px 0 4px;">María Pérez (tía)</p>
+              <p class="muted tiny">809-555-0100</p>
+            </div>
+            <div class="card" style="padding:18px; grid-column:1/-1;">
+              <div class="eyebrow">Tutores</div>
+              <div class="child-row" style="margin-top:10px;">
+                <div class="avatar sm">JP</div>
+                <div>
+                  <div style="font-weight:600;">Juan Pérez</div>
+                  <div class="tiny muted">Padre · Tutor principal</div>
+                </div>
+                <button class="btn outline sm" onclick="showScreen('screen-family')">Ver miembro →</button>
+              </div>
+              <div class="child-row">
+                <div class="avatar sm">MP</div>
+                <div>
+                  <div style="font-weight:600;">María Pérez</div>
+                  <div class="tiny muted">Madre</div>
+                </div>
+                <button class="btn outline sm">Ver miembro →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SCREEN 4: Children list with family column -->
+        <div id="screen-list" class="screen">
+          <div class="spec-note"><strong>P1.2-C</strong> — Opcional: columna «Familia» en listado de niños (apellido o hogar).</div>
+          <div class="row between" style="margin-bottom:20px;">
+            <div>
+              <div class="eyebrow">Ministerio de niños</div>
+              <div class="display" style="font-size:36px;">Registro de niños</div>
+            </div>
+            <button class="btn primary sm">+ Registrar niño</button>
+          </div>
+          <div class="card" style="overflow:hidden;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Edad</th>
+                  <th>Tutores</th>
+                  <th>Familia</th>
+                  <th>Alergias</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>José Pérez</strong></td>
+                  <td class="muted">9 años</td>
+                  <td class="muted">Juan, María</td>
+                  <td><span class="chip violet">Pérez</span></td>
+                  <td class="muted">—</td>
+                  <td><button class="btn ghost sm">Ver</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Ana Pérez</strong></td>
+                  <td class="muted">7 años</td>
+                  <td class="muted">Juan, María</td>
+                  <td><span class="chip violet">Pérez</span></td>
+                  <td class="muted">Maní</td>
+                  <td><button class="btn ghost sm">Ver</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Luis Pérez</strong></td>
+                  <td class="muted">2 años</td>
+                  <td class="muted">Juan, María</td>
+                  <td><span class="chip violet">Pérez</span></td>
+                  <td class="muted">—</td>
+                  <td><button class="btn ghost sm">Ver</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SCREEN 5: Drawer (hidden as screen, shown as overlay) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer overlay -->
+  <div id="screen-drawer" class="screen" style="display:none;">
+    <div class="drawer-backdrop" onclick="hideDrawer()"></div>
+    <div class="drawer">
+      <div class="drawer-head">
+        <div style="flex:1;">
+          <div class="eyebrow">Ministerio de niños</div>
+          <div class="display" style="font-size:20px;">Registrar hijo</div>
+          <div class="tiny muted" style="margin-top:4px;">Desde familia de Juan Pérez</div>
+        </div>
+        <button class="btn ghost sm" onclick="hideDrawer()">✕</button>
+      </div>
+      <div class="drawer-body">
+        <div class="spec-note" style="margin-bottom:14px;">
+          <strong>P1.2-D</strong> — Mismo drawer P1; tutores pre-cargados (Juan + María).
+        </div>
+        <div class="row" style="gap:14px; padding:14px; background:var(--primary-50); border-radius:14px; margin-bottom:16px;">
+          <div class="avatar lg">??</div>
+          <div>
+            <div style="font-weight:600;">Nuevo registro</div>
+            <div class="tiny muted">Ministerio infantil — no miembro adulto</div>
+          </div>
+        </div>
+        <div class="card section-card" style="margin-bottom:12px;">
+          <div class="section-head"><div style="font-weight:600;">Identidad</div></div>
+          <div class="section-body mf-grid">
+            <div class="field"><label>Nombre *</label><div class="input-wrap"><input placeholder="Ej. Luis" value="Luis" /></div></div>
+            <div class="field"><label>Apellido *</label><div class="input-wrap"><input value="Pérez" /></div></div>
+            <div class="field" style="grid-column:1/-1;"><label>Fecha nacimiento *</label><div class="input-wrap"><input type="date" value="2024-01-10" /></div></div>
+          </div>
+        </div>
+        <div class="card section-card">
+          <div class="section-head"><div style="font-weight:600;">Tutores</div></div>
+          <div class="section-body">
+            <div class="guardian-pill">
+              <div class="avatar sm">JP</div>
+              <div style="flex:1;"><div style="font-weight:600;">Juan Pérez</div><div class="tiny muted">Padre · Principal</div></div>
+            </div>
+            <div class="guardian-pill">
+              <div class="avatar sm">MP</div>
+              <div style="flex:1;"><div style="font-weight:600;">María Pérez</div><div class="tiny muted">Madre</div></div>
+            </div>
+            <div class="tiny muted" style="margin-top:8px;">+ Buscar otro tutor…</div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-foot">
+        <button class="btn outline" onclick="hideDrawer()">Cancelar</button>
+        <button class="btn primary" onclick="hideDrawer()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="mock-bar" aria-label="Vistas del mockup">
+    <span class="label">Vistas P1.2</span>
+    <button class="mock-btn active" data-screen="screen-family" type="button">A · Familia (Pérez)</button>
+    <button class="mock-btn" data-screen="screen-empty" type="button">B · Familia vacía</button>
+    <button class="mock-btn" data-screen="screen-child" type="button">C · Detalle niño</button>
+    <button class="mock-btn" data-screen="screen-list" type="button">D · Listado + familia</button>
+    <button class="mock-btn" data-screen="screen-drawer" type="button">E · Drawer hijo</button>
+  </nav>
+
+  <script>
+    const crumbs = {
+      'screen-family': 'Perfil · Familia',
+      'screen-empty': 'Perfil · Familia (vacío)',
+      'screen-child': 'Niño · José Pérez',
+      'screen-list': 'Registro de niños',
+      'screen-drawer': 'Registrar hijo',
+    };
+
+    function showScreen(id) {
+      document.querySelectorAll('.content .screen').forEach((el) => el.classList.remove('active'));
+      const drawer = document.getElementById('screen-drawer');
+      if (id === 'screen-drawer') {
+        drawer.style.display = 'block';
+        document.getElementById('crumb-title').textContent = crumbs[id];
+      } else {
+        drawer.style.display = 'none';
+        const screen = document.getElementById(id);
+        if (screen && screen.classList.contains('screen')) screen.classList.add('active');
+        document.getElementById('crumb-title').textContent = crumbs[id] || 'Mockup';
+      }
+      document.querySelectorAll('.mock-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.screen === id);
+      });
+    }
+
+    function hideDrawer() {
+      document.getElementById('screen-drawer').style.display = 'none';
+      showScreen('screen-family');
+    }
+
+    document.querySelectorAll('.mock-btn').forEach((btn) => {
+      btn.addEventListener('click', () => showScreen(btn.dataset.screen));
+    });
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    }
+  </script>
+</body>
+</html>

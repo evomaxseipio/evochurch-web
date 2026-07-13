@@ -1,6 +1,6 @@
 "use client";
 
-import type { MinistryActionResult } from "@/app/(app)/ministerios/actions";
+import type { MinistryActionResult } from "@/app/apps/church/(console)/ministerios/actions";
 import { MemberCombobox } from "@/components/ministries/member-combobox";
 import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";

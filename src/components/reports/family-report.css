@@ -1,0 +1,420 @@
+.family-report-dash .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.family-report-dash .display {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.family-report-dash .family-name {
+  font-weight: 600;
+}
+
+.family-report-dash .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.family-report-dash .chip.violet {
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+.family-report-dash .chip.green {
+  background: var(--green-bg, #d1fae5);
+  color: var(--green, #059669);
+}
+
+.family-report-dash .chip.amber {
+  background: var(--amber-bg, #fef3c7);
+  color: var(--amber, #b45309);
+}
+
+.family-report-dash .chip.muted {
+  background: var(--bg-3, var(--bg-2));
+  color: var(--muted);
+}
+
+.family-report-dash .alert-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber, #b45309);
+  display: inline-block;
+}
+
+.family-report-dash .linkish {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.family-report-dash .filter-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.family-report-dash .filter-chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--bg-1, #fff);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.family-report-dash .filter-chip.active {
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--accent);
+  border-color: color-mix(in oklab, var(--accent) 40%, transparent);
+}
+
+.family-report-dash .empty-state {
+  text-align: center;
+  padding: 56px 28px;
+  max-width: 480px;
+  margin: 40px auto;
+}
+
+.family-report-dash .empty-state .icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  margin: 0 auto 16px;
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+
+.family-report-dash .empty-state h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.family-report-dash .empty-state p {
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.family-report-dash .section-card {
+  padding: 0;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.family-report-dash .section-head {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.family-report-dash .section-body {
+  padding: 16px 18px;
+}
+
+.family-report-dash .person-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  margin-bottom: 8px;
+}
+
+.family-report-dash .person-row:last-child {
+  margin-bottom: 0;
+}
+
+.family-report-dash .person-meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.family-report-dash .avatar {
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.family-report-dash .avatar.md {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.family-report-dash .avatar.sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.family-report-dash .avatar.xs {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 10px;
+}
+
+.family-report-dash .avatar.soft {
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+.family-report-dash .family-tree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 20px 12px;
+}
+
+.family-report-dash .tree-couple {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+
+.family-report-dash .tree-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+  text-align: center;
+}
+
+.family-report-dash .tree-node .label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.family-report-dash .tree-node .sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.family-report-dash .tree-link {
+  width: 40px;
+  height: 2px;
+  background: var(--line);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.family-report-dash .tree-stem {
+  width: 2px;
+  height: 24px;
+  background: var(--line);
+  margin: 0 auto;
+}
+
+.family-report-dash .tree-kids {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  position: relative;
+}
+
+.family-report-dash .tree-kids::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, 90%);
+  height: 2px;
+  background: var(--line);
+}
+
+.family-report-dash .tree-kid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  min-width: 88px;
+  text-align: center;
+}
+
+.family-report-dash .tree-kid::before {
+  content: "";
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  background: var(--line);
+  transform: translateX(-50%);
+}
+
+.family-report-dash .notes-box {
+  background: var(--bg-2);
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--muted);
+  font-size: 13px;
+  min-height: 72px;
+}
+
+.family-report-dash .print-sheet {
+  display: none;
+}
+
+.family-report-dash .print-only {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .family-report-dash .hide-sm {
+    display: none;
+  }
+}
+
+@media print {
+  .no-print,
+  .family-report-dash .no-print,
+  aside,
+  nav,
+  .topbar,
+  .bottom-nav,
+  .app-topbar {
+    display: none !important;
+  }
+
+  .family-report-dash .screen-only {
+    display: none !important;
+  }
+
+  .family-report-dash .print-only,
+  .family-report-dash .print-sheet {
+    display: block !important;
+  }
+
+  .family-report-dash .print-sheet {
+    max-width: none;
+    margin: 0;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .family-report-dash .print-brand {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--fg, #1a1225);
+  }
+
+  .family-report-dash .print-brand .church {
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .family-report-dash .print-brand .doc-meta {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .family-report-dash .print-title {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 4px;
+  }
+
+  .family-report-dash .print-summary {
+    color: var(--muted);
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+
+  .family-report-dash .print-block {
+    margin-bottom: 24px;
+  }
+
+  .family-report-dash .print-block h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .family-report-dash .print-person {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--hairline, var(--line));
+    font-size: 13px;
+  }
+
+  .family-report-dash .print-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-top: 8px;
+  }
+
+  .family-report-dash .print-tree .couple {
+    font-weight: 600;
+  }
+
+  .family-report-dash .print-tree .kids {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .family-report-dash .print-footer {
+    margin-top: 36px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+  }
+}

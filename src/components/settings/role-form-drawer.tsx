@@ -5,7 +5,7 @@ import {
   updateChurchRoleAction,
   type CreateRoleActionResult,
   type UpdateRoleActionResult,
-} from "@/app/(app)/settings/roles/actions";
+} from "@/app/apps/church/(console)/settings/roles/actions";
 import { Icons } from "@/components/icons";
 import { useActionToast } from "@/hooks/use-action-toast";
 import type { ChurchRolePermissions } from "@/lib/roles/types";

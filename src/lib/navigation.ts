@@ -1,5 +1,10 @@
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 import type { ChurchKind } from "@/lib/auth/app-session";
+import {
+  churchPath,
+  churchPathSuffix,
+  isChurchAppPath,
+} from "@/lib/apps/church-routes";
 import { REPORT_READ_PERMISSIONS } from "@/lib/reports/permissions";
 
 export type NavItem = {
@@ -32,21 +37,35 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
 export const MAIN_NAV: NavEntry[] = [
   {
     id: "dashboard",
-    href: "/dashboard",
+    href: churchPath("/dashboard"),
     labelKey: "dashboard",
     icon: "home",
     permission: "dashboard:read",
   },
   {
     id: "miembros",
-    href: "/members",
     labelKey: "members",
     icon: "users",
-    permission: "members:read",
+    children: [
+      {
+        id: "miembros-lista",
+        href: churchPath("/members"),
+        labelKey: "membersAdults",
+        icon: "users",
+        permission: "members:read",
+      },
+      {
+        id: "miembros-ninos",
+        href: churchPath("/members/children"),
+        labelKey: "childrenRegistry",
+        icon: "users",
+        permission: "members:read",
+      },
+    ],
   },
   {
     id: "ministerios",
-    href: "/ministerios",
+    href: churchPath("/ministerios"),
     labelKey: "ministerios",
     icon: "pin",
     permission: "ministerios:read",
@@ -58,28 +77,28 @@ export const MAIN_NAV: NavEntry[] = [
     children: [
       {
         id: "fondos",
-        href: "/finances/funds",
+        href: churchPath("/finances/funds"),
         labelKey: "funds",
         icon: "wallet",
         permission: "finances:funds:read",
       },
       {
         id: "transacciones",
-        href: "/finances/transactions",
+        href: churchPath("/finances/transactions"),
         labelKey: "transactions",
         icon: "wallet",
         permission: "finances:transactions:read",
       },
       {
         id: "contribuciones",
-        href: "/finances/contributions",
+        href: churchPath("/finances/contributions"),
         labelKey: "contributions",
         icon: "wallet",
         permission: "finances:contributions:read",
       },
       {
         id: "tithe-close",
-        href: "/finances/tithe-close",
+        href: churchPath("/finances/tithe-close"),
         labelKey: "titheClose",
         icon: "wallet",
         permission: "finances:tithe_close:read",
@@ -88,7 +107,7 @@ export const MAIN_NAV: NavEntry[] = [
   },
   {
     id: "eventos",
-    href: "/eventos",
+    href: churchPath("/eventos"),
     labelKey: "eventos",
     icon: "cal",
     badge: "3",
@@ -96,7 +115,7 @@ export const MAIN_NAV: NavEntry[] = [
   },
   {
     id: "comunicacion",
-    href: "/comunicacion",
+    href: churchPath("/comunicacion"),
     labelKey: "comunicacion",
     icon: "chat",
     badge: "4",
@@ -104,14 +123,14 @@ export const MAIN_NAV: NavEntry[] = [
   },
   {
     id: "reportes",
-    href: "/reports",
+    href: churchPath("/reports"),
     labelKey: "reports",
     icon: "download",
     permissionAny: REPORT_READ_PERMISSIONS,
   },
   {
     id: "red",
-    href: "/network",
+    href: churchPath("/network"),
     labelKey: "network",
     icon: "grid",
     permission: "network:churches:read",
@@ -127,28 +146,28 @@ export const CONFIG_NAV: NavEntry[] = [
     children: [
       {
         id: "gastos",
-        href: "/settings/expenses",
+        href: churchPath("/settings/expenses"),
         labelKey: "expenseTypes",
         icon: "wallet",
         permission: "settings:expense_types:read",
       },
       {
         id: "ingresos-tipos",
-        href: "/settings/income-types",
+        href: churchPath("/settings/income-types"),
         labelKey: "incomeTypes",
         icon: "trendUp",
         permission: "settings:income_types:read",
       },
       {
         id: "iglesia",
-        href: "/settings/church",
+        href: churchPath("/settings/church"),
         labelKey: "churchProfile",
         icon: "pin",
         permission: "settings:church:read",
       },
       {
         id: "descuentos",
-        href: "/settings/discount-templates",
+        href: churchPath("/settings/discount-templates"),
         labelKey: "discountTemplates",
         icon: "target",
         permission: "settings:church:read",
@@ -162,21 +181,21 @@ export const CONFIG_NAV: NavEntry[] = [
     children: [
       {
         id: "usuarios",
-        href: "/settings/users",
+        href: churchPath("/settings/users"),
         labelKey: "adminUsers",
         icon: "users",
         permission: "admin_users:manage",
       },
       {
         id: "roles",
-        href: "/settings/roles",
+        href: churchPath("/settings/roles"),
         labelKey: "roles",
         icon: "star",
         permission: "roles:manage",
       },
       {
         id: "settings",
-        href: "/settings",
+        href: churchPath("/settings"),
         labelKey: "settings",
         icon: "settings",
         permission: "settings:read",
@@ -282,6 +301,8 @@ export function filterNavByPermissions(
 export const BREADCRUMB_KEYS: Record<string, [string, string]> = {
   dashboard: ["crumbHome", "dashboard"],
   miembros: ["crumbCommunity", "members"],
+  "miembros-lista": ["crumbCommunity", "membersAdults"],
+  "miembros-ninos": ["crumbCommunity", "childrenRegistry"],
   ministerios: ["crumbCommunity", "ministerios"],
   fondos: ["crumbFinances", "funds"],
   transacciones: ["crumbFinances", "transactions"],
@@ -299,24 +320,26 @@ export const BREADCRUMB_KEYS: Record<string, [string, string]> = {
 };
 
 export function navIdFromPath(pathname: string): string {
-  if (pathname === "/dashboard") return "dashboard";
-  if (pathname.startsWith("/members")) return "miembros";
-  if (pathname.startsWith("/ministerios")) return "ministerios";
-  if (pathname.startsWith("/finances/funds")) return "fondos";
-  if (pathname.startsWith("/finances/transactions")) return "transacciones";
-  if (pathname.startsWith("/finances/contributions")) return "contribuciones";
-  if (pathname.startsWith("/finances")) return "fondos";
-  if (pathname.startsWith("/eventos")) return "eventos";
-  if (pathname.startsWith("/comunicacion")) return "comunicacion";
-  if (pathname.startsWith("/reports")) return "reportes";
-  if (pathname.startsWith("/network")) return "red";
-  if (pathname.startsWith("/settings/users")) return "usuarios";
-  if (pathname.startsWith("/settings/expenses")) return "gastos";
-  if (pathname.startsWith("/settings/income-types")) return "ingresos-tipos";
-  if (pathname.startsWith("/settings/church")) return "iglesia";
-  if (pathname.startsWith("/settings/discount-templates")) return "descuentos";
-  if (pathname.startsWith("/settings/roles")) return "roles";
-  if (pathname.startsWith("/settings")) return "settings";
+  const path = isChurchAppPath(pathname) ? churchPathSuffix(pathname) : pathname;
+  if (path === "/dashboard") return "dashboard";
+  if (path.startsWith("/members/children")) return "miembros-ninos";
+  if (path.startsWith("/members")) return "miembros-lista";
+  if (path.startsWith("/ministerios")) return "ministerios";
+  if (path.startsWith("/finances/funds")) return "fondos";
+  if (path.startsWith("/finances/transactions")) return "transacciones";
+  if (path.startsWith("/finances/contributions")) return "contribuciones";
+  if (path.startsWith("/finances")) return "fondos";
+  if (path.startsWith("/eventos")) return "eventos";
+  if (path.startsWith("/comunicacion")) return "comunicacion";
+  if (path.startsWith("/reports")) return "reportes";
+  if (path.startsWith("/network")) return "red";
+  if (path.startsWith("/settings/users")) return "usuarios";
+  if (path.startsWith("/settings/expenses")) return "gastos";
+  if (path.startsWith("/settings/income-types")) return "ingresos-tipos";
+  if (path.startsWith("/settings/church")) return "iglesia";
+  if (path.startsWith("/settings/discount-templates")) return "descuentos";
+  if (path.startsWith("/settings/roles")) return "roles";
+  if (path.startsWith("/settings")) return "settings";
   return "dashboard";
 }
 

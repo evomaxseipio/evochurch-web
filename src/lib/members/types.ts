@@ -40,6 +40,7 @@ export type Member = {
   idNumber: string;
   isActive: boolean;
   isMember: boolean;
+  isChild?: boolean;
   bio: string;
   membershipRoleId: string;
   membershipRole: string;

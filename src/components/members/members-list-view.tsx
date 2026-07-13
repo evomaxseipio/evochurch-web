@@ -1,12 +1,13 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import {
   fetchContributionCatalogAction,
-} from "@/app/(app)/members/actions";
+} from "@/app/apps/church/(console)/members/actions";
 import {
   getMemberSystemAccessContextAction,
   resetMemberAccessPasswordAction,
-} from "@/app/(app)/settings/users/actions";
+} from "@/app/apps/church/(console)/settings/users/actions";
 import { SYSTEM_ACCESS_MESSAGES } from "@/lib/admin-users/eligibility";
 import type { AdminUserRow } from "@/lib/admin-users/types";
 import type { PresetContributor } from "@/components/contributions/contribution-form-drawer";
@@ -339,9 +340,13 @@ export function MembersListView({
           </p>
         </div>
         <div className="row">
+          <Link href={churchPath("/members/children")} className="btn outline">
+            <Icons.users size={16} /> {t("childrenRegistry")}
+          </Link>
           <Link
-            href="/reports?report=membership-directory"
+            href={`${churchPath("/reports")}?report=membership-directory`}
             className="btn outline"
+            style={{ marginLeft: 8 }}
           >
             <Icons.download size={16} /> {t("exportInReports")}
           </Link>
@@ -527,7 +532,9 @@ export function MembersListView({
           ]}
           rows={members}
           rowKey={(m) => m.memberId}
-          onRowClick={(m) => router.push(`/members/profile?id=${m.memberId}`)}
+          onRowClick={(m) =>
+            router.push(`${churchPath("/members/profile")}?id=${m.memberId}`)
+          }
           actions={(m) => (
             <RowMenu
               open={menuId === m.memberId}
@@ -593,7 +600,7 @@ export function MembersListView({
                     resetAccessPending={resetAccessPending}
                   />
                 </div>
-                <Link href={`/members/profile?id=${m.memberId}`} className="row" style={{ gap: 12, textDecoration: "none", color: "inherit" }}>
+                <Link href={`${churchPath("/members/profile")}?id=${m.memberId}`} className="row" style={{ gap: 12, textDecoration: "none", color: "inherit" }}>
                   <MemberAvatar member={m} size="md" square />
                   <div style={{ flex: 1, minWidth: 0, paddingRight: 36 }}>
                     <div style={{ fontWeight: 600 }}>{memberFullName(m)}</div>
@@ -708,7 +715,7 @@ function RowMenu({
     left: number | "auto";
     right: number | "auto";
   }>({ top: 0, bottom: "auto", left: 0, right: "auto" });
-  const profileHref = `/members/profile?id=${member.memberId}`;
+  const profileHref = `${churchPath("/members/profile")}?id=${member.memberId}`;
   const name = memberFullName(member);
 
   const menu = useMemo(() => {

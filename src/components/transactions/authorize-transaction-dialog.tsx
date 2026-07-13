@@ -3,7 +3,7 @@
 import {
   reviewPendingExpenseAction,
   type TransactionActionResult,
-} from "@/app/(app)/finances/transactions/actions";
+} from "@/app/apps/church/(console)/finances/transactions/actions";
 import { Icons } from "@/components/icons";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { fmtRD } from "@/lib/format-currency";

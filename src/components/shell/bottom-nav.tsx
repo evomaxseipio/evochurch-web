@@ -1,5 +1,6 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { Icons, NavIcon } from "@/components/icons";
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
@@ -31,7 +32,7 @@ const bottomItems: BottomItem[] = [
   {
     type: "link",
     id: "dashboard",
-    href: "/dashboard",
+    href: churchPath("/dashboard"),
     labelKey: "dashboard",
     icon: "home",
     permission: "dashboard:read",
@@ -39,7 +40,7 @@ const bottomItems: BottomItem[] = [
   {
     type: "link",
     id: "miembros",
-    href: "/members",
+    href: churchPath("/members"),
     labelKey: "members",
     icon: "users",
     permission: "members:read",
@@ -48,7 +49,7 @@ const bottomItems: BottomItem[] = [
   {
     type: "link",
     id: "comunicacion",
-    href: "/comunicacion",
+    href: churchPath("/comunicacion"),
     labelKey: "comunicacion",
     icon: "chat",
     permission: "comunicacion:read",
@@ -56,7 +57,7 @@ const bottomItems: BottomItem[] = [
   {
     type: "link",
     id: "settings",
-    href: "/settings",
+    href: churchPath("/settings"),
     labelKey: "settings",
     icon: "settings",
     permission: "settings:read",

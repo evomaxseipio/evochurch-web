@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EvoChurch BackOffice · Mockup unificado (Sales Hub + Organizations)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --bg-1: #10131a;
+      --bg-2: #161b24;
+      --bg-3: #1d2330;
+      --line: #262d3b;
+      --line-2: #313a4b;
+      --fg: #e8ecf3;
+      --fg-dim: #b3bbcb;
+      --muted: #828ca0;
+      --dim: #5a6478;
+      --accent: #5B21B6;
+      --accent-strong: #4C1D95;
+      --accent-soft: color-mix(in oklab, #5B21B6 16%, transparent);
+      --d-sales: #6366f1;
+      --d-sales-soft: color-mix(in oklab, #6366f1 14%, transparent);
+      --ok: #4ade80;
+      --warn: #fbbf24;
+      --danger: #f87171;
+      --info: #60a5fa;
+      --pending: #c084fc;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --shadow-1: 0 1px 0 rgba(255,255,255,0.03) inset, 0 4px 14px rgba(0,0,0,0.30);
+      --shadow-2: 0 12px 32px -6px rgba(0,0,0,0.45);
+      --font: 'Geist', ui-sans-serif, system-ui, sans-serif;
+      --sidebar-w: 240px;
+      --sidebar-collapsed: 64px;
+    }
+    [data-theme="light"] {
+      --bg: #faf7fb;
+      --bg-1: #ffffff;
+      --bg-2: #f4f0f8;
+      --bg-3: #ebe4f4;
+      --line: #e2dcef;
+      --line-2: #d4c9e8;
+      --fg: #1a1225;
+      --fg-dim: #4a3f5c;
+      --muted: #7c6f8f;
+      --dim: #a89bb8;
+      --shadow-1: 0 1px 2px rgba(91,33,182,0.06);
+      --shadow-2: 0 8px 24px rgba(91,33,182,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--fg);
+      font-size: 14px;
+      line-height: 1.5;
+      overflow: hidden;
+      height: 100vh;
+    }
+    button { font-family: inherit; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Shell */
+    .shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      height: 100vh;
+    }
+    .shell.collapsed { grid-template-columns: var(--sidebar-collapsed) 1fr; }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-1);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .sidebar-logo {
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sidebar-logo .mark {
+      width: 32px; height: 32px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent-strong), var(--accent));
+      flex-shrink: 0;
+    }
+    .sidebar-logo .name { font-weight: 700; font-size: 14px; }
+    .sidebar-logo .sub { font-size: 11px; color: var(--muted); }
+    .shell.collapsed .sidebar-logo .text { display: none; }
+    .nav-section { padding: 12px 8px; }
+    .nav-eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--dim);
+      padding: 4px 10px 8px;
+    }
+    .shell.collapsed .nav-eyebrow { display: none; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: var(--radius);
+      color: var(--fg-dim); font-weight: 500; font-size: 13px;
+      border: none; background: none; width: 100%; text-align: left;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover { background: var(--bg-2); color: var(--fg); }
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--fg);
+      font-weight: 600;
+    }
+    .nav-item .icon {
+      width: 18px; height: 18px; flex-shrink: 0;
+      display: grid; place-items: center; opacity: 0.7;
+    }
+    .nav-item.active .icon { opacity: 1; }
+    .shell.collapsed .nav-item span.label { display: none; }
+    .shell.collapsed .nav-item { justify-content: center; padding: 10px; }
+
+    /* Main */
+    .main { display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .topbar {
+      height: 52px; border-bottom: 1px solid var(--line);
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 20px; background: var(--bg-1); flex-shrink: 0;
+    }
+    .topbar .crumb { font-size: 13px; color: var(--muted); flex: 1; }
+    .topbar .crumb b { color: var(--fg); font-weight: 600; }
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: var(--radius);
+      border: 1px solid var(--line); background: var(--bg-2);
+      display: grid; place-items: center; color: var(--fg-dim);
+    }
+    .icon-btn:hover { background: var(--bg-3); color: var(--fg); }
+    .search-bar {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-2); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 6px 12px;
+      width: 220px; color: var(--muted); font-size: 13px;
+    }
+    .search-bar kbd {
+      margin-left: auto; font-size: 10px; padding: 2px 6px;
+      border-radius: 4px; background: var(--bg-3); border: 1px solid var(--line);
+      font-family: inherit;
+    }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: grid; place-items: center; font-size: 11px; font-weight: 700;
+    }
+    .content {
+      flex: 1; overflow-y: auto; padding: 24px 28px 56px;
+      max-width: 1320px;
+    }
+
+    /* Primitives */
+    .page-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .page-title { font-size: 22px; font-weight: 700; }
+    .page-sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 16px; border-radius: var(--radius);
+      font-weight: 600; font-size: 13px; border: none;
+      transition: opacity 0.15s;
+    }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.primary:hover { opacity: 0.9; }
+    .btn.outline {
+      background: transparent; color: var(--fg-dim);
+      border: 1px solid var(--line);
+    }
+    .btn.outline:hover { background: var(--bg-2); color: var(--fg); }
+    .btn.sm { padding: 6px 12px; font-size: 12px; }
+    .card {
+      background: var(--bg-1); border: 1px solid var(--line);
+      border-radius: var(--radius-lg); padding: 18px;
+    }
+    .chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 999px; font-size: 11px;
+      font-weight: 600; border: 1px solid transparent;
+    }
+    .chip.violet { color: var(--accent); background: var(--accent-soft); border-color: color-mix(in oklab, var(--accent) 30%, transparent); }
+    .chip.info { color: var(--info); background: color-mix(in oklab, var(--info) 14%, transparent); }
+    .chip.ok { color: var(--ok); background: color-mix(in oklab, var(--ok) 14%, transparent); }
+    .chip.warn { color: var(--warn); background: color-mix(in oklab, var(--warn) 14%, transparent); }
+    .chip.danger { color: var(--danger); background: color-mix(in oklab, var(--danger) 14%, transparent); }
+    .chip.pending { color: var(--pending); background: color-mix(in oklab, var(--pending) 14%, transparent); }
+    .chip.muted { color: var(--muted); background: var(--bg-2); border-color: var(--line); }
+    .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    /* Stats */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-card {
+      background: var(--bg-1); border: 1px solid var(--line);
+      border-radius: var(--radius-lg); padding: 18px 20px;
+    }
+    .stat-card .label { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; }
+    .stat-card .value.sales { color: var(--d-sales); }
+    .stat-card .value.warn { color: var(--warn); }
+    .stat-card .value.info { color: var(--info); }
+    .stat-card .value.ok { color: var(--ok); }
+    .stat-card .hint { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+    /* Grid layouts */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-8-4 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+
+    /* Pipeline bars */
+    .pipeline-bar { margin-bottom: 10px; }
+    .pipeline-bar .row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+    .pipeline-bar .row span:first-child { color: var(--fg-dim); }
+    .pipeline-bar .row span:last-child { color: var(--muted); font-weight: 600; }
+    .bar-track { height: 6px; background: var(--bg-3); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; }
+
+    /* Activity list */
+    .activity-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--line);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-time { font-size: 12px; color: var(--muted); width: 48px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+    .activity-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: grid; place-items: center; font-size: 12px; flex-shrink: 0;
+    }
+    .activity-body { flex: 1; min-width: 0; }
+    .activity-body .title { font-weight: 600; font-size: 13px; }
+    .activity-body .sub { font-size: 12px; color: var(--muted); }
+
+    /* Table */
+    .table-wrap {
+      border: 1px solid var(--line); border-radius: var(--radius-lg);
+      overflow: hidden; background: var(--bg-1);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; padding: 11px 16px; font-size: 11px;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--muted); background: var(--bg-2);
+      border-bottom: 1px solid var(--line);
+    }
+    td {
+      padding: 13px 16px; border-bottom: 1px solid var(--line);
+      font-size: 13px; vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg-2); cursor: pointer; }
+    .cell-main { font-weight: 600; }
+    .cell-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .overdue { color: var(--danger); font-weight: 600; }
+
+    /* Filters */
+    .toolbar {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1; min-width: 200px; max-width: 360px;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-2); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 8px 12px;
+      color: var(--muted); font-size: 13px;
+    }
+    .filter-select {
+      padding: 8px 12px; border-radius: var(--radius);
+      border: 1px solid var(--line); background: var(--bg-2);
+      color: var(--fg-dim); font-size: 13px;
+    }
+
+    /* Org detail */
+    .org-header {
+      margin-bottom: 20px;
+    }
+    .org-header .back {
+      font-size: 12px; color: var(--muted); margin-bottom: 8px;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .org-header .back:hover { color: var(--fg); }
+    .org-title-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .org-title { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+    .org-meta {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .meta-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px; margin-bottom: 20px;
+    }
+    .meta-item .label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--dim); margin-bottom: 4px;
+    }
+    .meta-item .value { font-size: 13px; font-weight: 600; }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 0; border-bottom: 1px solid var(--line);
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 16px; font-size: 13px; font-weight: 600;
+      color: var(--muted); border: none; background: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      cursor: pointer;
+    }
+    .tab:hover { color: var(--fg-dim); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* Contact card */
+    .contact-card { position: sticky; top: 0; }
+    .contact-card .name { font-size: 16px; font-weight: 700; margin-top: 4px; }
+    .contact-card .role { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+    .contact-actions {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .contact-actions .icon-btn { flex: 1; height: 40px; }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 20px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 15px; top: 8px; bottom: 8px;
+      width: 2px; background: var(--line);
+    }
+    .tl-item { position: relative; padding-bottom: 20px; }
+    .tl-item:last-child { padding-bottom: 0; }
+    .tl-dot {
+      position: absolute; left: -20px; top: 2px;
+      width: 32px; height: 32px; border-radius: 50%;
+      display: grid; place-items: center; font-size: 13px;
+      border: 2px solid var(--bg-1); z-index: 1;
+    }
+    .tl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .tl-head .type { font-weight: 600; font-size: 13px; }
+    .tl-head .when { font-size: 12px; color: var(--muted); }
+    .tl-result { font-size: 13px; color: var(--fg-dim); margin-top: 4px; }
+    .tl-next { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* Kanban */
+    .kanban {
+      display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;
+      height: calc(100vh - 200px);
+    }
+    .kanban-col {
+      min-width: 260px; max-width: 260px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      background: var(--bg-2); border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+    }
+    .kanban-col.lost { opacity: 0.75; }
+    .kanban-col-head {
+      padding: 12px 14px; font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--muted); border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between;
+    }
+    .kanban-col-head .count {
+      background: var(--bg-3); padding: 1px 8px; border-radius: 999px;
+      font-size: 11px;
+    }
+    .kanban-cards { padding: 8px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .kanban-card {
+      background: var(--bg-1); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 12px; cursor: grab;
+      transition: border-color 0.15s;
+    }
+    .kanban-card:hover { border-color: var(--line-2); }
+    .kanban-card .org { font-weight: 600; font-size: 13px; line-height: 1.3; }
+    .kanban-card .contact { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .kanban-card .action { font-size: 11px; color: var(--fg-dim); margin-top: 8px; }
+    .kanban-card .foot { display: flex; justify-content: flex-end; margin-top: 8px; }
+
+    /* Agenda */
+    .agenda-group { margin-bottom: 24px; }
+    .agenda-group-head {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--dim);
+      padding-bottom: 8px; border-bottom: 1px solid var(--line);
+      margin-bottom: 4px;
+    }
+    .agenda-row {
+      display: grid; grid-template-columns: 56px 28px 1fr 140px;
+      gap: 12px; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--line);
+      cursor: pointer;
+    }
+    .agenda-row:hover { background: var(--bg-2); margin: 0 -12px; padding-left: 12px; padding-right: 12px; border-radius: var(--radius); }
+    .agenda-row.overdue { border-left: 3px solid var(--danger); padding-left: 9px; }
+    .agenda-time { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--fg-dim); }
+    .agenda-org { font-weight: 600; font-size: 13px; }
+    .agenda-type { font-size: 12px; color: var(--muted); }
+    .agenda-owner { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .agenda-owner .mini-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent);
+      display: grid; place-items: center; font-size: 9px; font-weight: 700;
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed; bottom: 28px; right: 28px;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 22px; border-radius: 999px;
+      background: var(--accent); color: #fff;
+      font-weight: 700; font-size: 14px; border: none;
+      box-shadow: var(--shadow-2); z-index: 50;
+      transition: transform 0.15s;
+    }
+    .fab:hover { transform: scale(1.02); }
+
+    /* Drawer preview */
+    .drawer-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 100; display: none; align-items: stretch; justify-content: flex-end;
+    }
+    .drawer-overlay.open { display: flex; }
+    .drawer {
+      width: 440px; max-width: 100vw; background: var(--bg-1);
+      border-left: 1px solid var(--line); display: flex; flex-direction: column;
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .drawer-head {
+      padding: 18px 20px; border-bottom: 1px solid var(--line);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .drawer-head h2 { font-size: 16px; font-weight: 700; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 20px; }
+    .drawer-foot {
+      padding: 14px 20px; border-top: 1px solid var(--line);
+      display: flex; gap: 8px; justify-content: flex-end;
+    }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 9px 12px; border-radius: var(--radius);
+      border: 1px solid var(--line); background: var(--bg-2);
+      color: var(--fg); font-family: inherit; font-size: 13px;
+    }
+    .field textarea { resize: vertical; min-height: 64px; }
+    .quick-results { display: flex; flex-wrap: wrap; gap: 6px; }
+    .quick-results button {
+      padding: 5px 10px; border-radius: 999px; font-size: 11px;
+      font-weight: 600; border: 1px solid var(--line);
+      background: var(--bg-2); color: var(--fg-dim);
+    }
+    .quick-results button.selected {
+      background: var(--accent-soft); color: var(--accent);
+      border-color: color-mix(in oklab, var(--accent) 30%, transparent);
+    }
+
+    /* Organizations feature — states */
+    .state-panel { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 64px 32px; min-height: 420px; }
+    .state-icon { width: 56px; height: 56px; border-radius: var(--radius-lg); background: var(--bg-2); border: 1px solid var(--line); display: grid; place-items: center; font-size: 24px; margin-bottom: 20px; color: var(--muted); }
+    .state-icon.error { color: var(--danger); background: color-mix(in oklab, var(--danger) 12%, transparent); border-color: color-mix(in oklab, var(--danger) 25%, transparent); }
+    .state-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .state-desc { font-size: 14px; color: var(--muted); max-width: 360px; margin-bottom: 24px; line-height: 1.6; }
+    .skeleton { background: linear-gradient(90deg, var(--bg-2) 25%, var(--bg-3) 50%, var(--bg-2) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .sk-row { display: grid; grid-template-columns: 2fr 1fr 1.2fr 1fr 1.2fr 1fr 1fr 40px; gap: 16px; padding: 14px 16px; border-bottom: 1px solid var(--line); align-items: center; }
+    .sk-row .skeleton { height: 14px; }
+    .sk-row .skeleton.tall { height: 32px; }
+    tr.clickable { cursor: pointer; }
+    .row-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+    tr:hover .row-actions { opacity: 1; }
+    .row-actions .icon-btn { width: 28px; height: 28px; font-size: 12px; }
+
+    /* Detail tabs & info */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .tab.disabled { opacity: 0.45; cursor: default; pointer-events: none; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 24px; }
+    .info-field .label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .info-field .value { font-size: 14px; color: var(--fg); }
+    .tab-placeholder { padding: 48px 24px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: var(--radius-lg); background: var(--bg-2); }
+    .tab-placeholder .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+    .tab-placeholder p { font-size: 13px; max-width: 320px; margin: 0 auto; line-height: 1.6; }
+    .contact-detail { font-size: 13px; color: var(--fg-dim); line-height: 1.8; }
+    .dropdown-wrap { position: relative; }
+    .dropdown-menu { position: absolute; right: 0; top: 100%; margin-top: 4px; background: var(--bg-1); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px; min-width: 180px; display: none; z-index: 20; box-shadow: var(--shadow-2); }
+    .dropdown-menu.open { display: block; }
+    .dropdown-menu button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; color: var(--fg-dim); font-size: 13px; border-radius: 6px; cursor: pointer; }
+    .dropdown-menu button:hover { background: var(--bg-2); color: var(--fg); }
+
+    /* Org form drawer */
+    .form-section { margin-bottom: 16px; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; }
+    .form-section-head { padding: 12px 16px; background: var(--bg-2); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .form-section-head .title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-dim); }
+    .form-section-head .hint { font-size: 11px; color: var(--dim); }
+    .form-section-body { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-section-body.full { grid-template-columns: 1fr; }
+    .form-section.collapsed .form-section-body { display: none; }
+    .form-section .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 0; }
+    .form-section .field.span-2 { grid-column: span 2; }
+    .form-section .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .form-section .field label .req { color: var(--danger); }
+    .drawer-head .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    #orgFormOverlay .drawer { width: 520px; }
+
+    /* Screen visibility */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* Screen picker banner */
+    .mockup-banner {
+      position: fixed; bottom: 0; left: var(--sidebar-w);
+      right: 0; background: var(--bg-2); border-top: 1px solid var(--line);
+      padding: 8px 16px; display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: var(--muted); z-index: 40;
+      overflow-x: auto; flex-wrap: nowrap;
+    }
+    .shell.collapsed ~ .mockup-banner { left: var(--sidebar-collapsed); }
+    .mockup-banner b { color: var(--fg); }
+    .mockup-banner .pill {
+      padding: 4px 10px; border-radius: 999px; background: var(--bg-3);
+      border: 1px solid var(--line); color: var(--fg-dim); font-size: 11px;
+      cursor: pointer;
+    }
+    .mockup-banner .pill:hover, .mockup-banner .pill.active { border-color: var(--accent); color: var(--accent); }
+    .mockup-banner .sep { width: 1px; height: 16px; background: var(--line); flex-shrink: 0; }
+    .mockup-banner .group { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2, .grid-8-4, .meta-grid, .info-grid, .form-section-body { grid-template-columns: 1fr; }
+      .form-section .field.span-2 { grid-column: span 1; }
+      .contact-card { position: static; }
+      .sk-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 800px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .mockup-banner { left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell" id="shell">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="mark"></div>
+        <div class="text">
+          <div class="name">EvoChurch</div>
+          <div class="sub">BackOffice · Sales</div>
+        </div>
+      </div>
+      <nav class="nav-section">
+        <div class="nav-eyebrow">Sales Hub</div>
+        <button class="nav-item active" data-screen="dashboard">
+          <span class="icon">&#9632;</span><span class="label">Dashboard</span>
+        </button>
+        <button class="nav-item" data-screen="organizations">
+          <span class="icon">&#9776;</span><span class="label">Organizations</span>
+        </button>
+        <button class="nav-item" data-screen="pipeline">
+          <span class="icon">&#9646;</span><span class="label">Pipeline</span>
+        </button>
+        <button class="nav-item" data-screen="agenda">
+          <span class="icon">&#128197;</span><span class="label">Agenda</span>
+        </button>
+      </nav>
+      <nav class="nav-section" style="margin-top:auto;border-top:1px solid var(--line);">
+        <button class="nav-item">
+          <span class="icon">&#9881;</span><span class="label">Settings</span>
+        </button>
+      </nav>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <button class="icon-btn" id="toggleSidebar" title="Colapsar sidebar">&#9776;</button>
+        <div class="crumb"><span>Sales</span> / <b id="crumbPage">Dashboard</b></div>
+        <div class="search-bar">&#128269; Buscar... <kbd>&#8984;K</kbd></div>
+        <button class="icon-btn" id="toggleTheme" title="Tema">&#9790;</button>
+        <div class="avatar">ML</div>
+      </header>
+
+      <div class="content">
+        <!-- DASHBOARD -->
+        <section class="screen active" id="screen-dashboard">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Dashboard</div>
+              <div class="page-sub">Resumen comercial · viernes, 10 jul 2026</div>
+            </div>
+            <button class="btn primary" onclick="openOrgForm('create')">+ Nueva Organización</button>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="label">Prospectos activos</div>
+              <div class="value sales">47</div>
+              <div class="hint">+5 esta semana</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Seguimientos pendientes</div>
+              <div class="value warn">12</div>
+              <div class="hint">3 vencidos</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Demos agendadas</div>
+              <div class="value info">6</div>
+              <div class="hint">2 esta semana</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">Clientes</div>
+              <div class="value ok">8</div>
+              <div class="hint">Etapa Ganada</div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div style="font-weight:700;margin-bottom:16px;font-size:14px;">Pipeline resumido</div>
+              <div class="pipeline-bar"><div class="row"><span>Nuevo</span><span>12</span></div><div class="bar-track"><div class="bar-fill" style="width:72%;background:var(--info)"></div></div></div>
+              <div class="pipeline-bar"><div class="row"><span>Investigación</span><span>8</span></div><div class="bar-track"><div class="bar-fill" style="width:48%;background:var(--pending)"></div></div></div>
+              <div class="pipeline-bar"><div class="row"><span>Contacto</span><span>5</span></div><div class="bar-track"><div class="bar-fill" style="width:30%;background:var(--d-sales)"></div></div></div>
+              <div class="pipeline-bar"><div class="row"><span>Seguimiento</span><span>11</span></div><div class="bar-track"><div class="bar-fill" style="width:66%;background:var(--accent)"></div></div></div>
+              <div class="pipeline-bar"><div class="row"><span>Demo</span><span>6</span></div><div class="bar-track"><div class="bar-fill" style="width:36%;background:var(--warn)"></div></div></div>
+            </div>
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-weight:700;font-size:14px;">Próximas actividades</div>
+                <a href="#" style="font-size:12px;color:var(--accent);font-weight:600;">Ver agenda</a>
+              </div>
+              <div class="activity-item">
+                <div class="activity-time">14:30</div>
+                <div class="activity-icon" style="background:color-mix(in oklab,var(--info) 20%,transparent);color:var(--info)">&#128222;</div>
+                <div class="activity-body"><div class="title">Llamada · Iglesia El Redentor</div><div class="sub">María López</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-time">16:00</div>
+                <div class="activity-icon" style="background:color-mix(in oklab,var(--warn) 20%,transparent);color:var(--warn)">&#127909;</div>
+                <div class="activity-body"><div class="title">Demo · Concilio Central</div><div class="sub">Carlos Rodríguez</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-time">Mañ.</div>
+                <div class="activity-icon" style="background:color-mix(in oklab,var(--ok) 20%,transparent);color:var(--ok)">&#128172;</div>
+                <div class="activity-body"><div class="title">WhatsApp · Ministerio Vida</div><div class="sub">María López</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:16px;">
+            <div style="font-weight:700;margin-bottom:14px;font-size:14px;">Organizaciones recientes</div>
+            <div class="table-wrap" style="border:none;">
+              <table>
+                <thead><tr><th>Organización</th><th>Etapa</th><th>Próxima acción</th><th>Responsable</th></tr></thead>
+                <tbody>
+                  <tr onclick="goScreen('detail')">
+                    <td><div class="cell-main">Iglesia Central Bautista</div><div class="cell-sub">Iglesia · Santo Domingo</div></td>
+                    <td><span class="chip violet">Seguimiento</span></td>
+                    <td><div class="cell-main">Agendar demo</div><div class="cell-sub">15 jul</div></td>
+                    <td>María López</td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-main">Concilio Evangélico RD</div><div class="cell-sub">Concilio · Santiago</div></td>
+                    <td><span class="chip warn">Demo</span></td>
+                    <td><div class="cell-main">Demo virtual</div><div class="cell-sub overdue">Hoy 16:00</div></td>
+                    <td>Carlos R.</td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-main">Ministerio Vida Nueva</div><div class="cell-sub">Ministerio · La Vega</div></td>
+                    <td><span class="chip info">Contacto</span></td>
+                    <td><div class="cell-main">Enviar WhatsApp</div><div class="cell-sub">11 jul</div></td>
+                    <td>María López</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ORGANIZATIONS — LIST -->
+        <section class="screen" id="screen-organizations">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Organizations</div>
+              <div class="page-sub">47 prospectos activos</div>
+            </div>
+            <button class="btn primary" onclick="openOrgForm('create')">+ Nueva Organización</button>
+          </div>
+          <div class="toolbar">
+            <div class="search-input">&#128269; Buscar organizaciones...</div>
+            <select class="filter-select"><option>Pipeline: Todos</option><option>Nuevo</option><option>Seguimiento</option><option>Demo</option></select>
+            <select class="filter-select"><option>Responsable: Todos</option><option>María López</option><option>Carlos R.</option></select>
+            <select class="filter-select"><option>Ciudad: Todas</option></select>
+            <button class="btn outline sm">Limpiar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th><th>Ciudad</th><th>Contacto principal</th>
+                  <th>Pipeline</th><th>Próxima acción</th><th>Responsable</th><th>Última actividad</th><th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="clickable" onclick="goScreen('detail')">
+                  <td><div class="cell-main">Iglesia Central Bautista</div><div class="cell-sub">Iglesia · Bautista</div></td>
+                  <td>Santo Domingo</td>
+                  <td><div class="cell-main">Pastor Juan Pérez</div><div class="cell-sub">Pastor Principal</div></td>
+                  <td><span class="chip violet">Seguimiento</span></td>
+                  <td><div class="cell-main">Agendar demo</div><div class="cell-sub">15 jul</div></td>
+                  <td>María López</td>
+                  <td><div class="cell-main">Llamada</div><div class="cell-sub">Hace 2 días</div></td>
+                  <td onclick="event.stopPropagation()">
+                    <div class="row-actions">
+                      <button class="icon-btn" title="Ver" onclick="goScreen('detail')">&#8594;</button>
+                      <button class="icon-btn" title="Editar" onclick="openOrgForm('edit')">&#9998;</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr class="clickable">
+                  <td><div class="cell-main">Concilio Evangélico RD</div><div class="cell-sub">Concilio</div></td>
+                  <td>Santiago</td>
+                  <td><div class="cell-main">Lic. Ana Martínez</div><div class="cell-sub">Directora</div></td>
+                  <td><span class="chip warn">Demo</span></td>
+                  <td><div class="cell-main">Demo virtual</div><div class="cell-sub overdue">Hoy</div></td>
+                  <td>Carlos R.</td>
+                  <td><div class="cell-main">Correo</div><div class="cell-sub">Hace 5 días</div></td>
+                  <td onclick="event.stopPropagation()"><div class="row-actions"><button class="icon-btn">&#8594;</button><button class="icon-btn" onclick="openOrgForm('edit')">&#9998;</button></div></td>
+                </tr>
+                <tr class="clickable">
+                  <td><div class="cell-main">Iglesia El Redentor</div><div class="cell-sub">Iglesia</div></td>
+                  <td>San Pedro</td>
+                  <td><div class="cell-main">Pastor Miguel Santos</div><div class="cell-sub">Pastor</div></td>
+                  <td><span class="chip info">Contacto</span></td>
+                  <td><div class="cell-main">Llamar</div><div class="cell-sub overdue">Vencido</div></td>
+                  <td>María López</td>
+                  <td><div class="cell-main">—</div><div class="cell-sub">Sin actividad</div></td>
+                  <td onclick="event.stopPropagation()"><div class="row-actions"><button class="icon-btn">&#8594;</button><button class="icon-btn" onclick="openOrgForm('edit')">&#9998;</button></div></td>
+                </tr>
+                <tr class="clickable">
+                  <td><div class="cell-main">Fundación Manos Unidas</div><div class="cell-sub">Fundación</div></td>
+                  <td>La Romana</td>
+                  <td><div class="cell-main">Sra. Rosa Díaz</div><div class="cell-sub">Administradora</div></td>
+                  <td><span class="chip pending">Investigación</span></td>
+                  <td><div class="cell-main">Visitar</div><div class="cell-sub">18 jul</div></td>
+                  <td>Carlos R.</td>
+                  <td><div class="cell-main">Nota</div><div class="cell-sub">Hace 1 semana</div></td>
+                  <td onclick="event.stopPropagation()"><div class="row-actions"><button class="icon-btn">&#8594;</button><button class="icon-btn" onclick="openOrgForm('edit')">&#9998;</button></div></td>
+                </tr>
+                <tr class="clickable">
+                  <td><div class="cell-main">Ministerio Vida Nueva</div><div class="cell-sub">Ministerio</div></td>
+                  <td>La Vega</td>
+                  <td><div class="cell-main">Evang. Pedro López</div><div class="cell-sub">Coordinador</div></td>
+                  <td><span class="chip muted">Nuevo</span></td>
+                  <td><div class="cell-main">Enviar correo</div><div class="cell-sub">12 jul</div></td>
+                  <td>María López</td>
+                  <td><div class="cell-main">WhatsApp</div><div class="cell-sub">Ayer</div></td>
+                  <td onclick="event.stopPropagation()"><div class="row-actions"><button class="icon-btn">&#8594;</button><button class="icon-btn" onclick="openOrgForm('edit')">&#9998;</button></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ORGANIZATIONS — EMPTY -->
+        <section class="screen" id="screen-organizations-empty">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Organizations</div>
+              <div class="page-sub">Gestiona tus prospectos comerciales</div>
+            </div>
+            <button class="btn primary" onclick="openOrgForm('create')">+ Nueva Organización</button>
+          </div>
+          <div class="card state-panel">
+            <div class="state-icon">&#9776;</div>
+            <div class="state-title">Empieza captando tu primera organización</div>
+            <div class="state-desc">Registra iglesias, ministerios y otras organizaciones para dar seguimiento comercial y convertirlas en clientes.</div>
+            <button class="btn primary" onclick="openOrgForm('create')">+ Nueva Organización</button>
+          </div>
+        </section>
+
+        <!-- ORGANIZATIONS — LOADING -->
+        <section class="screen" id="screen-organizations-loading">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Organizations</div>
+              <div class="page-sub">Cargando...</div>
+            </div>
+            <button class="btn primary" disabled style="opacity:0.5">+ Nueva Organización</button>
+          </div>
+          <div class="toolbar">
+            <div class="search-input skeleton" style="height:38px;max-width:360px;border:none;"></div>
+            <div class="skeleton" style="width:140px;height:38px;border-radius:var(--radius);"></div>
+            <div class="skeleton" style="width:140px;height:38px;border-radius:var(--radius);"></div>
+          </div>
+          <div class="table-wrap">
+            <div class="sk-row" style="background:var(--bg-2);"><div class="skeleton" style="width:60%"></div><div class="skeleton" style="width:70%"></div><div class="skeleton tall"></div><div class="skeleton" style="width:80%"></div><div class="skeleton tall"></div><div class="skeleton" style="width:65%"></div><div class="skeleton tall"></div><div class="skeleton" style="width:28px"></div></div>
+            <div class="sk-row"><div class="skeleton tall"></div><div class="skeleton"></div><div class="skeleton tall"></div><div class="skeleton" style="width:90px;border-radius:999px"></div><div class="skeleton tall"></div><div class="skeleton"></div><div class="skeleton tall"></div><div class="skeleton" style="width:28px"></div></div>
+            <div class="sk-row"><div class="skeleton tall"></div><div class="skeleton"></div><div class="skeleton tall"></div><div class="skeleton" style="width:90px;border-radius:999px"></div><div class="skeleton tall"></div><div class="skeleton"></div><div class="skeleton tall"></div><div class="skeleton" style="width:28px"></div></div>
+            <div class="sk-row"><div class="skeleton tall"></div><div class="skeleton"></div><div class="skeleton tall"></div><div class="skeleton" style="width:90px;border-radius:999px"></div><div class="skeleton tall"></div><div class="skeleton"></div><div class="skeleton tall"></div><div class="skeleton" style="width:28px"></div></div>
+          </div>
+        </section>
+
+        <!-- ORGANIZATIONS — ERROR -->
+        <section class="screen" id="screen-organizations-error">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Organizations</div>
+              <div class="page-sub">Error al cargar datos</div>
+            </div>
+            <button class="btn primary" onclick="goScreen('organizations')">Reintentar</button>
+          </div>
+          <div class="card state-panel">
+            <div class="state-icon error">!</div>
+            <div class="state-title">No se pudieron cargar las organizaciones</div>
+            <div class="state-desc">Ocurrió un error al conectar con el servidor. Verifica tu conexión e intenta de nuevo.</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn outline" onclick="goScreen('organizations')">Volver</button>
+              <button class="btn primary" onclick="goScreen('organizations')">Reintentar</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ORG DETAIL -->
+        <section class="screen" id="screen-detail">
+          <div class="org-header">
+            <a class="back" href="#" onclick="goScreen('organizations');return false;">&#8592; Organizations</a>
+            <div class="org-title-row">
+              <div>
+                <div class="org-title">Iglesia Central Bautista</div>
+                <div class="org-meta">
+                  <span class="chip violet">Seguimiento</span>
+                  <span style="color:var(--muted);font-size:13px;">Santo Domingo</span>
+                  <span style="color:var(--muted);">·</span>
+                  <span style="font-size:13px;">María López</span>
+                  <span class="chip danger"><span class="dot"></span> Alta</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <button class="btn outline sm" onclick="openOrgForm('edit')">Editar</button>
+                <div class="dropdown-wrap">
+                  <button class="btn outline sm" onclick="toggleMenu(event)">&#8942;</button>
+                  <div class="dropdown-menu" id="moreMenu">
+                    <button>Cambiar responsable</button>
+                    <button>Marcar como perdida</button>
+                    <button style="color:var(--danger)">Eliminar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="meta-grid card" style="padding:16px 20px;">
+            <div class="meta-item"><div class="label">Pipeline</div><div class="value"><span class="chip violet">Seguimiento</span></div></div>
+            <div class="meta-item"><div class="label">Fuente</div><div class="value">Referido</div></div>
+            <div class="meta-item"><div class="label">Prioridad</div><div class="value"><span class="chip danger"><span class="dot"></span> Alta</span></div></div>
+            <div class="meta-item"><div class="label">Temperatura</div><div class="value"><span class="chip warn"><span class="dot"></span> Tibio</span></div></div>
+            <div class="meta-item"><div class="label">Próxima acción</div><div class="value">Agendar demo</div></div>
+            <div class="meta-item"><div class="label">Próximo seguimiento</div><div class="value">15 jul 2026</div></div>
+            <div class="meta-item"><div class="label">Última actividad</div><div class="value">Llamada · hace 2 días</div></div>
+            <div class="meta-item"><div class="label">Responsable</div><div class="value">María López</div></div>
+          </div>
+
+          <div class="grid-8-4">
+            <div>
+              <div class="tabs" id="detailTabs">
+                <button class="tab active" data-tab="info">Información</button>
+                <button class="tab" data-tab="contacts">Contactos</button>
+                <button class="tab" data-tab="activities">Actividades</button>
+                <button class="tab" data-tab="notes">Notas</button>
+                <button class="tab disabled" data-tab="files">Archivos</button>
+              </div>
+
+              <div class="tab-panel active" id="tab-info">
+                <div class="card">
+                  <div class="info-grid">
+                    <div class="info-field"><div class="label">Nombre</div><div class="value">Iglesia Central Bautista</div></div>
+                    <div class="info-field"><div class="label">Tipo</div><div class="value">Iglesia</div></div>
+                    <div class="info-field"><div class="label">Denominación</div><div class="value">Bautista</div></div>
+                    <div class="info-field"><div class="label">Fuente</div><div class="value">Referido</div></div>
+                    <div class="info-field"><div class="label">País</div><div class="value">República Dominicana</div></div>
+                    <div class="info-field"><div class="label">Provincia</div><div class="value">Distrito Nacional</div></div>
+                    <div class="info-field"><div class="label">Ciudad</div><div class="value">Santo Domingo</div></div>
+                    <div class="info-field"><div class="label">Dirección</div><div class="value">Av. Independencia #142</div></div>
+                    <div class="info-field"><div class="label">Teléfono</div><div class="value">+1 809 555 0100</div></div>
+                    <div class="info-field"><div class="label">Email</div><div class="value">info@centralbautista.org</div></div>
+                    <div class="info-field"><div class="label">Sitio web</div><div class="value">centralbautista.org</div></div>
+                    <div class="info-field"><div class="label">Facebook</div><div class="value">/centralbautista</div></div>
+                    <div class="info-field" style="grid-column:span 2"><div class="label">Observaciones</div><div class="value">Congregación de ~350 miembros. Interesados en módulo de finanzas.</div></div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-panel" id="tab-contacts">
+                <div class="tab-placeholder"><div class="eyebrow">Próximamente</div><p>El listado de contactos se diseñará en la feature Contacts. Aquí vivirán pastor, secretario, tesorero, etc.</p></div>
+              </div>
+              <div class="tab-panel" id="tab-activities">
+                <div class="card">
+                  <div class="timeline">
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:color-mix(in oklab,var(--info) 25%,transparent);color:var(--info)">&#128222;</div>
+                      <div class="tl-head"><span class="type">Llamada</span><span class="when">Hace 2 h · María López</span></div>
+                      <div class="tl-result">Resultado: Interesado, pidió información de precios</div>
+                      <div class="tl-next">Próxima: Agendar demo · 15 jul</div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:color-mix(in oklab,var(--ok) 25%,transparent);color:var(--ok)">&#128172;</div>
+                      <div class="tl-head"><span class="type">WhatsApp</span><span class="when">Ayer · María López</span></div>
+                      <div class="tl-result">Envié brochure y link de demo</div>
+                    </div>
+                    <div class="tl-item">
+                      <div class="tl-dot" style="background:color-mix(in oklab,var(--pending) 25%,transparent);color:var(--pending)">&#9998;</div>
+                      <div class="tl-head"><span class="type">Nota</span><span class="when">5 jul · Carlos R.</span></div>
+                      <div class="tl-result">Referido por Concilio Evangélico RD</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="tab-panel" id="tab-notes">
+                <div class="tab-placeholder"><div class="eyebrow">Próximamente</div><p>Notas internas del equipo comercial sobre esta organización.</p></div>
+              </div>
+              <div class="tab-panel" id="tab-files">
+                <div class="tab-placeholder"><div class="eyebrow">MVP 0.2</div><p>Archivos adjuntos (brochures, propuestas, contratos) llegarán en una versión posterior.</p></div>
+              </div>
+            </div>
+
+            <div class="contact-card card">
+              <div style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--dim);">Contacto principal</div>
+              <div class="name">Pastor Juan Pérez</div>
+              <div class="role">Pastor Principal</div>
+              <div class="contact-actions">
+                <button class="icon-btn" title="Llamar">&#128222;</button>
+                <button class="icon-btn" title="WhatsApp">&#128172;</button>
+                <button class="icon-btn" title="Correo">&#9993;</button>
+              </div>
+              <div class="contact-detail">
+                <div>&#128222; +1 809 555 0100</div>
+                <div>&#128172; +1 809 555 0100</div>
+                <div>&#9993; pastor@centralbautista.org</div>
+              </div>
+              <button class="btn primary sm" style="width:100%;margin-top:16px;" onclick="openActivityDrawer()">Registrar actividad</button>
+            </div>
+          </div>
+
+          <button class="fab" onclick="openActivityDrawer()">+ Registrar Actividad</button>
+        </section>
+
+        <!-- PIPELINE -->
+        <section class="screen" id="screen-pipeline">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Pipeline</div>
+              <div class="page-sub">Arrastra tarjetas para cambiar etapa</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <select class="filter-select"><option>Responsable: Todos</option></select>
+              <div class="search-input" style="max-width:200px;flex:none;">&#128269; Buscar...</div>
+            </div>
+          </div>
+          <div class="kanban">
+            <div class="kanban-col">
+              <div class="kanban-col-head">Nuevo <span class="count">4</span></div>
+              <div class="kanban-cards">
+                <div class="kanban-card" onclick="goScreen('detail')"><div class="org">Ministerio Vida Nueva</div><div class="contact">Evang. Pedro López</div><div class="action">Enviar correo · 12 jul</div><div class="foot"><span class="chip muted">Baja</span></div></div>
+                <div class="kanban-card"><div class="org">Iglesia Bethel</div><div class="contact">Pastora Elena Ruiz</div><div class="action">Investigar web</div><div class="foot"><span class="chip warn">Media</span></div></div>
+              </div>
+            </div>
+            <div class="kanban-col">
+              <div class="kanban-col-head">Investigación <span class="count">3</span></div>
+              <div class="kanban-cards">
+                <div class="kanban-card"><div class="org">Fundación Manos Unidas</div><div class="contact">Sra. Rosa Díaz</div><div class="action">Visitar · 18 jul</div><div class="foot"><span class="chip warn">Media</span></div></div>
+              </div>
+            </div>
+            <div class="kanban-col">
+              <div class="kanban-col-head">Contacto <span class="count">2</span></div>
+              <div class="kanban-cards">
+                <div class="kanban-card"><div class="org">Iglesia El Redentor</div><div class="contact">Pastor Miguel Santos</div><div class="action">Llamar · Vencido</div><div class="foot"><span class="chip danger">Alta</span></div></div>
+              </div>
+            </div>
+            <div class="kanban-col">
+              <div class="kanban-col-head">Seguimiento <span class="count">3</span></div>
+              <div class="kanban-cards">
+                <div class="kanban-card" onclick="goScreen('detail')"><div class="org">Iglesia Central Bautista</div><div class="contact">Pastor Juan Pérez</div><div class="action">Agendar demo · 15 jul</div><div class="foot"><span class="chip danger">Alta</span></div></div>
+              </div>
+            </div>
+            <div class="kanban-col">
+              <div class="kanban-col-head">Demo <span class="count">2</span></div>
+              <div class="kanban-cards">
+                <div class="kanban-card"><div class="org">Concilio Evangélico RD</div><div class="contact">Lic. Ana Martínez</div><div class="action">Demo virtual · Hoy</div><div class="foot"><span class="chip danger">Alta</span></div></div>
+              </div>
+            </div>
+            <div class="kanban-col">
+              <div class="kanban-col-head">Ganada <span class="count">8</span></div>
+              <div class="kanban-cards">
+                <div class="kanban-card"><div class="org">Iglesia Monte Sión</div><div class="contact">Pastor David G.</div><div class="action">Onboarding</div><div class="foot"><span class="chip ok">Alta</span></div></div>
+              </div>
+            </div>
+            <div class="kanban-col lost">
+              <div class="kanban-col-head">Perdida <span class="count">2</span></div>
+              <div class="kanban-cards">
+                <div class="kanban-card"><div class="org">Templo Restauración</div><div class="contact">—</div><div class="action">Sin presupuesto</div><div class="foot"><span class="chip muted">—</span></div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- AGENDA -->
+        <section class="screen" id="screen-agenda">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Agenda</div>
+              <div class="page-sub">Actividades programadas</div>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button class="btn outline sm" style="background:var(--accent-soft);color:var(--accent);border-color:transparent;">Hoy</button>
+              <button class="btn outline sm">Semana</button>
+              <button class="btn outline sm">Todas</button>
+            </div>
+          </div>
+
+          <div class="agenda-group">
+            <div class="agenda-group-head">Hoy (3)</div>
+            <div class="agenda-row overdue" onclick="goScreen('detail')">
+              <div class="agenda-time">09:00</div>
+              <div class="activity-icon" style="background:color-mix(in oklab,var(--info) 20%,transparent);color:var(--info);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;">&#128222;</div>
+              <div><div class="agenda-org">Iglesia El Redentor</div><div class="agenda-type">Llamada</div></div>
+              <div class="agenda-owner"><span class="mini-avatar">ML</span>María López</div>
+            </div>
+            <div class="agenda-row">
+              <div class="agenda-time">14:30</div>
+              <div class="activity-icon" style="background:color-mix(in oklab,var(--info) 20%,transparent);color:var(--info);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;">&#128222;</div>
+              <div><div class="agenda-org">Iglesia Central Bautista</div><div class="agenda-type">Llamada de seguimiento</div></div>
+              <div class="agenda-owner"><span class="mini-avatar">ML</span>María López</div>
+            </div>
+            <div class="agenda-row">
+              <div class="agenda-time">16:00</div>
+              <div class="activity-icon" style="background:color-mix(in oklab,var(--warn) 20%,transparent);color:var(--warn);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;">&#127909;</div>
+              <div><div class="agenda-org">Concilio Evangélico RD</div><div class="agenda-type">Demo virtual</div></div>
+              <div class="agenda-owner"><span class="mini-avatar">CR</span>Carlos R.</div>
+            </div>
+          </div>
+
+          <div class="agenda-group">
+            <div class="agenda-group-head">Mañana (2)</div>
+            <div class="agenda-row">
+              <div class="agenda-time">10:00</div>
+              <div class="activity-icon" style="background:color-mix(in oklab,var(--ok) 20%,transparent);color:var(--ok);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;">&#128172;</div>
+              <div><div class="agenda-org">Ministerio Vida Nueva</div><div class="agenda-type">WhatsApp</div></div>
+              <div class="agenda-owner"><span class="mini-avatar">ML</span>María López</div>
+            </div>
+            <div class="agenda-row">
+              <div class="agenda-time">11:30</div>
+              <div class="activity-icon" style="background:color-mix(in oklab,var(--info) 20%,transparent);color:var(--info);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;">&#128231;</div>
+              <div><div class="agenda-org">Fundación Manos Unidas</div><div class="agenda-type">Correo</div></div>
+              <div class="agenda-owner"><span class="mini-avatar">CR</span>Carlos R.</div>
+            </div>
+          </div>
+
+          <div class="agenda-group">
+            <div class="agenda-group-head">Próximos días (5)</div>
+            <div class="agenda-row">
+              <div class="agenda-time">15 jul</div>
+              <div class="activity-icon" style="background:color-mix(in oklab,var(--warn) 20%,transparent);color:var(--warn);width:28px;height:28px;border-radius:8px;display:grid;place-items:center;">&#127909;</div>
+              <div><div class="agenda-org">Iglesia Central Bautista</div><div class="agenda-type">Demo presencial</div></div>
+              <div class="agenda-owner"><span class="mini-avatar">ML</span>María López</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Org Form Drawer -->
+  <div class="drawer-overlay" id="orgFormOverlay" onclick="if(event.target===this)closeOrgForm()">
+    <div class="drawer">
+      <div class="drawer-head">
+        <div>
+          <h2 id="formTitle">Nueva Organización</h2>
+          <div class="sub" id="formSub">Registra en menos de 2 minutos</div>
+        </div>
+        <button class="icon-btn" onclick="closeOrgForm()">&#10005;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="form-section">
+          <div class="form-section-head" onclick="toggleSection(this)">
+            <span class="title">Identificación</span><span class="hint">Requerido</span>
+          </div>
+          <div class="form-section-body">
+            <div class="field span-2"><label>Nombre <span class="req">*</span></label><input type="text" id="fNombre" placeholder="Ej. Iglesia Central Bautista" /></div>
+            <div class="field"><label>Tipo <span class="req">*</span></label><select id="fTipo"><option>Iglesia</option><option>Ministerio</option><option>Concilio</option><option>Fundación</option></select></div>
+            <div class="field"><label>Denominación</label><input type="text" id="fDenom" placeholder="Ej. Bautista" /></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-head" onclick="toggleSection(this)">
+            <span class="title">Ubicación</span><span class="hint">Ciudad requerida</span>
+          </div>
+          <div class="form-section-body">
+            <div class="field"><label>País</label><select id="fPais"><option>República Dominicana</option><option>Estados Unidos</option></select></div>
+            <div class="field"><label>Provincia</label><input type="text" id="fProv" /></div>
+            <div class="field"><label>Ciudad <span class="req">*</span></label><input type="text" id="fCiudad" /></div>
+            <div class="field"><label>Dirección</label><input type="text" id="fDir" /></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-head" onclick="toggleSection(this)">
+            <span class="title">Contacto</span><span class="hint">Opcional</span>
+          </div>
+          <div class="form-section-body">
+            <div class="field"><label>Teléfono</label><input type="tel" id="fTel" /></div>
+            <div class="field"><label>Email</label><input type="email" id="fEmail" /></div>
+            <div class="field"><label>Sitio web</label><input type="url" id="fWeb" placeholder="https://..." /></div>
+            <div class="field"><label>Facebook</label><input type="text" id="fFb" /></div>
+            <div class="field span-2"><label>Instagram</label><input type="text" id="fIg" /></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-head" onclick="toggleSection(this)">
+            <span class="title">Comercial</span><span class="hint">Requerido</span>
+          </div>
+          <div class="form-section-body full">
+            <div class="field"><label>Fuente <span class="req">*</span></label><select id="fFuente"><option>Referido</option><option>Visita</option><option>Redes sociales</option><option>Evento</option><option>Web</option><option>Otro</option></select></div>
+          </div>
+        </div>
+        <div class="form-section collapsed">
+          <div class="form-section-head" onclick="toggleSection(this)">
+            <span class="title">Observaciones</span><span class="hint">Opcional</span>
+          </div>
+          <div class="form-section-body full">
+            <div class="field"><label>Notas internas</label><textarea id="fObs" placeholder="Contexto comercial..."></textarea></div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-foot">
+        <button class="btn outline" onclick="closeOrgForm()">Cancelar</button>
+        <button class="btn primary" id="formSaveBtn" onclick="saveOrgForm()">Crear organización</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Drawer -->
+  <div class="drawer-overlay" id="activityDrawerOverlay" onclick="if(event.target===this)closeActivityDrawer()">
+    <div class="drawer">
+      <div class="drawer-head">
+        <h2>Registrar actividad</h2>
+        <button class="icon-btn" onclick="closeActivityDrawer()">&#10005;</button>
+      </div>
+      <div class="drawer-body">
+        <div class="field">
+          <label>Tipo</label>
+          <select><option>Llamada</option><option>WhatsApp</option><option>Correo</option><option>Visita</option><option>Demo</option><option>Nota</option></select>
+        </div>
+        <div class="field">
+          <label>Resultado</label>
+          <div class="quick-results">
+            <button class="selected">Contactado</button>
+            <button>No contestó</button>
+            <button>Interesado</button>
+            <button>Agendar demo</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Comentario</label>
+          <textarea placeholder="Opcional..."></textarea>
+        </div>
+        <div class="field">
+          <label>Próxima acción</label>
+          <select><option>Agendar demo</option><option>Llamar</option><option>WhatsApp</option><option>Visitar</option></select>
+        </div>
+        <div class="field">
+          <label>Fecha próxima acción</label>
+          <input type="date" value="2026-07-15" />
+        </div>
+      </div>
+      <div class="drawer-foot">
+        <button class="btn outline" onclick="closeActivityDrawer()">Cancelar</button>
+        <button class="btn primary" onclick="closeActivityDrawer()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup-banner">
+    <b>EvoChurch BackOffice</b>
+    <span class="sep"></span>
+    <span class="group">Sales</span>
+    <span class="pill" data-view="dashboard" onclick="goScreen('dashboard')">Dashboard</span>
+    <span class="pill" data-view="pipeline" onclick="goScreen('pipeline')">Pipeline</span>
+    <span class="pill" data-view="agenda" onclick="goScreen('agenda')">Agenda</span>
+    <span class="sep"></span>
+    <span class="group">Organizations</span>
+    <span class="pill" data-view="organizations" onclick="goScreen('organizations')">List</span>
+    <span class="pill" data-view="organizations-empty" onclick="goScreen('organizations-empty')">Empty</span>
+    <span class="pill" data-view="organizations-loading" onclick="goScreen('organizations-loading')">Loading</span>
+    <span class="pill" data-view="organizations-error" onclick="goScreen('organizations-error')">Error</span>
+    <span class="pill" data-view="detail" onclick="goScreen('detail')">Detail</span>
+    <span class="sep"></span>
+    <span class="pill" onclick="openOrgForm('create')">Nueva Org</span>
+    <span class="pill" onclick="openOrgForm('edit')">Editar Org</span>
+    <span class="pill" onclick="openActivityDrawer()">Actividad</span>
+    <span style="margin-left:auto;white-space:nowrap;">Mockup unificado · MVP 0.1</span>
+  </div>
+
+  <script>
+    const labels = {
+      dashboard: 'Dashboard',
+      organizations: 'Organizations',
+      'organizations-empty': 'Organizations',
+      'organizations-loading': 'Organizations',
+      'organizations-error': 'Organizations',
+      detail: 'Organization Detail',
+      pipeline: 'Pipeline',
+      agenda: 'Agenda',
+    };
+
+    const navScreenMap = {
+      dashboard: 'dashboard',
+      organizations: 'organizations',
+      'organizations-empty': 'organizations',
+      'organizations-loading': 'organizations',
+      'organizations-error': 'organizations',
+      pipeline: 'pipeline',
+      agenda: 'agenda',
+      detail: null,
+    };
+
+    const editData = {
+      nombre: 'Iglesia Central Bautista', tipo: 'Iglesia', denom: 'Bautista',
+      pais: 'República Dominicana', prov: 'Distrito Nacional', ciudad: 'Santo Domingo',
+      dir: 'Av. Independencia #142', tel: '+1 809 555 0100', email: 'info@centralbautista.org',
+      web: 'https://centralbautista.org', fb: '/centralbautista', ig: '@centralbautista',
+      fuente: 'Referido', obs: 'Congregación de ~350 miembros. Interesados en módulo de finanzas.',
+    };
+
+    function goScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + id).classList.add('active');
+      const navId = navScreenMap[id];
+      document.querySelectorAll('.nav-item[data-screen]').forEach(n => {
+        n.classList.toggle('active', navId && n.dataset.screen === navId);
+      });
+      document.getElementById('crumbPage').textContent = labels[id] || id;
+      document.querySelector('.fab')?.style.setProperty('display', id === 'detail' ? 'inline-flex' : 'none');
+      document.querySelectorAll('.mockup-banner .pill[data-view]').forEach(p => {
+        p.classList.toggle('active', p.dataset.view === id);
+      });
+    }
+
+    document.querySelectorAll('.nav-item[data-screen]').forEach(btn => {
+      btn.addEventListener('click', () => goScreen(btn.dataset.screen));
+    });
+
+    document.getElementById('toggleSidebar').addEventListener('click', () => {
+      document.getElementById('shell').classList.toggle('collapsed');
+    });
+
+    document.getElementById('toggleTheme').addEventListener('click', () => {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    });
+
+    function openActivityDrawer() { document.getElementById('activityDrawerOverlay').classList.add('open'); }
+    function closeActivityDrawer() { document.getElementById('activityDrawerOverlay').classList.remove('open'); }
+
+    function openOrgForm(mode) {
+      const isEdit = mode === 'edit';
+      document.getElementById('formTitle').textContent = isEdit ? 'Editar Organización' : 'Nueva Organización';
+      document.getElementById('formSub').textContent = isEdit ? 'Iglesia Central Bautista' : 'Registra en menos de 2 minutos';
+      document.getElementById('formSaveBtn').textContent = isEdit ? 'Guardar cambios' : 'Crear organización';
+      const fields = {
+        fNombre: isEdit ? editData.nombre : '',
+        fTipo: isEdit ? editData.tipo : 'Iglesia',
+        fDenom: isEdit ? editData.denom : '',
+        fPais: isEdit ? editData.pais : 'República Dominicana',
+        fProv: isEdit ? editData.prov : '',
+        fCiudad: isEdit ? editData.ciudad : '',
+        fDir: isEdit ? editData.dir : '',
+        fTel: isEdit ? editData.tel : '',
+        fEmail: isEdit ? editData.email : '',
+        fWeb: isEdit ? editData.web : '',
+        fFb: isEdit ? editData.fb : '',
+        fIg: isEdit ? editData.ig : '',
+        fFuente: isEdit ? editData.fuente : 'Referido',
+        fObs: isEdit ? editData.obs : '',
+      };
+      Object.entries(fields).forEach(([fid, val]) => {
+        const el = document.getElementById(fid);
+        if (!el) return;
+        if (el.tagName === 'SELECT') {
+          [...el.options].forEach((o, i) => { if (o.text === val) el.selectedIndex = i; });
+        } else el.value = val;
+      });
+      document.getElementById('orgFormOverlay').classList.add('open');
+    }
+
+    function closeOrgForm() { document.getElementById('orgFormOverlay').classList.remove('open'); }
+    function saveOrgForm() {
+      closeOrgForm();
+      if (document.getElementById('formSaveBtn').textContent.includes('Crear')) goScreen('detail');
+    }
+    function toggleSection(head) { head.parentElement.classList.toggle('collapsed'); }
+
+    function toggleMenu(e) {
+      e.stopPropagation();
+      document.getElementById('moreMenu').classList.toggle('open');
+    }
+    document.addEventListener('click', () => document.getElementById('moreMenu')?.classList.remove('open'));
+
+    document.querySelectorAll('#detailTabs .tab:not(.disabled)').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('#detailTabs .tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab)?.classList.add('active');
+      });
+    });
+
+    document.querySelectorAll('.quick-results button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
+    goScreen('dashboard');
+  </script>
+</body>
+</html>

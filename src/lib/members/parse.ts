@@ -174,6 +174,7 @@ export function parseMember(raw: unknown): Member | null {
     idNumber: str(json.idNumber ?? json.id_number),
     isActive: bool(json.isActive ?? json.is_active),
     isMember: bool(json.isMember ?? json.is_member),
+    isChild: bool(json.isChild ?? json.is_child),
     bio: str(json.bio),
     membershipRoleId: str(
       json.membershipRoleId ?? json.membership_role_id ?? json.memberRoleId,

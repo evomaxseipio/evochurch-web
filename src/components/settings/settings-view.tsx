@@ -1,5 +1,6 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { Icons } from "@/components/icons";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { CrudSwitch } from "@/components/ui/crud-switch";
@@ -470,19 +471,19 @@ export function SettingsView({
               <div className="col" style={{ gap: 8 }}>
                 {[
                   {
-                    href: "/settings/users",
+                    href: churchPath("/settings/users"),
                     title: t("access.systemUsers"),
                     desc: t("access.systemUsersDesc"),
                     icon: "users" as const,
                   },
                   {
-                    href: "/settings/expenses",
+                    href: churchPath("/settings/expenses"),
                     title: t("access.expenseTypes"),
                     desc: t("access.expenseTypesDesc"),
                     icon: "wallet" as const,
                   },
                   {
-                    href: "/settings/income-types",
+                    href: churchPath("/settings/income-types"),
                     title: t("access.incomeTypes"),
                     desc: t("access.incomeTypesDesc"),
                     icon: "trendUp" as const,

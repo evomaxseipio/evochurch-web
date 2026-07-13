@@ -4,6 +4,9 @@ import { MemberProfileView } from "@/components/members/member-profile-view";
 import type { ProfileTabId } from "@/components/members/member-profile-toolbar";
 import type { MemberRoleCatalog } from "@/lib/members/roles";
 import type { Member, MembershipRecord, MemberFinanceData } from "@/lib/members/types";
+import type { PastoralEvent } from "@/lib/members/pastoral-events";
+import type { ChildListItem } from "@/lib/children/types";
+import type { MemberFamilyData } from "@/lib/members/family";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -12,6 +15,7 @@ const TABS: ProfileTabId[] = [
   "membership",
   "labor",
   "finances",
+  "family",
   "delete",
 ];
 
@@ -19,6 +23,7 @@ const LEGACY_TAB_MAP: Record<string, ProfileTabId> = {
   health: "profile",
   professions: "labor",
   employment: "labor",
+  pastoral: "membership",
 };
 
 function parseTab(value: string | null): ProfileTabId {
@@ -36,6 +41,10 @@ export function MemberProfileShell({
   roles,
   membership: membershipFromServer,
   finances = null,
+  pastoralEvents = [],
+  family = null,
+  adultMembers = [],
+  ministryChildren = [],
   canWriteMembers,
   canDeleteMembers,
   canReadMemberFinances,
@@ -45,6 +54,10 @@ export function MemberProfileShell({
   roles: MemberRoleCatalog[];
   membership: MembershipRecord | null;
   finances?: MemberFinanceData | null;
+  pastoralEvents?: PastoralEvent[];
+  family?: MemberFamilyData | null;
+  adultMembers?: Member[];
+  ministryChildren?: ChildListItem[];
   canWriteMembers: boolean;
   canDeleteMembers: boolean;
   canReadMemberFinances: boolean;
@@ -74,6 +87,11 @@ export function MemberProfileShell({
     setTab(next);
   }, [searchParams, router]);
 
+  // Misma ruta /members/profile: al cambiar de miembro, resetear tab según URL.
+  useEffect(() => {
+    setTab(parseTab(searchParams.get("tab")));
+  }, [memberFromServer.memberId]); // eslint-disable-line react-hooks/exhaustive-deps -- solo al cambiar perfil
+
   if (memberFromServer !== prevMemberFromServer) {
     setPrevMemberFromServer(memberFromServer);
     setMember(memberFromServer);
@@ -83,6 +101,14 @@ export function MemberProfileShell({
     setPrevMembershipFromServer(membershipFromServer);
     setMembership(membershipFromServer);
   }
+
+  useEffect(() => {
+    const needsLazyPayload =
+      (tab === "family" && family == null) ||
+      (tab === "finances" && finances == null);
+    if (!needsLazyPayload) return;
+    router.refresh();
+  }, [member.memberId, tab, family, finances, router]);
 
   function handleTabChange(next: ProfileTabId) {
     setTab(next);
@@ -94,7 +120,7 @@ export function MemberProfileShell({
     }
     const qs = params.toString();
     router.replace(qs ? `?${qs}` : "?", { scroll: false });
-    if (next === "finances") {
+    if (next === "finances" || next === "family") {
       router.refresh();
     }
   }
@@ -110,6 +136,10 @@ export function MemberProfileShell({
         onMemberUpdated={setMember}
         onMembershipUpdated={setMembership}
         finances={finances}
+        pastoralEvents={pastoralEvents}
+        family={family}
+        adultMembers={adultMembers}
+        ministryChildren={ministryChildren}
         canWriteMembers={canWriteMembers}
         canDeleteMembers={canDeleteMembers}
         canReadMemberFinances={canReadMemberFinances}

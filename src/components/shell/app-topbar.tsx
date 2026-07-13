@@ -1,5 +1,6 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { Icons } from "@/components/icons";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { signOut } from "@/app/(auth)/login/actions";
@@ -155,14 +156,14 @@ export function AppTopbar({
               ) : null}
             </div>
             <Link
-              href="/dashboard"
+              href={churchPath("/dashboard")}
               className="block px-4 py-2.5 text-sm"
               onClick={() => setMenuOpen(false)}
             >
               {tCommon("myAccount")}
             </Link>
             <Link
-              href="/settings"
+              href={churchPath("/settings")}
               className="block px-4 py-2.5 text-sm"
               onClick={() => setMenuOpen(false)}
             >

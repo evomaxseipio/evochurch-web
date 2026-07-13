@@ -1,9 +1,10 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import {
   deleteContributionAction,
   type ContributionActionResult,
-} from "@/app/(app)/finances/contributions/actions";
+} from "@/app/apps/church/(console)/finances/contributions/actions";
 import { ContributionActionMenu } from "@/components/contributions/contribution-action-menu";
 import { ContributionCard } from "@/components/contributions/contribution-card";
 import { ContributionFormDrawer } from "@/components/contributions/contribution-form-drawer";
@@ -293,7 +294,7 @@ export function ContributionsListView({
 
       {fundFilterId ? (
         <Link
-          href="/finances/contributions"
+          href={churchPath("/finances/contributions")}
           className="tiny"
           style={{
             display: "inline-flex",

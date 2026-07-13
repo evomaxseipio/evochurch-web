@@ -1,6 +1,6 @@
 "use client";
 
-import type { EventActionResult } from "@/app/(app)/eventos/actions";
+import type { EventActionResult } from "@/app/apps/church/(console)/eventos/actions";
 import { Icons } from "@/components/icons";
 import { CrudSwitch } from "@/components/ui/crud-switch";
 import { useActionToast } from "@/hooks/use-action-toast";

@@ -2,6 +2,7 @@ import type { PermissionKey } from "@/lib/auth/permission-keys";
 import {
   canExportAuditLog,
   canReadAuditLog,
+  canReadMembers,
   hasAnyPermission,
   hasPermission,
 } from "@/lib/auth/permissions";
@@ -9,9 +10,14 @@ import type { AppSession } from "@/lib/auth/app-session";
 import type { ReportId } from "@/lib/reports/types";
 
 const AUDIT_ACTIVITY_LOG_REPORT_ID = "audit-activity-log" as const;
+const FAMILY_HOUSEHOLDS_REPORT_ID = "family-households" as const;
 
 function isAuditActivityLogReport(reportId: ReportId): boolean {
   return reportId === AUDIT_ACTIVITY_LOG_REPORT_ID;
+}
+
+function isFamilyHouseholdsReport(reportId: ReportId): boolean {
+  return reportId === FAMILY_HOUSEHOLDS_REPORT_ID;
 }
 
 /** Recursos en BD (snake_case) — una fila por reporte en la matriz de permisos. */
@@ -108,7 +114,8 @@ export const ALL_REPORT_PERMISSIONS = [
 export function canAccessReportsHub(session: AppSession): boolean {
   return (
     hasAnyPermission(session, [...REPORT_READ_PERMISSIONS]) ||
-    canReadAuditLog(session)
+    canReadAuditLog(session) ||
+    canReadMembers(session)
   );
 }
 
@@ -119,6 +126,9 @@ export function canReadReport(
   if (isAuditActivityLogReport(reportId)) {
     return canReadAuditLog(session);
   }
+  if (isFamilyHouseholdsReport(reportId)) {
+    return canReadMembers(session);
+  }
   return hasPermission(session, reportReadPermission(reportId));
 }
 
@@ -128,6 +138,9 @@ export function canExportReport(
 ): boolean {
   if (isAuditActivityLogReport(reportId)) {
     return canExportAuditLog(session);
+  }
+  if (isFamilyHouseholdsReport(reportId)) {
+    return canReadMembers(session);
   }
   return hasPermission(session, reportExportPermission(reportId));
 }

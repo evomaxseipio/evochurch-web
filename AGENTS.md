@@ -49,7 +49,7 @@ Consola web SaaS: **Next.js + TypeScript + Tailwind + `@supabase/ssr`**.
 | `src/lib/tenant.ts` | Helpers legacy JWT (`app_metadata` primero) |
 | `src/lib/services/` | RPC por dominio (`members.ts` → `spgetprofiles`) |
 | `src/app/(auth)/` | Login |
-| `src/app/(app)/` | Dashboard, miembros, finanzas (shell) |
+| `src/app/apps/church/(console)/` | Dashboard, miembros, finanzas (shell) |
 
 Comandos: `npm install && npm run dev`. Variables: `.env.example` → `.env.local`.
 

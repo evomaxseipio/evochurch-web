@@ -1,9 +1,11 @@
 import type { PermissionKey } from "@/lib/auth/permission-keys";
+import { normalizeChurchPermissionPath } from "@/lib/apps/church-routes";
 import { REPORT_READ_PERMISSIONS } from "@/lib/reports/permissions";
 
 export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
   "/dashboard": "dashboard:read",
   "/members": "members:read",
+  "/members/children": "members:read",
   "/ministerios": "ministerios:read",
   "/finances/funds": "finances:funds:read",
   "/finances/transactions": "finances:transactions:read",
@@ -25,18 +27,20 @@ export const ROUTE_PERMISSIONS: Record<string, PermissionKey> = {
 export { REPORT_READ_PERMISSIONS };
 
 export function requiresReportsHubAccess(pathname: string): boolean {
-  return pathname === "/reports" || pathname.startsWith("/reports/");
+  const path = normalizeChurchPermissionPath(pathname);
+  return path === "/reports" || path.startsWith("/reports/");
 }
 
 export function permissionForPath(pathname: string): PermissionKey | null {
-  if (requiresReportsHubAccess(pathname)) {
+  const path = normalizeChurchPermissionPath(pathname);
+  if (requiresReportsHubAccess(path)) {
     return null;
   }
   const entries = Object.entries(ROUTE_PERMISSIONS).sort(
     ([a], [b]) => b.length - a.length,
   );
   for (const [prefix, perm] of entries) {
-    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+    if (path === prefix || path.startsWith(`${prefix}/`)) {
       return perm;
     }
   }

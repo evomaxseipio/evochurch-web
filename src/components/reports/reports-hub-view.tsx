@@ -1,6 +1,6 @@
 "use client";
 
-import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewMembershipDirectoryAction, previewReportAction, submitConcilioReportAction, toggleReportTemplateAction } from "@/app/(app)/reports/actions";
+import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewMembershipDirectoryAction, previewReportAction, submitConcilioReportAction, toggleReportTemplateAction } from "@/app/apps/church/(console)/reports/actions";
 import { ReportActionMenu } from "@/components/reports/report-action-menu";
 import { ReportCard } from "@/components/reports/report-card";
 import { ReportPeriodFilter } from "@/components/reports/report-period-filter";
@@ -36,6 +36,8 @@ import type { MonthPeriod, YearPeriod } from "@/lib/reports/period";
 import type { ReportFormat, ReportId } from "@/lib/reports/types";
 import type { ConcilioF001ReportPayload, FinancialMonthlyPayload, MembershipDirectoryPayload } from "@/lib/services/reports";
 import { toast } from "@/lib/toast";
+import { churchPath } from "@/lib/apps/church-routes";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -91,6 +93,7 @@ export function ReportsHubView({
 }) {
   const tCommon = useTranslations("common");
   const tReports = useTranslations("reports");
+  const router = useRouter();
   const isDesktop = useIsDesktop();
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] =
@@ -304,6 +307,11 @@ export function ReportsHubView({
           base64: "",
           auditLogInteractive: true,
         });
+        return;
+      }
+
+      if (entry.id === "family-households") {
+        router.push(churchPath("/reports/families"));
         return;
       }
 

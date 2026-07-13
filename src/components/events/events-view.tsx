@@ -4,7 +4,7 @@ import {
   deleteEventAction,
   loadEventSeriesAction,
   saveEventAction,
-} from "@/app/(app)/eventos/actions";
+} from "@/app/apps/church/(console)/eventos/actions";
 import { EventFormDrawer } from "@/components/events/event-form-drawer";
 import { EventsCalendar } from "@/components/events/events-calendar";
 import { EventsListPanel } from "@/components/events/events-list-panel";

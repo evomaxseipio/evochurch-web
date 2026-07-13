@@ -107,6 +107,16 @@ export const REPORT_CATALOG: ReportCatalogEntry[] = [
     periodKind: "none",
     rolesHint: "Pastor, Admin",
   },
+  {
+    id: "family-households",
+    title: "Familias",
+    description:
+      "Hogares derivados de vínculos familiares (cónyuge e hijos) para pastoral e impresión.",
+    category: "membership",
+    formats: [],
+    periodKind: "none",
+    rolesHint: "Secretario, Pastor, Admin",
+  },
 ];
 
 export const REPORT_CATEGORY_LABELS: Record<ReportCategory, string> = {

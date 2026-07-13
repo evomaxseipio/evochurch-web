@@ -4,7 +4,7 @@ import {
   saveContributionAction,
   searchMembersForContributionAction,
   type ContributionActionResult,
-} from "@/app/(app)/finances/contributions/actions";
+} from "@/app/apps/church/(console)/finances/contributions/actions";
 import { Icons } from "@/components/icons";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { categoryChipClass } from "@/lib/contributions/parse";

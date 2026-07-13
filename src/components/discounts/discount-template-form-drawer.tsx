@@ -1,10 +1,10 @@
 "use client";
 
-import type { DiscountActionResult } from "@/app/(app)/settings/discount-templates/actions";
+import type { DiscountActionResult } from "@/app/apps/church/(console)/settings/discount-templates/actions";
 import {
   deleteDiscountTemplateAction,
   saveDiscountTemplateAction,
-} from "@/app/(app)/settings/discount-templates/actions";
+} from "@/app/apps/church/(console)/settings/discount-templates/actions";
 import {
   DiscountLineEditor,
   type DiscountLineEditorHandle,

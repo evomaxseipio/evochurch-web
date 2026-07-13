@@ -1,9 +1,10 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import {
   deleteLedgerEntryAction,
   type TransactionActionResult,
-} from "@/app/(app)/finances/transactions/actions";
+} from "@/app/apps/church/(console)/finances/transactions/actions";
 import { AuthorizeTransactionDialog } from "@/components/transactions/authorize-transaction-dialog";
 import { TransactionActionMenu } from "@/components/transactions/transaction-action-menu";
 import { TransactionCard } from "@/components/transactions/transaction-card";
@@ -406,7 +407,7 @@ export function TransactionsListView({
 
       {fundFilterId ? (
         <Link
-          href="/finances/transactions"
+          href={churchPath("/finances/transactions")}
           className="tiny"
           style={{
             display: "inline-flex",

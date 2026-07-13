@@ -3,7 +3,7 @@
 import {
   deleteIncomeTypeAction,
   saveIncomeTypeAction,
-} from "@/app/(app)/settings/income-types/actions";
+} from "@/app/apps/church/(console)/settings/income-types/actions";
 import { CatalogTypesListView } from "@/components/catalog/catalog-types-list-view";
 import type { CatalogStats, IncomeTypeCatalogRow } from "@/lib/catalog/types";
 import { useTranslations } from "next-intl";

@@ -4,7 +4,7 @@ import {
   deactivateAdminUserAction,
   resetAuthUserAccessPasswordAction,
   type AdminUserActionResult,
-} from "@/app/(app)/settings/users/actions";
+} from "@/app/apps/church/(console)/settings/users/actions";
 import { AdminUserFormDrawer } from "@/components/admin-users/admin-user-form-drawer";
 import {
   AdminUserAvatar,

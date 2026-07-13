@@ -6,6 +6,7 @@ import {
   sessionRequiresPasswordChange,
   UPDATE_PASSWORD_PATH,
 } from "@/lib/auth/temp-password-flow";
+import { CHURCH_DASHBOARD_PATH } from "@/lib/apps/church-routes";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -17,7 +18,7 @@ export async function login(
 ): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/dashboard");
+  const next = String(formData.get("next") ?? CHURCH_DASHBOARD_PATH);
 
   if (!email || !password) {
     return { errorKey: "auth.errors.emailPasswordRequired" };
@@ -55,7 +56,7 @@ export async function login(
     redirect(UPDATE_PASSWORD_PATH);
   }
 
-  redirect(next.startsWith("/") ? next : "/dashboard");
+  redirect(next.startsWith("/") ? next : CHURCH_DASHBOARD_PATH);
 }
 
 export async function signOut() {

@@ -1,5 +1,6 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { MinistryIcon } from "@/components/ministries/ministry-ui";
 import { Icons } from "@/components/icons";
 import {
@@ -50,7 +51,7 @@ function MinistryPersonRow({
   const t = useTranslations("ministerios");
   const tMembers = useTranslations("members");
   const initials = memberInitials(member);
-  const profileHref = `/members/profile?id=${member.memberId}`;
+  const profileHref = `${churchPath("/members/profile")}?id=${member.memberId}`;
   const contact = [member.contact.email, member.contact.mobilePhone]
     .filter(Boolean)
     .join(" • ");

@@ -37,6 +37,7 @@ Después de la lectura obligatoria (ítems 0–3), **identifica qué vas a hacer
 | Reglas de negocio (miembros, finanzas…) | [product/AI_BUSINESS_RULES.md](product/AI_BUSINESS_RULES.md) + [architecture/MODULES.md](architecture/MODULES.md) |
 | Primera vez en el repo o cambio cross-stack | [architecture/SYSTEM_OVERVIEW.md](architecture/SYSTEM_OVERVIEW.md) |
 | Tocar tablas o contratos RPC | [architecture/DATABASE_SCHEMA.md](architecture/DATABASE_SCHEMA.md) |
+| BackOffice / feature nueva (Next.js) | [architecture/PROJECT_ARCHITECTURE_v1.md](architecture/PROJECT_ARCHITECTURE_v1.md) |
 
 **Regla:** Si la tarea cruza varias filas (ej. feature con UI + BD), leer **todas** las guías que apliquen. Si hay duda, priorizar `MULTI_TENANT` y la guía del stack.
 

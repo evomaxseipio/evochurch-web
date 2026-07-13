@@ -1,6 +1,6 @@
 "use client";
 
-import { loadCampusSummaryAction } from "@/app/(app)/network/actions";
+import { loadCampusSummaryAction } from "@/app/apps/church/(console)/network/actions";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { Icons } from "@/components/icons";
 import { PageHeader } from "@/components/ui/page-header";

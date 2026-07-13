@@ -3,8 +3,9 @@
 import {
   createMemberAction,
   type ActionResult,
-} from "@/app/(app)/members/actions";
+} from "@/app/apps/church/(console)/members/actions";
 import { Icons } from "@/components/icons";
+import { DrawerField, DrawerSectionCard } from "@/components/ui/drawer-form";
 import { useActionToast } from "@/hooks/use-action-toast";
 import {
   GENDER_OPTIONS,
@@ -16,6 +17,7 @@ import type { MemberRoleCatalog } from "@/lib/members/roles";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "@/lib/toast";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 
 const initial: ActionResult | null = null;
 
@@ -40,15 +42,20 @@ export function AddMemberModal({
   open,
   onClose,
   roles: _roles,
+  linkParentProfileId,
+  defaultLastName,
 }: {
   open: boolean;
   onClose: () => void;
   roles: MemberRoleCatalog[];
+  linkParentProfileId?: string;
+  defaultLastName?: string;
 }) {
   const t = useTranslations("members");
   const tCommon = useTranslations("common");
   const tValidation = useTranslations("validation");
   const tErrors = useTranslations("errors");
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(createMemberAction, initial);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -57,8 +64,10 @@ export function AddMemberModal({
     if (!open) {
       setFirstName("");
       setLastName("");
+      return;
     }
-  }, [open]);
+    if (defaultLastName) setLastName(defaultLastName);
+  }, [open, defaultLastName]);
 
   useActionToast(state, {
     successMessage: t("memberAdded"),
@@ -68,7 +77,10 @@ export function AddMemberModal({
       if (errorKey.startsWith("errors.")) return tErrors(errorKey.slice(7));
       return tErrors("serverError");
     },
-    onSuccess: onClose,
+    onSuccess: () => {
+      onClose();
+      router.refresh();
+    },
   });
 
   if (!open) return null;
@@ -283,6 +295,9 @@ export function AddMemberModal({
           <input type="hidden" name="isMember" value="true" />
           <input type="hidden" name="membershipRoleId" value="" />
           <input type="hidden" name="bio" value="" />
+          {linkParentProfileId ? (
+            <input type="hidden" name="parentProfileId" value={linkParentProfileId} />
+          ) : null}
 
           <div className="drawer-foot">
             <button
@@ -301,116 +316,5 @@ export function AddMemberModal({
         </form>
       </div>
     </>
-  );
-}
-
-function DrawerSectionCard({
-  eyebrow,
-  title,
-  children,
-}: {
-  eyebrow: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="card" style={{ padding: 0 }}>
-      <div
-        style={{
-          padding: "16px 18px",
-          borderBottom: "1px solid var(--line)",
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 14,
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ minWidth: 0 }}>
-          <div className="eyebrow">{eyebrow}</div>
-          <div
-            style={{
-              fontSize: 15,
-              fontWeight: 600,
-              marginTop: 3,
-              color: "var(--fg)",
-            }}
-          >
-            {title}
-          </div>
-        </div>
-      </div>
-      <div style={{ padding: 18 }}>{children}</div>
-    </div>
-  );
-}
-
-function DrawerField({
-  label,
-  name,
-  required,
-  type = "text",
-  options,
-  placeholder,
-  span = 1,
-  defaultValue,
-  value,
-  onChange,
-}: {
-  label: string;
-  name: string;
-  required?: boolean;
-  type?: string;
-  options?: readonly SelectOption[] | readonly string[];
-  placeholder?: string;
-  span?: number;
-  defaultValue?: string;
-  value?: string;
-  onChange?: (value: string) => void;
-}) {
-  const selectOptions: SelectOption[] = options
-    ? options.map((o) =>
-        typeof o === "string" ? { value: o, label: o } : o,
-      )
-    : [];
-
-  return (
-    <div className="field" style={{ gridColumn: `span ${span}` }}>
-      <label htmlFor={name}>
-        {label}
-        {required ? (
-          <span style={{ color: "var(--danger)", marginLeft: 2 }}>*</span>
-        ) : null}
-      </label>
-      <div className="input-wrap">
-        {type === "select" ? (
-          <select
-            id={name}
-            name={name}
-            defaultValue={defaultValue}
-            required={required}
-          >
-            {selectOptions.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            id={name}
-            name={name}
-            type={type}
-            placeholder={placeholder}
-            defaultValue={value === undefined ? defaultValue : undefined}
-            value={value}
-            onChange={
-              onChange ? (e) => onChange(e.target.value) : undefined
-            }
-            required={required}
-          />
-        )}
-      </div>
-    </div>
   );
 }

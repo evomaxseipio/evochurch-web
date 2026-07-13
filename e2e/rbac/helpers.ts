@@ -1,3 +1,4 @@
+import { churchPath } from "@/lib/apps/church-routes";
 import type { Page } from "@playwright/test";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -130,29 +131,30 @@ export async function sidebarHrefVisible(page: Page, href: string): Promise<bool
 }
 
 export async function pageDenied(page: Page, path: string): Promise<boolean> {
-  await page.goto(path, { waitUntil: "domcontentloaded" });
+  const targetPath = path.startsWith("/apps/church") ? path : churchPath(path);
+  await page.goto(targetPath, { waitUntil: "domcontentloaded" });
   await page
-    .waitForURL(/\/settings(\?|$)/, { timeout: 5000 })
+    .waitForURL(/\/apps\/church\/settings(\?|$)/, { timeout: 5000 })
     .catch(() => undefined);
   const url = page.url();
-  const basePath = path.split("?")[0];
-  if (!url.includes(basePath) && path.startsWith("/members")) {
+  const basePath = targetPath.split("?")[0];
+  if (!url.includes(basePath) && targetPath.includes("/members")) {
     return true;
   }
   if (
-    url.includes("/settings") &&
-    !path.startsWith("/settings") &&
-    !path.startsWith("/members/profile")
+    url.includes("/apps/church/settings") &&
+    !targetPath.includes("/settings") &&
+    !targetPath.includes("/members/profile")
   ) {
     return true;
   }
   if (url.includes("denied=1")) return true;
   const denied = page.getByText(/acceso denegado|no tienes permiso|se requiere rol/i);
   if (await denied.isVisible().catch(() => false)) return true;
-  if (path.startsWith("/settings/users")) {
+  if (targetPath.includes("/settings/users")) {
     return page.getByText(/solo un administrador|acceso denegado/i).isVisible().catch(() => false);
   }
-  if (path.startsWith("/members")) {
+  if (targetPath.includes("/members")) {
     const hasList = await page
       .getByText(/Miembros registrados|filter-toolbar/i)
       .first()
@@ -164,10 +166,10 @@ export async function pageDenied(page: Page, path: string): Promise<boolean> {
       .catch(() => false);
     return !(hasList || hasNewBtn);
   }
-  if (path.startsWith("/dashboard")) {
+  if (targetPath.includes("/dashboard")) {
     return !(await page.getByText(/Buenos días|Total de Miembros/i).first().isVisible().catch(() => false));
   }
-  if (path.startsWith("/finances")) {
+  if (targetPath.includes("/finances")) {
     return !(await page.getByText(/Contribuciones|Transacciones|Fondos/i).first().isVisible().catch(() => false));
   }
   return false;

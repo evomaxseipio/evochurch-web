@@ -1,6 +1,6 @@
 "use client";
 
-import { saveMemberLaborAction } from "@/app/(app)/members/profile/actions";
+import { saveMemberLaborAction } from "@/app/apps/church/(console)/members/profile/actions";
 import {
   ProfileField,
   ProfileSectionCard,
@@ -14,7 +14,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { saveMemberEmploymentAction } from "@/app/(app)/members/profile/actions";
+import { saveMemberEmploymentAction } from "@/app/apps/church/(console)/members/profile/actions";
 
 function laborFormKey(member: Member): string {
   return JSON.stringify({

@@ -1,5 +1,6 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { ChartPeriodToolbar } from "@/components/dashboard/chart-period-toolbar";
 import { ContributionsLineChart } from "@/components/dashboard/contributions-line-chart";
@@ -217,7 +218,7 @@ export function DashboardView({
               </div>
             </div>
             <Link
-              href="/reports?report=audit-activity-log&open=1"
+              href={`${churchPath("/reports")}?report=audit-activity-log&open=1`}
               className="tiny"
               style={{
                 color: "var(--primary)",

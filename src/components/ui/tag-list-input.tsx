@@ -9,15 +9,19 @@ export function TagListInput({
   label,
   hint,
   defaultValue = [],
+  value,
+  onChange,
   disabled = false,
   placeholder,
   span,
   embedded = false,
 }: {
   name: string;
-  label: string;
+  label?: string;
   hint?: string;
   defaultValue?: string[];
+  value?: string[];
+  onChange?: (tags: string[]) => void;
   disabled?: boolean;
   placeholder?: string;
   /** Grid columns to span inside `.form-grid` (default: full row). */
@@ -27,8 +31,15 @@ export function TagListInput({
 }) {
   const t = useTranslations("members");
   const inputId = useId();
-  const [tags, setTags] = useState<string[]>(defaultValue);
+  const [internalTags, setInternalTags] = useState<string[]>(defaultValue);
   const [draft, setDraft] = useState("");
+  const controlled = value != null && onChange != null;
+  const tags = controlled ? value : internalTags;
+
+  function commitTags(next: string[]) {
+    if (controlled) onChange!(next);
+    else setInternalTags(next);
+  }
 
   function addTag(raw: string) {
     const parts = raw
@@ -37,21 +48,19 @@ export function TagListInput({
       .filter(Boolean);
     if (parts.length === 0) return;
 
-    setTags((prev) => {
-      const next = [...prev];
-      for (const part of parts) {
-        const lower = part.toLowerCase();
-        if (!next.some((t) => t.toLowerCase() === lower)) {
-          next.push(part);
-        }
+    const next = [...tags];
+    for (const part of parts) {
+      const lower = part.toLowerCase();
+      if (!next.some((tag) => tag.toLowerCase() === lower)) {
+        next.push(part);
       }
-      return next;
-    });
+    }
+    commitTags(next);
     setDraft("");
   }
 
   function removeTag(index: number) {
-    setTags((prev) => prev.filter((_, i) => i !== index));
+    commitTags(tags.filter((_, i) => i !== index));
   }
 
   return (
@@ -63,7 +72,7 @@ export function TagListInput({
           : { gridColumn: span ? `span ${span}` : "1 / -1" }
       }
     >
-      <label htmlFor={inputId}>{label}</label>
+      {label ? <label htmlFor={inputId}>{label}</label> : null}
       {hint ? (
         <div className="tiny muted" style={{ marginBottom: 8 }}>
           {hint}

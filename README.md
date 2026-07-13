@@ -27,7 +27,9 @@ Abre [http://localhost:3000](http://localhost:3000). La raíz redirige a `/login
 src/
 ├── app/
 │   ├── (auth)/login/          # Login + server actions
-│   ├── (app)/                 # Shell autenticado
+│   ├── apps/
+│   │   ├── church/(console)/  # Shell autenticado iglesia
+│   │   └── backoffice/        # Admin plataforma (módulos vacíos)
 │   │   ├── dashboard/
 │   │   ├── members/           # RPC spgetprofiles
 │   │   └── finances/          # placeholder

@@ -1,5 +1,6 @@
 "use client";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { Icons } from "@/components/icons";
 import type { Locale } from "@/i18n/config";
 import type { PendingAuthorizationItem } from "@/lib/dashboard/types";
@@ -156,7 +157,7 @@ export function PendingTransactionsList({
           </div>
         </div>
         <Link
-          href="/finances/transactions"
+          href={churchPath("/finances/transactions")}
           className="tiny"
           style={{
             color: "var(--primary)",
@@ -236,7 +237,7 @@ export function PendingTransactionsList({
               <div key={item.id}>
                 <PendingRow
                   item={item}
-                  href="/finances/transactions"
+                  href={churchPath("/finances/transactions")}
                   locale={locale}
                 />
                 {index < visible.length - 1 ? (
@@ -254,7 +255,7 @@ export function PendingTransactionsList({
 
           {items.length > visible.length ? (
             <Link
-              href="/finances/transactions"
+              href={churchPath("/finances/transactions")}
               className="tiny"
               style={{
                 display: "block",

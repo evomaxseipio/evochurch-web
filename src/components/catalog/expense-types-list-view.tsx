@@ -3,7 +3,7 @@
 import {
   deleteExpenseTypeAction,
   saveExpenseTypeAction,
-} from "@/app/(app)/settings/expenses/actions";
+} from "@/app/apps/church/(console)/settings/expenses/actions";
 import { CatalogTypesListView } from "@/components/catalog/catalog-types-list-view";
 import type { CatalogStats, ExpenseTypeRow } from "@/lib/catalog/types";
 import { useTranslations } from "next-intl";

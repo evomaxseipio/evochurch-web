@@ -1,0 +1,2 @@
+-- EvoChurch — seed principal (desarrollo local)
+-- Las migraciones viven en supabase/migrations/; los datos de prueba aquí y en seeds/.
