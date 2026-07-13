@@ -18,7 +18,7 @@
 | **P1.4** | Familia bidireccional (padres + vincular hijo) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
 | **P-report-families** | Reporte de Familias (hub) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
 | **P1.3** | Hogar / household (opcional) | 📋 Backlog | Web + BD | ~0.5 sprint |
-| **P2** | Motor de asistencia MVP | 📋 Análisis ✅ → ejecutar Modo B (`feat/attendance-engine`) | Web + Supabase | ~1–2 sprints |
+| **P2** | Motor de asistencia MVP | 🚧 Implementado en `feat/attendance-engine` (QA manual pendiente) | Web + Supabase | ~1–2 sprints |
 | **P2.x** | Categorías de ministerios (Discipulado / Casas / …) | 📋 Decidido — tras P2 | Web + BD | ~0.5 sprint |
 | **P3** | Niños: asistencia | 📋 Backlog | Web | ~0.5 sprint |
 | **P4** | Asistencia móvil (casas fuente + estudios) | 📋 Backlog | Flutter + RPCs | ~1–2 sprints |
