@@ -2,7 +2,8 @@
 
 **Backlog:** [`BACKLOG-POST-REUNION-JUL2026.md`](./BACKLOG-POST-REUNION-JUL2026.md) — **P2**  
 **EDK:** EPIC 03 · ADR-006 · [`PRODUCT_STRATEGY.md`](../.evo/product/PRODUCT_STRATEGY.md) · [`PRODUCT_ROADMAP.md`](../.evo/product/PRODUCT_ROADMAP.md) Fase 3  
-**Rama sugerida (cuando se ejecute):** `feat/attendance-engine`
+**Rama:** `feat/attendance-engine`  
+**Estado análisis (Modo A):** ✅ **Aprobado** (2026-07-13) — listo para Modo B
 
 **Uso de este documento**
 
@@ -32,15 +33,17 @@ Necesidades operativas reales (reunión / roadmap):
 | Ministerio de niños | Lista del día (P3, sobre este motor) |
 | Cultos / servicio | Asistencia general (más adelante) |
 
-**Principio (cerrado):** un solo motor — **no** cuatro módulos duplicados (culto, casa, niños, escuela). Casas fuente y estudios son **configuraciones** (`activity_type`), no tablas separadas.  
+**Principio (cerrado):** un solo motor — **no** cuatro módulos duplicados (culto, casa, niños, escuela).  
+**Casa / estudio / escuela dominical** = filas de **`church_ministries`** (grupo con roster).  
+**`activity_type`** clasifica la **sesión** (qué clase de lista se pasa), no crea entidades nuevas.  
 Ref: ADR-006, `AI_BUSINESS_RULES.md` § Motor de asistencia.
 
 ## 2. Qué nos ofrece
 
 ### Valor inmediato (P2 — consola web)
 
-- Crear **sesión** (fecha + tipo + iglesia [+ ministerio / evento opcional]).
-- Marcar **registros**: presente / ausente / tarde.
+- Crear **sesión** (fecha + tipo + iglesia + **ministerio** [+ evento opcional]).
+- Marcar **registros** del **roster del ministerio**: presente / ausente / tarde.
 - Historial por sesión y base para historial por persona.
 - RPCs estables que Flutter reutilizará en **P4** sin reescribir backend.
 
@@ -48,6 +51,7 @@ Ref: ADR-006, `AI_BUSINESS_RULES.md` § Motor de asistencia.
 
 | Después | Depende de P2 |
 |---------|----------------|
+| **P2.x** Categorías de ministerios | Filtros Discipulado / Casas / Niños en picker y listados |
 | **P3** Asistencia niños | Checklist de `is_child = true` |
 | **P4** Asistencia móvil | Mismas RPCs en Flutter (casas / estudios en campo) |
 | Dashboard / KPIs | Tendencias, inactivos, riesgos pastorales |
@@ -60,6 +64,7 @@ Ref: ADR-006, `AI_BUSINESS_RULES.md` § Motor de asistencia.
 - Analytics avanzado
 - Flutter (P4)
 - Checklist solo-niños (P3)
+- Módulo “Discipulado / Estudios” aparte (ver P2.x categorías)
 - Multi-moneda (P5)
 
 Relación con calendario: los eventos eclesiásticos (`/eventos`) serán **fuente opcional de sesiones** a futuro (`EVENTS.md`). El MVP puede crear sesiones **sueltas** sin exigir `event_id`.
@@ -80,61 +85,64 @@ Relación con calendario: los eventos eclesiásticos (`/eventos`) serán **fuent
 ```
 Hecho: finanzas · miembros · pastorales · niños · familia · reporte familias
 Siguiente estructural: P2 asistencia  ← este documento
+Luego: P2.x categorías ministerios · P3 niños asistencia · P4 Flutter
 Opcional: P1.3 household
 Al final: P5 multi-moneda
 ```
 
-## 4. Modelo mental (propuesto)
+## 4. Modelo mental (aprobado)
 
 ```
+church_ministries                    -- ya existe: Casa Norte, Estudios martes, Escuela dominical…
+  (grupo + líderes + miembros)
+
 attendance_session
   church_id
   session_date
   activity_type   -- house_group | bible_study | children | service
-  ministry_id?    -- opcional
+  ministry_id     -- requerido para house_group / bible_study / children;
+                  -- nullable solo si activity_type = service
   event_id?       -- opcional (vínculo futuro a /eventos)
   title? / notes?
   created_by_profile_id?
 
 attendance_record
   session_id
-  profile_id
+  profile_id      -- del roster del ministerio (P2)
   status          -- present | absent | late
   church_id       -- denormalizado para RLS / queries
   notes?
 ```
 
-**Regla:** una sesión → muchos registros. No inventar “asistencia de casa” como entidad aparte.
+**Reglas:**
 
-## 5. Preguntas de evaluación (responder en análisis)
+- Una sesión → muchos registros. No inventar “asistencia de casa” ni “módulo estudios” como entidad aparte.
+- El checklist P2 = **miembros del `ministry_id`**, no todos los adultos de la iglesia.
+- UI hub **Asistencia** con presets “Sesión de casa” / “Sesión de estudio” (prefill `activity_type`).
 
-Antes de ejecutar, el agente de análisis / producto debe documentar respuestas (tabla al final de esta sección):
+### Ministerio vs tipo vs categoría (producto)
 
-1. **¿Qué actividad duele más hoy?** Casas fuente, estudios, niños o culto → define el primer `activity_type` del MVP UI.
-2. **¿Quién marca asistencia?** Solo staff en oficina, o líderes de casa (afecta permisos y urgencia de P4 móvil).
-3. **¿Status MVP?** Solo `present` / `absent`, o también `late` (propuesto) / justificado / invitado.
-4. **¿Cómo nace la sesión?** Sueltas en MVP, o ya vinculadas a `/eventos`.
-5. **¿Quién aparece en el checklist?**
-   - `house_group` / `bible_study` / `service` → miembros adultos (`is_child = false`)
-   - `children` → solo niños (puede **diferirse a P3** y en P2 dejar el tipo en enum sin UI)
-6. **¿Permisos v1?** Reutilizar algo existente vs `attendance:read` / `attendance:write` nuevos.
-7. **¿Dónde vive en la UI?** Entrada de menú propia (`/attendance` o `/asistencia`), bajo Ministerios, o bajo Eventos.
+| Concepto | Qué es | Cuándo |
+|----------|--------|--------|
+| Ministerio | Grupo concreto (roster) | Ya existe — P2 lo usa |
+| `activity_type` | Clase de la sesión | P2 (enum/CHECK) |
+| Categoría de ministerio (Discipulado, Casas, Niños…) | Taxonomía para filtrar | **P2.x** — decidido, no en este sprint |
 
-### Plantilla de respuesta del análisis
+Discipulado (estudios martes, jueves de enseñanza, escuela dominical) = ministerios que en P2.x vivirán bajo categoría; **no** un segundo CRUD.
 
-Completar y pegar al final del PR / chat antes de modo B:
+## 5. Preguntas de evaluación — **respuesta aprobada (2026-07-13)**
 
 | # | Pregunta | Decisión |
 |---|----------|----------|
-| 1 | Primer activity_type del MVP UI | |
-| 2 | Quién marca | |
-| 3 | Status MVP | |
-| 4 | Sesión suelta vs event_id | |
-| 5 | Universo del checklist (P2 vs P3) | |
-| 6 | Permisos | |
-| 7 | Ruta / nav | |
-| — | Go / No-Go a ejecución | |
-| — | Notas / riesgos | |
+| 1 | Primer `activity_type` del MVP UI | **`house_group` + `bible_study`** (presets en hub). `service` en enum/select OK. `children` en enum **sin** checklist UI. |
+| 2 | Quién marca | **Staff en consola web (P2).** Líderes en campo → **P4**. Sin portal líder en P2. |
+| 3 | Status MVP | **`present` \| `absent` \| `late`**. Fuera: justificado, invitado. |
+| 4 | Sesión suelta vs `event_id` | **Sesiones sueltas.** `event_id` nullable; sin UI de vínculo obligatorio a `/eventos`. |
+| 5 | Universo del checklist | **P2:** roster del `ministry_id`. **`children` checklist → P3.** No “todos los adultos de la iglesia”. |
+| 6 | Permisos | **`attendance:read` + `attendance:write`**. Seed en roles admin/operador. No reutilizar `members:*` / `eventos:*`. `write_own` → P4. |
+| 7 | Ruta / nav | **`/attendance`** top-level (label i18n Asistencia). No anidar bajo Eventos ni Ministerios. |
+| — | Go / No-Go | **Go** a ejecución (Modo B). |
+| — | Notas / riesgos | Schema sesión+registro desde día 1; audit; Flutter fuera; categorías ministerios = P2.x; sin módulo Discipulado duplicado. |
 
 ## 6. Criterios Go / No-Go
 
@@ -143,6 +151,7 @@ Completar y pegar al final del PR / chat antes de modo B:
 - Hay al menos un `activity_type` priorizado para UI.
 - Se acepta schema sesión + registro (ADR-006).
 - Queda claro: P2 = web; Flutter = P4; niños checklist = P3 (o se acuerda incluir children en P2).
+- Ministerio = grupo; checklist = roster (cerrado 2026-07-13).
 
 **No-Go / pausar** si:
 
@@ -170,40 +179,48 @@ Ingeniero senior Next.js 16 + Postgres/Supabase multitenant. Implementa el **mot
    - `supabase/migrations/20260713120000_profile_children_registry.sql`
    - `src/lib/services/children.ts`, `src/lib/services/pastoral-events.ts`
    - Listados + drawers: `src/components/children/`, `src/components/members/`
+   - Ministerios: `src/lib/ministries/`, `src/lib/services/ministries.ts`
 
 ### Prerrequisitos de producto (ya en repo)
 
 | Ítem | Estado |
 |------|--------|
-| P0 Eventos pastorales | ✅ (solo perfil; no dashboard eventos) |
+| P0 Eventos pastorales | ✅ |
 | P1 Niños + tutores | ✅ |
 | P1.2 / familia + reporte familias | ✅ |
-| P2 Motor asistencia | 📋 este sprint |
+| P2 Motor asistencia | 📋 este sprint (`feat/attendance-engine`) |
+| P2.x Categorías ministerios | Decidido en producto — **fuera** de este sprint |
 | P3 / P4 | Fuera de alcance de esta ejecución |
 
-## Decisiones de producto (cerradas en arquitectura)
+## Decisiones de producto (cerradas)
 
 | # | Decisión |
 |---|----------|
 | 1 | **Un motor** — `attendance_session` + `attendance_record`; tipos = config. |
 | 2 | Tipos MVP en schema: `house_group`, `bible_study`, `children`, `service`. |
-| 3 | Status MVP: `present`, `absent`, `late` (salvo análisis diga solo present/absent). |
+| 3 | Status MVP: `present`, `absent`, `late`. |
 | 4 | Multitenant: `church_id` + RLS + `fn_assert_session_church`. |
 | 5 | Audit log en create/update/delete de sesión y en mutaciones masivas de registros. |
-| 6 | Sin Flutter; sin QR; sin portal miembro. |
-| 7 | Checklist `children` **completo** puede ir en P3; P2 puede exponer el tipo en enum y UI de adultos primero (confirmar plantilla análisis). |
+| 6 | Sin Flutter; sin QR; sin portal miembro; sin KPIs. |
+| 7 | Checklist `children` → **P3**; P2 enum sí, UI checklist niños no. |
+| 8 | Casa / estudio = **`church_ministries`**; no tablas nuevas de programas. |
+| 9 | `ministry_id` **requerido** para `house_group` / `bible_study` / `children`; nullable solo si `service`. |
+| 10 | Checklist P2 = **roster del ministerio** (no toda la iglesia). |
+| 11 | Permisos: `attendance:read` / `attendance:write`. |
+| 12 | Ruta `/attendance` top-level; presets UI casa / estudio. |
+| 13 | Categorías de ministerios (Discipulado, etc.) → **P2.x** (documentar en PR; no implementar). |
 
-## Decisiones técnicas (proponer en PR si cambias)
+## Decisiones técnicas
 
-- Tablas: `attendance_session`, `attendance_record` (+ índices `(church_id, session_date)`, `(session_id, profile_id)` unique).
-- RPCs sugeridos:
+- Tablas: `attendance_session`, `attendance_record` (+ índices `(church_id, session_date)`, unique `(session_id, profile_id)`).
+- RPCs:
   - `sp_list_attendance_sessions(p_church_id, filtros…)`
   - `sp_get_attendance_session(p_session_id, p_church_id)` — incluye records
   - `sp_maintain_attendance_session(...)` — insert/update/delete sesión
   - `sp_set_attendance_records(...)` — upsert lote de statuses
 - Unicidad: un `profile_id` por sesión.
-- Checklist: perfiles del tenant según `activity_type` (adulto vs niño).
-- Permisos: documentar decisión del análisis (`attendance:*` vs reutilizar).
+- Checklist: miembros del `ministry_id` (P2). P3 filtrará `is_child` para `children`.
+- Permisos: `attendance:*` (seed roles).
 - CLI: `npx supabase@2.109.1` (v1 falla con Postgres 17).
 
 ## Fuera de alcance P2
@@ -211,8 +228,9 @@ Ingeniero senior Next.js 16 + Postgres/Supabase multitenant. Implementa el **mot
 - Flutter (P4)
 - QR / geolocalización
 - KPIs dashboard de asistencia
-- Integración obligatoria con `/eventos` (opcional `event_id` nullable OK)
-- Asistencia solo-niños pulida (P3) si el análisis la diferió
+- Integración obligatoria con `/eventos` (`event_id` nullable OK)
+- Asistencia solo-niños pulida (P3)
+- `ministry_category` / módulo Discipulado (P2.x)
 - Multi-moneda (P5)
 
 ## Tareas de implementación
@@ -221,26 +239,29 @@ Ingeniero senior Next.js 16 + Postgres/Supabase multitenant. Implementa el **mot
 
 - Tablas + RLS + índices
 - RPCs list / get / maintain session / set records
-- Audit keys: `actions.attendance.session.*`, `actions.attendance.records.*` (o naming acordado)
+- Audit keys: `actions.attendance.session.*`, `actions.attendance.records.*`
+- Permisos seed `attendance:read` / `attendance:write`
 - `npx supabase@2.109.1 db push --linked`
 
 ### P2-APP-1 — Capa app
 
 - `src/lib/attendance/` — tipos, parse, labels `activity_type` / status
 - `src/lib/services/attendance.ts` — wrappers RPC
-- Server actions bajo ruta dedicada (ej. `src/app/apps/church/(console)/attendance/actions.ts`)
+- Server actions bajo `src/app/apps/church/(console)/attendance/actions.ts`
+- Carga de roster vía ministerios existentes
 
 ### P2-UI-1 — Consola web
 
-- Listado de sesiones (fecha, tipo, conteo presentes)
-- Crear / editar sesión
-- Pantalla checklist: marcar presente/ausente/tarde + guardar lote
+- Listado de sesiones (fecha, tipo, ministerio, conteo presentes)
+- Crear / editar sesión (picker ministerio + `activity_type`)
+- Presets: “Sesión de casa” / “Sesión de estudio”
+- Pantalla checklist: presente/ausente/tarde + guardar lote (roster del ministerio)
 - Nav + `route-permissions`
 - i18n es/en/fr + claves audit
 
 ### P2-QA
 
-- Crear sesión `bible_study` o `house_group`, marcar 3 perfiles, reabrir y verificar persistencia
+- Crear sesión `house_group` o `bible_study` en un ministerio con ≥3 miembros, marcar, reabrir y verificar persistencia
 - `npm run build` exit 0
 
 ## DoD
@@ -248,12 +269,16 @@ Ingeniero senior Next.js 16 + Postgres/Supabase multitenant. Implementa el **mot
 ```
 [ ] Migración aplicada en remoto
 [ ] CRUD sesión + set records (lote)
-[ ] UI listado + checklist web
-[ ] Tipos como config (no tablas por ministerio)
+[ ] UI listado + checklist web (roster ministerio)
+[ ] Presets casa / estudio
+[ ] Tipos como config (no tablas por programa)
+[ ] ministry_id según reglas cerradas
 [ ] RLS / session church guard
+[ ] attendance:read / attendance:write
 [ ] Audit + i18n es/en/fr
 [ ] npm run build exit 0
 [ ] QA manual sesión + 3 registros
+[ ] PR nota: P2.x ministry_category diferido
 ```
 
 ## Archivos / rutas probables
@@ -294,16 +319,29 @@ Al final: decisiones abiertas vs cerradas y si se puede pasar a ejecución (modo
 @mejoras/ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md
 @mejoras/BACKLOG-POST-REUNION-JUL2026.md
 
-Lee .evo/engineering/AI_ENGINEERING_GUIDE.md, AGENTS.md, MULTI_TENANT.md, ADR-006.
+Lee .evo/engineering/AI_ENGINEERING_GUIDE.md, AGENTS.md,
+.evo/architecture/MULTI_TENANT.md, ADR-006 (.evo/architecture/DECISION_LOG.md),
+.evo/architecture/EVENTS.md (§ Relación con Attendance Engine).
+Patrones: pastoral_events / children registry (migraciones + services + list/drawer)
+y ministerios (src/lib/ministries/, services/ministries).
 
-MODO B — ejecutar P2 motor de asistencia.
+MODO B — ejecutar P2 motor de asistencia. Diff mínimo. NO Flutter. NO QR. NO KPIs.
 
-Asumir decisiones del análisis aprobado (pegar tabla aquí si existe):
-- activity_type UI prioritario: <…>
-- permisos: <…>
-- ruta: <…>
-- children checklist: P2 | P3
+### Decisiones de análisis APROBADAS (ver §5 de este doc — 2026-07-13)
 
-Implementar: SQL sesión+registros + RPCs + RLS + audit, capa app, listado+checklist web, i18n.
-Sin Flutter, sin QR, sin KPIs dashboard. Rama feat/attendance-engine. npm run build al final.
+- activity_type UI prioritario: house_group + bible_study (presets). service en select OK; children sin checklist UI
+- Quién marca: staff web (P4 = campo)
+- Status: present | absent | late
+- Sesiones sueltas; event_id nullable
+- Checklist: roster del ministry_id (NO toda la iglesia). children checklist = P3
+- ministry_id requerido para house_group / bible_study / children; nullable solo si service
+- Casa/estudio/escuela dominical = church_ministries (NO tablas nuevas ni módulo Discipulado)
+- Permisos: attendance:read + attendance:write
+- Ruta: /attendance top-level (label Asistencia)
+- P2.x ministry_category (Discipulado/Casas/Niños): DECIDIDO en producto, NO implementar; notar en PR
+
+Implementar: SQL sesión+registros + RPCs + RLS + audit + seed permisos,
+capa app, listado+checklist web (roster ministerio), presets casa/estudio, i18n es/en/fr.
+Rama: feat/attendance-engine. npm run build exit 0.
+QA: sesión house_group o bible_study en ministerio con ≥3 miembros, marcar, reabrir, persistencia.
 ```

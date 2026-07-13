@@ -18,7 +18,8 @@
 | **P1.4** | Familia bidireccional (padres + vincular hijo) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
 | **P-report-families** | Reporte de Familias (hub) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
 | **P1.3** | Hogar / household (opcional) | 📋 Backlog | Web + BD | ~0.5 sprint |
-| **P2** | Motor de asistencia MVP | 📋 Backlog — ver `ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md` | Web + Supabase | ~1–2 sprints |
+| **P2** | Motor de asistencia MVP | 📋 Análisis ✅ → ejecutar Modo B (`feat/attendance-engine`) | Web + Supabase | ~1–2 sprints |
+| **P2.x** | Categorías de ministerios (Discipulado / Casas / …) | 📋 Decidido — tras P2 | Web + BD | ~0.5 sprint |
 | **P3** | Niños: asistencia | 📋 Backlog | Web | ~0.5 sprint |
 | **P4** | Asistencia móvil (casas fuente + estudios) | 📋 Backlog | Flutter + RPCs | ~1–2 sprints |
 | **P5** | Fondos multi-moneda | 📋 Backlog | Web + BD | ~2 sprints |
@@ -225,24 +226,43 @@ Hogares derivados de `profile_spouse` + `profile_parent_child` (sin entidad hous
 ## P2 — Motor de asistencia MVP
 
 **Análisis + prompt agente:** [`ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md`](./ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md)  
-(Modo A = evaluar; Modo B = implementar.)
+**Estado:** ✅ Análisis Modo A aprobado (2026-07-13) → **Modo B** en rama `feat/attendance-engine`.
 
 **Problema:** Casas fuente, estudios bíblicos y niños necesitan registrar asistencia sin duplicar código.
 
 **Referencia:** EPIC 03 / ADR-006 en `.evo/architecture/DECISION_LOG.md`.
 
+### Modelo (aprobado)
+
+- Casa / estudio / escuela dominical = filas de **`church_ministries`** (no tablas nuevas).
+- Sesión: `activity_type` + **`ministry_id`** (roster = checklist).
+- Hub `/attendance` con presets casa / estudio.
+- Permisos: `attendance:read` / `attendance:write`.
+- Children checklist → P3. Categorías de ministerios (Discipulado…) → **P2.x**.
+
 ### Alcance
 
-- Tabla `attendance_session` (fecha, tipo actividad, ministerio/evento opcional, church_id).
+- Tabla `attendance_session` (fecha, tipo, `ministry_id`, evento opcional, church_id).
 - Tabla `attendance_record` (session_id, profile_id, status: present/absent/late).
 - RPCs: crear sesión, marcar asistencia, listar por sesión/período.
-- UI web mínima: crear sesión + checklist de miembros.
-- Configuración por tipo: `house_group`, `bible_study`, `children`, `service`.
+- UI web: listado + crear sesión + checklist del **roster del ministerio**.
+- Tipos: `house_group`, `bible_study`, `children`, `service`.
 
 ### DoD
 
-- Un líder puede registrar asistencia de una sesión desde la consola web.
-- Casas fuente y estudios Mar/Jue son **configuraciones**, no tablas separadas.
+- Staff registra asistencia de una sesión desde la consola web (roster del ministerio).
+- Casas / estudios son ministerios + `activity_type` de sesión — **no** módulos separados.
+
+---
+
+## P2.x — Categorías de ministerios (siguiente, no este sprint)
+
+**Decidido en producto (2026-07-13); no implementar en P2.**
+
+- `ministry_category` (ej. Discipulado, Casas fuente, Niños, Adoración, Otro).
+- Estudios martes / jueves de enseñanza / escuela dominical = ministerios bajo **Discipulado**.
+- Mejora filtros en `/ministerios` y presets/picker de asistencia.
+- **No** crear módulo CRUD “Discipulado/Estudios” aparte (piel filtrada OK después).
 
 ---
 
@@ -294,6 +314,7 @@ flowchart TD
   Pref[P-report-families]
   P13[P1.3 Hogar]
   P2[P2 Motor asistencia]
+  P2x[P2.x Categorías ministerios]
   P3[P3 Asistencia niños]
   P4[P4 Flutter móvil]
   P5[P5 Multi-moneda]
@@ -304,6 +325,7 @@ flowchart TD
   P14 --> Pref
   P14 --> P13
   P1 --> P3
+  P2 --> P2x
   P2 --> P3
   P2 --> P4
   P0 --> P5
@@ -318,11 +340,12 @@ flowchart TD
 3. ~~**P1.2** — Familia en perfil~~ ✅
 4. ~~**P1.4** — Familia bidireccional~~ ✅
 5. ~~**P-report-families** — Reporte Familias~~ ✅
-6. **P2** — Motor asistencia web
-7. **P3** — Asistencia niños
-8. **P4** — Flutter casas fuente + estudios
-9. **P5** — Multi-moneda
-10. **P1.3** — Hogar *(si hace falta tras P1.2/P1.4)*
+6. **P2** — Motor asistencia web ← actual (`feat/attendance-engine`)
+7. **P2.x** — Categorías de ministerios (Discipulado / Casas / …)
+8. **P3** — Asistencia niños
+9. **P4** — Flutter casas fuente + estudios
+10. **P5** — Multi-moneda
+11. **P1.3** — Hogar *(si hace falta tras P1.2/P1.4)*
 
 ---
 
@@ -330,10 +353,10 @@ flowchart TD
 
 ```
 @mejoras/BACKLOG-POST-REUNION-JUL2026.md
-@mejoras/ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md   # P2 activo (modo A análisis → modo B ejecución)
+@mejoras/ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md   # P2: análisis ✅ → modo B ejecución
 
 Lee primero .evo/engineering/AI_ENGINEERING_GUIDE.md (obligatorio).
-Modo A: solo análisis / Go-No-Go. Modo B: implementar. Diff mínimo. npm run build al final.
+Modo A: solo análisis / Go-No-Go. Modo B: implementar (decisiones §5 del análisis). Diff mínimo. npm run build al final.
 ```
 
 ---
@@ -343,7 +366,7 @@ Modo A: solo análisis / Go-No-Go. Modo B: implementar. Diff mínimo. npm run bu
 | EDK | Este backlog |
 |-----|--------------|
 | EPIC 05 CRM Pastoral | P0 ✅; P1.2 ✅; P1.4 ✅; P-report-families ✅; P1.3 hogar futuro; reporte agregado P0.1 futuro |
-| EPIC 03 Attendance | P2–P4 |
+| EPIC 03 Attendance | P2–P4 (+ P2.x categorías ministerios) |
 | EPIC 04 Ministerio Niños | P1 ✅ + P1.2/P1.4 familia + P3 asistencia |
 | Fondos Multimoneda | P5 |
 
