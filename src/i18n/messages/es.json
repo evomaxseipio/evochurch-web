@@ -1009,6 +1009,16 @@
       "editForMinistry": "Editar fondo · {name}",
       "ministryOptional": "Ministerio (opcional)",
       "churchFund": "Fondo general de iglesia"
+    },
+    "categoryLabel": "Categoría",
+    "categoryHelp": "Agrupa casas, discipulado, niños u adoración para filtrar y para asistencia.",
+    "categoryAll": "Todas las categorías",
+    "category": {
+      "discipleship": "Discipulado",
+      "house_group": "Casas fuente",
+      "children": "Niños",
+      "worship": "Adoración / culto",
+      "other": "Otro"
     }
   },
   "settings": {

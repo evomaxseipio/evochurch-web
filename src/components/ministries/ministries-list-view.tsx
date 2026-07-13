@@ -42,10 +42,12 @@ import {
 import { hasMinistryOperatingFund } from "@/lib/ministries/funds";
 import type {
   Ministry,
+  MinistryCategoryFilter,
   MinistryStats,
   MinistryStatusFilter,
   MinistryViewMode,
 } from "@/lib/ministries/types";
+import { MINISTRY_CATEGORIES } from "@/lib/ministries/types";
 import type { Fund, FundKind } from "@/lib/funds/types";
 import type { IconName } from "@/components/icons";
 import { useRouter } from "next/navigation";
@@ -113,6 +115,8 @@ export function MinistriesListView({
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<MinistryStatusFilter>("all");
+  const [categoryFilter, setCategoryFilter] =
+    useState<MinistryCategoryFilter>("all");
   const [view, setView] = useState<MinistryViewMode>("grid");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSize>(10);
@@ -136,7 +140,7 @@ export function MinistriesListView({
 
   useEffect(() => {
     setPage(1);
-  }, [query, statusFilter, pageSize, view]);
+  }, [query, statusFilter, categoryFilter, pageSize, view]);
 
   useActionToast(deleteState, {
     successMessage: t("deleted"),
@@ -147,8 +151,15 @@ export function MinistriesListView({
   });
 
   const filtered = useMemo(
-    () => filterMinistries(ministries, query, statusFilter, members),
-    [ministries, query, statusFilter, members],
+    () =>
+      filterMinistries(
+        ministries,
+        query,
+        statusFilter,
+        members,
+        categoryFilter,
+      ),
+    [ministries, query, statusFilter, categoryFilter, members],
   );
 
   const sorted = useMemo(
@@ -235,10 +246,35 @@ export function MinistriesListView({
         query={query}
         onQueryChange={setQuery}
         queryPlaceholder={t("searchPlaceholder")}
-        searchWidthPercent={40}
+        searchWidthPercent={36}
         filters={statusFilters}
         activeFilter={statusFilter}
         onFilterChange={setStatusFilter}
+        middle={
+          <div className="field" style={{ margin: 0, minWidth: 180 }}>
+            <select
+              aria-label={t("categoryLabel")}
+              value={categoryFilter}
+              onChange={(e) =>
+                setCategoryFilter(e.target.value as MinistryCategoryFilter)
+              }
+              style={{
+                height: 36,
+                borderRadius: 10,
+                border: "1px solid var(--line)",
+                background: "var(--surface)",
+                padding: "0 10px",
+              }}
+            >
+              <option value="all">{t("categoryAll")}</option>
+              {MINISTRY_CATEGORIES.map((category) => (
+                <option key={category} value={category}>
+                  {t(`category.${category}`)}
+                </option>
+              ))}
+            </select>
+          </div>
+        }
         trailing={
           <>
             <div
@@ -314,7 +350,7 @@ export function MinistriesListView({
           )}
           empty={
             <tr>
-              <td colSpan={6} style={{ textAlign: "center", padding: 40 }} className="muted">
+              <td colSpan={7} style={{ textAlign: "center", padding: 40 }} className="muted">
                 {t("noMatches")}
               </td>
             </tr>
@@ -342,6 +378,11 @@ export function MinistriesListView({
                   </div>
                 </div>
               ),
+            },
+            {
+              key: "category",
+              label: t("categoryLabel"),
+              render: (row) => t(`category.${row.category}`),
             },
             {
               key: "status",

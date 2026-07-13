@@ -946,6 +946,16 @@
       "editForMinistry": "Edit fund · {name}",
       "ministryOptional": "Ministry (optional)",
       "churchFund": "Church general fund"
+    },
+    "categoryLabel": "Category",
+    "categoryHelp": "Groups houses, discipleship, children, or worship for filters and attendance.",
+    "categoryAll": "All categories",
+    "category": {
+      "discipleship": "Discipleship",
+      "house_group": "House groups",
+      "children": "Children",
+      "worship": "Worship / service",
+      "other": "Other"
     }
   },
   "settings": {

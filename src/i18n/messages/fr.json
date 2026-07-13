@@ -946,6 +946,16 @@
       "editForMinistry": "Modifier le fonds · {name}",
       "ministryOptional": "Ministère (optionnel)",
       "churchFund": "Fonds général de l'église"
+    },
+    "categoryLabel": "Catégorie",
+    "categoryHelp": "Regroupe maisons, discipleat, enfants ou adoration pour filtres et présences.",
+    "categoryAll": "Toutes les catégories",
+    "category": {
+      "discipleship": "Discipleat",
+      "house_group": "Maisons",
+      "children": "Enfants",
+      "worship": "Adoration / culte",
+      "other": "Autre"
     }
   },
   "settings": {

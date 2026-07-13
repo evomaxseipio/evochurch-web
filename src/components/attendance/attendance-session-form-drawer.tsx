@@ -16,7 +16,9 @@ import {
   type AttendanceSessionListItem,
 } from "@/lib/attendance/types";
 import { churchPath } from "@/lib/apps/church-routes";
+import { ministriesForAttendancePicker } from "@/lib/ministries/parse";
 import type { Ministry } from "@/lib/ministries/types";
+import { ministryCategoryForActivityType } from "@/lib/ministries/types";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useMemo, useState, startTransition } from "react";
@@ -82,6 +84,7 @@ export function AttendanceSessionFormDrawer({
   onClose: () => void;
 }) {
   const t = useTranslations("attendance");
+  const tMinistries = useTranslations("ministerios");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
   const router = useRouter();
@@ -101,13 +104,16 @@ export function AttendanceSessionFormDrawer({
   );
   const pending = savePending || deletePending;
 
-  const ministryOptions = useMemo(
-    () =>
-      ministries
-        .filter((m) => m.isActive)
-        .map((m) => ({ value: m.id, label: m.name })),
-    [ministries],
-  );
+  const ministryOptions = useMemo(() => {
+    const preferred = ministryCategoryForActivityType(v.activityType);
+    return ministriesForAttendancePicker(ministries, preferred).map((m) => ({
+      value: m.id,
+      label:
+        preferred && m.category === preferred
+          ? m.name
+          : `${m.name} · ${tMinistries(`category.${m.category}`)}`,
+    }));
+  }, [ministries, v.activityType, tMinistries]);
 
   const activityOptions = useMemo(
     () =>

@@ -8,9 +8,11 @@ import { useActionToast } from "@/hooks/use-action-toast";
 import type { Member } from "@/lib/members/types";
 import type {
   Ministry,
+  MinistryCategory,
   MinistryColor,
   MinistryFormInput,
 } from "@/lib/ministries/types";
+import { MINISTRY_CATEGORIES } from "@/lib/ministries/types";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -34,6 +36,7 @@ function ministryToFormValues(ministry: Ministry | null): FormValues {
   return {
     name: ministry?.name ?? "",
     description: ministry?.description ?? "",
+    category: ministry?.category ?? "other",
     leaderProfileIds: ministry?.leaderProfileIds
       ? [...ministry.leaderProfileIds]
       : [],
@@ -105,6 +108,7 @@ export function MinistryFormDrawer({
     if (ministry?.id) fd.set("id", ministry.id);
     fd.set("name", values.name.trim());
     fd.set("description", values.description.trim());
+    fd.set("category", values.category);
     fd.set("leaderProfileIds", JSON.stringify(values.leaderProfileIds));
     fd.set("memberProfileIds", JSON.stringify(values.memberProfileIds));
     fd.set("color", values.color);
@@ -165,6 +169,28 @@ export function MinistryFormDrawer({
                 onChange={(event) => update("description", event.target.value)}
               />
             </div>
+          </div>
+
+          <div className="field">
+            <label>
+              {t("categoryLabel")}{" "}
+              <span style={{ color: "var(--danger)" }}>*</span>
+            </label>
+            <div className="input-wrap">
+              <select
+                value={values.category}
+                onChange={(event) =>
+                  update("category", event.target.value as MinistryCategory)
+                }
+              >
+                {MINISTRY_CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {t(`category.${category}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="help">{t("categoryHelp")}</div>
           </div>
 
           <div className="field">
