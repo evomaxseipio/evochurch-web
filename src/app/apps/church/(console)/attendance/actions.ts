@@ -1,6 +1,7 @@
 "use server";
 
 import { churchPath } from "@/lib/apps/church-routes";
+import { resolveChildrenChecklistIds } from "@/lib/attendance/children-roster";
 import {
   activityTypeRequiresMinistry,
   isAttendanceActivityType,
@@ -8,16 +9,43 @@ import {
   type AttendanceRecordInput,
   type AttendanceSessionInput,
   type AttendanceStatus,
+  type ChildrenRosterScope,
 } from "@/lib/attendance/types";
+import { hasPermission } from "@/lib/auth/permissions";
 import { getActionSessionWith } from "@/lib/auth/permissions-server";
+import { childListItemAsMember } from "@/lib/children/parse";
 import {
   maintainAttendanceSession,
+  fetchAttendanceSession,
   setAttendanceRecords,
 } from "@/lib/services/attendance";
+import { fetchAllChildren } from "@/lib/services/children";
+import { fetchMembersPage } from "@/lib/services/members";
+import { fetchMinistries } from "@/lib/services/ministries";
+import { fetchMinistryCategories } from "@/lib/services/ministry-categories";
+import type { Member } from "@/lib/members/types";
 import { revalidatePath } from "next/cache";
 
 export type AttendanceActionResult =
   | { ok: true; sessionId?: string }
+  | { ok: false; errorKey: string };
+
+export type AttendanceChecklistLoadResult =
+  | {
+      ok: true;
+      session: Awaited<
+        ReturnType<typeof fetchAttendanceSession>
+      >["session"];
+      records: Awaited<
+        ReturnType<typeof fetchAttendanceSession>
+      >["records"];
+      members: Member[];
+      ministries: Awaited<ReturnType<typeof fetchMinistries>>;
+      categories: Awaited<ReturnType<typeof fetchMinistryCategories>>;
+      canWrite: boolean;
+      /** Solo sesiones children: origen del roster del checklist. */
+      childrenRosterScope: ChildrenRosterScope | null;
+    }
   | { ok: false; errorKey: string };
 
 function toErrorKey(error: unknown, fallback: string): string {
@@ -193,6 +221,73 @@ export async function saveAttendanceRecordsAction(
     return {
       ok: false,
       errorKey: toErrorKey(e, "attendance.errors.saveRecordsFailed"),
+    };
+  }
+}
+
+export async function loadAttendanceChecklistAction(
+  sessionId: string,
+): Promise<AttendanceChecklistLoadResult> {
+  try {
+    const id = sessionId.trim();
+    if (!id) return { ok: false, errorKey: "attendance.errors.invalidForm" };
+
+    const { supabase, session } = await getActionSessionWith("attendance:read");
+    const [detail, ministries] = await Promise.all([
+      fetchAttendanceSession(supabase, session.churchId, id),
+      fetchMinistries(supabase, session.churchId),
+    ]);
+
+    let categories: Awaited<ReturnType<typeof fetchMinistryCategories>> = [];
+    try {
+      categories = await fetchMinistryCategories(supabase, session.churchId);
+    } catch {
+      categories = [];
+    }
+
+    let members: Member[];
+    let childrenRosterScope: ChildrenRosterScope | null = null;
+    let sessionOut = detail.session;
+
+    if (detail.session.activityType === "children") {
+      // spgetprofiles excluye is_child; el roster infantil usa el registro de niños.
+      const children = await fetchAllChildren(supabase, session.churchId);
+      members = children.map((child) =>
+        childListItemAsMember(child, session.churchId),
+      );
+      const resolved = resolveChildrenChecklistIds(
+        detail.session.ministryMemberIds,
+        members.map((m) => m.memberId),
+      );
+      childrenRosterScope = resolved.scope;
+      sessionOut = {
+        ...detail.session,
+        ministryMemberIds: resolved.profileIds,
+      };
+    } else {
+      const membersResult = await fetchMembersPage(supabase, {
+        churchId: session.churchId,
+        page: 1,
+        pageSize: null,
+        filter: "all",
+      });
+      members = membersResult.members;
+    }
+
+    return {
+      ok: true,
+      session: sessionOut,
+      records: detail.records,
+      members,
+      ministries,
+      categories,
+      canWrite: hasPermission(session, "attendance:write"),
+      childrenRosterScope,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      errorKey: toErrorKey(e, "errors.loadFailed"),
     };
   }
 }

@@ -17,6 +17,7 @@ import { useTranslations } from "next-intl";
 export function MinistryCard({
   ministry,
   members,
+  categoryLabel,
   onEdit,
   onViewMembers,
   onViewFunds,
@@ -26,6 +27,7 @@ export function MinistryCard({
 }: {
   ministry: Ministry;
   members: Member[];
+  categoryLabel: string;
   onEdit: () => void;
   onViewMembers: () => void;
   onViewFunds: () => void;
@@ -75,7 +77,7 @@ export function MinistryCard({
                   color: "var(--ink-2)",
                 }}
               >
-                {t(`category.${ministry.category}`)}
+                {categoryLabel}
               </span>
               {ministry.isFeatured ? <MinistryFeaturedBadge /> : null}
             </div>

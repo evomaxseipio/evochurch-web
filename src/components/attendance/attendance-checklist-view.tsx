@@ -9,16 +9,19 @@ import { Icons } from "@/components/icons";
 import { useActionToast } from "@/hooks/use-action-toast";
 import { recordFullName } from "@/lib/attendance/parse";
 import {
-  ATTENDANCE_STATUSES,
+  ATTENDANCE_STATUS_UI_ORDER,
   type AttendanceRecord,
   type AttendanceSessionDetail,
   type AttendanceSessionListItem,
   type AttendanceStatus,
+  type ChildrenRosterScope,
 } from "@/lib/attendance/types";
 import { churchPath } from "@/lib/apps/church-routes";
+import { computeAgeYears } from "@/lib/children/parse";
 import { memberFullName } from "@/lib/members/parse";
 import type { Member } from "@/lib/members/types";
 import type { Ministry } from "@/lib/ministries/types";
+import type { MinistryCategoryRow } from "@/lib/ministries/category-types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -27,6 +30,7 @@ import { useActionState, useMemo, useState, startTransition } from "react";
 type RowState = {
   profileId: string;
   name: string;
+  ageYears: number | null;
   status: AttendanceStatus;
   notes: string;
 };
@@ -49,6 +53,7 @@ function buildRows(
 ): RowState[] {
   const byId = new Map(members.map((m) => [m.memberId, m]));
   const recordByProfile = new Map(records.map((r) => [r.profileId, r]));
+  const isChildren = session.activityType === "children";
   const rosterIds =
     session.ministryMemberIds.length > 0
       ? session.ministryMemberIds
@@ -62,6 +67,10 @@ function buildRows(
     seen.add(profileId);
     const member = byId.get(profileId);
     const existing = recordByProfile.get(profileId);
+    const ageYears =
+      isChildren && member?.dateOfBirth
+        ? computeAgeYears(member.dateOfBirth)
+        : null;
     rows.push({
       profileId,
       name: member
@@ -69,6 +78,7 @@ function buildRows(
         : existing
           ? recordFullName(existing)
           : profileId.slice(0, 8),
+      ageYears: ageYears != null && ageYears >= 0 ? ageYears : null,
       status: existing?.status ?? "absent",
       notes: existing?.notes ?? "",
     });
@@ -76,9 +86,12 @@ function buildRows(
 
   for (const record of records) {
     if (seen.has(record.profileId)) continue;
+    // Sesión niños: el roster ya viene filtrado (ministry ∩ is_child o fallback iglesia).
+    if (isChildren) continue;
     rows.push({
       profileId: record.profileId,
       name: recordFullName(record),
+      ageYears: null,
       status: record.status,
       notes: record.notes,
     });
@@ -108,18 +121,58 @@ function toListItem(session: AttendanceSessionDetail): AttendanceSessionListItem
   };
 }
 
+function StatusSegmentedControl({
+  value,
+  disabled,
+  onChange,
+  label,
+}: {
+  value: AttendanceStatus;
+  disabled?: boolean;
+  onChange: (status: AttendanceStatus) => void;
+  label: string;
+}) {
+  const t = useTranslations("attendance");
+
+  return (
+    <div className="attendance-status-seg" role="group" aria-label={label}>
+      {ATTENDANCE_STATUS_UI_ORDER.map((status) => (
+        <button
+          key={status}
+          type="button"
+          data-status={status}
+          disabled={disabled}
+          onClick={() => onChange(status)}
+          aria-pressed={value === status}
+        >
+          {t(`status.${status}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function AttendanceChecklistView({
   session,
   records,
   members,
   ministries,
+  categories = [],
   canWrite,
+  childrenRosterScope = null,
+  embedded = false,
+  onClose,
 }: {
   session: AttendanceSessionDetail;
   records: AttendanceRecord[];
   members: Member[];
   ministries: Ministry[];
+  categories?: MinistryCategoryRow[];
   canWrite: boolean;
+  childrenRosterScope?: ChildrenRosterScope | null;
+  /** Contenido para drawer (body + foot). */
+  embedded?: boolean;
+  onClose?: () => void;
 }) {
   const t = useTranslations("attendance");
   const tCommon = useTranslations("common");
@@ -147,7 +200,10 @@ export function AttendanceChecklistView({
   useActionToast(saveState, {
     successMessage: t("recordsSaved"),
     resolveError: (errorKey) => resolveError(errorKey, tErrors, t),
-    onSuccess: () => router.refresh(),
+    onSuccess: () => {
+      router.refresh();
+      if (embedded) onClose?.();
+    },
   });
 
   function setStatus(profileId: string, status: AttendanceStatus) {
@@ -177,6 +233,116 @@ export function AttendanceChecklistView({
     startTransition(() => {
       saveAction(fd);
     });
+  }
+
+  const emptyMessage =
+    session.activityType === "children"
+      ? t("emptyChildrenRoster")
+      : t("emptyRoster");
+
+  const listBody = (
+    <>
+      {childrenRosterScope === "church" ? (
+        <p className="muted" style={{ marginTop: embedded ? 8 : 16, marginBottom: 0 }}>
+          {t("childrenRosterChurchHint")}
+        </p>
+      ) : null}
+      {rows.length === 0 ? (
+        <p className="muted" style={{ marginTop: embedded ? 8 : 24 }}>
+          {emptyMessage}
+        </p>
+      ) : (
+        <div className="table-wrap" style={{ marginTop: embedded ? 14 : 18 }}>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>{t("columns.member")}</th>
+                <th>{t("columns.status")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.profileId}>
+                  <td>
+                    {row.name}
+                    {row.ageYears != null ? (
+                      <span className="muted" style={{ marginLeft: 6 }}>
+                        · {t("ageYears", { age: row.ageYears })}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td>
+                    <StatusSegmentedControl
+                      value={row.status}
+                      disabled={!canWrite || pending}
+                      onChange={(status) => setStatus(row.profileId, status)}
+                      label={t("columns.status")}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <>
+        <div className="drawer-body" style={{ paddingTop: 12 }}>
+          <div
+            className="row between"
+            style={{ gap: 12, flexWrap: "wrap", marginBottom: 4 }}
+          >
+            <div className="row" style={{ gap: 8, flexWrap: "wrap" }}>
+              <span className="attendance-count-chip present">
+                {t("status.present")}: {counts.present}
+              </span>
+              <span className="attendance-count-chip late">
+                {t("status.late")}: {counts.late}
+              </span>
+              <span className="attendance-count-chip absent">
+                {t("status.absent")}: {counts.absent}
+              </span>
+            </div>
+            {canWrite ? (
+              <button
+                type="button"
+                className="btn outline"
+                onClick={markAllPresent}
+                disabled={pending || rows.length === 0}
+              >
+                {t("markAllPresent")}
+              </button>
+            ) : null}
+          </div>
+          {listBody}
+        </div>
+        <div className="drawer-foot row" style={{ gap: 8, justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            className="btn outline"
+            onClick={onClose}
+            disabled={pending}
+          >
+            {tCommon("cancel")}
+          </button>
+          {canWrite ? (
+            <button
+              type="button"
+              className="btn"
+              onClick={save}
+              disabled={pending || rows.length === 0}
+            >
+              <Icons.check size={16} />{" "}
+              {pending ? tCommon("saving") : t("saveRecords")}
+            </button>
+          ) : null}
+        </div>
+      </>
+    );
   }
 
   return (
@@ -235,69 +401,19 @@ export function AttendanceChecklistView({
         </div>
       </div>
 
-      <div
-        className="row"
-        style={{ gap: 12, marginTop: 18, flexWrap: "wrap" }}
-      >
-        <div className="card flat" style={{ padding: "10px 14px" }}>
-          {t("status.present")}: <strong>{counts.present}</strong>
-        </div>
-        <div className="card flat" style={{ padding: "10px 14px" }}>
-          {t("status.late")}: <strong>{counts.late}</strong>
-        </div>
-        <div className="card flat" style={{ padding: "10px 14px" }}>
-          {t("status.absent")}: <strong>{counts.absent}</strong>
-        </div>
+      <div className="row" style={{ gap: 12, marginTop: 18, flexWrap: "wrap" }}>
+        <span className="attendance-count-chip present">
+          {t("status.present")}: {counts.present}
+        </span>
+        <span className="attendance-count-chip late">
+          {t("status.late")}: {counts.late}
+        </span>
+        <span className="attendance-count-chip absent">
+          {t("status.absent")}: {counts.absent}
+        </span>
       </div>
 
-      {rows.length === 0 ? (
-        <p className="muted" style={{ marginTop: 24 }}>
-          {t("emptyRoster")}
-        </p>
-      ) : (
-        <div className="table-wrap" style={{ marginTop: 18 }}>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>{t("columns.member")}</th>
-                <th>{t("columns.status")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.profileId}>
-                  <td>{row.name}</td>
-                  <td>
-                    <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
-                      {ATTENDANCE_STATUSES.map((status) => (
-                        <button
-                          key={status}
-                          type="button"
-                          className="btn sm"
-                          disabled={!canWrite || pending}
-                          onClick={() => setStatus(row.profileId, status)}
-                          style={{
-                            background:
-                              row.status === status
-                                ? "var(--brand)"
-                                : "var(--surface-2)",
-                            color:
-                              row.status === status
-                                ? "white"
-                                : "var(--ink-2)",
-                          }}
-                        >
-                          {t(`status.${status}`)}
-                        </button>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {listBody}
 
       {canWrite ? (
         <AttendanceSessionFormDrawer
@@ -306,6 +422,7 @@ export function AttendanceChecklistView({
           session={toListItem(session)}
           presetActivityType={null}
           ministries={ministries}
+          categories={categories}
           onClose={() => setEditOpen(false)}
         />
       ) : null}

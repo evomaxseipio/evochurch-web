@@ -133,6 +133,7 @@ export function ChildDetailView({
                     <div className="tiny muted">
                       {t(`relationship.${guardian.relationship}`)}
                       {guardian.isPrimary ? ` · ${t("primaryGuardian")}` : ""}
+                      {guardian.phone ? ` · ${guardian.phone}` : ""}
                     </div>
                   </div>
                 </div>

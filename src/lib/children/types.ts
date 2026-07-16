@@ -14,6 +14,8 @@ export type ChildGuardian = {
   guardianLastName: string;
   relationship: GuardianRelationship;
   isPrimary: boolean;
+  /** Preferred phone from contacts (mobile → phone). */
+  phone?: string;
 };
 
 export type ChildProfile = {

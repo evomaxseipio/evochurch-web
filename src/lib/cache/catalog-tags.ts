@@ -8,6 +8,8 @@ export const catalogTags = {
     `catalog:income-types-operational:${churchId}`,
   expenseTypes: (churchId: number) => `catalog:expense-types:${churchId}`,
   ministries: (churchId: number) => `catalog:ministries:${churchId}`,
+  ministryCategories: (churchId: number) =>
+    `catalog:ministry-categories:${churchId}`,
   events: (churchId: number) => `catalog:events:${churchId}`,
   memberRoles: () => "catalog:member-roles",
   scriptureDaily: () => "catalog:scripture-daily",
@@ -35,6 +37,10 @@ export function revalidateExpenseTypesCatalog(churchId: number) {
 
 export function revalidateMinistriesCatalog(churchId: number) {
   revalidateTag(catalogTags.ministries(churchId), "max");
+}
+
+export function revalidateMinistryCategoriesCatalog(churchId: number) {
+  revalidateTag(catalogTags.ministryCategories(churchId), "max");
 }
 
 export function revalidateEventsCatalog(churchId: number) {

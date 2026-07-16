@@ -1,9 +1,11 @@
 "use server";
-import { churchPath } from "@/lib/apps/church-routes";
 
+import { churchPath } from "@/lib/apps/church-routes";
 import { getActionSessionWith } from "@/lib/auth/permissions-server";
+import { hasPermission } from "@/lib/auth/permissions";
 import type { Locale } from "@/i18n/config";
 import { isLocale } from "@/i18n/config";
+import type { DiscountPeriodRun } from "@/lib/discounts/types";
 import {
   generateTitheClosePdf,
   titheClosePdfFilename,
@@ -25,6 +27,17 @@ export type TitheCloseExportResult =
   | { ok: true; filename: string; mimeType: string; base64: string }
   | { ok: false; error: string };
 
+export type PreviewTitheCloseResult =
+  | {
+      ok: true;
+      run: DiscountPeriodRun | null;
+      noTemplate: boolean;
+      canWrite: boolean;
+      canManageTemplates: boolean;
+      churchName: string | null;
+    }
+  | { ok: false; error: string };
+
 async function readContext(needWrite = false) {
   const perm = needWrite
     ? "finances:tithe_close:write"
@@ -33,13 +46,58 @@ async function readContext(needWrite = false) {
   return { supabase, session };
 }
 
+function revalidateTitheClosePaths() {
+  revalidatePath(churchPath("/reports"));
+  revalidatePath(churchPath("/settings/discount-templates"));
+}
+
+export async function previewTitheCloseAction(
+  periodStart: string,
+): Promise<PreviewTitheCloseResult> {
+  const t = await getTranslations("finances.titheClose");
+  try {
+    const { supabase, session } = await readContext(false);
+    let result = await fetchDiscountPeriodRun(
+      supabase,
+      session.churchId,
+      periodStart,
+    );
+    if (
+      result.noTemplate &&
+      hasPermission(session, "settings:discount_templates:write")
+    ) {
+      await seedDefaultTitheTemplate(supabase, session.churchId);
+      result = await fetchDiscountPeriodRun(
+        supabase,
+        session.churchId,
+        periodStart,
+      );
+    }
+    return {
+      ok: true,
+      run: result.run,
+      noTemplate: result.noTemplate,
+      canWrite: hasPermission(session, "finances:tithe_close:write"),
+      canManageTemplates: hasPermission(
+        session,
+        "settings:discount_templates:write",
+      ),
+      churchName: session.churchName ?? null,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : t("closeFailed"),
+    };
+  }
+}
+
 export async function seedDefaultTitheTemplateAction(): Promise<TitheCloseActionResult> {
   const t = await getTranslations("finances.titheClose");
   try {
     const { supabase, session } = await readContext(true);
     await seedDefaultTitheTemplate(supabase, session.churchId);
-    revalidatePath(churchPath("/finances/tithe-close"));
-    revalidatePath(churchPath("/settings/discount-templates"));
+    revalidateTitheClosePaths();
     return { ok: true };
   } catch (e) {
     return {
@@ -56,7 +114,7 @@ export async function closeTitheWeekAction(
   try {
     const { supabase, session } = await readContext(true);
     await closeDiscountPeriodRun(supabase, session.churchId, periodStart);
-    revalidatePath(churchPath("/finances/tithe-close"));
+    revalidateTitheClosePaths();
     return { ok: true };
   } catch (e) {
     return {

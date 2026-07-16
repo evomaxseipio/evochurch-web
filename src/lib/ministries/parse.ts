@@ -40,6 +40,14 @@ function parseCategory(value: unknown): MinistryCategory {
   return isMinistryCategory(raw) ? raw : "other";
 }
 
+export function labelForMinistryCategory(
+  code: string,
+  categories: readonly { code: string; name: string }[],
+): string {
+  const found = categories.find((c) => c.code === code);
+  return found?.name?.trim() || code;
+}
+
 export function parseMinistryRow(row: unknown): Ministry | null {
   const record = asRecord(row);
   if (!record) return null;
@@ -217,13 +225,21 @@ export function sortMinistriesForDisplay(items: Ministry[]): Ministry[] {
   });
 }
 
-/** Prefer ministries matching suggested category; always fall back to full active list. */
+/** Prefer ministries matching suggested category codes (listed first); fall back to full active list. */
 export function ministriesForAttendancePicker(
   items: Ministry[],
-  preferredCategory: MinistryCategory | null,
+  preferredCategories: MinistryCategory | readonly MinistryCategory[] | null,
 ): Ministry[] {
   const active = items.filter((m) => m.isActive);
-  if (!preferredCategory) return active;
-  const preferred = active.filter((m) => m.category === preferredCategory);
-  return preferred.length > 0 ? preferred : active;
+  const preferred = !preferredCategories
+    ? []
+    : Array.isArray(preferredCategories)
+      ? preferredCategories
+      : [preferredCategories];
+  if (preferred.length === 0) return active;
+  const preferredSet = new Set(preferred);
+  const matched = active.filter((m) => preferredSet.has(m.category));
+  if (matched.length === 0) return active;
+  const others = active.filter((m) => !preferredSet.has(m.category));
+  return [...matched, ...others];
 }

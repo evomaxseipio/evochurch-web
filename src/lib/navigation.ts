@@ -96,13 +96,6 @@ export const MAIN_NAV: NavEntry[] = [
         icon: "wallet",
         permission: "finances:contributions:read",
       },
-      {
-        id: "tithe-close",
-        href: churchPath("/finances/tithe-close"),
-        labelKey: "titheClose",
-        icon: "wallet",
-        permission: "finances:tithe_close:read",
-      },
     ],
   },
   {
@@ -117,7 +110,7 @@ export const MAIN_NAV: NavEntry[] = [
     id: "asistencia",
     href: churchPath("/attendance"),
     labelKey: "attendance",
-    icon: "check",
+    icon: "pendingActions",
     permission: "attendance:read",
   },
   {
@@ -164,6 +157,13 @@ export const CONFIG_NAV: NavEntry[] = [
         labelKey: "incomeTypes",
         icon: "trendUp",
         permission: "settings:income_types:read",
+      },
+      {
+        id: "categorias-ministerio",
+        href: churchPath("/settings/ministry-categories"),
+        labelKey: "ministryCategories",
+        icon: "pin",
+        permission: "settings:ministry_categories:read",
       },
       {
         id: "iglesia",
@@ -319,6 +319,7 @@ export const BREADCRUMB_KEYS: Record<string, [string, string]> = {
   comunicacion: ["crumbConnection", "comunicacion"],
   gastos: ["crumbConfigSystem", "expenseTypes"],
   "ingresos-tipos": ["crumbConfigSystem", "incomeTypes"],
+  "categorias-ministerio": ["crumbConfigSystem", "ministryCategories"],
   iglesia: ["crumbConfigSystem", "churchProfile"],
   usuarios: ["crumbConfigUsers", "adminUsers"],
   roles: ["crumbConfigUsers", "roles"],
@@ -345,6 +346,8 @@ export function navIdFromPath(pathname: string): string {
   if (path.startsWith("/settings/users")) return "usuarios";
   if (path.startsWith("/settings/expenses")) return "gastos";
   if (path.startsWith("/settings/income-types")) return "ingresos-tipos";
+  if (path.startsWith("/settings/ministry-categories"))
+    return "categorias-ministerio";
   if (path.startsWith("/settings/church")) return "iglesia";
   if (path.startsWith("/settings/discount-templates")) return "descuentos";
   if (path.startsWith("/settings/roles")) return "roles";

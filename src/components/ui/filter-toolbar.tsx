@@ -9,7 +9,7 @@ export type FilterChip<T extends string = string> = {
   label: string;
 };
 
-function FilterChips<T extends string>({
+export function FilterChips<T extends string>({
   filters,
   activeFilter,
   onFilterChange,
@@ -63,6 +63,7 @@ export function FilterToolbar<T extends string = string>({
   maxSearchWidth = 320,
   compactSearch = false,
   searchWidthPercent,
+  hideSearch = false,
   style,
 }: {
   query: string;
@@ -76,6 +77,8 @@ export function FilterToolbar<T extends string = string>({
   maxSearchWidth?: number;
   compactSearch?: boolean;
   searchWidthPercent?: number;
+  /** Solo chips / trailing (sin caja de búsqueda). */
+  hideSearch?: boolean;
   style?: React.CSSProperties;
 }) {
   const t = useTranslations("common");
@@ -90,7 +93,9 @@ export function FilterToolbar<T extends string = string>({
       />
     ) : null;
 
-  const useExtendedLayout = compactSearch || middle != null || searchWidthPercent != null;
+  const useExtendedLayout =
+    !hideSearch &&
+    (compactSearch || middle != null || searchWidthPercent != null);
 
   const searchStyle: CSSProperties =
     searchWidthPercent != null
@@ -117,33 +122,35 @@ export function FilterToolbar<T extends string = string>({
         ...style,
       }}
     >
-      <div className="search" style={searchStyle}>
-        <Icons.search size={16} stroke="var(--ink-3)" />
-        <input
-          placeholder={placeholder}
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-        />
-        {query.trim() ? (
-          <button
-            type="button"
-            className="btn ghost icon-only sm"
-            onClick={() => onQueryChange("")}
-            aria-label={t("clearSearch")}
-            title={t("clearSearch")}
-            style={{
-              width: 24,
-              height: 24,
-              minWidth: 24,
-              padding: 0,
-              flexShrink: 0,
-              color: "var(--muted)",
-            }}
-          >
-            <Icons.x size={14} />
-          </button>
-        ) : null}
-      </div>
+      {hideSearch ? null : (
+        <div className="search" style={searchStyle}>
+          <Icons.search size={16} stroke="var(--ink-3)" />
+          <input
+            placeholder={placeholder}
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+          />
+          {query.trim() ? (
+            <button
+              type="button"
+              className="btn ghost icon-only sm"
+              onClick={() => onQueryChange("")}
+              aria-label={t("clearSearch")}
+              title={t("clearSearch")}
+              style={{
+                width: 24,
+                height: 24,
+                minWidth: 24,
+                padding: 0,
+                flexShrink: 0,
+                color: "var(--muted)",
+              }}
+            >
+              <Icons.x size={14} />
+            </button>
+          ) : null}
+        </div>
+      )}
 
       {middle}
 
@@ -155,6 +162,7 @@ export function FilterToolbar<T extends string = string>({
         </>
       ) : (
         <>
+          {hideSearch ? <div style={{ flex: 1, minWidth: 8 }} aria-hidden /> : null}
           {filterChips}
           {trailing}
         </>

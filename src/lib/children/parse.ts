@@ -8,6 +8,7 @@ import {
   type ChildrenPagination,
   type GuardianRelationship,
 } from "./types";
+import type { Member } from "@/lib/members/types";
 
 function asRecord(v: unknown): Record<string, unknown> | null {
   return v && typeof v === "object" && !Array.isArray(v)
@@ -57,6 +58,7 @@ export function parseChildGuardian(raw: unknown): ChildGuardian | null {
       row.isPrimary === true ||
       row.is_primary === true ||
       row.isPrimary === "true",
+    phone: str(row.phone) || undefined,
   };
 }
 
@@ -140,6 +142,32 @@ export function guardianFullName(guardian: ChildGuardian): string {
     .trim();
 }
 
+/** Contact shown in children tables: primary guardian phone, else emergency. */
+export function resolveChildContact(child: {
+  guardians: ChildGuardian[];
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+}): {
+  name: string;
+  phone: string;
+  source: "guardian" | "emergency";
+} {
+  const primary =
+    child.guardians.find((g) => g.isPrimary) ?? child.guardians[0] ?? null;
+  if (primary) {
+    return {
+      name: guardianFullName(primary),
+      phone: primary.phone?.trim() || "",
+      source: "guardian",
+    };
+  }
+  return {
+    name: child.emergencyContactName.trim(),
+    phone: child.emergencyContactPhone.trim(),
+    source: "emergency",
+  };
+}
+
 export function computeAgeYears(dateOfBirth: string): number | null {
   if (!dateOfBirth) return null;
   const birth = new Date(`${dateOfBirth}T12:00:00`);
@@ -188,4 +216,46 @@ export function parseGuardiansJson(raw: string): ChildGuardianInput[] {
   } catch {
     return [];
   }
+}
+
+/** Adapts a child list row to the Member shape used by ministry roster UI. */
+export function childListItemAsMember(
+  child: ChildListItem,
+  churchId: number | null = null,
+): Member {
+  return {
+    memberId: child.childId,
+    churchId,
+    firstName: child.firstName,
+    lastName: child.lastName,
+    nickName: "",
+    dateOfBirth: child.dateOfBirth,
+    gender: "",
+    maritalStatus: "",
+    nationality: "",
+    idType: "",
+    idNumber: "",
+    isActive: true,
+    isMember: false,
+    isChild: true,
+    bio: child.notes ?? "",
+    membershipRoleId: "",
+    membershipRole: "",
+    bloodType: "",
+    allergies: child.allergies,
+    professions: [],
+    employment: [],
+    primaryEmployment: null,
+    address: {
+      streetAddress: "",
+      stateProvince: "",
+      cityState: "",
+      country: "",
+    },
+    contact: {
+      phone: child.emergencyContactPhone ?? "",
+      mobilePhone: "",
+      email: "",
+    },
+  };
 }

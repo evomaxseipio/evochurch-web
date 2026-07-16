@@ -3,6 +3,7 @@
 import { CeadFinancialMonthlyPreview } from "@/components/reports/cead-financial-monthly-preview";
 import { ConcilioF001Preview } from "@/components/reports/concilio-f001-preview";
 import { MembershipDirectoryPreview } from "@/components/reports/membership-directory-preview";
+import { TitheClosePreview } from "@/components/reports/tithe-close-preview";
 import { AuditLogReportView } from "@/components/reports/audit-log-report-view";
 import "./cead-financial-monthly-preview.css";
 import "./concilio-f001-preview.css";
@@ -34,6 +35,8 @@ export function ReportPreviewDialog({
   treasurerName,
   generatedByName,
   auditLogInteractive,
+  titheCloseInteractive,
+  locale,
   churchName,
   onClose,
   onDownloadPdf,
@@ -58,6 +61,8 @@ export function ReportPreviewDialog({
   treasurerName?: string | null;
   generatedByName?: string | null;
   auditLogInteractive?: boolean;
+  titheCloseInteractive?: boolean;
+  locale?: string;
   churchName?: string | null;
   onClose: () => void;
   onDownloadPdf?: () => void;
@@ -74,7 +79,10 @@ export function ReportPreviewDialog({
     financialMonthlyPayload != null ||
     concilioF001Payload != null ||
     membershipDirectoryPayload != null;
-  const isHtmlPreview = isLightPaperPreview || auditLogInteractive === true;
+  const isHtmlPreview =
+    isLightPaperPreview ||
+    auditLogInteractive === true ||
+    titheCloseInteractive === true;
 
   useEffect(() => {
     if (!open) return;
@@ -172,7 +180,12 @@ export function ReportPreviewDialog({
         >
           {isHtmlPreview ? (
             <div className="cead-dash-wrap">
-              {auditLogInteractive ? (
+              {titheCloseInteractive ? (
+                <TitheClosePreview
+                  locale={locale ?? "es"}
+                  churchName={churchName}
+                />
+              ) : auditLogInteractive ? (
                 <AuditLogReportView churchName={churchName} />
               ) : concilioF001Payload ? (
                 <ConcilioF001Preview
@@ -255,26 +268,30 @@ export function ReportPreviewDialog({
                       : tReports("submitToCouncil")}
                   </button>
                 ) : null}
-                <button type="button" className="btn outline" onClick={handleDownloadPdf}>
-                  <Icons.filePdf size={14} />
-                  {tReports("preview.ceadMonthly.downloadPdf")}
-                </button>
-                {hasExcel ? (
-                  <button
-                    type="button"
-                    className="btn outline"
-                    disabled={downloadingExcel}
-                    onClick={onDownloadExcel}
-                  >
-                    {downloadingExcel ? (
-                      tReports("generating")
-                    ) : (
-                      <>
-                        <Icons.fileSpreadsheet size={14} />
-                        {tReports("preview.ceadMonthly.downloadExcel")}
-                      </>
-                    )}
-                  </button>
+                {!titheCloseInteractive ? (
+                  <>
+                    <button type="button" className="btn outline" onClick={handleDownloadPdf}>
+                      <Icons.filePdf size={14} />
+                      {tReports("preview.ceadMonthly.downloadPdf")}
+                    </button>
+                    {hasExcel ? (
+                      <button
+                        type="button"
+                        className="btn outline"
+                        disabled={downloadingExcel}
+                        onClick={onDownloadExcel}
+                      >
+                        {downloadingExcel ? (
+                          tReports("generating")
+                        ) : (
+                          <>
+                            <Icons.fileSpreadsheet size={14} />
+                            {tReports("preview.ceadMonthly.downloadExcel")}
+                          </>
+                        )}
+                      </button>
+                    ) : null}
+                  </>
                 ) : null}
               </>
             ) : null}

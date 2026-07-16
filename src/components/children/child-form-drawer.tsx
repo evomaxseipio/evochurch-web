@@ -166,7 +166,12 @@ export function ChildFormDrawer({
     if (!v.firstName.trim()) e.firstName = tValidation("required");
     if (!v.lastName.trim()) e.lastName = tValidation("required");
     if (!v.dateOfBirth.trim()) e.dateOfBirth = tValidation("required");
-    if (v.guardians.length === 0) e.guardians = t("errors.guardianRequired");
+    if (!v.emergencyContactName.trim()) {
+      e.emergencyContactName = tValidation("required");
+    }
+    if (!v.emergencyContactPhone.trim()) {
+      e.emergencyContactPhone = tValidation("required");
+    }
     setErrs(e);
     if (Object.keys(e).length) return;
 
@@ -273,22 +278,30 @@ export function ChildFormDrawer({
             />
           </DrawerSectionCard>
 
-          <DrawerSectionCard eyebrow={t("sectionEmergency")} title={t("emergencyContactName")}>
+          <DrawerSectionCard
+            eyebrow={t("sectionEmergency")}
+            title={t("emergencySectionTitle")}
+            sub={t("emergencyHint")}
+          >
             <div className="mf-grid">
               <DrawerField
                 label={t("emergencyContactName")}
+                required
                 value={v.emergencyContactName}
                 onChange={(emergencyContactName) =>
                   setV((s) => ({ ...s, emergencyContactName }))
                 }
+                error={errs.emergencyContactName}
               />
               <DrawerField
                 label={t("emergencyContactPhone")}
                 type="tel"
+                required
                 value={v.emergencyContactPhone}
                 onChange={(emergencyContactPhone) =>
                   setV((s) => ({ ...s, emergencyContactPhone }))
                 }
+                error={errs.emergencyContactPhone}
               />
             </div>
           </DrawerSectionCard>
@@ -303,11 +316,6 @@ export function ChildFormDrawer({
               adultMembers={adultMembers}
               onChange={(guardians) => setV((s) => ({ ...s, guardians }))}
             />
-            {errs.guardians ? (
-              <span className="field-error" style={{ display: "block", marginTop: 8 }}>
-                {errs.guardians}
-              </span>
-            ) : null}
           </DrawerSectionCard>
 
           <DrawerSectionCard eyebrow={t("sectionNotes")} title={t("notes")} sub={t("notesHint")}>

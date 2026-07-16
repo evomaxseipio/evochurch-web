@@ -39,6 +39,9 @@ function toErrorKey(error: unknown, fallback: string): string {
   if (message.includes("tutor")) {
     return "children.errors.invalidGuardian";
   }
+  if (message.includes("emergencia") || message.includes("emergency")) {
+    return "children.errors.emergencyRequired";
+  }
   return fallback;
 }
 
@@ -48,11 +51,18 @@ function parseChildInput(formData: FormData): ChildProfileInput | null {
   const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
   const childId = String(formData.get("childId") ?? "").trim() || undefined;
   const guardians = parseGuardiansJson(String(formData.get("guardians") ?? "[]"));
+  const emergencyContactName = String(
+    formData.get("emergencyContactName") ?? "",
+  ).trim();
+  const emergencyContactPhone = String(
+    formData.get("emergencyContactPhone") ?? "",
+  ).trim();
 
   if (!firstName) return null;
   if (!lastName) return null;
   if (!dateOfBirth) return null;
-  if (guardians.length === 0) return null;
+  if (!emergencyContactName) return null;
+  if (!emergencyContactPhone) return null;
 
   for (const guardian of guardians) {
     if (!isGuardianRelationship(guardian.relationship)) return null;
@@ -64,10 +74,8 @@ function parseChildInput(formData: FormData): ChildProfileInput | null {
     lastName,
     dateOfBirth,
     allergies: parseTagsJson(String(formData.get("allergies") ?? "[]")),
-    emergencyContactName: String(formData.get("emergencyContactName") ?? "").trim(),
-    emergencyContactPhone: String(
-      formData.get("emergencyContactPhone") ?? "",
-    ).trim(),
+    emergencyContactName,
+    emergencyContactPhone,
     notes: String(formData.get("notes") ?? "").trim(),
     guardians,
   };

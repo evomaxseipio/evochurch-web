@@ -100,6 +100,7 @@
     "configUsers": "User settings",
     "expenseTypes": "Expense types",
     "incomeTypes": "Income types",
+    "ministryCategories": "Ministry categories",
     "churchProfile": "Church profile",
     "discountTemplates": "Discount templates",
     "network": "Church network",
@@ -893,9 +894,14 @@
     "leadersCount": "{count, plural, one {# leader} other {# leaders}}",
     "noLeaders": "No leaders assigned",
     "noMembersMatchSearch": "No members match the search.",
+    "noPeopleMatchSearch": "No one matches the search.",
     "membersCount": "{count, plural, one {# member} other {# members}}",
-    "searchMember": "Search member…",
+    "searchMember": "Search the team…",
+    "searchRosterHint": "This search filters the current team. Use “Add member” to include someone new (adults or children).",
     "addMember": "Add member",
+    "childBadge": "Child",
+    "viewChild": "View record",
+    "memberFallbackRole": "Member",
     "servingTogether": "Serving together to build the Kingdom of God.",
     "assignLeaders": "Assign leaders",
     "viewEvents": "View events",
@@ -913,6 +919,9 @@
     "descriptionPlaceholder": "Purpose and scope of the ministry…",
     "leadersPlaceholderEmpty": "Search leaders…",
     "leadersPlaceholderSelected": "{count, plural, one {# leader selected} other {# leaders selected}}",
+    "membersPlaceholderEmpty": "Search members or children…",
+    "membersPlaceholderSelected": "{count, plural, one {# person selected} other {# people selected}} · search more…",
+    "membersIncludeChildrenHelp": "You can add adults and children from the children’s registry (useful for kids ministries).",
     "savedCreate": "Ministry created successfully.",
     "savedUpdate": "Ministry updated successfully.",
     "leaderRequired": "Select at least one leader",
@@ -948,11 +957,12 @@
       "churchFund": "Church general fund"
     },
     "categoryLabel": "Category",
-    "categoryHelp": "Groups houses, discipleship, children, or worship for filters and attendance.",
+    "categoryHelp": "Groups houses, cells, discipleship, children, or worship for filters and attendance.",
     "categoryAll": "All categories",
     "category": {
       "discipleship": "Discipleship",
       "house_group": "House groups",
+      "cell_group": "Cell group",
       "children": "Children",
       "worship": "Worship / service",
       "other": "Other"
@@ -1284,8 +1294,9 @@
   },
   "catalogs": {
     "incomeTypes": "Income types",
-    "expenseTypes": "Tipos de gasto",
+    "expenseTypes": "Expense types",
     "configFinances": "Settings · Finances",
+    "configMinistries": "Settings · Ministries",
     "deleteType": "Delete \"{name}\"?",
     "namePlaceholder": "e.g. Utilities",
     "descPlaceholder": "What kind of movements does this cover?",
@@ -1310,6 +1321,13 @@
       "entityLabel": "Income type",
       "newLabel": "New income type",
       "activeHint": "If inactive, it won't appear when registering new operational income."
+    },
+    "ministryCategories": {
+      "title": "Ministry categories",
+      "subtitle": "Classify ministries (discipleship, houses, cells, children…) for filters and attendance.",
+      "entityLabel": "Ministry category",
+      "newLabel": "New category",
+      "activeHint": "If inactive, it won't appear when creating or editing ministries."
     }
   },
   "roles": {
@@ -1401,7 +1419,7 @@
         },
         "tithe_close": {
           "read": "View weekly tithe close",
-          "write": "Close week and export tithe close"
+          "write": "Close weekly tithe period"
         }
       },
       "members": {
@@ -1439,6 +1457,11 @@
           "read": "View income types",
           "write": "Edit income types",
           "delete": "Delete income types"
+        },
+        "ministry_categories": {
+          "read": "View ministry categories",
+          "write": "Edit ministry categories",
+          "delete": "Delete ministry categories"
         },
         "church": {
           "read": "View church profile",
@@ -1735,6 +1758,11 @@
         "title": "Families",
         "description": "Households derived from family links (spouse and children) for pastoral care and printing.",
         "rolesHint": "Secretary, Pastor, Admin"
+      },
+      "tithe-weekly-close": {
+        "title": "Weekly tithe close",
+        "description": "Weekly tithe summary (Sunday to Sunday) and allocation by active template.",
+        "rolesHint": "Treasurer, Admin"
       }
     },
     "families": {
@@ -2031,6 +2059,25 @@
         "totalMovements": "Total movements",
         "regulationNote": "Council remittances must be sent between the 1st and 5th of each month per current regulations."
       },
+      "titheClose": {
+        "title": "WEEKLY TITHE CLOSE",
+        "periodHint": "Sunday-to-Sunday period",
+        "generatedAt": "Generated on",
+        "status": "Status",
+        "kpiContributions": "Contributions",
+        "kpiContributionsHint": "Tithe records in this week",
+        "kpiWeekStatus": "Week status",
+        "kpiOpenHint": "Ready to review and close",
+        "kpiClosedHint": "Snapshot saved · read only",
+        "sectionAllocation": "ALLOCATION BY TEMPLATE",
+        "sectionComposition": "ALLOCATION MIX",
+        "compositionHint": "Distribution of total tithes",
+        "sectionContributions": "CONTRIBUTION DETAIL",
+        "amountRd": "AMOUNT (RD$)",
+        "totalBase": "TOTAL TITHES",
+        "noTemplateTitle": "Tithe template required",
+        "openFootnote": "This week is still open. Closing saves an allocation snapshot for audit; the treasurer moves funds outside the system."
+      },
       "membershipDirectory": {
         "title": "MEMBERS REPORT",
         "pastor": "Pastor",
@@ -2212,27 +2259,32 @@
     "dateOfBirth": "Date of birth",
     "allergies": "Allergies",
     "allergiesPlaceholder": "e.g. Penicillin, Peanuts…",
-    "emergencyContactName": "Emergency contact",
-    "emergencyContactPhone": "Emergency phone",
+    "emergencyContactName": "Contact name",
+    "emergencyContactPhone": "Phone",
+    "emergencySectionTitle": "Emergency contact",
+    "emergencyHint": "Required: who to call and how to reach them if something happens (e.g. summer school or another activity).",
     "guardiansLabel": "Guardians / parents",
-    "guardiansHint": "Select at least one adult from the church as guardian.",
+    "guardiansHint": "Optional. Only if the adult is already registered as a member or visitor. Without a guardian you can still register the child with an emergency contact.",
     "relationshipLabel": "Relationship",
     "primaryGuardian": "Primary guardian",
     "removeGuardian": "Remove guardian",
-    "searchGuardian": "Search adults…",
+    "searchGuardian": "Search registered adults…",
+    "noAdultMatches": "No adults available",
     "guardiansSelected": "{count, plural, one {# guardian selected} other {# guardians selected}} · search more…",
     "searchPlaceholder": "Search by name or guardian…",
     "empty": "No children registered.",
     "columnName": "Name",
     "columnAge": "Age",
     "columnGuardians": "Guardians",
+    "columnContact": "Contact",
+    "contactEmergencyBadge": "emergency",
     "columnAllergies": "Allergies",
     "ageYears": "{age} years",
     "recordsNoun": "children",
     "sectionHealth": "Health",
     "sectionEmergency": "Emergency",
     "sectionGuardians": "Guardians",
-    "noGuardians": "No guardians assigned.",
+    "noGuardians": "No guardians linked (OK if you only have an emergency contact).",
     "savedCreate": "Child registered successfully.",
     "savedUpdate": "Record updated successfully.",
     "savedDelete": "Child record deleted.",
@@ -2245,8 +2297,9 @@
       "other": "Other"
     },
     "errors": {
-      "invalidForm": "Complete required fields and assign at least one guardian.",
+      "invalidForm": "Complete the required fields, including the emergency contact.",
       "guardianRequired": "You must assign at least one adult guardian.",
+      "emergencyRequired": "Provide the emergency contact name and phone.",
       "invalidGuardian": "One or more guardians are invalid.",
       "saveFailed": "Could not save the child record.",
       "deleteFailed": "Could not delete the child record."
@@ -2263,7 +2316,7 @@
   "attendance": {
     "eyebrow": "Operations",
     "title": "Attendance",
-    "subtitle": "Record who was present for house groups, Bible studies, or other ministry activities.",
+    "subtitle": "Record who was present for house groups, Bible studies, children, or other ministry activities.",
     "newSession": "New session",
     "editSession": "Edit session",
     "sessionDetails": "Session details",
@@ -2276,15 +2329,21 @@
     "checklistEyebrow": "Roll call",
     "markAllPresent": "Mark all present",
     "saveRecords": "Save attendance",
-    "empty": "No sessions yet. Create a house or study session to get started.",
+    "empty": "No sessions yet. Create a house, study, or children session to get started.",
     "emptyRoster": "This ministry has no members on its roster. Add them in Ministries and come back.",
+    "emptyChildrenRoster": "No children are registered yet. Add them under Members → Children and come back.",
+    "childrenRosterChurchHint": "Add children to the ministry roster to narrow this list.",
+    "ageYears": "{age} yrs",
+    "searchPlaceholder": "Search by title, ministry, or type…",
+    "loadingChecklist": "Loading roll…",
     "searchDisabled": "Filter by type",
     "filterType": "Type",
     "deleteConfirmTitle": "Delete session?",
     "deleteConfirmBody": "The session and all attendance records will be removed.",
     "presets": {
       "house_group": "House session",
-      "bible_study": "Study session"
+      "bible_study": "Study session",
+      "children": "Children session"
     },
     "activityType": {
       "house_group": "House group",

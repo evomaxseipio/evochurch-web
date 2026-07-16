@@ -81,6 +81,11 @@ export const SETTINGS_RESOURCE_DEFS = [
     actions: ["read", "write", "delete"],
   },
   {
+    key: "ministry_categories",
+    label: "Categorías de ministerios",
+    actions: ["read", "write", "delete"],
+  },
+  {
     key: "profile",
     label: "Configuración y perfil",
     actions: ["read"],
@@ -152,7 +157,7 @@ export const MODULE_ICONS: Record<string, keyof typeof Icons> = {
   members: "users",
   ministerios: "pin",
   eventos: "cal",
-  attendance: "check",
+  attendance: "pendingActions",
   comunicacion: "chat",
   settings: "settings",
   admin_users: "shield",
@@ -200,7 +205,12 @@ export function applyStandardPermissionRules(
 ): void {
   const moduleKey = key.split(":")[0];
   const crudModules = ["members", "eventos", "comunicacion", "attendance"];
-  const settingsCatalogResources = ["expense_types", "income_types", "church"] as const;
+  const settingsCatalogResources = [
+    "expense_types",
+    "income_types",
+    "ministry_categories",
+    "church",
+  ] as const;
 
   if (key.startsWith("reports:")) {
     const resource = key.split(":")[1];
@@ -257,7 +267,12 @@ export function applyStandardPermissionRules(
 
 const CRUD_MODULES = ["members", "eventos", "comunicacion", "attendance"] as const;
 
-const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types", "church"] as const;
+const SETTINGS_CATALOG_RESOURCES = [
+  "expense_types",
+  "income_types",
+  "ministry_categories",
+  "church",
+] as const;
 
 const FINANCE_RESOURCES = [
   "funds",

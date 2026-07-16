@@ -16,9 +16,13 @@ import {
   type AttendanceSessionListItem,
 } from "@/lib/attendance/types";
 import { churchPath } from "@/lib/apps/church-routes";
-import { ministriesForAttendancePicker } from "@/lib/ministries/parse";
+import {
+  labelForMinistryCategory,
+  ministriesForAttendancePicker,
+} from "@/lib/ministries/parse";
 import type { Ministry } from "@/lib/ministries/types";
-import { ministryCategoryForActivityType } from "@/lib/ministries/types";
+import { ministryCategoryCodesForActivityType } from "@/lib/ministries/types";
+import type { MinistryCategoryRow } from "@/lib/ministries/category-types";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useActionState, useEffect, useMemo, useState, startTransition } from "react";
@@ -74,17 +78,21 @@ export function AttendanceSessionFormDrawer({
   session,
   presetActivityType,
   ministries,
+  categories = [],
   onClose,
+  onCreated,
 }: {
   open: boolean;
   mode: "new" | "edit";
   session: AttendanceSessionListItem | null;
   presetActivityType: AttendanceActivityType | null;
   ministries: Ministry[];
+  categories?: MinistryCategoryRow[];
   onClose: () => void;
+  /** Tras crear, abre pasar lista (drawer) en vez de navegar a página completa. */
+  onCreated?: (sessionId: string) => void;
 }) {
   const t = useTranslations("attendance");
-  const tMinistries = useTranslations("ministerios");
   const tCommon = useTranslations("common");
   const tErrors = useTranslations("errors");
   const router = useRouter();
@@ -105,24 +113,23 @@ export function AttendanceSessionFormDrawer({
   const pending = savePending || deletePending;
 
   const ministryOptions = useMemo(() => {
-    const preferred = ministryCategoryForActivityType(v.activityType);
+    const preferred = ministryCategoryCodesForActivityType(v.activityType);
+    const preferredSet = new Set(preferred);
     return ministriesForAttendancePicker(ministries, preferred).map((m) => ({
       value: m.id,
       label:
-        preferred && m.category === preferred
+        preferredSet.has(m.category)
           ? m.name
-          : `${m.name} · ${tMinistries(`category.${m.category}`)}`,
+          : `${m.name} · ${labelForMinistryCategory(m.category, categories)}`,
     }));
-  }, [ministries, v.activityType, tMinistries]);
+  }, [ministries, categories, v.activityType]);
 
   const activityOptions = useMemo(
     () =>
-      ATTENDANCE_ACTIVITY_TYPES.filter((type) => type !== "children").map(
-        (type) => ({
-          value: type,
-          label: t(`activityType.${type}`),
-        }),
-      ),
+      ATTENDANCE_ACTIVITY_TYPES.map((type) => ({
+        value: type,
+        label: t(`activityType.${type}`),
+      })),
     [t],
   );
 
@@ -137,12 +144,13 @@ export function AttendanceSessionFormDrawer({
     successMessage: mode === "new" ? t("sessionCreated") : t("sessionUpdated"),
     resolveError: (errorKey) => resolveError(errorKey, tErrors, t),
     onSuccess: (result) => {
-      onClose();
-      if (mode === "new" && result.sessionId) {
-        router.push(churchPath(`/attendance/${result.sessionId}`));
-      } else {
+      if (mode === "new" && result.sessionId && onCreated) {
+        onCreated(result.sessionId);
         router.refresh();
+        return;
       }
+      onClose();
+      router.refresh();
     },
   });
 

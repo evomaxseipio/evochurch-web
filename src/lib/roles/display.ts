@@ -104,7 +104,7 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "finances:contributions:delete": "Eliminar contribuciones",
   "finances:contributions:export": "Exportar contribuciones",
   "finances:tithe_close:read": "Ver cierre semanal de diezmos",
-  "finances:tithe_close:write": "Cerrar semana y exportar cierre de diezmos",
+  "finances:tithe_close:write": "Cerrar semana de diezmos",
   "members:read": "Ver miembros",
   "members:write": "Editar miembros",
   "members:delete": "Eliminar miembros",
@@ -128,6 +128,9 @@ export const PERMISSION_UI_LABELS: Record<string, string> = {
   "settings:income_types:read": "Ver tipos de ingreso",
   "settings:income_types:write": "Editar tipos de ingreso",
   "settings:income_types:delete": "Eliminar tipos de ingreso",
+  "settings:ministry_categories:read": "Ver categorías de ministerios",
+  "settings:ministry_categories:write": "Editar categorías de ministerios",
+  "settings:ministry_categories:delete": "Eliminar categorías de ministerios",
   "settings:church:read": "Ver perfil de iglesia",
   "settings:church:write": "Editar perfil de iglesia",
   "settings:discount_templates:write":
@@ -179,6 +182,12 @@ const PERMISSION_UI_LABEL_KEYS: Record<string, string> = {
   "settings:income_types:read": "permissions.settings.income_types.read",
   "settings:income_types:write": "permissions.settings.income_types.write",
   "settings:income_types:delete": "permissions.settings.income_types.delete",
+  "settings:ministry_categories:read":
+    "permissions.settings.ministry_categories.read",
+  "settings:ministry_categories:write":
+    "permissions.settings.ministry_categories.write",
+  "settings:ministry_categories:delete":
+    "permissions.settings.ministry_categories.delete",
   "settings:church:read": "permissions.settings.church.read",
   "settings:church:write": "permissions.settings.church.write",
   "settings:discount_templates:write":

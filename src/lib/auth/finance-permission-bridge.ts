@@ -31,6 +31,9 @@ const LEGACY_SETTINGS_CATALOGS_GRANTS: PermissionKey[] = [
   "settings:income_types:read",
   "settings:income_types:write",
   "settings:income_types:delete",
+  "settings:ministry_categories:read",
+  "settings:ministry_categories:write",
+  "settings:ministry_categories:delete",
 ];
 
 /**

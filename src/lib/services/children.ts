@@ -3,6 +3,7 @@ import {
   parseChildrenListResponse,
 } from "@/lib/children/parse";
 import type {
+  ChildListItem,
   ChildProfile,
   ChildProfileInput,
   ChildrenListResult,
@@ -31,6 +32,29 @@ export async function fetchChildrenPage(
   if (error) throw error;
   assertRpcSuccess(data, "No se pudieron cargar los niños.");
   return parseChildrenListResponse(data);
+}
+
+/** Loads every child page (RPC caps page size at 100). */
+export async function fetchAllChildren(
+  supabase: SupabaseClient,
+  churchId: number,
+): Promise<ChildListItem[]> {
+  const pageSize = 100;
+  const first = await fetchChildrenPage(supabase, {
+    churchId,
+    page: 1,
+    pageSize,
+  });
+  const children = [...first.children];
+  for (let page = 2; page <= first.pagination.totalPages; page += 1) {
+    const next = await fetchChildrenPage(supabase, {
+      churchId,
+      page,
+      pageSize,
+    });
+    children.push(...next.children);
+  }
+  return children;
 }
 
 export async function fetchChildById(

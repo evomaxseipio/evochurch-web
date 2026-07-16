@@ -3,7 +3,38 @@
 import { Icons } from "@/components/icons";
 import { memberFullName, memberInitials } from "@/lib/members/parse";
 import type { Member } from "@/lib/members/types";
-import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+
+function foldQuery(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase();
+}
+
+function matchesPerson(member: Member, query: string): boolean {
+  const q = foldQuery(query);
+  if (!q) return true;
+  const haystack = foldQuery(
+    [
+      memberFullName(member),
+      member.nickName,
+      member.membershipRole,
+      member.contact.email,
+      member.contact.mobilePhone,
+      member.contact.phone,
+    ].join(" "),
+  );
+  return haystack.includes(q);
+}
 
 export function MemberCombobox({
   selectedIds,
@@ -11,27 +42,44 @@ export function MemberCombobox({
   onChange,
   placeholderEmpty = "Buscar miembros…",
   placeholderSelected,
+  adultsOnly = false,
 }: {
   selectedIds: string[];
   members: Member[];
   onChange: (ids: string[]) => void;
   placeholderEmpty?: string;
   placeholderSelected?: (count: number) => string;
+  /** When true, hides children (e.g. ministry leaders). */
+  adultsOnly?: boolean;
 }) {
+  const t = useTranslations("ministerios");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: 0,
+    zIndex: 1200,
+  });
 
-  const filtered = query.trim()
-    ? members.filter((member) => {
-        const name = memberFullName(member).toLowerCase();
-        const role = (member.membershipRole ?? "").toLowerCase();
-        const q = query.toLowerCase();
-        return name.includes(q) || role.includes(q);
-      })
-    : members;
+  const catalog = useMemo(
+    () =>
+      adultsOnly
+        ? members.filter((member) => member.isChild !== true)
+        : members,
+    [adultsOnly, members],
+  );
 
-  const selected = members.filter((member) =>
+  const filtered = useMemo(() => {
+    const q = query.trim();
+    if (!q) return catalog;
+    return catalog.filter((member) => matchesPerson(member, q));
+  }, [catalog, query]);
+
+  const selected = catalog.filter((member) =>
     selectedIds.includes(member.memberId),
   );
 
@@ -42,6 +90,48 @@ export function MemberCombobox({
         : [...selectedIds, id],
     );
   };
+
+  useLayoutEffect(() => {
+    if (!open || !rootRef.current) return;
+
+    function placeMenu() {
+      const trigger = rootRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const viewportPadding = 8;
+      const estimatedHeight = Math.min(280, 48 + filtered.length * 44);
+      const spaceBelow = window.innerHeight - rect.bottom - viewportPadding;
+      const openUp = spaceBelow < estimatedHeight && rect.top > spaceBelow;
+      const width = rect.width;
+
+      setMenuStyle({
+        position: "fixed",
+        top: openUp
+          ? Math.max(viewportPadding, rect.top - estimatedHeight - 4)
+          : rect.bottom + 4,
+        left: Math.min(
+          rect.left,
+          Math.max(viewportPadding, window.innerWidth - width - viewportPadding),
+        ),
+        width,
+        zIndex: 1200,
+        maxHeight: 220,
+        overflowY: "auto",
+        background: "var(--bg-1)",
+        border: "1px solid var(--line)",
+        borderRadius: 10,
+        boxShadow: "var(--shadow-3)",
+      });
+    }
+
+    placeMenu();
+    window.addEventListener("resize", placeMenu);
+    window.addEventListener("scroll", placeMenu, true);
+    return () => {
+      window.removeEventListener("resize", placeMenu);
+      window.removeEventListener("scroll", placeMenu, true);
+    };
+  }, [open, filtered.length]);
 
   useEffect(() => {
     if (!open) return;
@@ -56,7 +146,7 @@ export function MemberCombobox({
   }, [open]);
 
   return (
-    <div style={{ position: "relative" }}>
+    <div ref={rootRef} style={{ position: "relative" }}>
       {selected.length > 0 ? (
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
           {selected.map((member) => (
@@ -80,6 +170,11 @@ export function MemberCombobox({
               <span style={{ marginLeft: 2 }}>
                 {member.firstName || memberFullName(member).split(" ")[0]}
               </span>
+              {member.isChild ? (
+                <span style={{ opacity: 0.75, fontSize: 10 }}>
+                  {t("childBadge")}
+                </span>
+              ) : null}
               <button
                 type="button"
                 onClick={(event) => {
@@ -149,29 +244,17 @@ export function MemberCombobox({
               setOpen(false);
               setQuery("");
             }}
-            style={{ position: "fixed", inset: 0, zIndex: 50 }}
+            style={{ position: "fixed", inset: 0, zIndex: 1190 }}
             aria-hidden
           />
-          <div
-            style={{
-              position: "absolute",
-              top: "calc(100% + 4px)",
-              left: 0,
-              right: 0,
-              zIndex: 51,
-              background: "var(--bg-1)",
-              border: "1px solid var(--line)",
-              borderRadius: 10,
-              boxShadow: "var(--shadow-3)",
-              maxHeight: 220,
-              overflowY: "auto",
-            }}
-          >
+          <div style={menuStyle} role="listbox">
             {filtered.map((member, index) => {
               const isSelected = selectedIds.includes(member.memberId);
               return (
                 <div
                   key={member.memberId}
+                  role="option"
+                  aria-selected={isSelected}
                   onClick={(event) => {
                     event.stopPropagation();
                     toggle(member.memberId);
@@ -191,7 +274,7 @@ export function MemberCombobox({
                   }}
                 >
                   <span className="avatar sm">{memberInitials(member)}</span>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
                         fontSize: 13,
@@ -201,7 +284,9 @@ export function MemberCombobox({
                       {memberFullName(member)}
                     </div>
                     <div className="tiny muted">
-                      {member.membershipRole || "Miembro"}
+                      {member.isChild
+                        ? t("childBadge")
+                        : member.membershipRole || t("memberFallbackRole")}
                     </div>
                   </div>
                   {isSelected ? (
@@ -215,7 +300,7 @@ export function MemberCombobox({
                 style={{ padding: "20px 12px", textAlign: "center" }}
                 className="muted tiny"
               >
-                Sin resultados
+                {t("noPeopleMatchSearch")}
               </div>
             ) : null}
           </div>

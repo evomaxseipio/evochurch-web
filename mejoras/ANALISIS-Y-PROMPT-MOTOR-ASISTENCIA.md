@@ -86,8 +86,8 @@ Relación con calendario: los eventos eclesiásticos (`/eventos`) serán **fuent
 Hecho: finanzas · miembros · pastorales · niños · familia · reporte familias
 Siguiente estructural: P2 asistencia  ← este documento
 Luego: P2.x categorías ministerios · P3 niños asistencia · P4 Flutter
-Opcional: P1.3 household
 Al final: P5 multi-moneda
+(Hogar formal = may-have diferido; no en camino crítico)
 ```
 
 ## 4. Modelo mental (aprobado)

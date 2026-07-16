@@ -17,10 +17,9 @@
 | **P1.2** | Familia en perfil miembro | ✅ Cerrado (QA Jul 2026) | Web | ~0.5 sprint |
 | **P1.4** | Familia bidireccional (padres + vincular hijo) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
 | **P-report-families** | Reporte de Familias (hub) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
-| **P1.3** | Hogar / household (opcional) | 📋 Backlog | Web + BD | ~0.5 sprint |
 | **P2** | Motor de asistencia MVP | ✅ Código en `feat/attendance-engine` (QA pendiente) | Web + Supabase | ~1–2 sprints |
-| **P2.x** | Categorías de ministerios (Discipulado / Casas / …) | 🚧 En `feat/attendance-engine` | Web + BD | ~0.5 sprint |
-| **P3** | Niños: asistencia | 📋 Backlog | Web | ~0.5 sprint |
+| **P2.x** | Categorías de ministerios CRUD por iglesia | ✅ Código en `feat/attendance-engine` (QA staging) | Web + BD | ~0.5 sprint |
+| **P3** | Niños: asistencia | ✅ Código | Web | ~0.5 sprint |
 | **P4** | Asistencia móvil (casas fuente + estudios) | 📋 Backlog | Flutter + RPCs | ~1–2 sprints |
 | **P5** | Fondos multi-moneda | 📋 Backlog | Web + BD | ~2 sprints |
 
@@ -41,6 +40,7 @@
 3. **Motor de asistencia único** (ADR-006) — no módulos duplicados por actividad.
 4. **Registro de niños** separado de **asistencia de niños** (esta última depende del motor).
 5. **Multi-moneda al final** — alto blast radius; la iglesia puede operar en DOP mientras tanto.
+6. **Solo lo imprescindible en el backlog activo** — may-haves (p. ej. hogar formal) quedan diferidos hasta pedido explícito.
 
 ---
 
@@ -95,7 +95,7 @@
 
 - Asistencia de niños (→ P3).
 - Vista familia unificada (→ P1.2).
-- Hogar formal (→ P1.3).
+- Hogar formal / dirección compartida → **may-have diferido** (no en backlog activo).
 
 ### DoD
 
@@ -136,7 +136,7 @@
 
 ### Fuera de alcance P1.2
 
-- Tabla `household` / dirección compartida (P1.3).
+- Hogar formal / dirección compartida → **may-have diferido** (familia + reporte bastan para operar).
 - Hermandad entre hermanos, graduación niño→miembro.
 - Jóvenes como entidad aparte (siguen en miembros si son `is_member`).
 
@@ -192,7 +192,7 @@
 
 **Estado:** ✅ Cerrado (QA Jul 2026)
 
-Hogares derivados de `profile_spouse` + `profile_parent_child` (sin entidad household P1.3). Entrada en hub Reportes + rutas dedicadas. Permiso: `members:read` (+ acceso hub reportes). Dedup cónyuges: `anchor = LEAST(uuid)`.
+Hogares **derivados** de `profile_spouse` + `profile_parent_child` (sin entidad `household` formal). Esto es el valor operativo de “familias” — suficiente para operar. Entrada en hub Reportes + rutas dedicadas. Permiso: `members:read` (+ acceso hub reportes). Dedup cónyuges: `anchor = LEAST(uuid)`.
 
 ### DoD
 
@@ -212,14 +212,13 @@ Hogares derivados de `profile_spouse` + `profile_parent_child` (sin entidad hous
 
 ---
 
-## P1.3 — Hogar / household (futuro)
+## May-have diferido — Hogar formal (`household`)
 
-**Depende:** P1.2 / P1.4 estables.
+**Decisión (2026-07-14):** **fuera del backlog activo.** No es imprescindible para operar.
 
-- Entidad `household` (nombre opcional, dirección compartida).
-- `profile_household` para agrupar adultos e hijos.
-- ~~Reportes / directorio por familia.~~ → cubierto en espíritu por **P-report-families** (sin tabla household).
-- Solo si la iglesia lo pide tras usar P1.2 / P1.4.
+- Familia relacional (P1.2 / P1.4) + **P-report-families** cubren el valor pastoral de ver familias.
+- Entidad `household` + dirección compartida + `profile_household` = **may-have**: solo reabrir si la iglesia pide explícitamente visitas por casa / dirección única de hogar.
+- **No planificar** sprints para esto hasta nuevo pedido de producto.
 
 ---
 
@@ -238,7 +237,7 @@ Hogares derivados de `profile_spouse` + `profile_parent_child` (sin entidad hous
 - Sesión: `activity_type` + **`ministry_id`** (roster = checklist).
 - Hub `/attendance` con presets casa / estudio.
 - Permisos: `attendance:read` / `attendance:write`.
-- Children checklist → P3. Categorías de ministerios (Discipulado…) → **P2.x**.
+- Children checklist → P3. Categorías de ministerios CRUD por iglesia → **P2.x**.
 
 ### Alcance
 
@@ -255,23 +254,56 @@ Hogares derivados de `profile_spouse` + `profile_parent_child` (sin entidad hous
 
 ---
 
-## P2.x — Categorías de ministerios (siguiente, no este sprint)
+## P2.x — Categorías de ministerios (CRUD por iglesia)
 
-**Decidido en producto (2026-07-13); no implementar en P2.**
+**Decisión de producto (2026-07-14):** P2.x **deja de ser enum hardcodeado**. Cada iglesia administra su catálogo.
 
-- `ministry_category` (ej. Discipulado, Casas fuente, Niños, Adoración, Otro).
-- Estudios martes / jueves de enseñanza / escuela dominical = ministerios bajo **Discipulado**.
-- Mejora filtros en `/ministerios` y presets/picker de asistencia.
-- **No** crear módulo CRUD “Discipulado/Estudios” aparte (piel filtrada OK después).
+**Prompt agente:** [`AGENT-PROMPT-MINISTRY-CATEGORIES-CRUD.md`](./AGENT-PROMPT-MINISTRY-CATEGORIES-CRUD.md)
+
+### Alcance
+
+- Tabla `ministry_category` multitenant (`church_id` + RLS) + seed de sistema:
+  - `discipleship` (Discipulado), `house_group` (Casas fuente), **`cell_group` (Célula)**, `children`, `worship`, `other`
+- `church_ministries.ministry_category` → FK por `(church_id, code)` (texto semántico, no solo CHECK).
+- CRUD admin en `/settings/ministry-categories` (permisos `settings:ministry_categories:*`).
+- Select / filtros de `/ministerios` y presets de asistencia leen **codes** desde BD.
+- No borrar categoría `is_system` ni categoría en uso.
+- **No** crear módulo “Discipulado/Estudios” aparte (piel filtrada OK después).
+
+### DoD
+
+- [x] Migración SQL (+ permisos RBAC)
+- [x] Service + actions CRUD
+- [x] UI admin + select en ministry-form desde BD
+- [x] Attendance presets por code (incl. casa → `house_group` + `cell_group`)
+- [x] i18n es/en/fr + seed **Célula**
+- [x] `npm run build` exit 0
+
+### Siguiente tras P2.x
+
+**P3 — Niños: asistencia.**
 
 ---
 
 ## P3 — Niños: asistencia
 
-**Depende:** P1 + P2.
+**Prompt agente:** [`AGENT-PROMPT-CHILDREN-ATTENDANCE.md`](./AGENT-PROMPT-CHILDREN-ATTENDANCE.md)
 
-- Sesiones de tipo `children` vinculadas al ministerio de niños.
-- Checklist de niños registrados (no todos los miembros adultos).
+**Depende:** P1 + P2 (P2.x opcional; categoría `children` ya existe en seed).
+
+**Estado:** ✅ Código (filtro `is_child` en checklist; sin migración SQL — resolución en app).
+
+- Sesiones de tipo `children` en el mismo hub `/attendance` (ADR-006).
+- Checklist de niños registrados (`is_child = true`), no adultos/líderes.
+- `ministry_id` obligatorio (ministerio de niños).
+
+### DoD
+
+- [x] Preset UI sesión de niños
+- [x] Checklist solo `is_child`
+- [x] Persistencia records + i18n
+- [x] Sin regresión casa/estudio
+- [x] `npm run build` exit 0
 
 ---
 
@@ -312,7 +344,6 @@ flowchart TD
   P12[P1.2 Familia perfil]
   P14[P1.4 Familia bidireccional]
   Pref[P-report-families]
-  P13[P1.3 Hogar]
   P2[P2 Motor asistencia]
   P2x[P2.x Categorías ministerios]
   P3[P3 Asistencia niños]
@@ -323,13 +354,15 @@ flowchart TD
   P1 --> P12
   P12 --> P14
   P14 --> Pref
-  P14 --> P13
   P1 --> P3
   P2 --> P2x
   P2 --> P3
   P2 --> P4
   P0 --> P5
 ```
+
+**Camino crítico (imprescindible para operar):** P2.x → P3 → P4 → P5.  
+**May-have diferido:** hogar formal (`household`) — no bloquea nada.
 
 ---
 
@@ -340,12 +373,13 @@ flowchart TD
 3. ~~**P1.2** — Familia en perfil~~ ✅
 4. ~~**P1.4** — Familia bidireccional~~ ✅
 5. ~~**P-report-families** — Reporte Familias~~ ✅
-6. **P2** — Motor asistencia web ← actual (`feat/attendance-engine`)
-7. **P2.x** — Categorías de ministerios (Discipulado / Casas / …)
-8. **P3** — Asistencia niños
-9. **P4** — Flutter casas fuente + estudios
+6. ~~**P2** — Motor asistencia web~~ ✅ código en `feat/attendance-engine`
+7. ~~**P2.x** — Categorías ministerios CRUD~~ ✅ código (`feat/attendance-engine`)
+8. ~~**P3** — Asistencia niños~~ ✅ código (`feat/attendance-engine`)
+9. **P4** — Flutter casas fuente + estudios ← **siguiente** (repo Flutter)
 10. **P5** — Multi-moneda
-11. **P1.3** — Hogar *(si hace falta tras P1.2/P1.4)*
+
+~~P1.3 Hogar formal~~ → **may-have diferido** (2026-07-14); no en este orden.
 
 ---
 
@@ -353,10 +387,9 @@ flowchart TD
 
 ```
 @mejoras/BACKLOG-POST-REUNION-JUL2026.md
-@mejoras/ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md   # P2: análisis ✅ → modo B ejecución
 
 Lee primero .evo/engineering/AI_ENGINEERING_GUIDE.md (obligatorio).
-Modo A: solo análisis / Go-No-Go. Modo B: implementar (decisiones §5 del análisis). Diff mínimo. npm run build al final.
+P2 + P2.x + P3 cerrados en código. Siguiente: P4 (Flutter) o P5.
 ```
 
 ---
@@ -365,7 +398,7 @@ Modo A: solo análisis / Go-No-Go. Modo B: implementar (decisiones §5 del anál
 
 | EDK | Este backlog |
 |-----|--------------|
-| EPIC 05 CRM Pastoral | P0 ✅; P1.2 ✅; P1.4 ✅; P-report-families ✅; P1.3 hogar futuro; reporte agregado P0.1 futuro |
+| EPIC 05 CRM Pastoral | P0 ✅; P1.2 ✅; P1.4 ✅; P-report-families ✅; hogar formal **may-have diferido**; reporte pastoral agregado P0.1 futuro |
 | EPIC 03 Attendance | P2–P4 (+ P2.x categorías ministerios) |
 | EPIC 04 Ministerio Niños | P1 ✅ + P1.2/P1.4 familia + P3 asistencia |
 | Fondos Multimoneda | P5 |

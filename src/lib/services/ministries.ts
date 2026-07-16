@@ -68,7 +68,8 @@ function normalizeColor(color: string): Ministry["color"] {
 }
 
 function normalizeCategory(category: string): Ministry["category"] {
-  return isMinistryCategory(category) ? category : "other";
+  const trimmed = category.trim();
+  return isMinistryCategory(trimmed) ? trimmed : "other";
 }
 
 export async function saveMinistry(

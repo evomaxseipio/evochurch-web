@@ -281,6 +281,10 @@ export async function generateReport(
       throw new Error(
         "El reporte de familias se abre desde Reportes → Familias (ruta dedicada).",
       );
+    case "tithe-weekly-close":
+      throw new Error(
+        "El cierre semanal de diezmos se abre desde Reportes → Vista previa (navegación por semana).",
+      );
     default:
       throw new Error("Reporte no implementado.");
   }

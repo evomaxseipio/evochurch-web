@@ -11,11 +11,22 @@ export const ATTENDANCE_STATUSES = ["present", "absent", "late"] as const;
 
 export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number];
 
-/** UI presets: preferidos en hub P2. children sin checklist UI (P3). */
+/** Orden UI tipo semáforo: presente → tarde → ausente. */
+export const ATTENDANCE_STATUS_UI_ORDER = [
+  "present",
+  "late",
+  "absent",
+] as const satisfies readonly AttendanceStatus[];
+
+/** UI presets del hub: casa, estudio, niños (ADR-006 / un motor). */
 export const ATTENDANCE_UI_PRESETS = [
   "house_group",
   "bible_study",
+  "children",
 ] as const satisfies readonly AttendanceActivityType[];
+
+/** Origen del roster en checklist de niños. */
+export type ChildrenRosterScope = "ministry" | "church" | "empty";
 
 export type AttendanceSessionListItem = {
   id: string;

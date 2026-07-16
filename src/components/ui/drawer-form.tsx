@@ -78,6 +78,10 @@ export function DrawerField({
     : [];
 
   const inputId = name ?? label.replace(/\s+/g, "-").toLowerCase();
+  const controlled = value !== undefined;
+  const controlProps = controlled
+    ? { value }
+    : { defaultValue: defaultValue ?? "" };
 
   return (
     <div className="field" style={{ gridColumn: `span ${span}` }}>
@@ -94,8 +98,7 @@ export function DrawerField({
           <select
             id={inputId}
             name={name}
-            defaultValue={defaultValue ?? ""}
-            value={value}
+            {...controlProps}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={required}
           >
@@ -110,8 +113,7 @@ export function DrawerField({
             id={inputId}
             name={name}
             rows={rows}
-            defaultValue={defaultValue}
-            value={value}
+            {...controlProps}
             placeholder={placeholder}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
           />
@@ -121,8 +123,7 @@ export function DrawerField({
             name={name}
             type={type}
             placeholder={placeholder}
-            defaultValue={value === undefined ? defaultValue : undefined}
-            value={value}
+            {...controlProps}
             onChange={onChange ? (e) => onChange(e.target.value) : undefined}
             required={required}
           />

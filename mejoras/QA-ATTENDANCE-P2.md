@@ -1,23 +1,27 @@
-# QA — P2 Motor de asistencia + P2.x Categorías
+# QA — P2 Motor de asistencia + P2.x Categorías CRUD
 
 **Rama:** `feat/attendance-engine`  
-**Fecha:** 2026-07-13  
+**Fecha:** 2026-07-14  
 **Estado:** 📋 Checklist para piloto / staging
 
 ## Prerrequisitos
 
-- [ ] Migraciones aplicadas: `20260713230000_attendance_engine`, `20260713240000_ministry_category`
-- [ ] Usuario con `attendance:read` + `attendance:write` (roles admin suelen tenerlos por seed)
+- [ ] Migraciones aplicadas: `20260713230000_attendance_engine`, `20260713240000_ministry_category`, `20260714200000_ministry_category_crud`
+- [ ] Usuario con `attendance:read` + `attendance:write` y `settings:ministry_categories:*` (admin con catálogos)
 - [ ] Al menos un ministerio con ≥3 miembros en el roster
 
-## A — Categorías (P2.x)
+## A — Categorías CRUD (P2.x)
 
 | # | Caso | Resultado |
 |---|------|-----------|
-| A1 | Abrir `/ministerios` → editar un ministerio → campo **Categoría** visible | ☐ |
-| A2 | Asignar categoría **Casas fuente** a una casa / **Discipulado** a un estudio | ☐ |
-| A3 | Filtro de categoría en listado muestra solo ese grupo | ☐ |
-| A4 | Chip/badge de categoría visible en tarjeta o tabla | ☐ |
+| A1 | Abrir `/settings/ministry-categories` → ver seeds (Discipulado, Casas, **Célula**, Niños, Adoración, Otro) | ☐ |
+| A2 | Editar nombre de una categoría de sistema → se refleja en formulario de ministerio | ☐ |
+| A3 | Crear categoría custom → aparece en select de `/ministerios` | ☐ |
+| A4 | Intentar borrar categoría **en uso** → error; sistema (`is_system`) no se borra | ☐ |
+| A5 | Abrir `/ministerios` → editar → campo **Categoría** desde BD (incl. Célula) | ☐ |
+| A6 | Asignar **Casas fuente** / **Célula** / **Discipulado** según tipo | ☐ |
+| A7 | Filtro de categoría en listado muestra solo ese grupo | ☐ |
+| A8 | Chip/badge de categoría visible en tarjeta o tabla | ☐ |
 
 ## B — Sesiones de asistencia (P2)
 
@@ -26,7 +30,7 @@
 | B1 | Menú **Asistencia** visible con permiso | ☐ |
 | B2 | Preset **Sesión de casa** abre drawer con tipo `house_group` | ☐ |
 | B3 | Preset **Sesión de estudio** abre con tipo `bible_study` | ☐ |
-| B4 | Picker de ministerios prioriza categoría alineada (casas→Casas; estudio→Discipulado); si no hay, muestra todos activos | ☐ |
+| B4 | Picker prioriza codes (casa→`house_group`+`cell_group`; estudio→`discipleship`); si no hay, muestra todos activos | ☐ |
 | B5 | Crear sesión sin ministerio (tipo casa/estudio) → error / bloqueo | ☐ |
 | B6 | Crear sesión OK → redirige al checklist | ☐ |
 
@@ -56,16 +60,17 @@
 |---|------|-----------|
 | E1 | `/ministerios` CRUD (crear/editar/borrar) sigue OK | ☐ |
 | E2 | `/eventos` abre normal | ☐ |
-| E3 | `npm run build` exit 0 | ✅ (2026-07-13) |
+| E3 | `npm run build` exit 0 | ✅ (2026-07-14) |
 
 ## Fuera de alcance (no fallar QA por esto)
 
-- Checklist solo-niños (P3)
+- Checklist solo-niños (**P3 — siguiente**)
 - Flutter (P4)
 - QR / KPIs / vínculo obligatorio a `/eventos`
-- Tipos de categoría custom por iglesia
 
 ## Criterio de cierre
 
-P2 + P2.x **cerrados** cuando A1–A4, B1–B6, C1–C5 y E3 están OK en staging.  
+P2 + P2.x **cerrados** cuando A1–A8, B1–B6, C1–C5 y E3 estén OK en staging.  
 D2/D3 y C6/C7 recomendados pero no bloquean si el piloto es solo admin.
+
+**Siguiente sprint:** P3 asistencia niños.

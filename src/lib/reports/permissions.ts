@@ -11,6 +11,7 @@ import type { ReportId } from "@/lib/reports/types";
 
 const AUDIT_ACTIVITY_LOG_REPORT_ID = "audit-activity-log" as const;
 const FAMILY_HOUSEHOLDS_REPORT_ID = "family-households" as const;
+const TITHE_WEEKLY_CLOSE_REPORT_ID = "tithe-weekly-close" as const;
 
 function isAuditActivityLogReport(reportId: ReportId): boolean {
   return reportId === AUDIT_ACTIVITY_LOG_REPORT_ID;
@@ -18,6 +19,18 @@ function isAuditActivityLogReport(reportId: ReportId): boolean {
 
 function isFamilyHouseholdsReport(reportId: ReportId): boolean {
   return reportId === FAMILY_HOUSEHOLDS_REPORT_ID;
+}
+
+function isTitheWeeklyCloseReport(reportId: ReportId): boolean {
+  return reportId === TITHE_WEEKLY_CLOSE_REPORT_ID;
+}
+
+export function canReadTitheWeeklyClose(session: AppSession): boolean {
+  return hasPermission(session, "finances:tithe_close:read");
+}
+
+export function canCloseTitheWeeklyClose(session: AppSession): boolean {
+  return hasPermission(session, "finances:tithe_close:write");
 }
 
 /** Recursos en BD (snake_case) — una fila por reporte en la matriz de permisos. */
@@ -115,7 +128,8 @@ export function canAccessReportsHub(session: AppSession): boolean {
   return (
     hasAnyPermission(session, [...REPORT_READ_PERMISSIONS]) ||
     canReadAuditLog(session) ||
-    canReadMembers(session)
+    canReadMembers(session) ||
+    canReadTitheWeeklyClose(session)
   );
 }
 
@@ -129,6 +143,9 @@ export function canReadReport(
   if (isFamilyHouseholdsReport(reportId)) {
     return canReadMembers(session);
   }
+  if (isTitheWeeklyCloseReport(reportId)) {
+    return canReadTitheWeeklyClose(session);
+  }
   return hasPermission(session, reportReadPermission(reportId));
 }
 
@@ -141,6 +158,9 @@ export function canExportReport(
   }
   if (isFamilyHouseholdsReport(reportId)) {
     return canReadMembers(session);
+  }
+  if (isTitheWeeklyCloseReport(reportId)) {
+    return canReadTitheWeeklyClose(session);
   }
   return hasPermission(session, reportExportPermission(reportId));
 }
