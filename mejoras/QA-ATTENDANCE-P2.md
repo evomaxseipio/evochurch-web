@@ -1,4 +1,4 @@
-# QA — P2 Motor de asistencia + P2.x Categorías CRUD
+# QA — P2 Motor de asistencia + P2.x Categorías CRUD + P3 Asistencia de niños
 
 **Rama:** `feat/attendance-engine`  
 **Fecha:** 2026-07-14  
@@ -46,31 +46,42 @@
 | C6 | Editar sesión (fecha/título) desde checklist | ☐ |
 | C7 | Eliminar sesión → desaparece del listado | ☐ |
 
-## D — Permisos / filtro
+## D — Asistencia de niños (P3)
 
 | # | Caso | Resultado |
 |---|------|-----------|
-| D1 | Filtro por tipo en listado (casa / estudio / culto) | ☐ |
-| D2 | Usuario solo `attendance:read` ve listado pero no crear/editar | ☐ |
-| D3 | Usuario sin `attendance:read` no entra a `/attendance` | ☐ |
+| D1 | Preset **Sesión de niños** abre el drawer con tipo `children` | ☐ |
+| D2 | No permite crear una sesión de niños sin seleccionar un ministerio | ☐ |
+| D3 | Crear sesión para un ministerio de niños redirige a su checklist | ☐ |
+| D4 | El checklist muestra solo perfiles infantiles (`is_child = true`) del roster, nunca adultos o líderes | ☐ |
+| D5 | Ministerio infantil sin niños registrados muestra un estado vacío claro | ☐ |
+| D6 | Marcar presente / ausente / tarde, guardar y reabrir preserva los estados | ☐ |
+| D7 | Una sesión de casa o estudio sigue mostrando el roster adulto habitual | ☐ |
 
-## E — Regresión corta
+## E — Permisos / filtro
 
 | # | Caso | Resultado |
 |---|------|-----------|
-| E1 | `/ministerios` CRUD (crear/editar/borrar) sigue OK | ☐ |
-| E2 | `/eventos` abre normal | ☐ |
-| E3 | `npm run build` exit 0 | ✅ (2026-07-14) |
+| E1 | Filtro por tipo en listado (casa / estudio / culto / niños) | ☐ |
+| E2 | Usuario solo `attendance:read` ve listado pero no crear/editar | ☐ |
+| E3 | Usuario sin `attendance:read` no entra a `/attendance` | ☐ |
+
+## F — Regresión corta
+
+| # | Caso | Resultado |
+|---|------|-----------|
+| F1 | `/ministerios` CRUD (crear/editar/borrar) sigue OK | ☐ |
+| F2 | `/eventos` abre normal | ☐ |
+| F3 | `npm run build` exit 0 | ☐ |
 
 ## Fuera de alcance (no fallar QA por esto)
 
-- Checklist solo-niños (**P3 — siguiente**)
 - Flutter (P4)
 - QR / KPIs / vínculo obligatorio a `/eventos`
 
 ## Criterio de cierre
 
-P2 + P2.x **cerrados** cuando A1–A8, B1–B6, C1–C5 y E3 estén OK en staging.  
-D2/D3 y C6/C7 recomendados pero no bloquean si el piloto es solo admin.
+P2 + P2.x + P3 **cerrados** cuando A1–A8, B1–B6, C1–C5, D1–D7 y F3 estén OK en staging.  
+E2/E3 y C6/C7 recomendados pero no bloquean si el piloto es solo admin.
 
-**Siguiente sprint:** P3 asistencia niños.
+**Siguiente sprint:** P4 asistencia móvil (Flutter), después de cerrar este piloto.

@@ -1553,6 +1553,10 @@
         "family_child": {
           "link": "A lié un enfant",
           "unlink": "A délié un enfant"
+        },
+        "spouse": {
+          "link": "A lié le conjoint",
+          "unlink": "A délié le conjoint"
         }
       },
       "finances": {
