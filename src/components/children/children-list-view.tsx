@@ -1,6 +1,7 @@
 "use client";
 
 import { churchPath } from "@/lib/apps/church-routes";
+import { ChildActionMenu } from "@/components/children/child-action-menu";
 import { ChildFormDrawer } from "@/components/children/child-form-drawer";
 import { Icons } from "@/components/icons";
 import { DataTable } from "@/components/ui/data-table";
@@ -9,7 +10,7 @@ import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
   childFullName,
   computeAgeYears,
-  guardianFullName,
+  resolveChildContact,
   summarizeAllergies,
 } from "@/lib/children/parse";
 import type { ChildListItem, ChildrenPagination } from "@/lib/children/types";
@@ -143,11 +144,22 @@ export function ChildrenListView({
             },
           },
           {
-            key: "guardians",
-            label: t("columnGuardians"),
-            className: "muted",
-            render: (child) =>
-              child.guardians.map((g) => guardianFullName(g)).join(", ") || "—",
+            key: "contact",
+            label: t("columnContact"),
+            render: (child) => {
+              const contact = resolveChildContact(child);
+              return (
+                <div>
+                  <div style={{ fontWeight: 500 }}>{contact.name || "—"}</div>
+                  <div className="tiny muted">
+                    {contact.phone || "—"}
+                    {contact.name && contact.source === "emergency" ? (
+                      <span> · {t("contactEmergencyBadge")}</span>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            },
           },
           {
             key: "allergies",
@@ -159,25 +171,16 @@ export function ChildrenListView({
         rows={children}
         rowKey={(child) => child.childId}
         actions={(child) => (
-          <div className="row" style={{ gap: 6 }}>
-            <Link
-              href={churchPath(`/members/children/${child.childId}`)}
-              className="btn ghost sm"
-            >
-              {t("viewChild")}
-            </Link>
-            {canWrite ? (
-              <button
-                type="button"
-                className="btn outline sm"
-                onClick={() => setFormState({ mode: "edit", child })}
-              >
-                {tCommon("edit")}
-              </button>
-            ) : null}
-          </div>
+          <ChildActionMenu
+            childId={child.childId}
+            onEdit={
+              canWrite
+                ? () => setFormState({ mode: "edit", child })
+                : undefined
+            }
+          />
         )}
-        actionsPosition="end"
+        actionsPosition="start"
         actionsLabel={tCommon("actions")}
         empty={<div className="muted">{t("empty")}</div>}
       />

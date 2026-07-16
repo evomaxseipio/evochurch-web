@@ -1,0 +1,344 @@
+/* Cierre semanal de diezmos — mismo lenguaje visual que CEAD / Concilio */
+
+.tithe-close-dash .tithe-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  background: var(--cead-paper);
+  border: 1px solid var(--cead-border);
+  border-radius: var(--cead-radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: var(--cead-shadow);
+}
+
+.tithe-close-dash .tithe-week-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tithe-close-dash .tithe-week-nav button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--cead-border);
+  background: var(--cead-bg);
+  color: var(--cead-navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tithe-close-dash .tithe-week-nav button:hover:not(:disabled) {
+  background: var(--cead-blue-bg);
+  border-color: #c7d7fe;
+}
+
+.tithe-close-dash .tithe-week-nav button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tithe-close-dash .tithe-week-label {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cead-navy);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.tithe-close-dash .tithe-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.tithe-close-dash .tithe-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tithe-close-dash .tithe-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.tithe-close-dash .tithe-status.is-open {
+  background: var(--cead-blue-bg);
+  color: var(--cead-blue);
+}
+
+.tithe-close-dash .tithe-status.is-closed {
+  background: var(--cead-green-bg);
+  color: var(--cead-green);
+}
+
+.tithe-close-dash .tithe-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.tithe-close-dash .tithe-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tithe-close-dash .tithe-btn-ghost {
+  background: var(--cead-paper);
+  border-color: var(--cead-border);
+  color: var(--cead-navy);
+}
+
+.tithe-close-dash .tithe-btn-ghost:hover:not(:disabled) {
+  background: var(--cead-bg);
+}
+
+.tithe-close-dash .tithe-btn-primary {
+  background: var(--cead-navy);
+  color: #fff;
+}
+
+.tithe-close-dash .tithe-btn-primary:hover:not(:disabled) {
+  background: #162248;
+}
+
+.tithe-close-dash .tithe-kpis {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.tithe-close-dash .tithe-alloc-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+  align-items: stretch;
+}
+
+.tithe-close-dash .tithe-alloc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tithe-close-dash .tithe-alloc-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--cead-border);
+  border-radius: 10px;
+  background: var(--cead-bg);
+}
+
+.tithe-close-dash .tithe-alloc-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  grid-column: 1 / -1;
+}
+
+.tithe-close-dash .tithe-alloc-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cead-text);
+}
+
+.tithe-close-dash .tithe-alloc-pct {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cead-text-2);
+  letter-spacing: 0.02em;
+}
+
+.tithe-close-dash .tithe-alloc-amount {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--cead-navy);
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+}
+
+.tithe-close-dash .tithe-alloc-bar {
+  grid-column: 1;
+  grid-row: 2;
+  height: 8px;
+  border-radius: 999px;
+  background: #e8ebf2;
+  overflow: hidden;
+}
+
+.tithe-close-dash .tithe-alloc-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.tithe-close-dash .tithe-alloc-swatch-0 { background: #15803d; }
+.tithe-close-dash .tithe-alloc-swatch-1 { background: #c2660a; }
+.tithe-close-dash .tithe-alloc-swatch-2 { background: #2563eb; }
+.tithe-close-dash .tithe-alloc-swatch-3 { background: #1e2a5e; }
+
+.tithe-close-dash .tithe-compose {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px 22px;
+  min-height: 100%;
+}
+
+.tithe-close-dash .tithe-compose-title {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cead-text-muted);
+}
+
+.tithe-close-dash .tithe-compose-track {
+  display: flex;
+  height: 28px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--cead-border);
+}
+
+.tithe-close-dash .tithe-compose-seg {
+  height: 100%;
+  min-width: 2px;
+}
+
+.tithe-close-dash .tithe-compose-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tithe-close-dash .tithe-compose-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--cead-text-2);
+}
+
+.tithe-close-dash .tithe-compose-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tithe-close-dash .tithe-empty {
+  text-align: center;
+  padding: 48px 28px;
+}
+
+.tithe-close-dash .tithe-empty h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cead-navy);
+}
+
+.tithe-close-dash .tithe-empty p {
+  margin: 0 0 18px;
+  color: var(--cead-text-2);
+  font-size: 14px;
+}
+
+.tithe-close-dash .tithe-empty-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tithe-close-dash .tithe-loading {
+  padding: 64px 24px;
+  text-align: center;
+  color: var(--cead-text-2);
+}
+
+.tithe-close-dash .tithe-note {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--cead-border);
+  background: var(--cead-orange-bg);
+  color: var(--cead-orange);
+  font-size: 12.5px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tithe-close-dash .tithe-note.is-closed {
+  background: var(--cead-green-bg);
+  color: var(--cead-green);
+  border-color: #c6e9d2;
+}
+
+.tithe-close-dash .tithe-note p {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .tithe-close-dash .tithe-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .tithe-close-dash .tithe-alloc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .tithe-close-dash .tithe-toolbar {
+    display: none !important;
+  }
+
+  .tithe-close-dash .tithe-note {
+    break-inside: avoid;
+  }
+}

@@ -177,7 +177,9 @@ function pageHasTransactionsModule({ status, text }) {
 
 function pageHasTitheCloseModule({ status, text }) {
   if (status !== 200 || isNextErrorPage(text)) return false;
-  return /tithe-close|titheClose|Cierre de diezmos|Cierre semanal/i.test(text);
+  return /tithe-weekly-close|titheClose|Cierre de diezmos|Cierre semanal|Weekly tithe close/i.test(
+    text,
+  );
 }
 
 function pageHasMinistriesModule({ status, text }) {
@@ -492,10 +494,10 @@ async function main() {
         "high",
       );
 
-      const titheClose = await fetchPage("/finances/tithe-close", tesorero.auth);
+      const titheClose = await fetchPage("/reports", tesorero.auth);
       record(
         "PAGE-08",
-        "U-TESORERO /finances/tithe-close",
+        "U-TESORERO /reports (cierre semanal diezmos)",
         pageHasTitheCloseModule(titheClose) ? "PASS" : "FAIL",
         `status=${titheClose.status}`,
         "high",
@@ -503,7 +505,7 @@ async function main() {
     } else {
       record("PAGE-04", "U-TESORERO /settings/users", "BLOCKED", "sin U-TESORERO", "critical");
       record("PAGE-05", "U-TESORERO /finances/transactions", "BLOCKED", "sin U-TESORERO", "high");
-      record("PAGE-08", "U-TESORERO /finances/tithe-close", "BLOCKED", "sin U-TESORERO", "high");
+      record("PAGE-08", "U-TESORERO /reports (cierre semanal diezmos)", "BLOCKED", "sin U-TESORERO", "high");
     }
 
     if (lider?.auth) {
@@ -528,7 +530,7 @@ async function main() {
       const titheClose = await fetchPage("/finances/tithe-close", lider.auth);
       record(
         "PAGE-09",
-        "U-LIDER /finances/tithe-close",
+        "U-LIDER /finances/tithe-close (redirige; denegado sin permiso)",
         pageAccessDenied(titheClose) ? "PASS" : "FAIL",
         `status=${titheClose.status}`,
         "high",

@@ -21,7 +21,10 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | [BACKLOG-POST-REUNION-JUL2026.md](./BACKLOG-POST-REUNION-JUL2026.md) | **Backlog post-reunión** — P0–P5 priorizado (operar ahora) |
 | [AGENT-PROMPT-PASTORAL-EVENTS.md](./AGENT-PROMPT-PASTORAL-EVENTS.md) | **P0** — eventos pastorales del miembro (timeline) |
 | [AGENT-PROMPT-CHILDREN-REGISTRY.md](./AGENT-PROMPT-CHILDREN-REGISTRY.md) | **P1** — registro de niños + tutores |
-| [ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md](./ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md) | **P2** — análisis + ejecución motor de asistencia *(siguiente)* |
+| [ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md](./ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md) | **P2** — análisis + ejecución motor de asistencia |
+| [AGENT-PROMPT-MINISTRY-CATEGORIES-CRUD.md](./AGENT-PROMPT-MINISTRY-CATEGORIES-CRUD.md) | **P2.x** — CRUD categorías de ministerios por iglesia *(actual)* |
+| [QA-ATTENDANCE-P2.md](./QA-ATTENDANCE-P2.md) | QA P2 + P2.x — checklist staging |
+| [AGENT-PROMPT-CHILDREN-ATTENDANCE.md](./AGENT-PROMPT-CHILDREN-ATTENDANCE.md) | **P3** — asistencia de niños *(siguiente)* |
 | [DEBATE-MODULO-DESCUENTOS-DIEZMO.md](./DEBATE-MODULO-DESCUENTOS-DIEZMO.md) | **Debate + MVP** — plantillas descuento vinculadas a reportes |
 | [AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md](./AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md) | **Fase 3 diezmo semanal** — cierre domingo–domingo, PDF, snapshot (`feat/tithe-weekly-allocation`) |
 

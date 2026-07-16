@@ -16,11 +16,6 @@ const TABS = [
     href: churchPath("/finances/contributions"),
     labelKey: "tabs.contributions",
   },
-  {
-    id: "tithe-close",
-    href: churchPath("/finances/tithe-close"),
-    labelKey: "tabs.titheClose",
-  },
 ] as const;
 
 export type FinancesTabId = (typeof TABS)[number]["id"];

@@ -100,6 +100,7 @@
     "configUsers": "Configuración usuarios",
     "expenseTypes": "Tipos de gasto",
     "incomeTypes": "Tipos de ingreso",
+    "ministryCategories": "Categorías de ministerios",
     "churchProfile": "Perfil de iglesia",
     "discountTemplates": "Plantillas de descuento",
     "network": "Red de iglesias",
@@ -118,7 +119,8 @@
     "crumbConfigUsers": "Configuración usuarios",
     "searchPlaceholder": "Buscar miembros, transacciones, eventos…",
     "membersAdults": "Hermanos y visitas",
-    "childrenRegistry": "Registro de niños"
+    "childrenRegistry": "Registro de niños",
+    "attendance": "Asistencia"
   },
   "auth": {
     "welcomeBack": "Bienvenido de nuevo",
@@ -673,27 +675,32 @@
     "dateOfBirth": "Fecha de nacimiento",
     "allergies": "Alergias",
     "allergiesPlaceholder": "Ej. Penicilina, Maní…",
-    "emergencyContactName": "Contacto de emergencia",
-    "emergencyContactPhone": "Teléfono de emergencia",
+    "emergencyContactName": "Nombre de contacto",
+    "emergencyContactPhone": "Teléfono",
+    "emergencySectionTitle": "Contacto de emergencia",
+    "emergencyHint": "Obligatorio: quién llamar y ubicar si ocurre algo (p. ej. escuela de verano u otra actividad).",
     "guardiansLabel": "Tutores / padres",
-    "guardiansHint": "Selecciona al menos un adulto de la iglesia como tutor.",
+    "guardiansHint": "Opcional. Solo si el adulto ya está registrado como miembro o visita. Sin tutor puedes registrar al niño con el contacto de emergencia.",
     "relationshipLabel": "Relación",
     "primaryGuardian": "Tutor principal",
     "removeGuardian": "Quitar tutor",
-    "searchGuardian": "Buscar adultos…",
+    "searchGuardian": "Buscar adultos registrados…",
+    "noAdultMatches": "No hay adultos disponibles",
     "guardiansSelected": "{count, plural, one {# tutor seleccionado} other {# tutores seleccionados}} · buscar más…",
     "searchPlaceholder": "Buscar por nombre o tutor…",
     "empty": "No hay niños registrados.",
     "columnName": "Nombre",
     "columnAge": "Edad",
     "columnGuardians": "Tutores",
+    "columnContact": "Contacto",
+    "contactEmergencyBadge": "emergencia",
     "columnAllergies": "Alergias",
     "ageYears": "{age} años",
     "recordsNoun": "niños",
     "sectionHealth": "Salud",
     "sectionEmergency": "Emergencia",
     "sectionGuardians": "Tutores",
-    "noGuardians": "Sin tutores asignados.",
+    "noGuardians": "Sin tutores vinculados (válido si solo tienes contacto de emergencia).",
     "savedCreate": "Niño registrado correctamente.",
     "savedUpdate": "Registro actualizado correctamente.",
     "savedDelete": "Registro de niño eliminado.",
@@ -706,8 +713,9 @@
       "other": "Otro"
     },
     "errors": {
-      "invalidForm": "Completa los campos obligatorios y asigna al menos un tutor.",
+      "invalidForm": "Completa los campos obligatorios, incluido el contacto de emergencia.",
       "guardianRequired": "Debes asignar al menos un tutor adulto.",
+      "emergencyRequired": "Indica el nombre y teléfono de contacto de emergencia.",
       "invalidGuardian": "Uno o más tutores no son válidos.",
       "saveFailed": "No se pudo guardar el registro del niño.",
       "deleteFailed": "No se pudo eliminar el registro del niño."
@@ -955,9 +963,14 @@
     "leadersCount": "{count, plural, one {# líder} other {# líderes}}",
     "noLeaders": "Sin líderes asignados",
     "noMembersMatchSearch": "Ningún miembro coincide con la búsqueda.",
+    "noPeopleMatchSearch": "Ninguna persona coincide con la búsqueda.",
     "membersCount": "{count, plural, one {# miembro} other {# miembros}}",
-    "searchMember": "Buscar miembro…",
+    "searchMember": "Buscar en el equipo…",
+    "searchRosterHint": "Esta búsqueda filtra el equipo actual. Usa «Agregar miembro» para incluir a alguien nuevo (adultos o niños).",
     "addMember": "Agregar miembro",
+    "childBadge": "Niño/a",
+    "viewChild": "Ver ficha",
+    "memberFallbackRole": "Miembro",
     "servingTogether": "Sirviendo juntos para edificar el Reino de Dios.",
     "assignLeaders": "Asignar líderes",
     "viewEvents": "Ver eventos",
@@ -975,6 +988,9 @@
     "descriptionPlaceholder": "Propósito y alcance del ministerio…",
     "leadersPlaceholderEmpty": "Buscar líderes…",
     "leadersPlaceholderSelected": "{count, plural, one {# líder seleccionado} other {# líderes seleccionados}}",
+    "membersPlaceholderEmpty": "Buscar miembros o niños…",
+    "membersPlaceholderSelected": "{count, plural, one {# persona seleccionada} other {# personas seleccionadas}} · buscar más…",
+    "membersIncludeChildrenHelp": "Puedes agregar adultos y niños del registro infantil (útil para ministerios como EBDV).",
     "savedCreate": "Ministerio creado correctamente.",
     "savedUpdate": "Ministerio actualizado correctamente.",
     "leaderRequired": "Selecciona al menos un líder",
@@ -1008,6 +1024,17 @@
       "editForMinistry": "Editar fondo · {name}",
       "ministryOptional": "Ministerio (opcional)",
       "churchFund": "Fondo general de iglesia"
+    },
+    "categoryLabel": "Categoría",
+    "categoryHelp": "Agrupa casas, células, discipulado, niños u adoración para filtrar y para asistencia.",
+    "categoryAll": "Todas las categorías",
+    "category": {
+      "discipleship": "Discipulado",
+      "house_group": "Casas fuente",
+      "cell_group": "Célula",
+      "children": "Niños",
+      "worship": "Adoración / culto",
+      "other": "Otro"
     }
   },
   "settings": {
@@ -1338,6 +1365,7 @@
     "incomeTypes": "Tipos de ingreso",
     "expenseTypes": "Tipos de gasto",
     "configFinances": "Configuración · Finanzas",
+    "configMinistries": "Configuración · Ministerios",
     "deleteType": "¿Eliminar \"{name}\"?",
     "namePlaceholder": "Ej. Servicios básicos",
     "descPlaceholder": "¿Qué tipo de movimientos cubre?",
@@ -1362,6 +1390,13 @@
       "entityLabel": "Tipo de ingreso",
       "newLabel": "Nuevo tipo de ingreso",
       "activeHint": "Si está inactivo, no aparecerá al registrar nuevos ingresos operacionales."
+    },
+    "ministryCategories": {
+      "title": "Categorías de ministerios",
+      "subtitle": "Clasifica ministerios (discipulado, casas, células, niños…) para filtros y asistencia.",
+      "entityLabel": "Categoría de ministerio",
+      "newLabel": "Nueva categoría",
+      "activeHint": "Si está inactiva, no aparecerá al crear o editar ministerios."
     }
   },
   "roles": {
@@ -1411,7 +1446,8 @@
       "admin_users": "Usuarios con acceso a la consola web",
       "roles": "Matriz de roles y permisos por iglesia",
       "audit": "Bitácora de acciones administrativas",
-      "reports": "Informes financieros, membresía y ejecutivos"
+      "reports": "Informes financieros, membresía y ejecutivos",
+      "attendance": "Sesiones y lista de asistencia por ministerio"
     },
     "financeResources": {
       "funds": "Fondos",
@@ -1452,7 +1488,7 @@
         },
         "tithe_close": {
           "read": "Ver cierre semanal de diezmos",
-          "write": "Cerrar semana y exportar cierre de diezmos"
+          "write": "Cerrar semana de diezmos"
         }
       },
       "members": {
@@ -1491,6 +1527,11 @@
           "write": "Editar tipos de ingreso",
           "delete": "Eliminar tipos de ingreso"
         },
+        "ministry_categories": {
+          "read": "Ver categorías de ministerios",
+          "write": "Editar categorías de ministerios",
+          "delete": "Eliminar categorías de ministerios"
+        },
         "church": {
           "read": "Ver perfil de iglesia",
           "write": "Editar perfil de iglesia"
@@ -1513,6 +1554,10 @@
       "audit": {
         "read": "Ver bitácora de acciones",
         "export": "Exportar bitácora"
+      },
+      "attendance": {
+        "read": "Ver asistencia",
+        "write": "Crear sesiones y marcar asistencia"
       }
     },
     "notes": {
@@ -1548,7 +1593,8 @@
       "admin_users": "Usuarios sistema",
       "roles": "Roles",
       "auth": "Autenticación",
-      "reports": "Reportes"
+      "reports": "Reportes",
+      "attendance": "Asistencia"
     },
     "actions": {
       "create": "Creó",
@@ -1649,6 +1695,16 @@
         "deactivate": "Desactivó reporte: {reportId}",
         "template_enable": "Activó plantillas en reporte: {reportId}",
         "template_disable": "Desactivó plantillas en reporte: {reportId}"
+      },
+      "attendance": {
+        "session": {
+          "create": "Creó sesión de asistencia ({activity_type})",
+          "update": "Actualizó sesión de asistencia ({activity_type})",
+          "delete": "Eliminó sesión de asistencia"
+        },
+        "records": {
+          "update": "Actualizó registros de asistencia ({count})"
+        }
       }
     },
     "filters": {
@@ -1771,6 +1827,11 @@
         "title": "Familias",
         "description": "Hogares derivados de vínculos familiares (cónyuge e hijos) para pastoral e impresión.",
         "rolesHint": "Secretario, Pastor, Admin"
+      },
+      "tithe-weekly-close": {
+        "title": "Cierre semanal de diezmos",
+        "description": "Resumen de diezmos por semana (domingo a domingo) y reparto según plantilla activa.",
+        "rolesHint": "Tesorero, Admin"
       }
     },
     "families": {
@@ -2067,6 +2128,25 @@
         "totalMovements": "Total movimientos",
         "regulationNote": "Los envíos al Concilio deben remitirse del 1 al 5 de cada mes según el reglamento vigente."
       },
+      "titheClose": {
+        "title": "CIERRE SEMANAL DE DIEZMOS",
+        "periodHint": "Período domingo a domingo",
+        "generatedAt": "Generado el",
+        "status": "Estado",
+        "kpiContributions": "Contribuciones",
+        "kpiContributionsHint": "Registros de diezmo en la semana",
+        "kpiWeekStatus": "Estado de la semana",
+        "kpiOpenHint": "Lista para revisar y cerrar",
+        "kpiClosedHint": "Snapshot guardado · solo lectura",
+        "sectionAllocation": "REPARTO SEGÚN PLANTILLA",
+        "sectionComposition": "COMPOSICIÓN DEL REPARTO",
+        "compositionHint": "Distribución del total de diezmos",
+        "sectionContributions": "DETALLE DE CONTRIBUCIONES",
+        "amountRd": "MONTO (RD$)",
+        "totalBase": "TOTAL DIEZMOS",
+        "noTemplateTitle": "Plantilla de diezmo requerida",
+        "openFootnote": "Esta semana sigue abierta. Al cerrarla se guarda un snapshot del reparto para auditoría; el tesorero mueve los fondos por fuera."
+      },
       "membershipDirectory": {
         "title": "REPORTE DE MIEMBROS",
         "pastor": "Pastor",
@@ -2232,5 +2312,76 @@
   "placeholder": {
     "comingSoon": "Próximamente",
     "nextPhase": "Esta pantalla se implementará en la siguiente fase del diseño."
+  },
+  "attendance": {
+    "eyebrow": "Operación",
+    "title": "Asistencia",
+    "subtitle": "Registra quién estuvo presente por casa, estudio, niños u otra actividad del ministerio.",
+    "newSession": "Nueva sesión",
+    "editSession": "Editar sesión",
+    "sessionDetails": "Detalles de la sesión",
+    "sessionCreated": "Sesión creada",
+    "sessionUpdated": "Sesión actualizada",
+    "sessionDeleted": "Sesión eliminada",
+    "recordsSaved": "Asistencia guardada",
+    "openChecklist": "Pasar lista",
+    "backToList": "Volver a asistencia",
+    "checklistEyebrow": "Lista del día",
+    "markAllPresent": "Todos presentes",
+    "saveRecords": "Guardar asistencia",
+    "empty": "No hay sesiones todavía. Crea una de casa, estudio o niños para empezar.",
+    "emptyRoster": "Este ministerio no tiene miembros en el roster. Agrégalos en Ministerios y vuelve.",
+    "emptyChildrenRoster": "No hay niños registrados en la iglesia. Regístralos en Miembros → Niños y vuelve.",
+    "childrenRosterChurchHint": "Agrega niños al roster del ministerio para acotar la lista.",
+    "ageYears": "{age} años",
+    "searchPlaceholder": "Buscar por título, ministerio o tipo…",
+    "loadingChecklist": "Cargando lista…",
+    "searchDisabled": "Filtro por tipo",
+    "filterType": "Tipo",
+    "deleteConfirmTitle": "¿Eliminar sesión?",
+    "deleteConfirmBody": "Se borrarán la sesión y todos sus registros de asistencia.",
+    "presets": {
+      "house_group": "Sesión de casa",
+      "bible_study": "Sesión de estudio",
+      "children": "Sesión de niños"
+    },
+    "activityType": {
+      "house_group": "Casa fuente",
+      "bible_study": "Estudio bíblico",
+      "children": "Niños",
+      "service": "Culto / servicio"
+    },
+    "status": {
+      "present": "Presente",
+      "absent": "Ausente",
+      "late": "Tarde"
+    },
+    "fields": {
+      "date": "Fecha",
+      "activityType": "Tipo de actividad",
+      "ministry": "Ministerio / grupo",
+      "title": "Título",
+      "titlePlaceholder": "Opcional, ej. Casa Norte — semana 12",
+      "notes": "Notas"
+    },
+    "columns": {
+      "date": "Fecha",
+      "type": "Tipo",
+      "ministry": "Ministerio",
+      "title": "Título",
+      "present": "Presentes",
+      "marked": "Marcados",
+      "member": "Persona",
+      "status": "Estado"
+    },
+    "errors": {
+      "invalidForm": "Revisa fecha, tipo y ministerio.",
+      "saveFailed": "No se pudo guardar la sesión.",
+      "deleteFailed": "No se pudo eliminar la sesión.",
+      "saveRecordsFailed": "No se pudo guardar la asistencia.",
+      "emptyRecords": "No hay registros para guardar.",
+      "ministryRequired": "Elige el ministerio o grupo.",
+      "dateRequired": "La fecha es obligatoria."
+    }
   }
 }

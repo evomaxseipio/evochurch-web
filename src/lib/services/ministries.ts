@@ -1,6 +1,7 @@
 import { catalogTags } from "@/lib/cache/catalog-tags";
 import { parseMinistryRows } from "@/lib/ministries/parse";
 import type { Ministry, MinistryFormInput } from "@/lib/ministries/types";
+import { isMinistryCategory } from "@/lib/ministries/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
 
@@ -8,6 +9,8 @@ const MINISTRY_COLORS = new Set(["violet", "lila", "green"]);
 
 const MINISTRY_COLUMNS_BASE =
   "id, name, descripcion, is_active, leader_profile_ids, member_profile_ids, color, is_featured, created_at";
+
+const MINISTRY_COLUMNS_WITH_CATEGORY = `${MINISTRY_COLUMNS_BASE}, ministry_category`;
 
 function isMissingColumnError(
   error: { message?: string; code?: string },
@@ -36,23 +39,37 @@ export async function fetchMinistries(
           .order("name");
 
       let { data, error } = await buildQuery(
-        `${MINISTRY_COLUMNS_BASE}, default_fund_id`,
+        `${MINISTRY_COLUMNS_WITH_CATEGORY}, default_fund_id`,
       );
 
+      if (error && isMissingColumnError(error, "ministry_category")) {
+        ({ data, error } = await buildQuery(
+          `${MINISTRY_COLUMNS_BASE}, default_fund_id`,
+        ));
+      }
+
       if (error && isMissingColumnError(error, "default_fund_id")) {
-        ({ data, error } = await buildQuery(MINISTRY_COLUMNS_BASE));
+        ({ data, error } = await buildQuery(MINISTRY_COLUMNS_WITH_CATEGORY));
+        if (error && isMissingColumnError(error, "ministry_category")) {
+          ({ data, error } = await buildQuery(MINISTRY_COLUMNS_BASE));
+        }
       }
 
       if (error) throw error;
       return parseMinistryRows(data);
     },
-    ["catalog:ministries", "v4", String(churchId)],
+    ["catalog:ministries", "v5", String(churchId)],
     { tags: [catalogTags.ministries(churchId)], revalidate: 300 },
   )();
 }
 
 function normalizeColor(color: string): Ministry["color"] {
   return MINISTRY_COLORS.has(color) ? (color as Ministry["color"]) : "violet";
+}
+
+function normalizeCategory(category: string): Ministry["category"] {
+  const trimmed = category.trim();
+  return isMinistryCategory(trimmed) ? trimmed : "other";
 }
 
 export async function saveMinistry(
@@ -67,6 +84,7 @@ export async function saveMinistry(
     church_id: churchId,
     name,
     descripcion: input.description.trim(),
+    ministry_category: normalizeCategory(input.category),
     is_active: input.isActive,
     leader_profile_ids: input.leaderProfileIds,
     member_profile_ids: input.memberProfileIds,

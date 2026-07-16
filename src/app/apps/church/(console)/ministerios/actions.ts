@@ -10,7 +10,12 @@ import {
   revalidateMinistriesCatalog,
   revalidateFundsCatalog,
 } from "@/lib/cache/catalog-tags";
-import type { MinistryColor, MinistryFormInput } from "@/lib/ministries/types";
+import type {
+  MinistryCategory,
+  MinistryColor,
+  MinistryFormInput,
+} from "@/lib/ministries/types";
+import { isMinistryCategory } from "@/lib/ministries/types";
 import {
   deleteMinistry,
   saveMinistry,
@@ -69,11 +74,16 @@ function parseMinistryInput(formData: FormData): MinistryFormInput & {
 } {
   const id = String(formData.get("id") ?? "").trim() || null;
   const color = String(formData.get("color") ?? "violet") as MinistryColor;
+  const categoryRaw = String(formData.get("category") ?? "other").trim();
+  const category: MinistryCategory = isMinistryCategory(categoryRaw)
+    ? categoryRaw
+    : "other";
 
   return {
     id,
     name: String(formData.get("name") ?? "").trim(),
     description: String(formData.get("description") ?? "").trim(),
+    category,
     leaderProfileIds: parseProfileIds(
       String(formData.get("leaderProfileIds") ?? "").trim(),
     ),
@@ -115,6 +125,7 @@ export async function saveMinistryAction(
     await saveMinistry(supabase, churchId, input);
     revalidateMinistriesCatalog(churchId);
     revalidatePath(churchPath("/ministerios"));
+    revalidatePath(churchPath("/attendance"));
     return { ok: true };
   } catch (e) {
     return {

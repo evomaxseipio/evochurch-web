@@ -81,6 +81,11 @@ export const SETTINGS_RESOURCE_DEFS = [
     actions: ["read", "write", "delete"],
   },
   {
+    key: "ministry_categories",
+    label: "Categorías de ministerios",
+    actions: ["read", "write", "delete"],
+  },
+  {
     key: "profile",
     label: "Configuración y perfil",
     actions: ["read"],
@@ -105,6 +110,9 @@ export const MODULE_MATRIX_RESOURCE_DEFS: Record<
   dashboard: [{ key: "dashboard", label: "Dashboard", actions: ["read"] }],
   members: [{ key: "members", label: "Miembros", actions: ["read", "write", "delete"] }],
   eventos: [{ key: "eventos", label: "Eventos", actions: ["read", "write", "write_own", "delete"] }],
+  attendance: [
+    { key: "attendance", label: "Asistencia", actions: ["read", "write"] },
+  ],
   comunicacion: [
     { key: "comunicacion", label: "Comunicación", actions: ["read", "write", "delete"] },
   ],
@@ -134,6 +142,7 @@ export const MODULE_LABELS: Record<string, string> = {
   members: "Miembros",
   ministerios: "Ministerios",
   eventos: "Eventos",
+  attendance: "Asistencia",
   comunicacion: "Comunicación",
   settings: "Configuración",
   admin_users: "Usuarios admin",
@@ -148,6 +157,7 @@ export const MODULE_ICONS: Record<string, keyof typeof Icons> = {
   members: "users",
   ministerios: "pin",
   eventos: "cal",
+  attendance: "pendingActions",
   comunicacion: "chat",
   settings: "settings",
   admin_users: "shield",
@@ -162,6 +172,7 @@ export const MODULE_COLORS: Record<string, string> = {
   members: "#2563EB",
   ministerios: "#9333EA",
   eventos: "#0891B2",
+  attendance: "#059669",
   comunicacion: "#DB2777",
   settings: "#64748B",
   admin_users: "#0891B2",
@@ -193,8 +204,13 @@ export function applyStandardPermissionRules(
   checked: boolean,
 ): void {
   const moduleKey = key.split(":")[0];
-  const crudModules = ["members", "eventos", "comunicacion"];
-  const settingsCatalogResources = ["expense_types", "income_types", "church"] as const;
+  const crudModules = ["members", "eventos", "comunicacion", "attendance"];
+  const settingsCatalogResources = [
+    "expense_types",
+    "income_types",
+    "ministry_categories",
+    "church",
+  ] as const;
 
   if (key.startsWith("reports:")) {
     const resource = key.split(":")[1];
@@ -249,9 +265,14 @@ export function applyStandardPermissionRules(
   }
 }
 
-const CRUD_MODULES = ["members", "eventos", "comunicacion"] as const;
+const CRUD_MODULES = ["members", "eventos", "comunicacion", "attendance"] as const;
 
-const SETTINGS_CATALOG_RESOURCES = ["expense_types", "income_types", "church"] as const;
+const SETTINGS_CATALOG_RESOURCES = [
+  "expense_types",
+  "income_types",
+  "ministry_categories",
+  "church",
+] as const;
 
 const FINANCE_RESOURCES = [
   "funds",

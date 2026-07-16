@@ -117,6 +117,16 @@ export const REPORT_CATALOG: ReportCatalogEntry[] = [
     periodKind: "none",
     rolesHint: "Secretario, Pastor, Admin",
   },
+  {
+    id: "tithe-weekly-close",
+    title: "Cierre semanal de diezmos",
+    description:
+      "Resumen de diezmos por semana (domingo a domingo) y reparto según plantilla activa.",
+    category: "financial",
+    formats: ["pdf"],
+    periodKind: "none",
+    rolesHint: "Tesorero, Admin",
+  },
 ];
 
 export const REPORT_CATEGORY_LABELS: Record<ReportCategory, string> = {

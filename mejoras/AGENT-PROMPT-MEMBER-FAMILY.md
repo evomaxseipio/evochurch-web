@@ -44,7 +44,7 @@ Eres ingeniero senior Next.js 16 + Postgres/Supabase multitenant. Extiende el **
 | 3 | **Cónyuge** = vínculo opcional entre dos perfiles adultos (`is_child = false`), misma iglesia. |
 | 4 | **Registrar hijo** desde Familia abre el **mismo drawer P1** con tutores sugeridos (adulto actual + cónyuge si hay). |
 | 5 | Permisos v1: **`members:read`** ver; **`members:write`** vincular cónyuge y acciones de hijos. |
-| 6 | **No** incluye hogar/dirección compartida en MVP (→ P1.3). |
+| 6 | **No** incluye hogar/dirección compartida en MVP — **may-have diferido** (familia + reporte bastan; no en backlog activo). |
 | 7 | **No** incluye hermanos entre niños ni graduación niño→miembro (→ backlog futuro). |
 | 8 | Jóvenes/adolescentes **miembros** siguen en listado adultos; solo menores del ministerio infantil en registro niños. |
 
@@ -68,7 +68,7 @@ Eres ingeniero senior Next.js 16 + Postgres/Supabase multitenant. Extiende el **
 
 ### Fuera de alcance P1.2
 
-- Tabla `household` / directorio por hogar (P1.3)
+- Hogar formal / dirección compartida — **may-have diferido** (fuera del backlog activo, 2026-07-14)
 - Reportes CEAD por familia
 - Flutter
 - Asistencia (P2/P3)

@@ -1,0 +1,12 @@
+---
+description: Idioma de comunicación con el usuario — español de República Dominicana
+alwaysApply: true
+---
+
+# Idioma — Español de República Dominicana
+
+- Responde siempre al usuario en **español de República Dominicana** (es-DO).
+- Tono claro, directo y natural; evita anglicismos innecesarios en la prosa (los términos técnicos de código, rutas y nombres de features pueden quedar en inglés cuando el repo los usa así: `attendance`, `ministry_id`, etc.).
+- Preferir formulaciones locales cuando aplique (ej. “ustedes”, “decir”, “montar”, “dejar listo”) sin caer en jerga que resté claridad en docs de producto.
+- Documentación en el repo (`.md`, PR, commits): español neutro/latinoamericano claro está bien; al **hablarle al usuario** en el chat, priorizar es-DO.
+- No asumir que el usuario quiere mensajes en inglés salvo que lo pida explícitamente.

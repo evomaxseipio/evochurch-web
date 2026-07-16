@@ -1,8 +1,12 @@
 import { MinistriesListView } from "@/components/ministries/ministries-list-view";
+import { childListItemAsMember } from "@/lib/children/parse";
 import { computeMinistryStats } from "@/lib/ministries/parse";
 import { requirePageAccess } from "@/lib/auth/require-page-access";
+import type { Member } from "@/lib/members/types";
+import { fetchAllChildren } from "@/lib/services/children";
 import { fetchMembersPage } from "@/lib/services/members";
 import { fetchMinistries } from "@/lib/services/ministries";
+import { fetchMinistryCategories } from "@/lib/services/ministry-categories";
 import { fetchFunds } from "@/lib/services/funds";
 import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
@@ -13,8 +17,9 @@ export default async function MinisteriosPage() {
 
   const supabase = await createClient();
   const loadErrors: string[] = [];
-  let members: Awaited<ReturnType<typeof fetchMembersPage>>["members"] = [];
+  let adults: Member[] = [];
   let ministries: Awaited<ReturnType<typeof fetchMinistries>> = [];
+  let categories: Awaited<ReturnType<typeof fetchMinistryCategories>> = [];
   let funds: Awaited<ReturnType<typeof fetchFunds>> = [];
 
   try {
@@ -24,7 +29,29 @@ export default async function MinisteriosPage() {
       pageSize: null,
       filter: "all",
     });
-    members = membersResult.members;
+    adults = membersResult.members;
+  } catch (e) {
+    loadErrors.push(
+      e instanceof Error ? e.message : tErrors("loadFailed"),
+    );
+  }
+
+  let childrenAsMembers: Member[] = [];
+  try {
+    const children = await fetchAllChildren(supabase, session.churchId);
+    childrenAsMembers = children.map((child) =>
+      childListItemAsMember(child, session.churchId),
+    );
+  } catch (e) {
+    loadErrors.push(
+      e instanceof Error ? e.message : tErrors("loadFailed"),
+    );
+  }
+
+  const members = [...adults, ...childrenAsMembers];
+
+  try {
+    ministries = await fetchMinistries(supabase, session.churchId);
   } catch (e) {
     loadErrors.push(
       e instanceof Error ? e.message : tErrors("loadFailed"),
@@ -32,7 +59,7 @@ export default async function MinisteriosPage() {
   }
 
   try {
-    ministries = await fetchMinistries(supabase, session.churchId);
+    categories = await fetchMinistryCategories(supabase, session.churchId);
   } catch (e) {
     loadErrors.push(
       e instanceof Error ? e.message : tErrors("loadFailed"),
@@ -80,6 +107,7 @@ export default async function MinisteriosPage() {
         stats={computeMinistryStats(ministries)}
         members={members}
         funds={funds}
+        categories={categories}
         permissions={session.permissions}
         profileId={session.profileId}
       />

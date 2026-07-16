@@ -32,20 +32,24 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DataTable } from "@/components/ui/data-table";
 import { FilterToolbar } from "@/components/ui/filter-toolbar";
 import { PaginationBar } from "@/components/ui/pagination-bar";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useActionToast } from "@/hooks/use-action-toast";
 import type { Member } from "@/lib/members/types";
 import {
   filterMinistries,
   formatMinistryDate,
+  labelForMinistryCategory,
   sortMinistriesForDisplay,
 } from "@/lib/ministries/parse";
 import { hasMinistryOperatingFund } from "@/lib/ministries/funds";
 import type {
   Ministry,
+  MinistryCategoryFilter,
   MinistryStats,
   MinistryStatusFilter,
   MinistryViewMode,
 } from "@/lib/ministries/types";
+import type { MinistryCategoryRow } from "@/lib/ministries/category-types";
 import type { Fund, FundKind } from "@/lib/funds/types";
 import type { IconName } from "@/components/icons";
 import { useRouter } from "next/navigation";
@@ -74,6 +78,7 @@ export function MinistriesListView({
   stats,
   members,
   funds,
+  categories,
   permissions,
   profileId,
 }: {
@@ -81,6 +86,7 @@ export function MinistriesListView({
   stats: MinistryStats;
   members: Member[];
   funds: Fund[];
+  categories: MinistryCategoryRow[];
   permissions: PermissionKey[];
   profileId: string;
 }) {
@@ -100,6 +106,16 @@ export function MinistriesListView({
       })),
     [tCommon],
   );
+  const categoryOptions = useMemo(
+    () => [
+      { value: "all", label: t("categoryAll") },
+      ...categories.map((cat) => ({
+        value: cat.code,
+        label: cat.name,
+      })),
+    ],
+    [t, categories],
+  );
   const canCreate = canCreateMinistryWith(permissions);
   const canViewProfiles = canReadMembersWith(permissions);
   const canManageFunds = canWriteFundsWith(permissions);
@@ -113,6 +129,8 @@ export function MinistriesListView({
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<MinistryStatusFilter>("all");
+  const [categoryFilter, setCategoryFilter] =
+    useState<MinistryCategoryFilter>("all");
   const [view, setView] = useState<MinistryViewMode>("grid");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState<PageSize>(10);
@@ -136,7 +154,7 @@ export function MinistriesListView({
 
   useEffect(() => {
     setPage(1);
-  }, [query, statusFilter, pageSize, view]);
+  }, [query, statusFilter, categoryFilter, pageSize, view]);
 
   useActionToast(deleteState, {
     successMessage: t("deleted"),
@@ -147,8 +165,15 @@ export function MinistriesListView({
   });
 
   const filtered = useMemo(
-    () => filterMinistries(ministries, query, statusFilter, members),
-    [ministries, query, statusFilter, members],
+    () =>
+      filterMinistries(
+        ministries,
+        query,
+        statusFilter,
+        members,
+        categoryFilter,
+      ),
+    [ministries, query, statusFilter, categoryFilter, members],
   );
 
   const sorted = useMemo(
@@ -239,6 +264,20 @@ export function MinistriesListView({
         filters={statusFilters}
         activeFilter={statusFilter}
         onFilterChange={setStatusFilter}
+        middle={
+          <SearchableSelect
+            compact
+            clearable={false}
+            options={categoryOptions}
+            value={categoryFilter}
+            onChange={(next) =>
+              setCategoryFilter((next || "all") as MinistryCategoryFilter)
+            }
+            placeholder={t("categoryLabel")}
+            ariaLabel={t("categoryLabel")}
+            emptyMessage={t("noMatches")}
+          />
+        }
         trailing={
           <>
             <div
@@ -286,7 +325,6 @@ export function MinistriesListView({
           </>
         }
       />
-
       {view === "grid" ? (
         <div className="grid-12">
           {pageRows.map((ministry) => (
@@ -294,6 +332,10 @@ export function MinistriesListView({
               key={ministry.id}
               ministry={ministry}
               members={members}
+              categoryLabel={labelForMinistryCategory(
+                ministry.category,
+                categories,
+              )}
               {...menuHandlers(ministry)}
             />
           ))}
@@ -314,7 +356,7 @@ export function MinistriesListView({
           )}
           empty={
             <tr>
-              <td colSpan={6} style={{ textAlign: "center", padding: 40 }} className="muted">
+              <td colSpan={7} style={{ textAlign: "center", padding: 40 }} className="muted">
                 {t("noMatches")}
               </td>
             </tr>
@@ -342,6 +384,12 @@ export function MinistriesListView({
                   </div>
                 </div>
               ),
+            },
+            {
+              key: "category",
+              label: t("categoryLabel"),
+              render: (row) =>
+                labelForMinistryCategory(row.category, categories),
             },
             {
               key: "status",
@@ -411,6 +459,7 @@ export function MinistriesListView({
         mode={formState?.mode ?? "new"}
         ministry={formState?.ministry ?? null}
         members={members}
+        categories={categories}
         open={formState != null}
         onClose={() => setFormState(null)}
         saveAction={saveMinistryAction}

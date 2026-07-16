@@ -8,9 +8,11 @@ import { useActionToast } from "@/hooks/use-action-toast";
 import type { Member } from "@/lib/members/types";
 import type {
   Ministry,
+  MinistryCategory,
   MinistryColor,
   MinistryFormInput,
 } from "@/lib/ministries/types";
+import type { MinistryCategoryRow } from "@/lib/ministries/category-types";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
@@ -30,10 +32,26 @@ type FormValues = MinistryFormInput;
 
 type FormErrors = Partial<Record<"name" | "leaderProfileIds", string>>;
 
-function ministryToFormValues(ministry: Ministry | null): FormValues {
+function defaultCategoryCode(
+  categories: MinistryCategoryRow[],
+  preferred?: string | null,
+): MinistryCategory {
+  if (preferred && categories.some((c) => c.code === preferred)) {
+    return preferred;
+  }
+  return categories.find((c) => c.code === "other")?.code
+    ?? categories[0]?.code
+    ?? "other";
+}
+
+function ministryToFormValues(
+  ministry: Ministry | null,
+  categories: MinistryCategoryRow[],
+): FormValues {
   return {
     name: ministry?.name ?? "",
     description: ministry?.description ?? "",
+    category: defaultCategoryCode(categories, ministry?.category),
     leaderProfileIds: ministry?.leaderProfileIds
       ? [...ministry.leaderProfileIds]
       : [],
@@ -48,6 +66,7 @@ export function MinistryFormDrawer({
   mode,
   ministry,
   members,
+  categories,
   open,
   onClose,
   saveAction,
@@ -55,6 +74,7 @@ export function MinistryFormDrawer({
   mode: "new" | "edit";
   ministry: Ministry | null;
   members: Member[];
+  categories: MinistryCategoryRow[];
   open: boolean;
   onClose: () => void;
   saveAction: (
@@ -68,15 +88,15 @@ export function MinistryFormDrawer({
   const initial: MinistryActionResult | null = null;
   const [state, formAction, pending] = useActionState(saveAction, initial);
   const [values, setValues] = useState<FormValues>(() =>
-    ministryToFormValues(ministry),
+    ministryToFormValues(ministry, categories),
   );
   const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     if (!open) return;
-    setValues(ministryToFormValues(ministry));
+    setValues(ministryToFormValues(ministry, categories));
     setErrors({});
-  }, [open, ministry]);
+  }, [open, ministry, categories]);
 
   useActionToast(state, {
     successMessage: mode === "new" ? t("savedCreate") : t("savedUpdate"),
@@ -87,6 +107,8 @@ export function MinistryFormDrawer({
   });
 
   if (!open) return null;
+
+  const categoryOptions = categories.filter((c) => c.isActive || c.code === values.category);
 
   const update = <K extends keyof FormValues>(key: K, value: FormValues[K]) => {
     setValues((current) => ({ ...current, [key]: value }));
@@ -105,6 +127,7 @@ export function MinistryFormDrawer({
     if (ministry?.id) fd.set("id", ministry.id);
     fd.set("name", values.name.trim());
     fd.set("description", values.description.trim());
+    fd.set("category", values.category);
     fd.set("leaderProfileIds", JSON.stringify(values.leaderProfileIds));
     fd.set("memberProfileIds", JSON.stringify(values.memberProfileIds));
     fd.set("color", values.color);
@@ -169,11 +192,34 @@ export function MinistryFormDrawer({
 
           <div className="field">
             <label>
+              {t("categoryLabel")}{" "}
+              <span style={{ color: "var(--danger)" }}>*</span>
+            </label>
+            <div className="input-wrap">
+              <select
+                value={values.category}
+                onChange={(event) =>
+                  update("category", event.target.value as MinistryCategory)
+                }
+              >
+                {categoryOptions.map((category) => (
+                  <option key={category.code} value={category.code}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="help">{t("categoryHelp")}</div>
+          </div>
+
+          <div className="field">
+            <label>
               {t("leaders")} <span style={{ color: "var(--danger)" }}>*</span>
             </label>
             <MemberCombobox
               selectedIds={values.leaderProfileIds}
               members={members}
+              adultsOnly
               onChange={(ids) => update("leaderProfileIds", ids)}
               placeholderEmpty={t("leadersPlaceholderEmpty")}
               placeholderSelected={(count) =>
@@ -191,7 +237,12 @@ export function MinistryFormDrawer({
               selectedIds={values.memberProfileIds}
               members={members}
               onChange={(ids) => update("memberProfileIds", ids)}
+              placeholderEmpty={t("membersPlaceholderEmpty")}
+              placeholderSelected={(count) =>
+                t("membersPlaceholderSelected", { count })
+              }
             />
+            <div className="help">{t("membersIncludeChildrenHelp")}</div>
           </div>
 
           <div className="field">

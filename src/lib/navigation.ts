@@ -96,13 +96,6 @@ export const MAIN_NAV: NavEntry[] = [
         icon: "wallet",
         permission: "finances:contributions:read",
       },
-      {
-        id: "tithe-close",
-        href: churchPath("/finances/tithe-close"),
-        labelKey: "titheClose",
-        icon: "wallet",
-        permission: "finances:tithe_close:read",
-      },
     ],
   },
   {
@@ -112,6 +105,13 @@ export const MAIN_NAV: NavEntry[] = [
     icon: "cal",
     badge: "3",
     permission: "eventos:read",
+  },
+  {
+    id: "asistencia",
+    href: churchPath("/attendance"),
+    labelKey: "attendance",
+    icon: "pendingActions",
+    permission: "attendance:read",
   },
   {
     id: "comunicacion",
@@ -157,6 +157,13 @@ export const CONFIG_NAV: NavEntry[] = [
         labelKey: "incomeTypes",
         icon: "trendUp",
         permission: "settings:income_types:read",
+      },
+      {
+        id: "categorias-ministerio",
+        href: churchPath("/settings/ministry-categories"),
+        labelKey: "ministryCategories",
+        icon: "pin",
+        permission: "settings:ministry_categories:read",
       },
       {
         id: "iglesia",
@@ -308,9 +315,11 @@ export const BREADCRUMB_KEYS: Record<string, [string, string]> = {
   transacciones: ["crumbFinances", "transactions"],
   contribuciones: ["crumbFinances", "contributions"],
   eventos: ["crumbAgenda", "eventos"],
+  asistencia: ["crumbAgenda", "attendance"],
   comunicacion: ["crumbConnection", "comunicacion"],
   gastos: ["crumbConfigSystem", "expenseTypes"],
   "ingresos-tipos": ["crumbConfigSystem", "incomeTypes"],
+  "categorias-ministerio": ["crumbConfigSystem", "ministryCategories"],
   iglesia: ["crumbConfigSystem", "churchProfile"],
   usuarios: ["crumbConfigUsers", "adminUsers"],
   roles: ["crumbConfigUsers", "roles"],
@@ -330,12 +339,15 @@ export function navIdFromPath(pathname: string): string {
   if (path.startsWith("/finances/contributions")) return "contribuciones";
   if (path.startsWith("/finances")) return "fondos";
   if (path.startsWith("/eventos")) return "eventos";
+  if (path.startsWith("/attendance")) return "asistencia";
   if (path.startsWith("/comunicacion")) return "comunicacion";
   if (path.startsWith("/reports")) return "reportes";
   if (path.startsWith("/network")) return "red";
   if (path.startsWith("/settings/users")) return "usuarios";
   if (path.startsWith("/settings/expenses")) return "gastos";
   if (path.startsWith("/settings/income-types")) return "ingresos-tipos";
+  if (path.startsWith("/settings/ministry-categories"))
+    return "categorias-ministerio";
   if (path.startsWith("/settings/church")) return "iglesia";
   if (path.startsWith("/settings/discount-templates")) return "descuentos";
   if (path.startsWith("/settings/roles")) return "roles";

@@ -20,6 +20,7 @@ const ministry: Ministry = {
   id: "min-1",
   name: "Caballeros",
   description: "",
+  category: "other",
   leaderProfileIds: [],
   memberProfileIds: [],
   color: "violet",

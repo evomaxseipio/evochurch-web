@@ -2,10 +2,13 @@ import { memberFullName } from "@/lib/members/parse";
 import type { Member } from "@/lib/members/types";
 import type {
   Ministry,
+  MinistryCategory,
+  MinistryCategoryFilter,
   MinistryColor,
   MinistryStats,
   MinistryStatusFilter,
 } from "./types";
+import { isMinistryCategory } from "./types";
 
 const MINISTRY_COLORS = new Set<MinistryColor>(["violet", "lila", "green"]);
 
@@ -32,6 +35,19 @@ export function profileIds(value: unknown): string[] {
   return [];
 }
 
+function parseCategory(value: unknown): MinistryCategory {
+  const raw = String(value ?? "other").trim();
+  return isMinistryCategory(raw) ? raw : "other";
+}
+
+export function labelForMinistryCategory(
+  code: string,
+  categories: readonly { code: string; name: string }[],
+): string {
+  const found = categories.find((c) => c.code === code);
+  return found?.name?.trim() || code;
+}
+
 export function parseMinistryRow(row: unknown): Ministry | null {
   const record = asRecord(row);
   if (!record) return null;
@@ -53,6 +69,11 @@ export function parseMinistryRow(row: unknown): Ministry | null {
     id,
     name,
     description: String(record.descripcion ?? record.description ?? "").trim(),
+    category: parseCategory(
+      record.ministry_category ??
+        (record as { ministryCategory?: unknown }).ministryCategory ??
+        record.category,
+    ),
     leaderProfileIds: profileIds(
       record.leader_profile_ids ??
         (record as { leaderProfileIds?: unknown }).leaderProfileIds ??
@@ -174,12 +195,14 @@ export function filterMinistries(
   query: string,
   status: MinistryStatusFilter,
   members: Member[],
+  category: MinistryCategoryFilter = "all",
 ): Ministry[] {
   const q = query.trim().toLowerCase();
 
   return items.filter((item) => {
     if (status === "active" && !item.isActive) return false;
     if (status === "inactive" && item.isActive) return false;
+    if (category !== "all" && item.category !== category) return false;
 
     if (!q) return true;
 
@@ -187,6 +210,7 @@ export function filterMinistries(
     return (
       item.name.toLowerCase().includes(q) ||
       item.description.toLowerCase().includes(q) ||
+      item.category.toLowerCase().includes(q) ||
       leaders.includes(q)
     );
   });
@@ -199,4 +223,23 @@ export function sortMinistriesForDisplay(items: Ministry[]): Ministry[] {
     }
     return a.name.localeCompare(b.name, "es");
   });
+}
+
+/** Prefer ministries matching suggested category codes (listed first); fall back to full active list. */
+export function ministriesForAttendancePicker(
+  items: Ministry[],
+  preferredCategories: MinistryCategory | readonly MinistryCategory[] | null,
+): Ministry[] {
+  const active = items.filter((m) => m.isActive);
+  const preferred = !preferredCategories
+    ? []
+    : Array.isArray(preferredCategories)
+      ? preferredCategories
+      : [preferredCategories];
+  if (preferred.length === 0) return active;
+  const preferredSet = new Set(preferred);
+  const matched = active.filter((m) => preferredSet.has(m.category));
+  if (matched.length === 0) return active;
+  const others = active.filter((m) => !preferredSet.has(m.category));
+  return [...matched, ...others];
 }

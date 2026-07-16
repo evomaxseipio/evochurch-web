@@ -1,6 +1,9 @@
 import type { PermissionKey } from "@/lib/auth/permission-keys";
 
-export type SettingsCatalogResource = "expense_types" | "income_types";
+export type SettingsCatalogResource =
+  | "expense_types"
+  | "income_types"
+  | "ministry_categories";
 
 export function settingsCatalogPermissionKey(
   resource: SettingsCatalogResource,

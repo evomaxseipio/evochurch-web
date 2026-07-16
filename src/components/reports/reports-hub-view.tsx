@@ -1,6 +1,7 @@
 "use client";
 
 import { generateReportAction, previewConcilioF001Action, previewFinancialMonthlyCeadAction, previewMembershipDirectoryAction, previewReportAction, submitConcilioReportAction, toggleReportTemplateAction } from "@/app/apps/church/(console)/reports/actions";
+import { exportTitheClosePdfAction } from "@/app/apps/church/(console)/reports/tithe-close-actions";
 import { ReportActionMenu } from "@/components/reports/report-action-menu";
 import { ReportCard } from "@/components/reports/report-card";
 import { ReportPeriodFilter } from "@/components/reports/report-period-filter";
@@ -35,6 +36,7 @@ import {
 import type { MonthPeriod, YearPeriod } from "@/lib/reports/period";
 import type { ReportFormat, ReportId } from "@/lib/reports/types";
 import type { ConcilioF001ReportPayload, FinancialMonthlyPayload, MembershipDirectoryPayload } from "@/lib/services/reports";
+import { currentSundayWeek } from "@/lib/discounts/week-period";
 import { toast } from "@/lib/toast";
 import { churchPath } from "@/lib/apps/church-routes";
 import { useRouter } from "next/navigation";
@@ -53,6 +55,7 @@ type PreviewContext = {
   treasurerName?: string | null;
   generatedByName?: string | null;
   auditLogInteractive?: boolean;
+  titheCloseInteractive?: boolean;
 };
 
 function filterCatalogByQuery(
@@ -222,6 +225,23 @@ export function ReportsHubView({
       const period = periodForCatalogEntry(entry, monthPeriod, yearPeriod);
       const filterArg =
         reportId === "membership-directory" ? memberFilter : undefined;
+
+      if (reportId === "tithe-weekly-close") {
+        if (format !== "pdf") {
+          toast.error(tReports("errors.generateFailed"));
+          return;
+        }
+        const weekStart = currentSundayWeek().periodStart;
+        const result = await exportTitheClosePdfAction(weekStart, locale);
+        if (!result.ok) {
+          toast.error(tReports("errors.generateFailed"), result.error);
+          return;
+        }
+        downloadBase64File(result.base64, result.filename, result.mimeType);
+        toast.success(tReports("downloadReady"), result.filename);
+        return;
+      }
+
       const result = await generateReportAction(
         reportId,
         format,
@@ -306,6 +326,19 @@ export function ReportsHubView({
           blobUrl: "",
           base64: "",
           auditLogInteractive: true,
+        });
+        return;
+      }
+
+      if (entry.id === "tithe-weekly-close") {
+        revokeBlobUrl(previewContext?.blobUrl);
+        setPreviewContext({
+          entry,
+          filename: "",
+          mimeType: "text/html",
+          blobUrl: "",
+          base64: "",
+          titheCloseInteractive: true,
         });
         return;
       }
@@ -560,6 +593,8 @@ export function ReportsHubView({
         treasurerName={previewContext?.treasurerName}
         generatedByName={previewContext?.generatedByName}
         auditLogInteractive={previewContext?.auditLogInteractive}
+        titheCloseInteractive={previewContext?.titheCloseInteractive}
+        locale={locale}
         churchName={churchName}
         canExport={
           previewContext ? exportableSet.has(previewContext.entry.id) : false

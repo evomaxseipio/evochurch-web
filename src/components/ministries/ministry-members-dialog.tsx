@@ -23,16 +23,32 @@ function avatarGradient(initials: string): string {
   return `linear-gradient(135deg, hsl(${(a * 17) % 360} 50% 45%), hsl(${(b * 23) % 360} 60% 35%))`;
 }
 
-function matchesMemberQuery(member: Member, query: string): boolean {
-  const haystack = [
-    memberFullName(member),
-    member.contact.email,
-    member.contact.mobilePhone,
-    member.contact.phone,
-  ]
-    .join(" ")
+function foldQuery(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
     .toLowerCase();
-  return haystack.includes(query);
+}
+
+function matchesMemberQuery(member: Member, query: string): boolean {
+  const haystack = foldQuery(
+    [
+      memberFullName(member),
+      member.nickName,
+      member.membershipRole,
+      member.contact.email,
+      member.contact.mobilePhone,
+      member.contact.phone,
+    ].join(" "),
+  );
+  return haystack.includes(foldQuery(query));
+}
+
+function personProfileHref(member: Member): string {
+  if (member.isChild) {
+    return churchPath(`/members/children/${member.memberId}`);
+  }
+  return `${churchPath("/members/profile")}?id=${member.memberId}`;
 }
 
 function MinistryPersonRow({
@@ -51,8 +67,8 @@ function MinistryPersonRow({
   const t = useTranslations("ministerios");
   const tMembers = useTranslations("members");
   const initials = memberInitials(member);
-  const profileHref = `${churchPath("/members/profile")}?id=${member.memberId}`;
-  const contact = [member.contact.email, member.contact.mobilePhone]
+  const profileHref = personProfileHref(member);
+  const contact = [member.contact.email, member.contact.mobilePhone || member.contact.phone]
     .filter(Boolean)
     .join(" • ");
 
@@ -85,6 +101,11 @@ function MinistryPersonRow({
               <Icons.crown size={10} /> {t("leader")}
             </span>
           ) : null}
+          {member.isChild ? (
+            <span className="chip muted" style={{ fontSize: 11 }}>
+              {t("childBadge")}
+            </span>
+          ) : null}
         </div>
         {contact ? (
           <div className="muted tiny" style={{ marginTop: 4 }}>
@@ -99,7 +120,8 @@ function MinistryPersonRow({
           style={{ flexShrink: 0, whiteSpace: "nowrap" }}
           onClick={onClose}
         >
-          {tMembers("viewProfile")} <Icons.arrowRight size={12} />
+          {member.isChild ? t("viewChild") : tMembers("viewProfile")}{" "}
+          <Icons.arrowRight size={12} />
         </Link>
       ) : null}
     </li>
@@ -174,7 +196,6 @@ export function MinistryMembersDialog({
 }) {
   const t = useTranslations("ministerios");
   const tCommon = useTranslations("common");
-  const tMembers = useTranslations("members");
   const [query, setQuery] = useState("");
 
   const ministryLeaders = useMemo(
@@ -200,13 +221,13 @@ export function MinistryMembersDialog({
   }, [ministry, members, leaderIds]);
 
   const filteredLeaders = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return ministryLeaders;
     return ministryLeaders.filter((member) => matchesMemberQuery(member, q));
   }, [ministryLeaders, query]);
 
   const filteredMembers = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return ministryMembers;
     return ministryMembers.filter((member) => matchesMemberQuery(member, q));
   }, [ministryMembers, query]);
@@ -364,6 +385,11 @@ export function MinistryMembersDialog({
                 </button>
               ) : null}
             </div>
+            {query.trim() && !hasResults && totalPeople > 0 ? (
+              <p className="muted tiny" style={{ margin: "8px 0 0" }}>
+                {t("searchRosterHint")}
+              </p>
+            ) : null}
           </div>
         ) : null}
 
@@ -385,7 +411,7 @@ export function MinistryMembersDialog({
             </p>
           ) : filteredLeaders.length === 0 ? (
             <p className="muted" style={{ margin: "0 0 16px", fontSize: 14 }}>
-              {tMembers("noResultsHint")}
+              {t("noPeopleMatchSearch")}
             </p>
           ) : (
             <MemberList>
@@ -411,7 +437,7 @@ export function MinistryMembersDialog({
             </p>
           ) : filteredMembers.length === 0 && !hasResults ? (
             <p className="muted" style={{ margin: "0 0 16px", fontSize: 14 }}>
-              {tMembers("noResultsHint")}
+              {t("noPeopleMatchSearch")}
             </p>
           ) : filteredMembers.length === 0 ? (
             <p className="muted" style={{ margin: "0 0 16px", fontSize: 14 }}>
