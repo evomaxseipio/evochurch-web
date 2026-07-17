@@ -209,31 +209,10 @@ export function OrganizationsListView({
     />
   );
 
-  if (isPending) {
-    return <OrganizationsListSkeleton />;
-  }
-
-  if (isError || !isOrganizationListVm(data)) {
-    return (
-      <>
-        {pageHeader}
-        <OrganizationsErrorState
-          message={
-            error instanceof Error
-              ? error.message
-              : "No se pudieron cargar las organizaciones."
-          }
-          onRetry={() => void refetch()}
-        />
-        {formDrawer}
-      </>
-    );
-  }
-
-  const list = data;
+  const list = isOrganizationListVm(data) ? data : null;
   const enrichedItems = useMemo(
-    () => enrichOrganizationList(list.items),
-    [list.items],
+    () => (list ? enrichOrganizationList(list.items) : []),
+    [list],
   );
 
   const ownerOptions = useMemo(() => {
@@ -262,6 +241,28 @@ export function OrganizationsListView({
       return true;
     });
   }, [enrichedItems, pipelineFilter, ownerFilter, cityFilter]);
+
+  if (isPending) {
+    return <OrganizationsListSkeleton />;
+  }
+
+  if (isError || !list) {
+    return (
+      <>
+        {pageHeader}
+        <OrganizationsErrorState
+          message={
+            error instanceof Error
+              ? error.message
+              : "No se pudieron cargar las organizaciones."
+          }
+          onRetry={() => void refetch()}
+        />
+        {formDrawer}
+      </>
+    );
+  }
+
   const totalPages = Math.max(1, Math.ceil(list.total / list.pageSize));
   const pageStart = list.total === 0 ? 0 : (list.page - 1) * list.pageSize;
   const pageEnd = Math.min(pageStart + list.pageSize, list.total);

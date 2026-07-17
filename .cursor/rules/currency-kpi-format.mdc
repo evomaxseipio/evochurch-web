@@ -1,0 +1,24 @@
+---
+description: Formato de montos en KPI cards y tablas financieras — RD$100,000 completo
+alwaysApply: true
+---
+
+# Moneda — KPI cards y montos visibles
+
+## Formato obligatorio
+
+En **KPI cards** (`FundsKpi`, `KpiCard`), stats grids, tablas financieras y cualquier monto que el usuario deba leer como valor real:
+
+- Usar **`fmtRD(n, locale)`** de `@/lib/format-currency`.
+- Resultado esperado: **`RD$100,000`** — monto completo, separador de miles, sin espacio tras `RD$`, sin sufijos K/M.
+- Montos con signo (balance neto, egresos): **`fmtRDSigned(n, locale)`**.
+
+## No usar en KPI cards
+
+- **`fmtRDshort`** — solo para ejes de gráficos, leyendas compactas o espacios muy reducidos donde el monto completo no cabe.
+- Formateo manual con `toLocaleString`, template strings tipo `` `RD$ ${n}` `` o truncado con `...`.
+
+## Referencia
+
+- Implementación: `src/lib/format-currency.ts`
+- Guía frontend: `.evo/engineering/AI_FRONTEND_GUIDE.md` (sección Moneda)

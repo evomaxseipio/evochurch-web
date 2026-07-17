@@ -68,13 +68,14 @@ export default async function ChildrenPage({
       ) : listData ? (
         <ChildrenListView
           key={`${query}|${page}|${pageSize}`}
-          children={listData.children}
           pagination={listData.pagination}
           query={query}
           pageSize={pageSize}
           adultMembers={adultMembers}
           canWrite={canWriteMembers(session)}
-        />
+        >
+          {listData.children}
+        </ChildrenListView>
       ) : null}
     </>
   );

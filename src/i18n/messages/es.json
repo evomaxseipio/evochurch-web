@@ -883,6 +883,7 @@
     "subtitle": "Ingresos, egresos y transferencias entre fondos",
     "subtitleLong": "Ingresos operacionales y egresos de todos los fondos de la congregación.",
     "movements": "Movimientos",
+    "generalBalance": "Balance General",
     "incomePeriod": "Ingresos (periodo)",
     "expensePeriod": "Egresos (periodo)",
     "pendingToAuthorize": "Pendientes de autorizar",

@@ -21,7 +21,6 @@ import {
   dateRangeExportSlug,
 } from "@/components/finance/date-range-filter";
 import { FinPageHeader } from "@/components/finances/fin-page-header";
-import { FundFilterSummary } from "@/components/finances/fund-filter-summary";
 import { Icons } from "@/components/icons";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { DataTable } from "@/components/ui/data-table";
@@ -217,14 +216,6 @@ export function TransactionsListView({
     [filtered, dateRange, statusFilter, fundFilterId],
   );
 
-  const filteredFund = useMemo(
-    () =>
-      fundFilterId
-        ? funds.find((f) => f.fundId === fundFilterId) ?? null
-        : null,
-    [funds, fundFilterId],
-  );
-
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const safePage = Math.min(page, totalPages);
   const pageStart = (safePage - 1) * pageSize;
@@ -330,13 +321,9 @@ export function TransactionsListView({
 
   const emptyMessage =
     totalCount === 0
-      ? fundFilterId && filteredFund && filteredFund.totalContributions > 0
-        ? tTransactions("emptyFundWithBalance", {
-            amount: fmtRD(filteredFund.totalContributions, locale),
-          })
-        : fundFilterId
-          ? tTransactions("emptyFund")
-          : tTransactions("empty")
+      ? fundFilterId
+        ? tTransactions("emptyFund")
+        : tTransactions("empty")
       : tTransactions("emptyFiltered");
 
   function renderEmptyState() {
@@ -418,15 +405,6 @@ export function TransactionsListView({
         >
           {tTransactions("viewAll")}
         </Link>
-      ) : null}
-
-      {filteredFund ? (
-        <FundFilterSummary
-          fund={filteredFund}
-          movementsInPeriod={periodStats.movements}
-          locale={locale}
-          contributionsHref={`/finances/contributions?fund=${encodeURIComponent(filteredFund.fundId)}`}
-        />
       ) : null}
 
       <TransactionsKpi stats={periodStats} visuals={kpiVisuals} />

@@ -232,6 +232,22 @@ Beneficio: enlaces compartibles, back button funciona.
 
 ---
 
+## Moneda en UI
+
+Montos que el usuario lee como valor real (KPI cards, tablas, totales, reportes):
+
+| Contexto | Función | Ejemplo |
+|----------|---------|---------|
+| KPI cards, tablas, totales | `fmtRD(n, locale)` | `RD$100,000` |
+| Balance / montos con signo | `fmtRDSigned(n, locale)` | `−RD$1,500` |
+| Ejes de gráficos (espacio limitado) | `fmtRDshort(n, locale)` | `RD$ 100K` |
+
+- Siempre pasar `locale` del usuario (`useLocale()` o sesión).
+- **Nunca** `fmtRDshort` en `FundsKpi` / `KpiCard`.
+- Fuente: `src/lib/format-currency.ts`.
+
+---
+
 ## Accesibilidad
 
 - Contraste WCAG AA (tokens ya calibrados).

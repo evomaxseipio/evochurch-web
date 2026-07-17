@@ -8,9 +8,14 @@ function trimCurrencyDecimals(value: string): string {
     .trim();
 }
 
-/** Full DOP amount with locale-aware grouping (e.g. RD$898,100 or RD$898.100). */
+/** Full DOP amount with locale-aware grouping (e.g. RD$100,000). No space after RD$. */
 export function fmtRD(n: number, locale: Locale = "es"): string {
   return trimCurrencyDecimals(formatCurrency(Math.abs(n), locale, "DOP"));
+}
+
+/** Prefix with minus when negative — use in KPI cards and tables that show signed amounts. */
+export function fmtRDSigned(n: number, locale: Locale = "es"): string {
+  return n < 0 ? `−${fmtRD(n, locale)}` : fmtRD(n, locale);
 }
 
 function fmtRDShortSuffix(
@@ -25,7 +30,7 @@ function fmtRDShortSuffix(
   return `RD$ ${formatted}${suffix}`;
 }
 
-/** Compact KPI / chart axis amounts (K/M suffix when large). */
+/** Compact chart axis / tooltip amounts (K/M suffix). Never use in KPI cards — use fmtRD. */
 export function fmtRDshort(n: number, locale: Locale = "es"): string {
   const abs = Math.abs(n);
   const sign = n < 0 ? "−" : "";

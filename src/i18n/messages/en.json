@@ -814,6 +814,7 @@
     "subtitle": "Income, expenses and fund transfers",
     "subtitleLong": "Operational income and expenses across congregation funds.",
     "movements": "Entries",
+    "generalBalance": "General Balance",
     "incomePeriod": "Income (period)",
     "expensePeriod": "Expenses (period)",
     "pendingToAuthorize": "Pending authorization",
