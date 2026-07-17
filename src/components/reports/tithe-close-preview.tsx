@@ -97,7 +97,7 @@ export function TitheClosePreview({
   const tPreview = useTranslations("reports.preview.titheClose");
   const tCommon = useTranslations("common");
   const localeFromHook = useLocale() as Locale;
-  const locale = (isLocale(localeProp) ? localeProp : localeFromHook) as Locale;
+  const locale = (localeProp && isLocale(localeProp) ? localeProp : localeFromHook) as Locale;
 
   const [periodStart, setPeriodStart] = useState(
     () => currentSundayWeek().periodStart,
