@@ -36,7 +36,7 @@ import type {
 } from "@/lib/funds/types";
 import { canDeleteFund } from "@/lib/ministries/funds";
 import type { Ministry } from "@/lib/ministries/types";
-import { fmtRD, fmtRDshort } from "@/lib/format-currency";
+import { fmtRD } from "@/lib/format-currency";
 import { formatDate } from "@/lib/i18n/format";
 import { toast } from "@/lib/toast";
 import { useLocale, useTranslations } from "next-intl";
@@ -255,7 +255,7 @@ export function FundsListView({
             kind={KPI_KIND}
             feature={false}
             label={tFunds("totalRaised")}
-            value={fmtRDshort(stats.totalRaised, locale)}
+            value={fmtRD(stats.totalRaised, locale)}
             icon={<Icons.trendUp size={16} />}
             accent="var(--accent)"
             delta="+12.4%"

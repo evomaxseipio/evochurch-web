@@ -1667,6 +1667,20 @@ body {
   max-height: 100px;
   box-sizing: border-box;
 }
+.dashboard-kpis > .dashboard-kpi-cell > .kpi .head {
+  min-height: 32px;
+  align-items: flex-start;
+}
+.dashboard-kpis > .dashboard-kpi-cell > .kpi .label {
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.dashboard-kpis > .dashboard-kpi-cell > .kpi .val {
+  font-size: clamp(18px, 2.2vw, 24px);
+}
 .dashboard-foot { align-items: start; }
 .dashboard-foot > .card { height: auto; }
 .dashboard-pending-card,
@@ -1717,11 +1731,12 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 14px;
 }
+.span-2 { grid-column: span 2; }
 .span-3 { grid-column: span 3; } .span-4 { grid-column: span 4; } .span-5 { grid-column: span 5; }
 .span-6 { grid-column: span 6; } .span-7 { grid-column: span 7; } .span-8 { grid-column: span 8; }
 .span-9 { grid-column: span 9; } .span-12 { grid-column: span 12; }
 @media (max-width: 900px) {
-  .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-9 { grid-column: span 2; }
+  .span-2, .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-9 { grid-column: span 2; }
 }
 
 /* ===== Toast ===== */

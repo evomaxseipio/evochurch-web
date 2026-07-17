@@ -1,7 +1,7 @@
 import { FundsKpi } from "@/components/funds/funds-kpi";
 import { Icons } from "@/components/icons";
 import type { ContributionsStats } from "@/lib/contributions/types";
-import { fmtRDshort } from "@/lib/format-currency";
+import { fmtRD } from "@/lib/format-currency";
 import { useLocale, useTranslations } from "next-intl";
 
 const KPI_KIND = "elevated" as const;
@@ -16,7 +16,7 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
         <FundsKpi
           kind={KPI_KIND}
           label={tContributions("totalIncome")}
-          value={fmtRDshort(stats.total, locale)}
+          value={fmtRD(stats.total, locale)}
           icon={<Icons.trendUp size={16} />}
           tone="d-system"
           totalSummary
@@ -28,7 +28,7 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
         <FundsKpi
           kind={KPI_KIND}
           label={tContributions("tithes")}
-          value={fmtRDshort(stats.tithes, locale)}
+          value={fmtRD(stats.tithes, locale)}
           icon={<Icons.wallet size={16} />}
           tone="d-funds"
         />
@@ -37,7 +37,7 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
         <FundsKpi
           kind={KPI_KIND}
           label={tContributions("offerings")}
-          value={fmtRDshort(stats.offerings, locale)}
+          value={fmtRD(stats.offerings, locale)}
           icon={<Icons.check size={16} />}
           tone="d-income"
         />
@@ -46,7 +46,7 @@ export function ContributionsKpi({ stats }: { stats: ContributionsStats }) {
         <FundsKpi
           kind={KPI_KIND}
           label={tContributions("donations")}
-          value={fmtRDshort(stats.donations, locale)}
+          value={fmtRD(stats.donations, locale)}
           icon={<Icons.star size={16} />}
           tone="d-donation"
         />

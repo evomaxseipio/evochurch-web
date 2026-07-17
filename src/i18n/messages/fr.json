@@ -814,6 +814,7 @@
     "subtitle": "Income, expenses and fund transfers",
     "subtitleLong": "Revenus opérationnels et dépenses de tous les fonds.",
     "movements": "Mouvements",
+    "generalBalance": "Solde Général",
     "incomePeriod": "Revenus (période)",
     "expensePeriod": "Dépenses (période)",
     "pendingToAuthorize": "En attente d'autorisation",
