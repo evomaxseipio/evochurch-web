@@ -111,23 +111,24 @@ Features nuevos: `data → domain → providers → presentation` con `HookConsu
 
 ---
 
-## ADR-006 — Un motor de asistencia (planificado)
+## ADR-006 — Un motor de asistencia
 
 **Fecha:** 2026-07 (producto)  
-**Estado:** Propuesto — ver [PRODUCT_STRATEGY.md](../product/PRODUCT_STRATEGY.md) EPIC 03
+**Estado:** Aceptado e implementado — QA staging 2026-07-21
 
 ### Contexto
 
 Riesgo de crear módulos separados de asistencia por culto, casas fuente, escuela bíblica, niños.
 
-### Decisión (propuesta)
+### Decisión
 
-Un `attendance_engine` genérico configurable por tipo de actividad. Módulos específicos son configuraciones, no código duplicado.
+Un `attendance_engine` genérico configurable por tipo de actividad. Módulos específicos son configuraciones, no código duplicado. Cada sesión admite modo `individual` (roster y estados) o `aggregate` (conceptos y cantidades dinámicas) dentro de las mismas tablas y RPC.
 
 ### Consecuencias
 
-- EPIC 03 bloquea features de asistencia hasta tener el motor.
-- Diseño de schema debe ser extensible desde el inicio.
+- `attendance_session` + `attendance_record` son el único motor para casas, estudios, niños y cultos.
+- Las categorías y ministerios configuran el comportamiento; no se crean módulos paralelos.
+- El modo agregado conserva el aislamiento tenant y rechaza registros individuales.
 
 ---
 

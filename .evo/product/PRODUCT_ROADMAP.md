@@ -9,9 +9,9 @@ Roadmap derivado de [PRODUCT_STRATEGY.md](PRODUCT_STRATEGY.md).
 
 | Horizonte | Enfoque |
 |-----------|---------|
-| **Ahora (Sprint 01)** | Personas + Dashboard — features en desarrollo |
-| **Corto plazo (Q3 2026)** | Finanzas críticas + Motor de asistencia |
-| **Mediano plazo (Q4 2026)** | Ministerios, CRM pastoral, multimoneda |
+| **Ahora (cierre web Jul 2026)** | Validación Attendance Engine + cierre documental Sprint 01 |
+| **Corto plazo (Q3 2026)** | P4 asistencia Flutter + finanzas críticas |
+| **Mediano plazo (Q4 2026)** | Multimoneda + CRM pastoral avanzado |
 | **Largo plazo (2027+)** | Automatización, IA, integraciones |
 
 ---
@@ -29,20 +29,20 @@ Infraestructura multitenant, RBAC, módulos base.
 | Eventos + comunicación | ✅ |
 | Reportes (CEAD, Concilio, directorio) | ✅ |
 | Red multi-sede (headquarters/campus) | ✅ |
-| Perfil de iglesia + branding | 🚧 |
+| Perfil de iglesia + branding | ✅ |
 | RBAC granular + roles custom | ✅ |
-| EDK documentación | 🚧 |
+| EDK documentación | ✅ sincronizada 2026-07-21 |
 
 ---
 
-## Fase 1 — Sprint 01 (actual)
+## Fase 1 — Sprint 01 (cierre en validación)
 
 **Objetivo:** Completar features críticas de personas y dashboard.
 
 | Feature | EPIC | Estado | Prioridad |
 |---------|------|--------|-----------|
-| Estado Activo/Inactivo | 01 Personas | 🚧 En Desarrollo | 🔴 |
-| Montos completos (Dashboard) | 06 Dashboard | 🚧 Sprint 01 | 🔴 |
+| Estado Activo/Inactivo | 01 Personas | 🧪 Web validada; Flutter pendiente | 🔴 |
+| Montos completos (Dashboard) | 06 Dashboard | 🧪 Montos reales; mocks no financieros pendientes | 🔴 |
 
 Ver detalle: [../sprints/sprint-01/SPRINT.md](../sprints/sprint-01/SPRINT.md)
 
@@ -74,12 +74,12 @@ Motor genérico de asistencia (🔴)
     └── Ministerio de Niños
 ```
 
-| Feature | Prioridad | Nota |
-|---------|-----------|------|
-| Motor genérico de asistencia | 🔴 | Prerequisito de todo lo demás |
-| Casas Fuente | 🟠 | Depende motor |
-| Escuela Bíblica | 🟠 | Depende motor |
-| Ministerio de Niños (asistencia) | 🟠 | Depende motor |
+| Feature | Estado | Nota |
+|---------|--------|------|
+| Motor genérico de asistencia | 🧪 Validación web | Individual + agregado; QA staging 2026-07-21 |
+| Casas Fuente | 🧪 Validación web | RPC staging PASS; móvil en P4 |
+| Escuela Bíblica | 🧪 Validación web | RPC staging PASS; móvil en P4 |
+| Ministerio de Niños (asistencia) | 🧪 Validación web | Filtro infantil cubierto por tests; móvil en P4 |
 
 **Principio:** Una entidad `attendance_session` + configuración por tipo de actividad.
 
@@ -89,8 +89,8 @@ Motor genérico de asistencia (🔴)
 
 | Feature | Prioridad |
 |---------|-----------|
-| Ministerio de Niños (gestión) | 🟠 |
-| Fondos por Ministerio | 💡 Idea |
+| Ministerio de Niños (gestión) | ✅ Web |
+| Fondos por Ministerio | ✅ Web |
 
 **Hito:** Líder de ministerio opera su área sin acceso a finanzas globales.
 
@@ -102,8 +102,8 @@ Motor genérico de asistencia (🔴)
 
 | Feature | Estado |
 |---------|--------|
-| Timeline del miembro | 💡 Idea |
-| Eventos relevantes (enfermedad, ayuda, discipulado…) | 💡 Idea |
+| Timeline del miembro | 🧪 Validación web |
+| Eventos relevantes (enfermedad, ayuda, discipulado…) | ✅ Web |
 | Notas pastorales (privadas por permiso) | 💡 Idea |
 
 **Dependencia suave:** EPIC 01 Personas estable.
@@ -114,7 +114,7 @@ Motor genérico de asistencia (🔴)
 
 | Feature | Estado |
 |---------|--------|
-| Montos completos | 🚧 Sprint 01 |
+| Montos completos | 🧪 Validación |
 | KPIs inteligentes (tendencias, riesgos, inactivos) | 💡 Idea |
 
 ---

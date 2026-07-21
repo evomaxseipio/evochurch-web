@@ -3,7 +3,7 @@
 **Objetivo:** Completar features críticas de gestión de miembros (activo/inactivo) y visualización financiera completa en dashboard.
 
 **EPICs:** 01 — Personas · 06 — Dashboard  
-**Estado:** 🚧 En curso  
+**Estado:** 🧪 Validación web · carry-over Flutter documentado
 **Prioridad:** 🔴 Crítica
 
 ---
@@ -20,9 +20,9 @@
 
 | ID | Tarea | Feature | Estado |
 |----|-------|---------|--------|
-| [TASK-001](TASK-001.md) | Estado Activo/Inactivo — web | EPIC 01 | 🚧 |
-| [TASK-002](TASK-002.md) | Montos completos — Dashboard KPIs | EPIC 06 | 🚧 |
-| [TASK-003](TASK-003.md) | Estado Activo/Inactivo — Flutter | EPIC 01 | 📋 |
+| [TASK-001](TASK-001.md) | Estado Activo/Inactivo — web | EPIC 01 | 🧪 |
+| [TASK-002](TASK-002.md) | Montos completos — Dashboard KPIs | EPIC 06 | 🧪 |
+| [TASK-003](TASK-003.md) | Estado Activo/Inactivo — Flutter | EPIC 01 | 📋 P4 Flutter |
 
 ---
 
@@ -58,11 +58,18 @@
 
 - [ ] TASK-001 completada y validada en web
 - [ ] TASK-002 completada — dashboard muestra montos reales
-- [ ] TASK-003 completada o movida a sprint 02 con justificación
-- [ ] PRODUCT_STRATEGY actualizado (estados ✅ o 🧪)
-- [ ] Build web sin errores
+- [x] TASK-003 movida al siguiente ciclo Flutter/P4: el cliente Flutter vive fuera de este repositorio
+- [x] PRODUCT_STRATEGY actualizado (2026-07-21)
+- [x] Build web sin errores (`npm run build`, 2026-07-21)
 - [ ] Architecture review documentado para cambios no triviales
 - [ ] Sin regresiones multitenant
+
+## Evidencia de cierre técnico — 2026-07-21
+
+- `npm run build` ✅
+- `npm run typecheck` ✅
+- `npm run qa:i18n` ✅ (1990 claves × 3 locales)
+- El sprint permanece en 🧪 hasta completar validación manual específica de TASK-001/TASK-002.
 
 ---
 

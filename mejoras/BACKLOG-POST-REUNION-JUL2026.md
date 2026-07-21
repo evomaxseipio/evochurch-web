@@ -17,9 +17,10 @@
 | **P1.2** | Familia en perfil miembro | ✅ Cerrado (QA Jul 2026) | Web | ~0.5 sprint |
 | **P1.4** | Familia bidireccional (padres + vincular hijo) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
 | **P-report-families** | Reporte de Familias (hub) | ✅ Cerrado (QA Jul 2026) | Web + BD | ~0.5 sprint |
-| **P2** | Motor de asistencia MVP | ✅ Código en `feat/attendance-engine` (QA pendiente) | Web + Supabase | ~1–2 sprints |
-| **P2.x** | Categorías de ministerios CRUD por iglesia | ✅ Código en `feat/attendance-engine` (QA staging) | Web + BD | ~0.5 sprint |
-| **P3** | Niños: asistencia | ✅ Código | Web | ~0.5 sprint |
+| **P2** | Motor de asistencia MVP | 🧪 QA staging automatizado PASS | Web + Supabase | piloto manual |
+| **P2.x** | Categorías de ministerios CRUD por iglesia | 🧪 Código en `main`; CRUD manual pendiente | Web + BD | piloto manual |
+| **P3** | Niños: asistencia | 🧪 RPC + filtro unitario PASS | Web | piloto manual |
+| **P3.x** | Modo agregado | 🧪 RPC + E2E staging PASS | Web + Supabase | piloto manual |
 | **P4** | Asistencia móvil (casas fuente + estudios) | 📋 Backlog | Flutter + RPCs | ~1–2 sprints |
 | **P5** | Fondos multi-moneda | 📋 Backlog | Web + BD | ~2 sprints |
 
@@ -225,7 +226,7 @@ Hogares **derivados** de `profile_spouse` + `profile_parent_child` (sin entidad 
 ## P2 — Motor de asistencia MVP
 
 **Análisis + prompt agente:** [`ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md`](./ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md)  
-**Estado:** ✅ Análisis Modo A aprobado (2026-07-13) → **Modo B** en rama `feat/attendance-engine`.
+**Estado:** 🧪 Implementado en `main`; QA automatizado staging PASS (2026-07-21).
 
 **Problema:** Casas fuente, estudios bíblicos y niños necesitan registrar asistencia sin duplicar código.
 
@@ -291,7 +292,7 @@ Hogares **derivados** de `profile_spouse` + `profile_parent_child` (sin entidad 
 
 **Depende:** P1 + P2 (P2.x opcional; categoría `children` ya existe en seed).
 
-**Estado:** ✅ Código (filtro `is_child` en checklist; sin migración SQL — resolución en app).
+**Estado:** 🧪 Código + QA automatizado PASS (filtro `is_child` en checklist; sin migración SQL — resolución en app).
 
 - Sesiones de tipo `children` en el mismo hub `/attendance` (ADR-006).
 - Checklist de niños registrados (`is_child = true`), no adultos/líderes.
@@ -373,11 +374,9 @@ flowchart TD
 3. ~~**P1.2** — Familia en perfil~~ ✅
 4. ~~**P1.4** — Familia bidireccional~~ ✅
 5. ~~**P-report-families** — Reporte Familias~~ ✅
-6. ~~**P2** — Motor asistencia web~~ ✅ código en `feat/attendance-engine`
-7. ~~**P2.x** — Categorías ministerios CRUD~~ ✅ código (`feat/attendance-engine`)
-8. ~~**P3** — Asistencia niños~~ ✅ código (`feat/attendance-engine`)
-9. **P4** — Flutter casas fuente + estudios ← **siguiente** (repo Flutter)
-10. **P5** — Multi-moneda
+6. **P2/P2.x/P3/P3.x** — 🧪 código en `main`; QA automatizado PASS, demo piloto pendiente
+7. **P4** — Flutter casas fuente + estudios ← **siguiente desarrollo** (repo Flutter, tras demo piloto)
+8. **P5** — Multi-moneda
 
 ~~P1.3 Hogar formal~~ → **may-have diferido** (2026-07-14); no en este orden.
 
@@ -389,7 +388,7 @@ flowchart TD
 @mejoras/BACKLOG-POST-REUNION-JUL2026.md
 
 Lee primero .evo/engineering/AI_ENGINEERING_GUIDE.md (obligatorio).
-P2 + P2.x + P3 cerrados en código. Siguiente: P4 (Flutter) o P5.
+P2 + P2.x + P3 + P3.x integrados en main. QA: npm run qa:attendance && npm run qa:attendance:e2e. Siguiente desarrollo: P4 (Flutter), después de la demo piloto.
 ```
 
 ---

@@ -5,7 +5,7 @@
 **Prioridad:** 🔴  
 **Stack:** Flutter  
 **Estimación:** M  
-**Estado:** 📋 Backlog (dentro sprint 01)
+**Estado:** 📋 Carry-over al ciclo P4 Flutter
 
 ---
 
@@ -68,3 +68,4 @@ Paridad con web: filtro activo/inactivo en listado de miembros y toggle en mante
 ## Notas
 
 - Si el sprint se cierra sin esta tarea, mover a sprint 02 y actualizar PRODUCT_STRATEGY.
+- Justificación 2026-07-21: el repositorio Flutter es externo y P4 agrupa la operación móvil sobre las RPC estables del motor de asistencia.

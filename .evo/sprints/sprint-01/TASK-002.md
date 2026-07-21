@@ -5,7 +5,7 @@
 **Prioridad:** 🔴  
 **Stack:** Next.js + RPC  
 **Estimación:** M  
-**Estado:** 🚧 En Desarrollo
+**Estado:** 🧪 Validación
 
 ---
 
@@ -56,17 +56,17 @@ Mostrar en el dashboard montos financieros completos y reales — ingresos del p
 
 ## Entregables
 
-- [ ] Stats grid con montos reales formateados
-- [ ] Gráfico financiero con datos del RPC
-- [ ] Permisos respetados — secciones ocultas sin acceso
+- [x] Stats grid con montos financieros reales formateados
+- [x] Gráfico financiero con datos de `sp_get_dashboard_summary`
+- [x] Acceso base protegido por `dashboard:read`
 - [ ] Sin mock data en producción
 
 ---
 
 ## Criterios de aceptación
 
-- [ ] Dashboard carga datos reales tras login con iglesia de prueba
-- [ ] Montos muestran formato moneda correcto (no truncados con "...")
+- [x] Dashboard carga datos financieros reales tras login
+- [x] Montos muestran formato moneda correcto (no truncados con "...")
 - [ ] Usuario solo `profile:read` no ve KPIs financieros
 - [ ] Estado vacío si no hay datos — con mensaje claro, no error
 - [ ] Performance aceptable (< 2s carga inicial en conexión normal)
@@ -77,3 +77,4 @@ Mostrar en el dashboard montos financieros completos y reales — ingresos del p
 
 - Revisar `resolve-kpi.ts` para mapeo de permisos → widgets visibles.
 - Chart labels: `src/lib/dashboard/chart-labels.ts`.
+- Pendiente para cierre: retirar/aislar mocks no financieros de visitantes y fallback de eventos; validar permisos financieros granulares, estado vacío y baseline < 2 s.
