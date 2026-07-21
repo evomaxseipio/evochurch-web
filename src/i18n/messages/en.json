@@ -2341,6 +2341,24 @@
     "filterType": "Type",
     "deleteConfirmTitle": "Delete session?",
     "deleteConfirmBody": "The session and all attendance records will be removed.",
+    "mode": {
+      "title": "Attendance Mode",
+      "individual": "Individual",
+      "aggregate": "Aggregate",
+      "changeTitle": "Change Attendance Mode",
+      "individualToAggregateWarning": "This session already contains individual attendance records. Changing to Aggregate mode will permanently delete all attendance records. This action cannot be undone.",
+      "aggregateToIndividualWarning": "This session already contains aggregate attendance data. Changing to Individual mode will permanently delete the aggregate information. This action cannot be undone.",
+      "changeDeleteRecords": "Change and Delete Records",
+      "changeDeleteData": "Change and Delete Data"
+    },
+    "aggregate": {
+      "title": "Aggregate Attendance",
+      "description": "Capture dynamic concepts and quantities without an individual checklist.",
+      "addRow": "Add Row",
+      "concept": "Concept",
+      "quantity": "Quantity",
+      "total": "Total"
+    },
     "presets": {
       "house_group": "House session",
       "bible_study": "Study session",
@@ -2376,6 +2394,8 @@
       "status": "Status"
     },
     "errors": {
+      "aggregateRowRequired": "Add at least one row.",
+      "aggregateInvalid": "Each row needs a concept and a quantity greater than or equal to zero.",
       "invalidForm": "Check date, type, and ministry.",
       "saveFailed": "Could not save the session.",
       "deleteFailed": "Could not delete the session.",

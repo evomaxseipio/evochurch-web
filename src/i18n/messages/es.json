@@ -2341,6 +2341,24 @@
     "filterType": "Tipo",
     "deleteConfirmTitle": "¿Eliminar sesión?",
     "deleteConfirmBody": "Se borrarán la sesión y todos sus registros de asistencia.",
+    "mode": {
+      "title": "Modo de asistencia",
+      "individual": "Individual",
+      "aggregate": "Agregada",
+      "changeTitle": "Cambiar modo de asistencia",
+      "individualToAggregateWarning": "Esta sesión ya contiene registros individuales de asistencia. Cambiar al modo Agregado eliminará permanentemente todos los registros. Esta acción no se puede deshacer.",
+      "aggregateToIndividualWarning": "Esta sesión ya contiene información agregada de asistencia. Cambiar al modo Individual eliminará permanentemente la información agregada. Esta acción no se puede deshacer.",
+      "changeDeleteRecords": "Cambiar y eliminar registros",
+      "changeDeleteData": "Cambiar y eliminar datos"
+    },
+    "aggregate": {
+      "title": "Asistencia agregada",
+      "description": "Registra conceptos y cantidades sin una lista individual.",
+      "addRow": "Agregar fila",
+      "concept": "Concepto",
+      "quantity": "Cantidad",
+      "total": "Total"
+    },
     "presets": {
       "house_group": "Sesión de casa",
       "bible_study": "Sesión de estudio",
@@ -2376,6 +2394,8 @@
       "status": "Estado"
     },
     "errors": {
+      "aggregateRowRequired": "Agrega al menos una fila.",
+      "aggregateInvalid": "Cada fila necesita un concepto y una cantidad mayor o igual a cero.",
       "invalidForm": "Revisa fecha, tipo y ministerio.",
       "saveFailed": "No se pudo guardar la sesión.",
       "deleteFailed": "No se pudo eliminar la sesión.",

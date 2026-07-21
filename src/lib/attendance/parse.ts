@@ -1,7 +1,9 @@
 import {
   isAttendanceActivityType,
   isAttendanceStatus,
+  isAttendanceMode,
   type AttendanceActivityType,
+  type AttendanceAggregateItem,
   type AttendanceRecord,
   type AttendanceSessionDetail,
   type AttendanceSessionListItem,
@@ -34,6 +36,18 @@ function uuidOrNull(v: unknown): string | null {
   return s || null;
 }
 
+
+function aggregateItems(v: unknown): AttendanceAggregateItem[] {
+  if (!Array.isArray(v)) return [];
+  return v.flatMap((item) => {
+    const row = asRecord(item);
+    if (!row) return [];
+    const label = str(row.label).trim();
+    const value = num(row.value);
+    return label && value >= 0 ? [{ label, value }] : [];
+  });
+}
+
 function uuidList(v: unknown): string[] {
   if (Array.isArray(v)) {
     return v
@@ -50,7 +64,8 @@ export function parseAttendanceSessionListItem(
   if (!r) return null;
   const id = str(r.id).trim();
   const activityRaw = str(r.activityType ?? r.activity_type).trim();
-  if (!id || !isAttendanceActivityType(activityRaw)) return null;
+  const modeRaw = str((r.attendanceMode ?? r.attendance_mode) || "individual").trim();
+  if (!id || !isAttendanceActivityType(activityRaw) || !isAttendanceMode(modeRaw)) return null;
 
   return {
     id,
@@ -71,6 +86,8 @@ export function parseAttendanceSessionListItem(
     absentCount: num(r.absentCount ?? r.absent_count),
     lateCount: num(r.lateCount ?? r.late_count),
     recordCount: num(r.recordCount ?? r.record_count),
+    attendanceMode: modeRaw,
+    aggregateData: aggregateItems(r.aggregateData ?? r.aggregate_data),
   };
 }
 
@@ -125,7 +142,8 @@ export function parseAttendanceSessionDetail(data: unknown): {
 
   const id = str(s.id).trim();
   const activityRaw = str(s.activityType ?? s.activity_type).trim();
-  if (!id || !isAttendanceActivityType(activityRaw)) return null;
+  const modeRaw = str((s.attendanceMode ?? s.attendance_mode) || "individual").trim();
+  if (!id || !isAttendanceActivityType(activityRaw) || !isAttendanceMode(modeRaw)) return null;
 
   const session: AttendanceSessionDetail = {
     id,
@@ -145,6 +163,8 @@ export function parseAttendanceSessionDetail(data: unknown): {
     ),
     createdAt: str(s.createdAt ?? s.created_at),
     updatedAt: str(s.updatedAt ?? s.updated_at),
+    attendanceMode: modeRaw,
+    aggregateData: aggregateItems(s.aggregateData ?? s.aggregate_data),
   };
 
   const recordsRaw = root?.records;

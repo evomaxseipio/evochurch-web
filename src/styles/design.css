@@ -1217,6 +1217,48 @@ body {
   @keyframes slideIn { from { transform: translateY(100%); } }
 }
 
+/* Asistencia agregada — concepto flexible y cantidades alineadas al borde. */
+.attendance-aggregate-table-wrap {
+  box-shadow: 0 8px 24px color-mix(in oklab, var(--accent) 5%, transparent);
+}
+.attendance-aggregate-table {
+  table-layout: fixed;
+}
+.attendance-aggregate-table .attendance-aggregate-quantity-col {
+  width: 30%;
+}
+.attendance-aggregate-table th,
+.attendance-aggregate-table td {
+  padding-inline: 16px;
+}
+.attendance-aggregate-table thead th:last-child,
+.attendance-aggregate-table tbody td:last-child,
+.attendance-aggregate-table tfoot td:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.attendance-aggregate-table tbody tr {
+  cursor: default;
+}
+.attendance-aggregate-table tfoot th,
+.attendance-aggregate-table tfoot td {
+  padding: 11px 16px;
+  border-top: 1px solid var(--line);
+  background: color-mix(in oklab, var(--accent) 5%, var(--bg-1));
+  color: var(--fg);
+  font-size: 13px;
+  font-weight: 700;
+}
+.attendance-aggregate-table tfoot th {
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  .attendance-aggregate-table .attendance-aggregate-quantity-col { width: 34%; }
+  .attendance-aggregate-table th,
+  .attendance-aggregate-table td { padding-inline: 12px; }
+}
+
 /* Asistencia — semáforo (misma paleta brillante en dark y light) */
 .attendance-status-seg {
   display: inline-flex;

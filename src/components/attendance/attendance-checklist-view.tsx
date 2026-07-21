@@ -100,7 +100,10 @@ function buildRows(
   return rows.sort((a, b) => a.name.localeCompare(b.name, "es"));
 }
 
-function toListItem(session: AttendanceSessionDetail): AttendanceSessionListItem {
+function toListItem(
+  session: AttendanceSessionDetail,
+  individualRecordCount = 0,
+): AttendanceSessionListItem {
   return {
     id: session.id,
     churchId: session.churchId,
@@ -117,7 +120,12 @@ function toListItem(session: AttendanceSessionDetail): AttendanceSessionListItem
     presentCount: 0,
     absentCount: 0,
     lateCount: 0,
-    recordCount: 0,
+    recordCount:
+      session.attendanceMode === "aggregate"
+        ? session.aggregateData.reduce((sum, item) => sum + item.value, 0)
+        : individualRecordCount,
+    attendanceMode: session.attendanceMode,
+    aggregateData: session.aggregateData,
   };
 }
 
@@ -205,6 +213,62 @@ export function AttendanceChecklistView({
       if (embedded) onClose?.();
     },
   });
+
+  if (session.attendanceMode === "aggregate") {
+    const total = session.aggregateData.reduce((sum, item) => sum + item.value, 0);
+    const aggregateTable = (
+      <div
+        className="table-wrap attendance-aggregate-table-wrap"
+        style={{ marginTop: embedded ? 12 : 18 }}
+      >
+        <table className="table attendance-aggregate-table">
+          <colgroup>
+            <col />
+            <col className="attendance-aggregate-quantity-col" />
+          </colgroup>
+          <thead><tr><th scope="col">{t("aggregate.concept")}</th><th scope="col">{t("aggregate.quantity")}</th></tr></thead>
+          <tbody>{session.aggregateData.map((item, index) => (
+            <tr key={`${item.label}-${index}`}><td>{item.label}</td><td>{item.value}</td></tr>
+          ))}</tbody>
+          <tfoot><tr><th scope="row">{t("aggregate.total")}</th><td>{total}</td></tr></tfoot>
+        </table>
+      </div>
+    );
+
+    if (embedded) {
+      return (
+        <>
+          <div className="drawer-body" style={{ paddingTop: 12 }}>
+            <p className="muted" style={{ margin: 0 }}>{t("aggregate.description")}</p>
+            {aggregateTable}
+          </div>
+          <div className="drawer-foot row" style={{ gap: 8, justifyContent: "flex-end" }}>
+            <button type="button" className="btn outline" onClick={onClose}>{tCommon("close")}</button>
+          </div>
+        </>
+      );
+    }
+
+    return (
+      <>
+        <div className="row between" style={{ flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div className="eyebrow">{t("aggregate.title")}</div>
+            <h1 className="display" style={{ fontSize: 34, margin: "4px 0 6px", letterSpacing: "-0.025em" }}>
+              {session.title || t(`activityType.${session.activityType}`)}
+            </h1>
+            <p className="muted" style={{ margin: 0 }}>{session.sessionDate}{session.ministryName ? ` · ${session.ministryName}` : ""}</p>
+          </div>
+          <div className="row" style={{ gap: 8 }}>
+            <Link href={churchPath("/attendance")} className="btn outline">{t("backToList")}</Link>
+            {canWrite ? <button type="button" className="btn" onClick={() => setEditOpen(true)}>{t("editSession")}</button> : null}
+          </div>
+        </div>
+        {aggregateTable}
+        {canWrite ? <AttendanceSessionFormDrawer open={editOpen} mode="edit" session={toListItem(session)} presetActivityType={null} ministries={ministries} categories={categories} onClose={() => setEditOpen(false)} /> : null}
+      </>
+    );
+  }
 
   function setStatus(profileId: string, status: AttendanceStatus) {
     setRows((prev) =>
@@ -419,7 +483,7 @@ export function AttendanceChecklistView({
         <AttendanceSessionFormDrawer
           open={editOpen}
           mode="edit"
-          session={toListItem(session)}
+          session={toListItem(session, records.length)}
           presetActivityType={null}
           ministries={ministries}
           categories={categories}

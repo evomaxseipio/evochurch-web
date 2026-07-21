@@ -2341,6 +2341,24 @@
     "filterType": "Type",
     "deleteConfirmTitle": "Supprimer la session ?",
     "deleteConfirmBody": "La session et tous les enregistrements seront supprimés.",
+    "mode": {
+      "title": "Mode de présence",
+      "individual": "Individuel",
+      "aggregate": "Agrégé",
+      "changeTitle": "Changer le mode de présence",
+      "individualToAggregateWarning": "Cette session contient déjà des présences individuelles. Le passage au mode Agrégé supprimera définitivement tous ces enregistrements. Cette action est irréversible.",
+      "aggregateToIndividualWarning": "Cette session contient déjà des données agrégées. Le passage au mode Individuel supprimera définitivement ces informations. Cette action est irréversible.",
+      "changeDeleteRecords": "Changer et supprimer les présences",
+      "changeDeleteData": "Changer et supprimer les données"
+    },
+    "aggregate": {
+      "title": "Présence agrégée",
+      "description": "Saisissez des concepts et des quantités sans liste individuelle.",
+      "addRow": "Ajouter une ligne",
+      "concept": "Concept",
+      "quantity": "Quantité",
+      "total": "Total"
+    },
     "presets": {
       "house_group": "Session maison",
       "bible_study": "Session étude",
@@ -2376,6 +2394,8 @@
       "status": "Statut"
     },
     "errors": {
+      "aggregateRowRequired": "Ajoutez au moins une ligne.",
+      "aggregateInvalid": "Chaque ligne doit avoir un concept et une quantité supérieure ou égale à zéro.",
       "invalidForm": "Vérifiez la date, le type et le ministère.",
       "saveFailed": "Impossible d'enregistrer la session.",
       "deleteFailed": "Impossible de supprimer la session.",

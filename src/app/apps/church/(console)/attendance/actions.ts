@@ -6,6 +6,8 @@ import {
   activityTypeRequiresMinistry,
   isAttendanceActivityType,
   isAttendanceStatus,
+  isAttendanceMode,
+  type AttendanceAggregateItem,
   type AttendanceRecordInput,
   type AttendanceSessionInput,
   type AttendanceStatus,
@@ -82,11 +84,32 @@ function parseSessionInput(formData: FormData): AttendanceSessionInput | null {
   const sessionId = String(formData.get("sessionId") ?? "").trim() || undefined;
   const title = String(formData.get("title") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
+  const attendanceModeRaw = String(formData.get("attendanceMode") ?? "individual").trim();
+  const aggregateRaw = String(formData.get("aggregateData") ?? "[]").trim();
 
-  if (!sessionDate || !isAttendanceActivityType(activityRaw)) return null;
+  if (!sessionDate || !isAttendanceActivityType(activityRaw) || !isAttendanceMode(attendanceModeRaw)) return null;
 
   const ministryId = ministryRaw || null;
   if (activityTypeRequiresMinistry(activityRaw) && !ministryId) return null;
+
+  const aggregateData: AttendanceAggregateItem[] = [];
+  if (attendanceModeRaw === "aggregate") {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(aggregateRaw);
+    } catch {
+      return null;
+    }
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    for (const item of parsed) {
+      if (!item || typeof item !== "object") return null;
+      const row = item as Record<string, unknown>;
+      const label = String(row.label ?? "").trim();
+      const value = Number(row.value);
+      if (!label || !Number.isFinite(value) || value < 0) return null;
+      aggregateData.push({ label, value });
+    }
+  }
 
   return {
     sessionId,
@@ -95,6 +118,8 @@ function parseSessionInput(formData: FormData): AttendanceSessionInput | null {
     ministryId,
     title,
     notes,
+    attendanceMode: attendanceModeRaw,
+    aggregateData,
   };
 }
 
@@ -152,6 +177,8 @@ export async function deleteAttendanceSessionAction(
         sessionDate: "",
         activityType: "house_group",
         ministryId: null,
+        attendanceMode: "individual",
+        aggregateData: [],
       },
       "delete",
     );
@@ -233,10 +260,22 @@ export async function loadAttendanceChecklistAction(
     if (!id) return { ok: false, errorKey: "attendance.errors.invalidForm" };
 
     const { supabase, session } = await getActionSessionWith("attendance:read");
-    const [detail, ministries] = await Promise.all([
-      fetchAttendanceSession(supabase, session.churchId, id),
-      fetchMinistries(supabase, session.churchId),
-    ]);
+    const detail = await fetchAttendanceSession(supabase, session.churchId, id);
+
+    if (detail.session.attendanceMode === "aggregate") {
+      return {
+        ok: true,
+        session: detail.session,
+        records: [],
+        members: [],
+        ministries: [],
+        categories: [],
+        canWrite: hasPermission(session, "attendance:write"),
+        childrenRosterScope: null,
+      };
+    }
+
+    const ministries = await fetchMinistries(supabase, session.churchId);
 
     let categories: Awaited<ReturnType<typeof fetchMinistryCategories>> = [];
     try {

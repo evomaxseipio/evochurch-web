@@ -71,6 +71,8 @@ export async function maintainAttendanceSession(
     p_event_id: null,
     p_title: action === "delete" ? null : input.title || null,
     p_notes: action === "delete" ? null : input.notes || null,
+    p_attendance_mode: action === "delete" ? null : input.attendanceMode,
+    p_aggregate_data: action === "delete" ? [] : input.aggregateData,
   });
 
   if (error) throw error;

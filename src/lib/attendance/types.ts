@@ -11,6 +11,14 @@ export const ATTENDANCE_STATUSES = ["present", "absent", "late"] as const;
 
 export type AttendanceStatus = (typeof ATTENDANCE_STATUSES)[number];
 
+export const ATTENDANCE_MODES = ["individual", "aggregate"] as const;
+export type AttendanceMode = (typeof ATTENDANCE_MODES)[number];
+
+export type AttendanceAggregateItem = {
+  label: string;
+  value: number;
+};
+
 /** Orden UI tipo semáforo: presente → tarde → ausente. */
 export const ATTENDANCE_STATUS_UI_ORDER = [
   "present",
@@ -45,6 +53,8 @@ export type AttendanceSessionListItem = {
   absentCount: number;
   lateCount: number;
   recordCount: number;
+  attendanceMode: AttendanceMode;
+  aggregateData: AttendanceAggregateItem[];
 };
 
 export type AttendanceRecord = {
@@ -74,6 +84,8 @@ export type AttendanceSessionDetail = {
   createdByProfileId: string | null;
   createdAt: string;
   updatedAt: string;
+  attendanceMode: AttendanceMode;
+  aggregateData: AttendanceAggregateItem[];
 };
 
 export type AttendanceSessionInput = {
@@ -83,6 +95,8 @@ export type AttendanceSessionInput = {
   ministryId: string | null;
   title?: string;
   notes?: string;
+  attendanceMode: AttendanceMode;
+  aggregateData: AttendanceAggregateItem[];
 };
 
 export type AttendanceRecordInput = {
@@ -102,6 +116,10 @@ export function isAttendanceActivityType(
   value: string,
 ): value is AttendanceActivityType {
   return (ATTENDANCE_ACTIVITY_TYPES as readonly string[]).includes(value);
+}
+
+export function isAttendanceMode(value: string): value is AttendanceMode {
+  return (ATTENDANCE_MODES as readonly string[]).includes(value);
 }
 
 export function isAttendanceStatus(value: string): value is AttendanceStatus {
