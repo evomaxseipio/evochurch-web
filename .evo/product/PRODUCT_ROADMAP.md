@@ -35,14 +35,14 @@ Infraestructura multitenant, RBAC, módulos base.
 
 ---
 
-## Fase 1 — Sprint 01 (cierre en validación)
+## Fase 1 — Sprint 01 (cerrado)
 
 **Objetivo:** Completar features críticas de personas y dashboard.
 
 | Feature | EPIC | Estado | Prioridad |
 |---------|------|--------|-----------|
-| Estado Activo/Inactivo | 01 Personas | 🧪 Web validada; Flutter pendiente | 🔴 |
-| Montos completos (Dashboard) | 06 Dashboard | 🧪 Montos reales; mocks no financieros pendientes | 🔴 |
+| Estado Activo/Inactivo | 01 Personas | ✅ Web terminado; Flutter pendiente | 🔴 |
+| Montos completos (Dashboard) | 06 Dashboard | ✅ Montos financieros reales; mocks no financieros pendientes | 🔴 |
 
 Ver detalle: [../sprints/sprint-01/SPRINT.md](../sprints/sprint-01/SPRINT.md)
 
@@ -76,10 +76,10 @@ Motor genérico de asistencia (🔴)
 
 | Feature | Estado | Nota |
 |---------|--------|------|
-| Motor genérico de asistencia | 🧪 Validación web | Individual + agregado; QA staging 2026-07-21 |
-| Casas Fuente | 🧪 Validación web | RPC staging PASS; móvil en P4 |
-| Escuela Bíblica | 🧪 Validación web | RPC staging PASS; móvil en P4 |
-| Ministerio de Niños (asistencia) | 🧪 Validación web | Filtro infantil cubierto por tests; móvil en P4 |
+| Motor genérico de asistencia | ✅ Web terminado | Individual + agregado; piloto aprobado 2026-07-21 |
+| Casas Fuente | ✅ Web terminado | Validado en piloto; móvil en P4 |
+| Escuela Bíblica | ✅ Web terminado | Validado en piloto; móvil en P4 |
+| Ministerio de Niños (asistencia) | ✅ Web terminado | Validado en piloto; móvil en P4 |
 
 **Principio:** Una entidad `attendance_session` + configuración por tipo de actividad.
 
@@ -114,7 +114,7 @@ Motor genérico de asistencia (🔴)
 
 | Feature | Estado |
 |---------|--------|
-| Montos completos | 🧪 Validación |
+| Montos completos | ✅ Web terminado |
 | KPIs inteligentes (tendencias, riesgos, inactivos) | 💡 Idea |
 
 ---

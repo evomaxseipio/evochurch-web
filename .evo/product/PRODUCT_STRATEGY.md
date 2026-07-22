@@ -50,7 +50,7 @@ Administrar completamente el ciclo de vida del miembro.
 
 Estado Activo/Inactivo
 
-Estado: 🧪 Validación (web implementada; paridad Flutter pendiente)
+Estado: ✅ Terminado (web; paridad Flutter pendiente)
 
 Prioridad: 🔴
 
@@ -204,7 +204,7 @@ Registrar asistencia para cualquier actividad de la iglesia mediante un único m
 
 Motor genérico de asistencia
 
-Estado: 🧪 Validación web · Flutter pendiente
+Estado: ✅ Terminado (web; Flutter pendiente)
 
 Prioridad: 🔴
 
@@ -225,7 +225,7 @@ No crear módulos separados para:
 
 Casas Fuente
 
-Estado: 🧪 Validación web · Flutter pendiente
+Estado: ✅ Terminado (web; Flutter pendiente)
 
 Depende:
 
@@ -237,7 +237,7 @@ Motor de asistencia
 
 Escuela Bíblica
 
-Estado: 🧪 Validación web · Flutter pendiente
+Estado: ✅ Terminado (web; Flutter pendiente)
 
 Depende:
 
@@ -249,7 +249,7 @@ Motor de asistencia
 
 Ministerio de Niños
 
-Estado: 🧪 Validación web · Flutter pendiente
+Estado: ✅ Terminado (web; Flutter pendiente)
 
 Depende:
 
@@ -353,7 +353,7 @@ Que un pastor pueda conocer el estado de la iglesia en menos de cinco minutos.
 
 Montos completos
 
-Estado: 🧪 Validación (montos financieros reales; KPIs mock no financieros pendientes)
+Estado: ✅ Terminado (montos financieros reales; KPIs mock no financieros pendientes)
 
 ---
 

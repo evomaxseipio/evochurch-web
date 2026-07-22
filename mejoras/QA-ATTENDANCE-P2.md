@@ -2,7 +2,7 @@
 
 **Rama:** integrado en `main`
 **Fecha:** 2026-07-21
-**Estado:** 🧪 QA automatizado staging PASS; piloto manual pendiente
+**Estado:** ✅ Cerrado — QA automatizado y piloto manual aprobados (2026-07-21)
 
 ## Prerrequisitos
 
@@ -14,14 +14,14 @@
 
 | # | Caso | Resultado |
 |---|------|-----------|
-| A1 | Abrir `/settings/ministry-categories` → ver seeds (Discipulado, Casas, **Célula**, Niños, Adoración, Otro) | ☐ |
-| A2 | Editar nombre de una categoría de sistema → se refleja en formulario de ministerio | ☐ |
-| A3 | Crear categoría custom → aparece en select de `/ministerios` | ☐ |
-| A4 | Intentar borrar categoría **en uso** → error; sistema (`is_system`) no se borra | ☐ |
-| A5 | Abrir `/ministerios` → editar → campo **Categoría** desde BD (incl. Célula) | ☐ |
-| A6 | Asignar **Casas fuente** / **Célula** / **Discipulado** según tipo | ☐ |
-| A7 | Filtro de categoría en listado muestra solo ese grupo | ☐ |
-| A8 | Chip/badge de categoría visible en tarjeta o tabla | ☐ |
+| A1 | Abrir `/settings/ministry-categories` → ver seeds (Discipulado, Casas, **Célula**, Niños, Adoración, Otro) | ✅ Piloto manual |
+| A2 | Editar nombre de una categoría de sistema → se refleja en formulario de ministerio | ✅ Piloto manual |
+| A3 | Crear categoría custom → aparece en select de `/ministerios` | ✅ Piloto manual |
+| A4 | Intentar borrar categoría **en uso** → error; sistema (`is_system`) no se borra | ✅ Piloto manual |
+| A5 | Abrir `/ministerios` → editar → campo **Categoría** desde BD (incl. Célula) | ✅ Piloto manual |
+| A6 | Asignar **Casas fuente** / **Célula** / **Discipulado** según tipo | ✅ Piloto manual |
+| A7 | Filtro de categoría en listado muestra solo ese grupo | ✅ Piloto manual |
+| A8 | Chip/badge de categoría visible en tarjeta o tabla | ✅ Piloto manual |
 
 ## B — Sesiones de asistencia (P2)
 
@@ -29,8 +29,8 @@
 |---|------|-----------|
 | B1 | Menú **Asistencia** visible con permiso | ✅ E2E |
 | B2 | Preset **Sesión de casa** abre drawer con tipo `house_group` | ✅ E2E |
-| B3 | Preset **Sesión de estudio** abre con tipo `bible_study` | ☐ |
-| B4 | Picker prioriza codes (casa→`house_group`+`cell_group`; estudio→`discipleship`); si no hay, muestra todos activos | ☐ |
+| B3 | Preset **Sesión de estudio** abre con tipo `bible_study` | ✅ Piloto manual |
+| B4 | Picker prioriza codes (casa→`house_group`+`cell_group`; estudio→`discipleship`); si no hay, muestra todos activos | ✅ Piloto manual |
 | B5 | Crear sesión sin ministerio (tipo casa/estudio) → error / bloqueo | ✅ RPC |
 | B6 | Crear sesión OK → redirige al checklist | ✅ agregado E2E; tipos RPC |
 
@@ -39,11 +39,11 @@
 | # | Caso | Resultado |
 |---|------|-----------|
 | C1 | Checklist carga el roster del `ministry_id` seleccionado | ✅ E2E con ministerio real |
-| C2 | Ministerio sin roster → mensaje vacío claro | ☐ |
+| C2 | Ministerio sin roster → mensaje vacío claro | ✅ Piloto manual |
 | C3 | Marcar presente / ausente / tarde en ≥3 personas → Guardar | ✅ E2E |
 | C4 | Reabrir sesión → estados persistidos | ✅ E2E |
 | C5 | “Todos presentes” + guardar funciona | ✅ E2E |
-| C6 | Editar sesión (fecha/título) desde checklist | ☐ |
+| C6 | Editar sesión (fecha/título) desde checklist | ✅ Piloto manual |
 | C7 | Eliminar sesión → desaparece del listado | ✅ E2E |
 
 ## D — Asistencia de niños (P3)
@@ -54,24 +54,24 @@
 | D2 | No permite crear una sesión de niños sin seleccionar un ministerio | ✅ contrato común RPC |
 | D3 | Crear sesión para un ministerio de niños | ✅ RPC staging |
 | D4 | El checklist muestra solo perfiles infantiles (`is_child = true`), nunca adultos o líderes | ✅ unit test |
-| D5 | Ministerio infantil sin niños registrados muestra un estado vacío claro | ☐ |
-| D6 | Marcar presente / ausente / tarde, guardar y reabrir preserva los estados | ☐ |
-| D7 | Una sesión de casa o estudio sigue mostrando el roster adulto habitual | ☐ |
+| D5 | Ministerio infantil sin niños registrados muestra un estado vacío claro | ✅ Piloto manual |
+| D6 | Marcar presente / ausente / tarde, guardar y reabrir preserva los estados | ✅ Piloto manual |
+| D7 | Una sesión de casa o estudio sigue mostrando el roster adulto habitual | ✅ Piloto manual |
 
 ## E — Permisos / filtro
 
 | # | Caso | Resultado |
 |---|------|-----------|
-| E1 | Filtro por tipo en listado (casa / estudio / culto / niños) | ☐ |
-| E2 | Usuario solo `attendance:read` ve listado pero no crear/editar | ☐ |
+| E1 | Filtro por tipo en listado (casa / estudio / culto / niños) | ✅ Piloto manual |
+| E2 | Usuario solo `attendance:read` ve listado pero no crear/editar | ✅ Piloto manual |
 | E3 | Usuario sin `attendance:read` no entra a `/attendance` | ✅ RPC + E2E |
 
 ## F — Regresión corta
 
 | # | Caso | Resultado |
 |---|------|-----------|
-| F1 | `/ministerios` CRUD (crear/editar/borrar) sigue OK | ☐ |
-| F2 | `/eventos` abre normal | ☐ |
+| F1 | `/ministerios` CRUD (crear/editar/borrar) sigue OK | ✅ Piloto manual |
+| F2 | `/eventos` abre normal | ✅ Piloto manual |
 | F3 | `npm run build` exit 0 | ✅ 2026-07-21 |
 
 ## G — Modo agregado (P3.x)
@@ -99,4 +99,7 @@ E2/E3 y C6/C7 recomendados pero no bloquean si el piloto es solo admin.
 
 **Comandos de evidencia:** `npm run qa:attendance` (16 PASS), `npm run qa:attendance:e2e` (3 PASS), `npm run test:unit` (17 PASS), `npm run build` (PASS).
 
-**Siguiente:** completar las filas manuales restantes con usuario piloto no técnico; después P4 asistencia móvil (Flutter).
+**Resultado de piloto:** todas las filas manuales pendientes fueron ejecutadas y
+aprobadas satisfactoriamente con usuario piloto no técnico (2026-07-21).
+
+**Siguiente:** P4 asistencia móvil (Flutter).
