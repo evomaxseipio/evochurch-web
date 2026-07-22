@@ -23,8 +23,8 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | [AGENT-PROMPT-CHILDREN-REGISTRY.md](./AGENT-PROMPT-CHILDREN-REGISTRY.md) | **P1** — registro de niños + tutores |
 | [ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md](./ANALISIS-Y-PROMPT-MOTOR-ASISTENCIA.md) | **P2** — análisis + ejecución motor de asistencia |
 | [AGENT-PROMPT-MINISTRY-CATEGORIES-CRUD.md](./AGENT-PROMPT-MINISTRY-CATEGORIES-CRUD.md) | **P2.x** — CRUD categorías de ministerios por iglesia *(actual)* |
-| [QA-ATTENDANCE-P2.md](./QA-ATTENDANCE-P2.md) | QA P2 + P2.x — checklist staging |
-| [AGENT-PROMPT-CHILDREN-ATTENDANCE.md](./AGENT-PROMPT-CHILDREN-ATTENDANCE.md) | **P3** — asistencia de niños *(siguiente)* |
+| [QA-ATTENDANCE-P2.md](./QA-ATTENDANCE-P2.md) | QA P2 + P2.x + P3 + modo agregado — staging |
+| [AGENT-PROMPT-CHILDREN-ATTENDANCE.md](./AGENT-PROMPT-CHILDREN-ATTENDANCE.md) | **P3** — asistencia de niños *(implementada; piloto pendiente)* |
 | [DEBATE-MODULO-DESCUENTOS-DIEZMO.md](./DEBATE-MODULO-DESCUENTOS-DIEZMO.md) | **Debate + MVP** — plantillas descuento vinculadas a reportes |
 | [AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md](./AGENT-PROMPT-FASE-DESCUENTOS-DIEZMO.md) | **Fase 3 diezmo semanal** — cierre domingo–domingo, PDF, snapshot (`feat/tithe-weekly-allocation`) |
 
@@ -47,10 +47,11 @@ Documentación de mejoras planificadas para que agentes (Cursor, Claude, etc.) l
 | Sprint performance 4 | ⚙️ | Captura manual baselines (ver abajo) |
 | Sprint RBAC | ✅ | `npm run qa:rbac:full` (lint 0 errores) |
 | Módulo reportes REP-0…6 | ✅ | Descargas manuales R-04…08; `npm run qa:reports` |
-| i18n es/en/fr | ✅ | 1624 claves × 3 locales; `npm run qa:i18n` |
+| i18n es/en/fr | ✅ | 1990 claves × 3 locales; `npm run qa:i18n` |
+| Attendance P2/P3/P3.x | 🧪 | 16 RPC + 3 E2E PASS; demo piloto pendiente |
 | Placeholders post-MVP | — | `/eventos`, `/comunicacion`, KPIs mock dashboard |
 
-**Orden recomendado restante:** migraciones ministerios-fondos → `npm run build` → `npm run qa:reports` → QA RBAC → I18N-QA → baselines Sprint 4.
+**Orden recomendado restante:** demo piloto Attendance → P4 Flutter → QA manual reportes/RBAC → baselines Sprint 4.
 
 **Sprint RBAC:** configuración basada en roles — rama `feat/rbac-sprint`. Ver [AGENT-PROMPT-RBAC-SPRINT.md](./AGENT-PROMPT-RBAC-SPRINT.md).
 

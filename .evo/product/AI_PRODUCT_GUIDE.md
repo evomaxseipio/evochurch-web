@@ -134,12 +134,12 @@ Iglesia piloto de referencia: **Fuente Inagotable** (feedback financiero documen
 
 | EPIC | Objetivo | Prioridad actual |
 |------|---------|------------------|
-| 01 — Personas | Ciclo de vida del miembro | 🔴 Activo/Inactivo en sprint |
+| 01 — Personas | Ciclo de vida del miembro | 🧪 Web validada; Flutter pendiente |
 | 02 — Finanzas | Transparencia financiera | 🔴 Diezmo automático en backlog |
-| 03 — Attendance Engine | Motor único de asistencia | 🔴 Motor genérico en backlog |
+| 03 — Attendance Engine | Motor único de asistencia | 🧪 Web + modo agregado en validación piloto |
 | 04 — Ministerios | Autonomía con control | 🟠 |
 | 05 — CRM Pastoral | Historia del miembro | 💡 Ideas |
-| 06 — Dashboard | Estado en < 5 min | 🚧 Montos completos sprint 01 |
+| 06 — Dashboard | Estado en < 5 min | 🧪 Montos reales; mocks no financieros pendientes |
 | 07 — Automatización | Eliminar tareas repetitivas | 💡 Ideas |
 | 08 — IA | Asistente inteligente | 💡 Ideas |
 

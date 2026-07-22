@@ -5,7 +5,7 @@
 **Prioridad:** 🔴  
 **Stack:** Next.js + BD (si RPC requiere ajuste)  
 **Estimación:** M  
-**Estado:** 🧪 Validación (implementación web lista)
+**Estado:** 🧪 Validación
 
 ---
 
@@ -56,9 +56,9 @@ Permitir marcar miembros como activos o inactivos, filtrar el listado por estado
 
 ## Entregables
 
-- [ ] Filtros Activos/Inactivos funcionales en listado web
-- [ ] Toggle en formulario de perfil persiste vía Server Action
-- [ ] Stats cards muestran conteos correctos
+- [x] Filtros Activos/Inactivos implementados en listado web
+- [x] Toggle en formulario de perfil persiste vía Server Action
+- [x] Stats cards consumen conteos `active` / `inactive` del RPC
 - [ ] Prueba manual: activar/desactivar miembro y verificar listado
 
 ---

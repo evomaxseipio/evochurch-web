@@ -50,7 +50,7 @@ Administrar completamente el ciclo de vida del miembro.
 
 Estado Activo/Inactivo
 
-Estado: 🧪 Validación
+Estado: 🧪 Validación (web implementada; paridad Flutter pendiente)
 
 Prioridad: 🔴
 
@@ -66,7 +66,7 @@ Sprint: 01
 
 Tipo de sangre
 
-Estado: 🧪 Validación
+Estado: ✅ Terminado (web)
 
 Prioridad: 🟡
 
@@ -84,7 +84,7 @@ Ninguna
 
 Información profesional
 
-Estado: 📋 Backlog
+Estado: ✅ Terminado (web)
 
 Prioridad: 🟡
 
@@ -102,7 +102,7 @@ Permitirá localizar profesionales dentro de la iglesia.
 
 Timeline del miembro
 
-Estado: 💡 Idea
+Estado: 🧪 Validación (timeline pastoral web)
 
 Prioridad: 🟠
 
@@ -128,7 +128,7 @@ Convertir EvoChurch en la plataforma financiera más transparente para iglesias.
 
 Distribución automática del diezmo
 
-Estado: 📋 Backlog
+Estado: 🧪 Validación web
 
 Prioridad: 🔴
 
@@ -204,7 +204,7 @@ Registrar asistencia para cualquier actividad de la iglesia mediante un único m
 
 Motor genérico de asistencia
 
-Estado: 📋 Backlog
+Estado: 🧪 Validación web · Flutter pendiente
 
 Prioridad: 🔴
 
@@ -219,24 +219,17 @@ No crear módulos separados para:
 - Niños
 - Escuela Bíblica
 
-Implementación web entregada: sesiones reutilizables, roster por ministerio,
-asistencia de niños y modo agregado. Pendiente de piloto en staging y validación
-de las migraciones remotas antes de marcarla terminada.
-
 ---
 
 ### Feature
 
 Casas Fuente
 
-Estado: 🧪 Validación
+Estado: 🧪 Validación web · Flutter pendiente
 
 Depende:
 
 Motor de asistencia
-
-Cobertura incluida en el motor web; requiere validación del flujo real de una
-iglesia piloto.
 
 ---
 
@@ -244,14 +237,11 @@ iglesia piloto.
 
 Escuela Bíblica
 
-Estado: 🧪 Validación
+Estado: 🧪 Validación web · Flutter pendiente
 
 Depende:
 
 Motor de asistencia
-
-Cobertura incluida en el motor web; requiere validación del flujo real de una
-iglesia piloto.
 
 ---
 
@@ -259,13 +249,11 @@ iglesia piloto.
 
 Ministerio de Niños
 
-Estado: 🧪 Validación
+Estado: 🧪 Validación web · Flutter pendiente
 
 Depende:
 
 Motor de asistencia
-
-Cobertura web incluida; la paridad Flutter queda como siguiente entrega móvil.
 
 ---
 
@@ -281,7 +269,7 @@ Dar autonomía a cada ministerio sin perder el control administrativo.
 
 Ministerio de Niños
 
-Estado: 📋 Backlog
+Estado: ✅ Terminado (gestión web)
 
 Prioridad: 🟠
 
@@ -297,7 +285,7 @@ Debe integrarse al motor de asistencia.
 
 Fondos por Ministerio
 
-Estado: 💡 Idea
+Estado: ✅ Terminado (web)
 
 Comentarios
 
@@ -319,7 +307,7 @@ No solamente un registro.
 
 Timeline
 
-Estado: 💡 Idea
+Estado: 🧪 Validación (timeline pastoral web)
 
 ---
 
@@ -327,7 +315,7 @@ Estado: 💡 Idea
 
 Eventos relevantes
 
-Estado: 💡 Idea
+Estado: ✅ Terminado (web)
 
 Ejemplos
 
@@ -365,7 +353,7 @@ Que un pastor pueda conocer el estado de la iglesia en menos de cinco minutos.
 
 Montos completos
 
-Estado: 🧪 Validación
+Estado: 🧪 Validación (montos financieros reales; KPIs mock no financieros pendientes)
 
 ---
 
