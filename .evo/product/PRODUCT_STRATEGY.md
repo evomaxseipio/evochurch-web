@@ -50,7 +50,7 @@ Administrar completamente el ciclo de vida del miembro.
 
 Estado Activo/Inactivo
 
-Estado: 🚧 En Desarrollo
+Estado: 🧪 Validación
 
 Prioridad: 🔴
 
@@ -66,7 +66,7 @@ Sprint: 01
 
 Tipo de sangre
 
-Estado: 📋 Backlog
+Estado: 🧪 Validación
 
 Prioridad: 🟡
 
@@ -219,17 +219,24 @@ No crear módulos separados para:
 - Niños
 - Escuela Bíblica
 
+Implementación web entregada: sesiones reutilizables, roster por ministerio,
+asistencia de niños y modo agregado. Pendiente de piloto en staging y validación
+de las migraciones remotas antes de marcarla terminada.
+
 ---
 
 ### Feature
 
 Casas Fuente
 
-Estado: 📋 Backlog
+Estado: 🧪 Validación
 
 Depende:
 
 Motor de asistencia
+
+Cobertura incluida en el motor web; requiere validación del flujo real de una
+iglesia piloto.
 
 ---
 
@@ -237,11 +244,14 @@ Motor de asistencia
 
 Escuela Bíblica
 
-Estado: 📋 Backlog
+Estado: 🧪 Validación
 
 Depende:
 
 Motor de asistencia
+
+Cobertura incluida en el motor web; requiere validación del flujo real de una
+iglesia piloto.
 
 ---
 
@@ -249,11 +259,13 @@ Motor de asistencia
 
 Ministerio de Niños
 
-Estado: 📋 Backlog
+Estado: 🧪 Validación
 
 Depende:
 
 Motor de asistencia
+
+Cobertura web incluida; la paridad Flutter queda como siguiente entrega móvil.
 
 ---
 
@@ -353,7 +365,7 @@ Que un pastor pueda conocer el estado de la iglesia en menos de cinco minutos.
 
 Montos completos
 
-Estado: 🚧 Sprint 01
+Estado: 🧪 Validación
 
 ---
 

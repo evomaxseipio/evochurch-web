@@ -5,7 +5,7 @@
 **Prioridad:** 🔴  
 **Stack:** Next.js + RPC  
 **Estimación:** M  
-**Estado:** 🚧 En Desarrollo
+**Estado:** 🧪 Validación (implementación web lista)
 
 ---
 

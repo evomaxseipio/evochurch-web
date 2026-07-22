@@ -3,7 +3,7 @@
 **Objetivo:** Completar features críticas de gestión de miembros (activo/inactivo) y visualización financiera completa en dashboard.
 
 **EPICs:** 01 — Personas · 06 — Dashboard  
-**Estado:** 🚧 En curso  
+**Estado:** 🧪 Validación
 **Prioridad:** 🔴 Crítica
 
 ---
@@ -20,9 +20,9 @@
 
 | ID | Tarea | Feature | Estado |
 |----|-------|---------|--------|
-| [TASK-001](TASK-001.md) | Estado Activo/Inactivo — web | EPIC 01 | 🚧 |
-| [TASK-002](TASK-002.md) | Montos completos — Dashboard KPIs | EPIC 06 | 🚧 |
-| [TASK-003](TASK-003.md) | Estado Activo/Inactivo — Flutter | EPIC 01 | 📋 |
+| [TASK-001](TASK-001.md) | Estado Activo/Inactivo — web | EPIC 01 | 🧪 |
+| [TASK-002](TASK-002.md) | Montos completos — Dashboard KPIs | EPIC 06 | 🧪 |
+| [TASK-003](TASK-003.md) | Estado Activo/Inactivo — Flutter | EPIC 01 | ➡️ Sprint móvil siguiente |
 
 ---
 
@@ -33,13 +33,14 @@
 - Toggle y filtro activo/inactivo en listado de miembros (web).
 - Stats cards: Activos / Inactivos clickeables.
 - Dashboard: montos financieros completos en stats y gráficos.
-- Alineación Flutter del filtro activo/inactivo (si tiempo permite).
+- La paridad Flutter se mueve al siguiente sprint móvil: el repositorio Flutter
+  no forma parte de este checkout y depende del contrato RPC ya implementado.
 
 ### Fuera del sprint
 
 - Timeline del miembro
 - Distribución automática del diezmo
-- Motor de asistencia
+- Motor de asistencia (entregado fuera del alcance original; está en validación)
 - Tipo de sangre, información profesional
 
 ---
@@ -56,11 +57,11 @@
 
 ## Definition of Done (sprint)
 
-- [ ] TASK-001 completada y validada en web
-- [ ] TASK-002 completada — dashboard muestra montos reales
-- [ ] TASK-003 completada o movida a sprint 02 con justificación
-- [ ] PRODUCT_STRATEGY actualizado (estados ✅ o 🧪)
-- [ ] Build web sin errores
+- [ ] TASK-001 validada en iglesia piloto (implementación web lista)
+- [ ] TASK-002 validada con datos reales y permisos parciales
+- [x] TASK-003 movida al siguiente sprint móvil: requiere el repositorio Flutter
+- [x] PRODUCT_STRATEGY actualizado a 🧪 donde corresponde
+- [ ] Build web sin errores en entorno de CI
 - [ ] Architecture review documentado para cambios no triviales
 - [ ] Sin regresiones multitenant
 
@@ -71,3 +72,4 @@
 - [../../product/PRODUCT_STRATEGY.md](../../product/PRODUCT_STRATEGY.md)
 - [../../product/PRODUCT_ROADMAP.md](../../product/PRODUCT_ROADMAP.md)
 - [../../architecture/MULTI_TENANT.md](../../architecture/MULTI_TENANT.md)
+- [../../../mejoras/QA-ATTENDANCE-P2.md](../../../mejoras/QA-ATTENDANCE-P2.md)

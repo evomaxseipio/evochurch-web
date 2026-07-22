@@ -6,7 +6,7 @@
 
 ## Prerrequisitos
 
-- [ ] Migraciones aplicadas: `20260713230000_attendance_engine`, `20260713240000_ministry_category`, `20260714200000_ministry_category_crud`
+- [ ] Migraciones aplicadas: `20260713230000_attendance_engine`, `20260713240000_ministry_category`, `20260714200000_ministry_category_crud`, `20260720120000_attendance_aggregate_mode`
 - [ ] Usuario con `attendance:read` + `attendance:write` y `settings:ministry_categories:*` (admin con catálogos)
 - [ ] Al menos un ministerio con ≥3 miembros en el roster
 
@@ -66,13 +66,23 @@
 | E2 | Usuario solo `attendance:read` ve listado pero no crear/editar | ☐ |
 | E3 | Usuario sin `attendance:read` no entra a `/attendance` | ☐ |
 
-## F — Regresión corta
+## F — Modo agregado
 
 | # | Caso | Resultado |
 |---|------|-----------|
-| F1 | `/ministerios` CRUD (crear/editar/borrar) sigue OK | ☐ |
-| F2 | `/eventos` abre normal | ☐ |
-| F3 | `npm run build` exit 0 | ☐ |
+| F1 | Crear sesión con modo **agregado** sin seleccionar ministerio | ☐ |
+| F2 | Registrar totales de presentes, ausentes y tardanzas; guardar y reabrir | ☐ |
+| F3 | Los totales persisten y no se crea roster individual | ☐ |
+| F4 | Una sesión con roster individual conserva su comportamiento anterior | ☐ |
+| F5 | Usuario solo `attendance:read` no puede editar los totales | ☐ |
+
+## G — Regresión corta
+
+| # | Caso | Resultado |
+|---|------|-----------|
+| G1 | `/ministerios` CRUD (crear/editar/borrar) sigue OK | ☐ |
+| G2 | `/eventos` abre normal | ☐ |
+| G3 | `npm run build` exit 0 | ☐ |
 
 ## Fuera de alcance (no fallar QA por esto)
 
@@ -81,7 +91,8 @@
 
 ## Criterio de cierre
 
-P2 + P2.x + P3 **cerrados** cuando A1–A8, B1–B6, C1–C5, D1–D7 y F3 estén OK en staging.  
+P2 + P2.x + P3 + modo agregado **cerrados** cuando A1–A8, B1–B6, C1–C5,
+D1–D7, F1–F5 y G3 estén OK en staging.
 E2/E3 y C6/C7 recomendados pero no bloquean si el piloto es solo admin.
 
 **Siguiente sprint:** P4 asistencia móvil (Flutter), después de cerrar este piloto.

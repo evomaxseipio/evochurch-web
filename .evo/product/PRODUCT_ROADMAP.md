@@ -9,7 +9,7 @@ Roadmap derivado de [PRODUCT_STRATEGY.md](PRODUCT_STRATEGY.md).
 
 | Horizonte | Enfoque |
 |-----------|---------|
-| **Ahora (Sprint 01)** | Personas + Dashboard — features en desarrollo |
+| **Ahora** | Validación de personas, dashboard y asistencia en iglesia piloto |
 | **Corto plazo (Q3 2026)** | Finanzas críticas + Motor de asistencia |
 | **Mediano plazo (Q4 2026)** | Ministerios, CRM pastoral, multimoneda |
 | **Largo plazo (2027+)** | Automatización, IA, integraciones |
@@ -41,8 +41,8 @@ Infraestructura multitenant, RBAC, módulos base.
 
 | Feature | EPIC | Estado | Prioridad |
 |---------|------|--------|-----------|
-| Estado Activo/Inactivo | 01 Personas | 🚧 En Desarrollo | 🔴 |
-| Montos completos (Dashboard) | 06 Dashboard | 🚧 Sprint 01 | 🔴 |
+| Estado Activo/Inactivo | 01 Personas | 🧪 Validación web | 🔴 |
+| Montos completos (Dashboard) | 06 Dashboard | 🧪 Validación | 🔴 |
 
 Ver detalle: [../sprints/sprint-01/SPRINT.md](../sprints/sprint-01/SPRINT.md)
 
@@ -76,10 +76,10 @@ Motor genérico de asistencia (🔴)
 
 | Feature | Prioridad | Nota |
 |---------|-----------|------|
-| Motor genérico de asistencia | 🔴 | Prerequisito de todo lo demás |
-| Casas Fuente | 🟠 | Depende motor |
-| Escuela Bíblica | 🟠 | Depende motor |
-| Ministerio de Niños (asistencia) | 🟠 | Depende motor |
+| Motor genérico de asistencia | 🧪 Validación | Web implementada; pendiente piloto y migraciones remotas |
+| Casas Fuente | 🧪 Validación | Cubierto por el motor web; validar operación real |
+| Escuela Bíblica | 🧪 Validación | Cubierto por el motor web; validar operación real |
+| Ministerio de Niños (asistencia) | 🧪 Validación web | Paridad Flutter pendiente |
 
 **Principio:** Una entidad `attendance_session` + configuración por tipo de actividad.
 
@@ -114,7 +114,7 @@ Motor genérico de asistencia (🔴)
 
 | Feature | Estado |
 |---------|--------|
-| Montos completos | 🚧 Sprint 01 |
+| Montos completos | 🧪 Validación |
 | KPIs inteligentes (tendencias, riesgos, inactivos) | 💡 Idea |
 
 ---
